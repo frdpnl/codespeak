@@ -20,7 +20,7 @@
  * 13.10.2022 created.
  *
  * gcc -static -std=gnu99 -Wall -g -I../local/include -L../local/lib this_file.c -lgrapheme 
- * pijul push_wz frdpnl@ssh.pijul.com:frdpnl/codespeak
+ * warning, valgrind prefers dynamic libs.
  *
  */
 
