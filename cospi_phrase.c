@@ -832,9 +832,57 @@ eval_div(Val *s, size_t p) {
 }
 Val *
 eval_plu(Val *s, size_t p) {
-	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	free_v(s);
-	return NULL;
+	if (!infixed(p, s->seq.v.n)) {
+		printf("%s:%d symbol not infixed\n", 
+				__FUNCTION__,__LINE__);
+		free_v(s);
+		return NULL;
+	}
+	Val *a = eval(s->seq.v.v[p-1]);
+	if (a == NULL) {
+		printf("%s:%d 1st argument null\n", 
+				__FUNCTION__,__LINE__);
+		free_v(s);
+		return NULL;
+	}
+	Val *b = eval(s->seq.v.v[p+1]);
+	if (b == NULL) {
+		printf("%s:%d 2nd argument null\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(s);
+		return NULL;
+	}
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("%s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		free_v(s);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v += b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->hdr.t = VREA;
+		a->rea.v = (double)a->nat.v * b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		a->rea.v += (double)b->nat.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->rea.v += b->rea.v;
+	}
+	free_v(b);
+	/* consumed 2 seq items */
+	for (size_t i=p-1; i < s->seq.v.n && i < p+2; ++i) {
+		free_v(s->seq.v.v[i]);
+	}
+	s->seq.v.v[p-1] = a;
+	for (size_t i=p+2; i < s->seq.v.n; ++i) {
+		s->seq.v.v[i-2] = s->seq.v.v[i];
+	}
+	s->seq.v.n -= 2;
+	return s;
 }
 Val *
 eval_min(Val *s, size_t p) {

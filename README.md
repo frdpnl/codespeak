@@ -3,25 +3,71 @@ Personal programming language
 
 ## Expression
 
-Examples:
+Examples first:
 
-`()` means symbolic computation (or sub-expression).
+### Symbolic application
+
+`()` means symbolic application (includes sub-expression), or single value.
 Whitespace needed to separate words.
 
-`2`
+`2` 2
+
+`(2)` 2
 
 `(2 * 3)`
 
-`2 * 3` implicit top-level `()`
+`2 * 3` implicit top-level ()
 
-`2 * (3 * 2)`
+`2 * (3 + 2)` 14
+
+`2 * 3 + 2.0` 8.0 (real) 
+
+### List
 
 `,` means list
 
 `2, 3` list of 2 natural numbers
 
-`2, (3 * 4), 4`
+`2, (3 * 4), 4` list of 3 numbers
 
-`2, (3,4),4`
+`2, (3,4),4` list includes a sub-list
+
+`2, +, 3` also a list (you can guess where this is going)
+
+### Invalid expressions
+
+`2 3 4` symbolic application, but no symbols present
+
+`2, 3 + 4` symbol + is unexpected, need ()
+
+`2 + 3., 4` cannot add a natural number to a list
+
+## Bugs
+
+Heap deallocation is not always correctly handled in case of misformed programs.
+
+## General principles
+
+A program is a sequence of paragraphs (not here yet).
+
+A paragraph is a sequence of sentences (not here yet).
+
+A sentence is a sequence of expressions (expressions in progress).
+
+An expression can include symbols, that are loosely evaluated (totally symbol dependent), 
+according to my findings from the study of natural languages (such as the classic style, and Chomsky's Minimal Program).
+
+Envisioning something like:
+
+`2, 3, 4; call it times. 
+3th time; take it; call it p.
+2 * p + 1; print it.`
+
+Single dependency is suckless.org's libgrapheme, for unicode support in source code.
+For the learning experience, all is in C (gnu99), and theory is introduced when absolutely needed.
+
+Inspired by nanopass, several small steps to evaluation (inefficient most of the time).
+
+Long-term objective is to compile to WebAssembly (yes, not here yet).
 
 
