@@ -64,9 +64,11 @@ Envisioning something like:
 
 ```
 2, 3, 4; call it times. 
-3th time; take it; call it p.
+3th time; take it; call it p. 
 2 * p + 1; print it.
 ```
+
+`take p` removes p from list.
 
 For the learning experience, all is in C (gnu99), and theory is introduced when absolutely needed (a learning exercise).
 
