@@ -59,11 +59,14 @@ according to my findings from the study of natural languages (such as the classi
 
 Envisioning something like:
 
-`2, 3, 4; call it times. 
+```
+2, 3, 4; call it times. 
 3th time; take it; call it p.
-2 * p + 1; print it.`
+2 * p + 1; print it.
+```
 
 Single dependency is suckless.org's libgrapheme, for unicode support in source code.
+Also, relying on one of FreeBSD's specific libc function (probably does not compile on GNU/Linux).
 For the learning experience, all is in C (gnu99), and theory is introduced when absolutely needed.
 
 Inspired by nanopass, several small steps to evaluation (inefficient most of the time).
