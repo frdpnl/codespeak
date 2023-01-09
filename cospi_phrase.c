@@ -361,14 +361,12 @@ free_s(Sem *a) {
 				free_s(a->seq.v.s +i);
 			}
 			free(a->seq.v.s);
-			free(a);
 			break;
 		case SLST:
 			for (size_t i=0; i<a->lst.v.n; ++i) {
 				free_s(a->lst.v.s +i);
 			}
 			free(a->lst.v.s);
-			free(a);
 			break;
 		default:
 			printf("%s:%d unknown seme\n",
@@ -1066,22 +1064,23 @@ main(int argc, char **argv) {
 		return 1;
 	}
 	Sem *ls = read_semes(lw);
+	free_lw(lw);
 	if (ls == NULL) {
 		return 1;
 	}
-	free_lw(lw);
 	printf("semes: "); print_s(ls); printf("\n");
 	Val *v = read_val(ls);
+	free_s(ls);
+	free(ls);
 	if (v == NULL) {
 		return 1;
 	}
-	free_s(ls);
 	printf("values: "); print_v(v); printf("\n");
 	Val *ev = eval(v);
+	free_v(v);
 	if (ev == NULL) {
 		return 1;
 	}
-	free_v(v);
 	printf("evaluated: "); print_v(ev); printf("\n\n");
 	free_v(ev);
 	return 0;
