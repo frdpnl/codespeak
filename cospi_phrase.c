@@ -512,6 +512,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 					printf("%s:%d unexpected list element\n",
 							__FUNCTION__, __LINE__);
 					free_s(b);
+					free(b);
 					return NULL;
 				}
 				inpar = 1;
@@ -542,6 +543,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 							__FUNCTION__,__LINE__,
 							inpar < 0 ? ")" : "(");
 					free_s(b);
+					free(b);
 					return NULL;
 				}
 				break;
@@ -549,12 +551,14 @@ read_seme(Listw *a, size_t from, size_t tox) {
 				printf("%s:%d unmatched )\n",
 						__FUNCTION__,__LINE__);
 				free_s(b);
+				free(b);
 				return NULL;
 			case STR:
 				if (b->hdr.t == SLST && !lst_expect1) {
 					printf("%s:%d unexpected list element\n",
 							__FUNCTION__, __LINE__);
 					free_s(b);
+					free(b);
 					return NULL;
 				}
 				c = isnat(a->w+iw);
@@ -568,6 +572,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 					printf("%s:%d unknown word\n",
 							__FUNCTION__,__LINE__);
 					free_s(b);
+					free(b);
 					return NULL;
 				}
 				b = push_s(b, c);
@@ -581,6 +586,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 				printf("%s:%d unexpected word\n",
 						__FUNCTION__,__LINE__);
 				free_s(b);
+				free(b);
 				return NULL;
 		}
 		if (pushed && b->hdr.t == SLST) {
@@ -983,8 +989,9 @@ read_val(Sem *a) {
 		b->hdr.t = VSYM;
 		symtof *s = find_sym(a->sym.v);
 		if (s == NULL) {
-			printf("%s:%d unknown symbol \"%s\"\n",
+			printf("%s:%d unknown symbol '%s\n",
 					__FUNCTION__,__LINE__,a->sym.v);
+			free_v(b);
 			return NULL;
 		}
 		b->sym.prio = s->prio;
@@ -1000,6 +1007,10 @@ read_val(Sem *a) {
 		Val *c;
 		for (size_t i=0; i<n; ++i) {
 			c = read_val(l+i);
+			if (c == NULL) {
+				free_v(b);
+				return NULL;
+			}
 			b = push_v(b, c);
 		}
 		return b;
@@ -1013,12 +1024,17 @@ read_val(Sem *a) {
 		Val *c;
 		for (size_t i=0; i<n; ++i) {
 			c = read_val(l+i);
+			if (c == NULL) {
+				free_v(b);
+				return NULL;
+			}
 			b = push_v(b, c);
 		}
 		return b;
 	}
 	printf("%s:%d unknown seme\n",
 			__FUNCTION__,__LINE__);
+	free_v(b);
 	return NULL;
 }
 

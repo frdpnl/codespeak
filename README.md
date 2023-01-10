@@ -7,8 +7,9 @@ Examples first:
 
 ### Symbolic application
 
-`()` means symbolic application (includes sub-expression), or single value.
-Whitespace needed to separate words.
+`()` means sub-expression.
+It also represents symbol application, or single value.
+Whitespace expected to separate words.
 
 `2` 2
 
@@ -16,11 +17,11 @@ Whitespace needed to separate words.
 
 `(2 * 3)`
 
-`2 * 3` implicit top-level ()
+`2 * 3` accepted because of an implicit top-level ()
 
 `2 * (3 + 2)` 14
 
-`2 * 3 + 2.0` 8.0 (real) 
+`2 * 3 + 2.0` 8.0 (promoted to real) 
 
 ### List
 
@@ -36,21 +37,21 @@ Whitespace needed to separate words.
 
 ### Invalid expressions
 
-`2 3 4` symbolic application, but no symbols present
+`2 3 4` symbolic application (implicit ()), but no symbols present
 
-`2, 3 + 4` symbol + is unexpected, need ()
+`2, 3 + 4` symbol + is unexpected, needs () or ,
 
 `2 + 3., 4` cannot add a natural number to a list
 
-## Bugs
+## Known bugs
 
-Heap deallocation is not always correctly handled in case of misformed programs.
 
 ## General principles
 
 This small language project tries to provide a more natural way to express programs, 
 according to my findings from the study of natural languages 
-(such as the Classic style, Chomsky's Minimal Program. More details to come).
+(such as the Classic style, Chomsky's Minimal Program. More details to come),
+and to my taste and limitations :)
 
 A program is a sequence of paragraphs (not here yet).
 
@@ -58,7 +59,7 @@ A paragraph is a sequence of sentences (not here yet).
 
 A sentence is a sequence of expressions (expressions in progress).
 
-An expression can include symbols, that are loosely evaluated (totally symbol dependent).
+An expression can include symbols, that are loosely evaluated (totally symbol dependent, Minimal Program).
 
 Envisioning something like:
 
@@ -70,12 +71,15 @@ Envisioning something like:
 
 `take p` removes p from list.
 
-For the learning experience, all is in C (gnu99), and theory is introduced when absolutely needed (a learning exercise).
+For the learning experience, all is in C (gnu99), and theory is introduced when needed (a learning exercise).
 
 Single dependency is suckless.org's libgrapheme, for unicode support in source code.
+(like other suckless.org programs - `st`, `dwm` - it is excellent).
 Also, relies on one of FreeBSD's specific libc function (so, probably does not compile on GNU/Linux).
-Inspired by nanopass, several small steps to evaluation (inefficient most of the time).
+Inspired by nanopass; several small steps to evaluation (inefficient most of the time).
 
-Long-term objective is to compile to WebAssembly (yes, not here yet).
+Long-term objective is to compile to WASM (yes, not here yet).
+
+Beyond long-term project is to provide WASM runtime to GPU.
 
 
