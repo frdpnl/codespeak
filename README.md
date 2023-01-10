@@ -21,7 +21,7 @@ Whitespace expected to separate words.
 
 `2 * (3 + 2)` 14
 
-`2 * 3 + 2.0` 8.0 (promoted to real) 
+`2 * 3 + 2.0` 8.0 (real) 
 
 ### List
 

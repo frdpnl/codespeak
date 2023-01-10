@@ -742,17 +742,17 @@ copy_v(Val *a) {
 static Val *
 push_v(Val *a, Val *b) {
 	if (a == NULL) {
-		printf("%s:%d seq or lst val is null\n",
+		printf("%s:%d seq or list is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if (b == NULL) {
-		printf("%s:%d pushed val is null\n",
+		printf("%s:%d pushed value is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if (a->hdr.t != VSEQ && a->hdr.t != VLST) {
-		printf("%s:%d not a seq or lst val\n",
+		printf("%s:%d not a seq or list val\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
@@ -776,27 +776,50 @@ infixed(size_t p, size_t n) {
 	return (p > 0 && p < n-1);
 }
 
-Val *
-eval_mul(Val *s, size_t p) {
+static bool
+set_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
+	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("%s:%d symbol not infixed\n", 
 				__FUNCTION__,__LINE__);
-		free_v(s);
-		return NULL;
+		return false;
 	}
-	Val *a = eval(s->seq.v.v[p-1]);
+	a = eval(s->seq.v.v[p-1]);
 	if (a == NULL) {
 		printf("%s:%d 1st argument null\n", 
 				__FUNCTION__,__LINE__);
-		free_v(s);
-		return NULL;
+		return false;
 	}
-	Val *b = eval(s->seq.v.v[p+1]);
+	b = eval(s->seq.v.v[p+1]);
 	if (b == NULL) {
 		printf("%s:%d 2nd argument null\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
-		free_v(s);
+		return false;
+	}
+	*pa = a;
+	*pb = b;
+	return true;
+}
+static void
+upd_infix(Val *s, size_t p, Val *a) {
+	/* consumed 2 seq items */
+	for (size_t i=p-1; i < s->seq.v.n && i < p+2; ++i) {
+		free_v(s->seq.v.v[i]);
+	}
+	s->seq.v.v[p-1] = a;
+	for (size_t i=p+2; i < s->seq.v.n; ++i) {
+		s->seq.v.v[i-2] = s->seq.v.v[i];
+	}
+	s->seq.v.n -= 2;
+}
+
+static Val *
+eval_mul(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -805,7 +828,6 @@ eval_mul(Val *s, size_t p) {
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
-		free_v(s);
 		return NULL;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -819,44 +841,15 @@ eval_mul(Val *s, size_t p) {
 		a->rea.v *= b->rea.v;
 	}
 	free_v(b);
-	/* consumed 2 seq items */
-	for (size_t i=p-1; i < s->seq.v.n && i < p+2; ++i) {
-		free_v(s->seq.v.v[i]);
-	}
-	s->seq.v.v[p-1] = a;
-	for (size_t i=p+2; i < s->seq.v.n; ++i) {
-		s->seq.v.v[i-2] = s->seq.v.v[i];
-	}
-	s->seq.v.n -= 2;
+	upd_infix(s, p, a);
 	return s;
 }
-Val *
+static Val *
 eval_div(Val *s, size_t p) {
-	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	free_v(s);
-	return NULL;
-}
-Val *
-eval_plu(Val *s, size_t p) {
-	if (!infixed(p, s->seq.v.n)) {
-		printf("%s:%d symbol not infixed\n", 
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
-		free_v(s);
-		return NULL;
-	}
-	Val *a = eval(s->seq.v.v[p-1]);
-	if (a == NULL) {
-		printf("%s:%d 1st argument null\n", 
-				__FUNCTION__,__LINE__);
-		free_v(s);
-		return NULL;
-	}
-	Val *b = eval(s->seq.v.v[p+1]);
-	if (b == NULL) {
-		printf("%s:%d 2nd argument null\n", 
-				__FUNCTION__,__LINE__);
-		free_v(a);
-		free_v(s);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -865,59 +858,108 @@ eval_plu(Val *s, size_t p) {
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
-		free_v(s);
+		return NULL;
+	}
+	if ((b->hdr.t == VNAT && b->nat.v == 0) 
+			|| (b->hdr.t == VREA && b->rea.v == 0.)) {
+		printf("%s:%d division by 0\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v /= b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->hdr.t = VREA;
+		a->rea.v = (double)a->nat.v / b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		a->rea.v /= (double)b->nat.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->rea.v /= b->rea.v;
+	}
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
+}
+static Val *
+eval_plu(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("%s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
 		return NULL;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v += b->nat.v;
 	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
 		a->hdr.t = VREA;
-		a->rea.v = (double)a->nat.v * b->rea.v;
+		a->rea.v = (double)a->nat.v + b->rea.v;
 	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
 		a->rea.v += (double)b->nat.v;
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v += b->rea.v;
 	}
 	free_v(b);
-	/* consumed 2 seq items */
-	for (size_t i=p-1; i < s->seq.v.n && i < p+2; ++i) {
-		free_v(s->seq.v.v[i]);
-	}
-	s->seq.v.v[p-1] = a;
-	for (size_t i=p+2; i < s->seq.v.n; ++i) {
-		s->seq.v.v[i-2] = s->seq.v.v[i];
-	}
-	s->seq.v.n -= 2;
+	upd_infix(s, p, a);
 	return s;
 }
-Val *
+static Val *
 eval_min(Val *s, size_t p) {
-	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	free_v(s);
-	return NULL;
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("%s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v -= b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->hdr.t = VREA;
+		a->rea.v = (double)a->nat.v - b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		a->rea.v -= (double)b->nat.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->rea.v -= b->rea.v;
+	}
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
 }
-Val *
+static Val *
 eval_les(Val *s, size_t p) {
 	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	free_v(s);
 	return NULL;
 }
 Val *
 eval_leq(Val *s, size_t p) {
 	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	free_v(s);
 	return NULL;
 }
 Val *
 eval_gre(Val *s, size_t p) {
 	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	free_v(s);
 	return NULL;
 }
 Val *
 eval_grq(Val *s, size_t p) {
 	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	free_v(s);
 	return NULL;
 }
 
@@ -929,15 +971,26 @@ typedef struct symtof_ {
 
 #define NSYMS 8
 symtof Syms[] = {
-	(symtof) {"*",  1, eval_mul},
-	(symtof) {"/",  1, eval_div},
-	(symtof) {"+",  2, eval_plu},
-	(symtof) {"-",  2, eval_min},
-	(symtof) {"<",  3, eval_les},
-	(symtof) {"<=", 3, eval_leq},
-	(symtof) {">",  3, eval_gre},
-	(symtof) {">=", 3, eval_grq},
+	(symtof) {"*",  10, eval_mul},
+	(symtof) {"/",  10, eval_div},
+	(symtof) {"+",  20, eval_plu},
+	(symtof) {"-",  20, eval_min},
+	(symtof) {"<",  30, eval_les},
+	(symtof) {"<=", 30, eval_leq},
+	(symtof) {">",  30, eval_gre},
+	(symtof) {">=", 30, eval_grq},
 };
+
+static unsigned int
+minprio() {
+	unsigned int m = 0;
+	for (int i=0; i<NSYMS; ++i) {
+		if (Syms[i].prio > m) {
+			m = Syms[i].prio;
+		}
+	}
+	return m;
+}
 
 static symtof *
 find_sym(char *a) {
@@ -1060,6 +1113,10 @@ eval(Val *a) {
 		b->lst.v.v = NULL;
 		for (size_t i=0; i < a->lst.v.n; ++i) {
 			c = eval(a->lst.v.v[i]);
+			if (c == NULL) {
+				free_v(b);
+				return NULL;
+			}
 			b = push_v(b, c);
 		}
 		return b;
@@ -1067,14 +1124,14 @@ eval(Val *a) {
 	if (a->hdr.t == VSEQ) {
 		b = copy_v(a);
 		while (b->seq.v.n > 0) {
-			unsigned int minprio = 100; /* fix this later (fun that computes it) */
+			unsigned int hiprio = minprio()+1;
 			size_t symat = 0;
 			bool symfound = false;
 			for (size_t i=0; i < b->seq.v.n; ++i) {
 				c = b->seq.v.v[i];
 				if (c->hdr.t == VSYM) {
-					if (c->sym.prio < minprio) {
-						minprio = c->sym.prio;
+					if (c->sym.prio < hiprio) {
+						hiprio = c->sym.prio;
 						symat = i;
 						symfound = true;
 					}
@@ -1092,16 +1149,18 @@ eval(Val *a) {
 					return NULL;
 				}
 			}
-			/* execute the symbol */
-			b = b->seq.v.v[symat]->sym.v(b, symat);
-			if (b == NULL) {
+			/* apply the symbol */
+			c = b->seq.v.v[symat]->sym.v(b, symat);
+			if (c == NULL) {
+				free_v(b);
 				return NULL;
 			}
+			b = c;
 		}
 		/* empty seq, return nil */
+		free_v(b);
 		c = malloc(sizeof(Val));
 		c->hdr.t = VNIL;
-		free_v(b);
 		return c;
 	}
 	printf("%s:%d unknown value\n",
@@ -1145,7 +1204,7 @@ main(int argc, char **argv) {
 	if (ev == NULL) {
 		return 1;
 	}
-	printf("evaluated: "); print_v(ev); printf("\n\n");
+	printf("evaluates to: "); print_v(ev); printf("\n\n");
 	free_v(ev);
 	return 0;
 }
