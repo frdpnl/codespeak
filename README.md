@@ -46,7 +46,7 @@ Whitespace expected to separate words.
 ## Known bugs
 
 
-## General principles
+## Background
 
 This small language project tries to provide a more natural way to express programs, 
 according to my findings from the study of natural languages 
