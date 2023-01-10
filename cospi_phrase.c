@@ -466,12 +466,14 @@ lst_of(Sem *a) {
 		printf("%s:%d not a seq or lst seme\n",
 				__FUNCTION__,__LINE__);
 		free_s(a);
+		free(a);
 		return NULL;
 	}
 	if (a->hdr.t == SSEQ && a->seq.v.n > 1) {
 		printf("%s:%d cannot add a list element to a seq-seme\n",
 				__FUNCTION__,__LINE__);
 		free_s(a);
+		free(a);
 		return NULL;
 	}
 	a->hdr.t = SLST;
@@ -501,9 +503,6 @@ read_seme(Listw *a, size_t from, size_t tox) {
 					c = sem_nil();
 					b = push_s(b, c);
 					free(c);
-					if (b == NULL) {
-						return NULL;
-					}
 				}
 				lst_expect1 = true;
 				break;
