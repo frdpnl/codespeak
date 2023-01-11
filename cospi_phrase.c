@@ -943,23 +943,131 @@ eval_min(Val *s, size_t p) {
 }
 static Val *
 eval_les(Val *s, size_t p) {
-	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	return NULL;
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	/* to be expanded to other types */
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("%s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v = a->nat.v < b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->nat.v = a->nat.v < b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->nat.v < b->nat.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->rea.v < b->rea.v;
+	}
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
 }
-Val *
+static Val *
 eval_leq(Val *s, size_t p) {
-	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	return NULL;
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	/* to be expanded to other types */
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("%s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v = a->nat.v <= b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->nat.v = a->nat.v <= b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->nat.v <= b->nat.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->rea.v <= b->rea.v;
+	}
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
 }
-Val *
+static Val *
 eval_gre(Val *s, size_t p) {
-	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	return NULL;
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	/* to be expanded to other types */
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("%s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v = a->nat.v > b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->nat.v = a->nat.v > b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->nat.v > b->nat.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->rea.v > b->rea.v;
+	}
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
 }
-Val *
-eval_grq(Val *s, size_t p) {
-	printf("%s:%d\n", __FUNCTION__,__LINE__);
-	return NULL;
+static Val *
+eval_geq(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("%s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	/* to be expanded to other types */
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("%s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v = a->nat.v >= b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->nat.v = a->nat.v >= b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->nat.v >= b->nat.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->rea.v >= b->rea.v;
+	}
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
 }
 
 typedef struct symtof_ {
@@ -977,7 +1085,7 @@ symtof Syms[] = {
 	(symtof) {"<",  30, eval_les},
 	(symtof) {"<=", 30, eval_leq},
 	(symtof) {">",  30, eval_gre},
-	(symtof) {">=", 30, eval_grq},
+	(symtof) {">=", 30, eval_geq},
 };
 
 static unsigned int
