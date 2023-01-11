@@ -79,7 +79,7 @@ word(wtype a) {
 static Word *
 word_str(char *a, size_t n) {
 	if (n >= WSZ) {
-		printf("%s:%d word to big\n", 
+		printf("? %s:%d word to big\n", 
 				__FUNCTION__, __LINE__);
 		return NULL;
 	}
@@ -92,7 +92,7 @@ word_str(char *a, size_t n) {
 static Listw *
 push_wz(Listw *a, Word *b) {
 	if (a == NULL) {
-		printf("%s:%d list is null\n", 
+		printf("? %s:%d list is null\n", 
 				__FUNCTION__, __LINE__);
 		return NULL;
 	}
@@ -117,15 +117,15 @@ print_w(Word *a) {
 	char *typtxt[] = { "Sep", "Left", "Right", "Str"};
 	switch (a->t) {
 		case STR:
-			printf("%s[%s]", typtxt[a->t], a->v);
+			printf("? %s[%s]", typtxt[a->t], a->v);
 			break;
 		case SEP:
 		case LEFT: 
 		case RIGHT:
-			printf("%s", typtxt[a->t]);
+			printf("? %s", typtxt[a->t]);
 			break;
 		default:
-			printf("%s:%d unknown word type ", 
+			printf("? %s:%d unknown word type ", 
 					__FUNCTION__, __LINE__);
 	}
 }
@@ -256,7 +256,7 @@ typedef union Sem_ {
 static void
 print_s(Sem *a) {
 	if (a == NULL) {
-		printf("%s:%d null seme\n",
+		printf("? %s:%d null seme\n",
 				__FUNCTION__,__LINE__);
 		return;
 	}
@@ -288,7 +288,7 @@ print_s(Sem *a) {
 			printf(") ");
 			break;
 		default:
-			printf("%s:%d unknown seme\n",
+			printf("? %s:%d unknown seme\n",
 					__FUNCTION__, __LINE__);
 	}
 }
@@ -346,7 +346,7 @@ sem_seq() {
 static void 
 free_s(Sem *a) {
 	if (a == NULL) {
-		printf("%s:%d null seme\n",
+		printf("? %s:%d null seme\n",
 				__FUNCTION__, __LINE__);
 		return;
 	}
@@ -369,7 +369,7 @@ free_s(Sem *a) {
 			free(a->lst.v.s);
 			break;
 		default:
-			printf("%s:%d unknown seme\n",
+			printf("? %s:%d unknown seme\n",
 					__FUNCTION__,__LINE__);
 	}
 }
@@ -377,7 +377,7 @@ free_s(Sem *a) {
 static Sem* 
 isnat(Word *a) {
 	if (a->t != STR) {
-		printf("%s:%d word is not a string\n",
+		printf("? %s:%d word is not a string\n",
 				__FUNCTION__, __LINE__);
 		return NULL;
 	}
@@ -388,7 +388,7 @@ isnat(Word *a) {
 		return sem_nat(n);
 	}
 	if (errno == ERANGE) {
-		printf("%s:%d natural number out of range %s\n", 
+		printf("? %s:%d natural number out of range %s\n", 
 				__FUNCTION__, __LINE__, a->v);
 	} 
 	return NULL;
@@ -397,7 +397,7 @@ isnat(Word *a) {
 static Sem *
 isrea(Word *a) {
 	if (a->t != STR) {
-		printf("%s:%d word is not a string\n",
+		printf("? %s:%d word is not a string\n",
 				__FUNCTION__, __LINE__);
 		return NULL;
 	}
@@ -409,10 +409,10 @@ isrea(Word *a) {
 	}
 	if (errno == ERANGE) {
 		if (f == 0) {
-			printf("%s:%d real underflow %s\n", 
+			printf("? %s:%d real underflow %s\n", 
 					__FUNCTION__, __LINE__, a->v);
 		} else {
-			printf("%s:%d real overflow %s\n", 
+			printf("? %s:%d real overflow %s\n", 
 					__FUNCTION__, __LINE__, a->v);
 		}
 	}
@@ -422,7 +422,7 @@ isrea(Word *a) {
 static Sem *
 issym(Word *a) {
 	if (a->t != STR) {
-		printf("%s:%d word is not a string\n",
+		printf("? %s:%d word is not a string\n",
 				__FUNCTION__, __LINE__);
 		return NULL;
 	}
@@ -432,17 +432,17 @@ issym(Word *a) {
 static Sem *
 push_s(Sem *a, Sem *b) {
 	if (a == NULL) {
-		printf("%s:%d seq or lst seme is null\n",
+		printf("? %s:%d seq or lst seme is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if (b == NULL) {
-		printf("%s:%d pushed seme is null\n",
+		printf("? %s:%d pushed seme is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if (a->hdr.t != SSEQ && a->hdr.t != SLST) {
-		printf("%s:%d not a seq or lst seme\n",
+		printf("? %s:%d not a seq or lst seme\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
@@ -458,19 +458,19 @@ push_s(Sem *a, Sem *b) {
 static Sem *
 lst_of(Sem *a) {
 	if (a == NULL) {
-		printf("%s:%d seme is null\n",
+		printf("? %s:%d seme is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if (a->hdr.t != SSEQ && a->hdr.t != SLST) {
-		printf("%s:%d not a seq or lst seme\n",
+		printf("? %s:%d not a seq or lst seme\n",
 				__FUNCTION__,__LINE__);
 		free_s(a);
 		free(a);
 		return NULL;
 	}
 	if (a->hdr.t == SSEQ && a->seq.v.n > 1) {
-		printf("%s:%d cannot add a list element to a seq-seme\n",
+		printf("? %s:%d cannot add a list element to a seq-seme\n",
 				__FUNCTION__,__LINE__);
 		free_s(a);
 		free(a);
@@ -508,7 +508,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 				break;
 			case LEFT:
 				if (b->hdr.t == SLST && !lst_expect1) {
-					printf("%s:%d unexpected list element\n",
+					printf("? %s:%d unexpected list element\n",
 							__FUNCTION__, __LINE__);
 					free_s(b);
 					free(b);
@@ -538,7 +538,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 					}
 				}
 				if (inpar != 0) {
-					printf("%s:%d unmatched %s\n",
+					printf("? %s:%d unmatched %s\n",
 							__FUNCTION__,__LINE__,
 							inpar < 0 ? ")" : "(");
 					free_s(b);
@@ -547,14 +547,14 @@ read_seme(Listw *a, size_t from, size_t tox) {
 				}
 				break;
 			case RIGHT:
-				printf("%s:%d unmatched )\n",
+				printf("? %s:%d unmatched )\n",
 						__FUNCTION__,__LINE__);
 				free_s(b);
 				free(b);
 				return NULL;
 			case STR:
 				if (b->hdr.t == SLST && !lst_expect1) {
-					printf("%s:%d unexpected list element\n",
+					printf("? %s:%d unexpected list element\n",
 							__FUNCTION__, __LINE__);
 					free_s(b);
 					free(b);
@@ -568,7 +568,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 					c = issym(a->w+iw);
 				}
 				if (c == NULL) {
-					printf("%s:%d unknown word\n",
+					printf("? %s:%d unknown word\n",
 							__FUNCTION__,__LINE__);
 					free_s(b);
 					free(b);
@@ -582,7 +582,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 				pushed = true;
 				break;
 			default:
-				printf("%s:%d unexpected word\n",
+				printf("? %s:%d unexpected word\n",
 						__FUNCTION__,__LINE__);
 				free_s(b);
 				free(b);
@@ -600,7 +600,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 static Sem *
 read_semes(Listw *a) {
 	if (a == NULL) {
-		printf("%s:%d null list of words\n",
+		printf("? %s:%d null list of words\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
@@ -651,7 +651,7 @@ typedef union Val_ {
 static void
 print_v(Val *a) {
 	if (a == NULL) {
-		printf("%s:%d null value\n",
+		printf("? %s:%d null value\n",
 				__FUNCTION__,__LINE__);
 		return;
 	}
@@ -683,7 +683,7 @@ print_v(Val *a) {
 			printf(") ");
 			break;
 		default:
-			printf("%s:%d unknown value\n",
+			printf("? %s:%d unknown value\n",
 					__FUNCTION__, __LINE__);
 	}
 }
@@ -691,7 +691,7 @@ print_v(Val *a) {
 static void 
 free_v(Val *a) {
 	if (a == NULL) {
-		printf("%s:%d null value\n",
+		printf("? %s:%d null value\n",
 				__FUNCTION__, __LINE__);
 		return;
 	}
@@ -714,7 +714,7 @@ free_v(Val *a) {
 			free(a->lst.v.v);
 			break;
 		default:
-			printf("%s:%d unknown value\n",
+			printf("? %s:%d unknown value\n",
 					__FUNCTION__,__LINE__);
 	}
 	free(a);
@@ -723,7 +723,7 @@ free_v(Val *a) {
 static Val *
 copy_v(Val *a) {
 	if (a == NULL) {
-		printf("%s:%d value is null\n",
+		printf("? %s:%d value is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
@@ -741,17 +741,17 @@ copy_v(Val *a) {
 static Val *
 push_v(Val *a, Val *b) {
 	if (a == NULL) {
-		printf("%s:%d seq or list is null\n",
+		printf("? %s:%d seq or list is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if (b == NULL) {
-		printf("%s:%d pushed value is null\n",
+		printf("? %s:%d pushed value is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if (a->hdr.t != VSEQ && a->hdr.t != VLST) {
-		printf("%s:%d not a seq or list val\n",
+		printf("? %s:%d not a seq or list val\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
@@ -779,19 +779,19 @@ static bool
 set_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
-		printf("%s:%d symbol not infixed\n", 
+		printf("? %s:%d symbol not infixed\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
 	a = eval(s->seq.v.v[p-1]);
 	if (a == NULL) {
-		printf("%s:%d 1st argument null\n", 
+		printf("? %s:%d 1st argument null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
 	b = eval(s->seq.v.v[p+1]);
 	if (b == NULL) {
-		printf("%s:%d 2nd argument null\n", 
+		printf("? %s:%d 2nd argument null\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		return false;
@@ -817,13 +817,13 @@ static Val *
 eval_mul(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -847,13 +847,13 @@ static Val *
 eval_div(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -861,7 +861,7 @@ eval_div(Val *s, size_t p) {
 	}
 	if ((b->hdr.t == VNAT && b->nat.v == 0) 
 			|| (b->hdr.t == VREA && b->rea.v == 0.)) {
-		printf("%s:%d division by 0\n", 
+		printf("? %s:%d division by 0\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -885,13 +885,13 @@ static Val *
 eval_plu(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -915,13 +915,13 @@ static Val *
 eval_min(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -945,14 +945,14 @@ static Val *
 eval_les(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -977,14 +977,14 @@ static Val *
 eval_leq(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -1009,14 +1009,14 @@ static Val *
 eval_gre(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -1041,14 +1041,14 @@ static Val *
 eval_geq(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
-		printf("%s:%d infix expression invalid\n", 
+		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("%s:%d arguments not numbers\n", 
+		printf("? %s:%d arguments not numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -1068,7 +1068,40 @@ eval_geq(Val *s, size_t p) {
 	free_v(b);
 	upd_infix(s, p, a);
 	return s;
+}static Val *
+eval_eq(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("? %s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	/* to be expanded to other types */
+	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
+			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		printf("? %s:%d arguments not numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
+		a->nat.v = a->nat.v == b->nat.v;
+	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		a->nat.v = (double)a->nat.v == b->rea.v;
+	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		unsigned long long c = a->rea.v == (double)b->nat.v;
+		a->hdr.t = VNAT;
+		a->nat.v = c;
+	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
+		a->hdr.t = VNAT;
+		a->nat.v = a->rea.v == b->rea.v;
+	}
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
 }
+
 
 typedef struct symtof_ {
 	char str[WSZ];
@@ -1076,7 +1109,7 @@ typedef struct symtof_ {
 	Val* (*f)(Val *s, size_t p);
 } symtof;
 
-#define NSYMS 8
+#define NSYMS 9
 symtof Syms[] = {
 	(symtof) {"*",  10, eval_mul},
 	(symtof) {"/",  10, eval_div},
@@ -1086,6 +1119,7 @@ symtof Syms[] = {
 	(symtof) {"<=", 30, eval_leq},
 	(symtof) {">",  30, eval_gre},
 	(symtof) {">=", 30, eval_geq},
+	(symtof) {"=", 30, eval_eq},
 };
 
 static unsigned int
@@ -1113,7 +1147,7 @@ find_sym(char *a) {
 static bool
 isatom_v(Val *a) {
 	if (a==NULL) {
-		printf("%s:%d null value\n",
+		printf("? %s:%d null value\n",
 				__FUNCTION__,__LINE__);
 		return false;
 	}
@@ -1126,7 +1160,7 @@ isatom_v(Val *a) {
 static Val *
 read_val(Sem *a) {
 	if (a == NULL) {
-		printf("%s:%d seme is null\n",
+		printf("? %s:%d seme is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
@@ -1149,7 +1183,7 @@ read_val(Sem *a) {
 		b->hdr.t = VSYM;
 		symtof *s = find_sym(a->sym.v);
 		if (s == NULL) {
-			printf("%s:%d unknown symbol '%s\n",
+			printf("? %s:%d unknown symbol '%s\n",
 					__FUNCTION__,__LINE__,a->sym.v);
 			free_v(b);
 			return NULL;
@@ -1192,7 +1226,7 @@ read_val(Sem *a) {
 		}
 		return b;
 	}
-	printf("%s:%d unknown seme\n",
+	printf("? %s:%d unknown seme\n",
 			__FUNCTION__,__LINE__);
 	free_v(b);
 	return NULL;
@@ -1203,7 +1237,7 @@ read_val(Sem *a) {
 static Val *
 eval(Val *a) {
 	if (a == NULL) {
-		printf("%s:%d value is null\n",
+		printf("? %s:%d value is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
@@ -1250,7 +1284,7 @@ eval(Val *a) {
 					free_v(b);
 					return c;
 				} else { /* multiple seq items without any symbol */
-					printf("%s:%d seq-value without symbol\n",
+					printf("? %s:%d seq-value without symbol\n",
 							__FUNCTION__,__LINE__);
 					free_v(b);
 					return NULL;
@@ -1270,7 +1304,7 @@ eval(Val *a) {
 		c->hdr.t = VNIL;
 		return c;
 	}
-	printf("%s:%d unknown value\n",
+	printf("? %s:%d unknown value\n",
 			__FUNCTION__,__LINE__);
 	return NULL;
 }
@@ -1285,33 +1319,33 @@ int
 main(int argc, char **argv) {
 	if (argc < 2) {
 		usage(argv[0]);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	char *s = argv[1];
-	printf("%s\n", s);
+	printf("# input:\t %s", s);
 	Listw *lw = read_words(s);
 	if (lw == NULL) {
-		return 1;
+		return EXIT_FAILURE;
 	}
 	Sem *ls = read_semes(lw);
 	free_lw(lw);
 	if (ls == NULL) {
-		return 1;
+		return EXIT_FAILURE;
 	}
-	printf("semes: "); print_s(ls); printf("\n");
+	printf("# semes:\t "); print_s(ls); printf("\n");
 	Val *v = read_val(ls);
 	free_s(ls);
 	free(ls);
 	if (v == NULL) {
-		return 1;
+		return EXIT_FAILURE;
 	}
-	printf("values: "); print_v(v); printf("\n");
+	printf("# values:\t "); print_v(v); printf("\n");
 	Val *ev = eval(v);
 	free_v(v);
 	if (ev == NULL) {
-		return 1;
+		return EXIT_FAILURE;
 	}
-	printf("evaluates to: "); print_v(ev); printf("\n\n");
+	printf("= "); print_v(ev); printf("\n\n");
 	free_v(ev);
-	return 0;
+	return EXIT_SUCCESS;
 }

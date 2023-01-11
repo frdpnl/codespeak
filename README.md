@@ -7,8 +7,9 @@ Examples first:
 
 ### Symbolic application
 
-`()` means sub-expression.
+Note: `()` means sub-expression.
 It also represents symbol application, or single value.
+
 Whitespace expected to separate words.
 
 `2` 2
@@ -23,7 +24,11 @@ Whitespace expected to separate words.
 
 `2 * 3 + 2.0` 8.0 (real) 
 
-`2 * 2 > 3.` 1 (natural) precedence applies
+`2 * 2 > 3.` 1 (true), precedence applies
+
+`2 * 0.5 = 1 + 0 = 1` 1 (true)
+
+`2 = 2 = 2.` 0 (false), true is 1, so different from 2
 
 ### List
 
