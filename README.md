@@ -30,6 +30,14 @@ Whitespace expected to separate words.
 
 `2 = 2 = 2.` 0 (false), true is 1, so different from 2
 
+`(2,3,4) = (2,3,(3 + 1))` 1 (true)
+
+`(2, 3.) /= (2, 3)` 1 (true) real versus natural
+
+`2 and -2` 1 (true)
+
+`2 = 3 or 3 = 2. * 3` 0 (false), and/or have lower precedence
+
 ### List
 
 `,` means list
@@ -47,6 +55,8 @@ Whitespace expected to separate words.
 `2 3 4` symbolic application (implicit ()), but no symbols present
 
 `2, 3 + 4` symbol + is unexpected, needs () or ,
+
+`2, = 2,` 2 is unexpected, needs () or ,
 
 `2 + 3., 4` cannot add a natural number to a list
 

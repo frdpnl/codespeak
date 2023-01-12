@@ -720,6 +720,42 @@ free_v(Val *a) {
 	free(a);
 }
 
+static bool
+isequal_v(Val *a, Val *b) {
+	if (a == NULL || b == NULL) {
+		printf("? %s:%d value is null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	if (a->hdr.t != b->hdr.t) {
+		return false;
+	}
+	if (a->hdr.t == VNIL) {
+		return true;
+	}
+	if (a->hdr.t == VNAT) {
+		return (a->nat.v == b->nat.v);
+	}
+	if (a->hdr.t == VREA) {
+		return (a->rea.v == b->rea.v);
+	}
+	if (a->hdr.t == VSYM) {
+		return (a->sym.v == b->sym.v);
+	}
+	if (a->hdr.t == VLST) {
+		for (size_t i=0; i<a->lst.v.n; ++i) { 
+			bool c = isequal_v(a->lst.v.v[i], b->lst.v.v[i]);
+			if (!c) {
+				return c;
+			}
+		}
+		return true;
+	}
+	printf("? %s:%d unsupported value\n",
+			__FUNCTION__,__LINE__);
+	return false;
+}
+
 static Val *
 copy_v(Val *a) {
 	if (a == NULL) {
@@ -1068,7 +1104,8 @@ eval_geq(Val *s, size_t p) {
 	free_v(b);
 	upd_infix(s, p, a);
 	return s;
-}static Val *
+}
+static Val *
 eval_eq(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
@@ -1076,32 +1113,76 @@ eval_eq(Val *s, size_t p) {
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
-	/* to be expanded to other types */
-	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
-			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
+	bool c = isequal_v(a, b);
+	free_v(a);
+	free_v(b);
+	Val *d = malloc(sizeof(Val));
+	d->hdr.t = VNAT;
+	d->nat.v = c ? 1 : 0;
+	upd_infix(s, p, d);
+	return s;
+}
+static Val *
+eval_neq(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("? %s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	bool c = isequal_v(a, b);
+	free_v(a);
+	free_v(b);
+	Val *d = malloc(sizeof(Val));
+	d->hdr.t = VNAT;
+	d->nat.v = c ? 0 : 1;
+	upd_infix(s, p, d);
+	return s;
+}
+static Val *
+eval_and(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("? %s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
+		printf("? %s:%d arguments not natural numbers\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
 		return NULL;
 	}
-	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
-		a->nat.v = a->nat.v == b->nat.v;
-	} else if (a->hdr.t == VNAT && b->hdr.t == VREA) {
-		a->nat.v = (double)a->nat.v == b->rea.v;
-	} else if (a->hdr.t == VREA && b->hdr.t == VNAT) {
-		unsigned long long c = a->rea.v == (double)b->nat.v;
-		a->hdr.t = VNAT;
-		a->nat.v = c;
-	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
-		a->hdr.t = VNAT;
-		a->nat.v = a->rea.v == b->rea.v;
-	}
+	a->nat.v = (a->nat.v == 0 ? 0 : 1);
+	b->nat.v = (b->nat.v == 0 ? 0 : 1);
+	a->nat.v = a->nat.v && b->nat.v;
 	free_v(b);
 	upd_infix(s, p, a);
 	return s;
 }
-
+static Val *
+eval_or(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("? %s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
+		printf("? %s:%d arguments not natural numbers\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	a->nat.v = (a->nat.v == 0 ? 0 : 1);
+	b->nat.v = (b->nat.v == 0 ? 0 : 1);
+	a->nat.v = a->nat.v || b->nat.v;
+	free_v(b);
+	upd_infix(s, p, a);
+	return s;
+}
 
 typedef struct symtof_ {
 	char str[WSZ];
@@ -1109,17 +1190,20 @@ typedef struct symtof_ {
 	Val* (*f)(Val *s, size_t p);
 } symtof;
 
-#define NSYMS 9
+#define NSYMS 12
 symtof Syms[] = {
-	(symtof) {"*",  10, eval_mul},
-	(symtof) {"/",  10, eval_div},
-	(symtof) {"+",  20, eval_plu},
-	(symtof) {"-",  20, eval_min},
-	(symtof) {"<",  30, eval_les},
-	(symtof) {"<=", 30, eval_leq},
-	(symtof) {">",  30, eval_gre},
-	(symtof) {">=", 30, eval_geq},
-	(symtof) {"=", 30, eval_eq},
+	(symtof) {"*",   10, eval_mul},
+	(symtof) {"/",   10, eval_div},
+	(symtof) {"+",   20, eval_plu},
+	(symtof) {"-",   20, eval_min},
+	(symtof) {"<",   30, eval_les},
+	(symtof) {"<=",  30, eval_leq},
+	(symtof) {">",   30, eval_gre},
+	(symtof) {">=",  30, eval_geq},
+	(symtof) {"=",   30, eval_eq},
+	(symtof) {"/=",  30, eval_neq},
+	(symtof) {"and", 40, eval_and},
+	(symtof) {"or",  40, eval_or},
 };
 
 static unsigned int
