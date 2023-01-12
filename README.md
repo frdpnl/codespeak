@@ -3,12 +3,12 @@ Personal programming language
 
 ## Expression
 
-Examples first:
+Presented by examples.
 
 ### Symbolic application
 
 Note: `()` means sub-expression.
-It also represents symbol application, or single value.
+It also expresses symbol application, or a single value.
 
 Whitespace expected to separate words.
 
@@ -16,23 +16,25 @@ Whitespace expected to separate words.
 
 `(2)` 2
 
-`(2 * 3)`
+`2 * 3` 6, valid because of an implicit top-level ()
 
-`2 * 3` accepted because of an implicit top-level ()
-
-`2 * (3 + 2)` 14
+`2 * (3 + 2)` 10
 
 `2 * 3 + 2.0` 8.0 (real) 
 
 `2 * 2 > 3.` 1 (true), precedence applies
+
+`2 = 2.` 0 (false), strict equality
+
+`2 ~= 2.` 1 (true), roughly equal
+
+`2 /= 2.` 1 (true), different
 
 `2 * 0.5 = 1 + 0 = 1` 1 (true)
 
 `2 = 2 = 2.` 0 (false), true is 1, so different from 2
 
 `(2,3,4) = (2,3,(3 + 1))` 1 (true)
-
-`(2, 3.) /= (2, 3)` 1 (true) real versus natural
 
 `2 and -2` 1 (true)
 
@@ -69,6 +71,8 @@ This small language project tries to provide a more natural way to express progr
 according to my findings from the study of natural languages 
 (such as the Classic style, Chomsky's Minimal Program. More details to come),
 and to my taste and limitations :)
+
+*Language does not need grammar, but grammar needs language.* (citation missing)
 
 A program is a sequence of paragraphs (not here yet).
 

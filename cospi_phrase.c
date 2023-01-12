@@ -756,6 +756,47 @@ isequal_v(Val *a, Val *b) {
 	return false;
 }
 
+static bool
+isequiv_v(Val *a, Val *b) {
+	if (a == NULL || b == NULL) {
+		printf("? %s:%d value is null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	if (a->hdr.t == VNAT && b->hdr.t == VREA) {
+		return ((double)a->nat.v == b->rea.v);
+	}
+	if (a->hdr.t == VREA && b->hdr.t == VNAT) {
+		return (a->rea.v == (double)b->nat.v);
+	}
+	if (a->hdr.t != b->hdr.t) {
+		return false;
+	}
+	if (a->hdr.t == VNIL) {
+		return true;
+	}
+	if (a->hdr.t == VNAT) {
+		return (a->nat.v == b->nat.v);
+	}
+	if (a->hdr.t == VREA) {
+		return (a->rea.v == b->rea.v);
+	}
+	if (a->hdr.t == VSYM) {
+		return (a->sym.v == b->sym.v);
+	}
+	if (a->hdr.t == VLST) {
+		for (size_t i=0; i<a->lst.v.n; ++i) { 
+			bool c = isequiv_v(a->lst.v.v[i], b->lst.v.v[i]);
+			if (!c) {
+				return c;
+			}
+		}
+		return true;
+	}
+	printf("? %s:%d unsupported value\n",
+			__FUNCTION__,__LINE__);
+	return false;
+}
 static Val *
 copy_v(Val *a) {
 	if (a == NULL) {
@@ -1140,6 +1181,23 @@ eval_neq(Val *s, size_t p) {
 	return s;
 }
 static Val *
+eval_eqv(Val *s, size_t p) {
+	Val *a, *b;
+	if (!set_infix_arg(s, p, &a, &b)) {
+		printf("? %s:%d infix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	bool c = isequiv_v(a, b);
+	free_v(a);
+	free_v(b);
+	Val *d = malloc(sizeof(Val));
+	d->hdr.t = VNAT;
+	d->nat.v = c ? 1 : 0;
+	upd_infix(s, p, d);
+	return s;
+}
+static Val *
 eval_and(Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_infix_arg(s, p, &a, &b)) {
@@ -1190,7 +1248,7 @@ typedef struct symtof_ {
 	Val* (*f)(Val *s, size_t p);
 } symtof;
 
-#define NSYMS 12
+#define NSYMS 13
 symtof Syms[] = {
 	(symtof) {"*",   10, eval_mul},
 	(symtof) {"/",   10, eval_div},
@@ -1202,6 +1260,7 @@ symtof Syms[] = {
 	(symtof) {">=",  30, eval_geq},
 	(symtof) {"=",   30, eval_eq},
 	(symtof) {"/=",  30, eval_neq},
+	(symtof) {"~=",  30, eval_eqv},
 	(symtof) {"and", 40, eval_and},
 	(symtof) {"or",  40, eval_or},
 };
