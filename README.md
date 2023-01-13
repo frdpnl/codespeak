@@ -12,33 +12,29 @@ It also expresses symbol application, or a single value.
 
 Whitespace expected to separate words.
 
-`2` 2
+`2` (evaluates to) 2
 
-`(2)` 2
+`(+)` + (symbol)
 
 `2 * 3` 6, valid because of an implicit top-level ()
 
-`2 * (3 + 2)` 10
-
-`2 * 3 + 2.0` 8.0 (real) 
+`2 * 3 + 2.0` 8.0 
 
 `2 * 2 > 3.` 1 (true), precedence applies
 
 `2 = 2.` 0 (false), strict equality
 
-`2 ~= 2.` 1 (true), roughly equal
+`2 ~= 2.0` 1, more or less equal
 
-`2 /= 2.` 1 (true), different
-
-`2 * 0.5 = 1 + 0 = 1` 1 (true)
+`2 /= 2.` 1, different types
 
 `2 = 2 = 2.` 0 (false), true is 1, so different from 2
 
-`(2,3,+) = (2, (2 + 1), +)` 1 (true)
+`(2,3,+) = (2, (2 + 1), +)` 1
 
-`2 and -2` 1 (true)
+`2 and (not -2)` 0, precedence
 
-`2 = 3 or 3 = 2. * 3` 0 (false), and/or have lower precedence
+`2 = 3 or 3 = 2. * 3` 0, and/or have lower precedence
 
 ### List
 

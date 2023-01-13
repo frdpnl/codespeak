@@ -851,6 +851,10 @@ static bool
 infixed(size_t p, size_t n) {
 	return (p > 0 && p < n-1);
 }
+static bool 
+prefixed1(size_t p, size_t n) {
+	return (p >= 0 && p < n-1);
+}
 
 static bool
 set_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
@@ -877,6 +881,23 @@ set_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	*pb = b;
 	return true;
 }
+static bool
+set_prefix1_arg(Val *s, size_t p, Val **pa) {
+	Val *a;
+	if (!prefixed1(p, s->seq.v.n)) {
+		printf("? %s:%d symbol not prefixed to one argument\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	a = eval(s->seq.v.v[p+1]);
+	if (a == NULL) {
+		printf("? %s:%d argument null\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	*pa = a;
+	return true;
+}
 static void
 upd_infix(Val *s, size_t p, Val *a) {
 	/* consumed 2 seq items */
@@ -888,6 +909,18 @@ upd_infix(Val *s, size_t p, Val *a) {
 		s->seq.v.v[i-2] = s->seq.v.v[i];
 	}
 	s->seq.v.n -= 2;
+}
+static void
+upd_prefix1(Val *s, size_t p, Val *a) {
+	/* consumed 1 seq item */
+	for (size_t i=p; i < s->seq.v.n && i < p+2; ++i) {
+		free_v(s->seq.v.v[i]);
+	}
+	s->seq.v.v[p] = a;
+	for (size_t i=p+2; i < s->seq.v.n; ++i) {
+		s->seq.v.v[i-1] = s->seq.v.v[i];
+	}
+	s->seq.v.n -= 1;
 }
 
 static Val *
@@ -1241,6 +1274,36 @@ eval_or(Val *s, size_t p) {
 	upd_infix(s, p, a);
 	return s;
 }
+static Val *
+eval_not(Val *s, size_t p) {
+	printf("? %s:%d ", __FUNCTION__,__LINE__); print_v(s); printf("\n");
+	Val *a;
+	if (!set_prefix1_arg(s, p, &a)) {
+		printf("? %s:%d prefix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if ((a->hdr.t != VNAT)) {
+		printf("? %s:%d argument not natural number (boolean)\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		return NULL;
+	}
+	a->nat.v = (a->nat.v == 0 ? 1 : 0);
+	upd_prefix1(s, p, a);
+	return s;
+}
+static Val *
+eval_id(Val *s, size_t p) {
+	Val *a;
+	if (!set_prefix1_arg(s, p, &a)) {
+		printf("? %s:%d prefix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	upd_prefix1(s, p, a);
+	return s;
+}
 
 typedef struct symtof_ {
 	char str[WSZ];
@@ -1248,8 +1311,9 @@ typedef struct symtof_ {
 	Val* (*f)(Val *s, size_t p);
 } symtof;
 
-#define NSYMS 13
+#define NSYMS 15
 symtof Syms[] = {
+	(symtof) {"id",  1, eval_id}, /* technical symbol */
 	(symtof) {"*",   10, eval_mul},
 	(symtof) {"/",   10, eval_div},
 	(symtof) {"+",   20, eval_plu},
@@ -1261,8 +1325,9 @@ symtof Syms[] = {
 	(symtof) {"=",   30, eval_eq},
 	(symtof) {"/=",  30, eval_neq},
 	(symtof) {"~=",  30, eval_eqv},
-	(symtof) {"and", 40, eval_and},
-	(symtof) {"or",  40, eval_or},
+	(symtof) {"not", 40, eval_not},
+	(symtof) {"and", 50, eval_and},
+	(symtof) {"or",  50, eval_or},
 };
 
 static unsigned int
@@ -1406,11 +1471,32 @@ eval(Val *a) {
 		return b;
 	}
 	if (a->hdr.t == VSEQ) {
-		b = copy_v(a);
+		printf("# %s:%d ", __FUNCTION__,__LINE__); print_v(a); printf("\n");
+		/* b = copy_v(a); */
+		b = malloc(sizeof(Val));
+		b->hdr.t = VSEQ;
+		b->seq.v.n = 0;
+		b->seq.v.v = NULL;
+		for (size_t i=0; i < a->seq.v.n; ++i) {
+			c = eval(a->seq.v.v[i]);
+			if (c == NULL) {
+				free_v(b);
+				return NULL;
+			}
+			b = push_v(b, c);
+		}
+		/* symbol application */
 		while (b->seq.v.n > 0) {
+			printf("# %s:%d ", __FUNCTION__,__LINE__); print_v(b); printf("\n");
+			if (b->seq.v.n == 1) {
+				c = copy_v(b->seq.v.v[0]);
+				free_v(b);
+				return c;
+			}
 			unsigned int hiprio = minprio()+1;
 			size_t symat = 0;
 			bool symfound = false;
+			/* evaluation from left to right (for same priority) */
 			for (size_t i=0; i < b->seq.v.n; ++i) {
 				c = b->seq.v.v[i];
 				if (c->hdr.t == VSYM) {
@@ -1419,19 +1505,14 @@ eval(Val *a) {
 						symat = i;
 						symfound = true;
 					}
-				}
+				} 
 			}
 			if (!symfound) { 
-				if (b->seq.v.n == 1) {
-					c = eval(b->seq.v.v[0]);
-					free_v(b);
-					return c;
-				} else { /* multiple seq items without any symbol */
-					printf("? %s:%d seq-value without symbol\n",
-							__FUNCTION__,__LINE__);
-					free_v(b);
-					return NULL;
-				}
+				/* multiple seq items without any symbol */
+				printf("? %s:%d seq-value without symbol\n",
+						__FUNCTION__,__LINE__);
+				free_v(b);
+				return NULL;
 			}
 			/* apply the symbol */
 			c = b->seq.v.v[symat]->sym.v(b, symat);
