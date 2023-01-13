@@ -68,7 +68,7 @@ according to my findings from the study of natural languages
 (such as the Classic style, Chomsky's Minimal Program. More details to come),
 and to my taste and limitations :)
 
-*Language does not need grammar, but grammar needs language.* (citation missing)
+*Language does not need grammar, but grammar needs language.* (reference needed)
 
 A program is a sequence of paragraphs (not here yet).
 
