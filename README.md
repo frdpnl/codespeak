@@ -34,7 +34,7 @@ Whitespace expected to separate words.
 
 `2 = 2 = 2.` 0 (false), true is 1, so different from 2
 
-`(2,3,4) = (2,3,(3 + 1))` 1 (true)
+`(2,3,+) = (2, (2 + 1), +)` 1 (true)
 
 `2 and -2` 1 (true)
 
