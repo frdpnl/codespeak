@@ -196,14 +196,14 @@ read_words(char *a) {
 			continue;
 		} 
 		if (boff+read >= WSZ) {
-			printf("\n%s:%d word too big (%luB)!\n", 
+			printf("\n? %s:%d word too big (%luB)!\n", 
 					__FUNCTION__,
 					__LINE__,
 					boff+read);
 			free_lw(b);
 			return NULL;
 		}
-		/* default case: add to current word */
+		/* default case: add character to current word */
 		memcpy(buf+boff, a+off, read*sizeof(char));
 		boff += read;
 		buf[boff] = '\0';
@@ -857,14 +857,17 @@ prefixed1(size_t p, size_t n) {
 }
 
 static bool
-set_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
+get_eval_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not infixed\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = eval(s->seq.v.v[p-1]);
+	a = eval(s->seq.v.v[p-1]); 
+	/* this is already evaluated by eval(), so will just copy_v().
+	 * right now, keep eval() instead of a direct copy_v(), 
+	 * in order to support later flexibility */
 	if (a == NULL) {
 		printf("? %s:%d 1st argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -882,7 +885,32 @@ set_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	return true;
 }
 static bool
-set_prefix1_arg(Val *s, size_t p, Val **pa) {
+get_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
+	Val *a, *b;
+	if (!infixed(p, s->seq.v.n)) {
+		printf("? %s:%d symbol not infixed\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	a = copy_v(s->seq.v.v[p-1]); 
+	if (a == NULL) {
+		printf("? %s:%d 1st argument null\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	b = copy_v(s->seq.v.v[p+1]);
+	if (b == NULL) {
+		printf("? %s:%d 2nd argument null\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		return false;
+	}
+	*pa = a;
+	*pb = b;
+	return true;
+}
+static bool
+get_eval_prefix1_arg(Val *s, size_t p, Val **pa) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to one argument\n", 
@@ -890,6 +918,23 @@ set_prefix1_arg(Val *s, size_t p, Val **pa) {
 		return false;
 	}
 	a = eval(s->seq.v.v[p+1]);
+	if (a == NULL) {
+		printf("? %s:%d argument null\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	*pa = a;
+	return true;
+}
+static bool
+get_prefix1_arg(Val *s, size_t p, Val **pa) {
+	Val *a;
+	if (!prefixed1(p, s->seq.v.n)) {
+		printf("? %s:%d symbol not prefixed to one argument\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	a = copy_v(s->seq.v.v[p+1]);
 	if (a == NULL) {
 		printf("? %s:%d argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -926,7 +971,7 @@ upd_prefix1(Val *s, size_t p, Val *a) {
 static Val *
 eval_mul(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -956,7 +1001,7 @@ eval_mul(Val *s, size_t p) {
 static Val *
 eval_div(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -994,7 +1039,7 @@ eval_div(Val *s, size_t p) {
 static Val *
 eval_plu(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1024,7 +1069,7 @@ eval_plu(Val *s, size_t p) {
 static Val *
 eval_min(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1054,7 +1099,7 @@ eval_min(Val *s, size_t p) {
 static Val *
 eval_les(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1086,7 +1131,7 @@ eval_les(Val *s, size_t p) {
 static Val *
 eval_leq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1118,7 +1163,7 @@ eval_leq(Val *s, size_t p) {
 static Val *
 eval_gre(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1150,7 +1195,7 @@ eval_gre(Val *s, size_t p) {
 static Val *
 eval_geq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1182,7 +1227,7 @@ eval_geq(Val *s, size_t p) {
 static Val *
 eval_eq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1199,7 +1244,7 @@ eval_eq(Val *s, size_t p) {
 static Val *
 eval_neq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1216,7 +1261,7 @@ eval_neq(Val *s, size_t p) {
 static Val *
 eval_eqv(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1233,7 +1278,7 @@ eval_eqv(Val *s, size_t p) {
 static Val *
 eval_and(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1255,7 +1300,7 @@ eval_and(Val *s, size_t p) {
 static Val *
 eval_or(Val *s, size_t p) {
 	Val *a, *b;
-	if (!set_infix_arg(s, p, &a, &b)) {
+	if (!get_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1276,9 +1321,8 @@ eval_or(Val *s, size_t p) {
 }
 static Val *
 eval_not(Val *s, size_t p) {
-	printf("? %s:%d ", __FUNCTION__,__LINE__); print_v(s); printf("\n");
 	Val *a;
-	if (!set_prefix1_arg(s, p, &a)) {
+	if (!get_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1296,12 +1340,38 @@ eval_not(Val *s, size_t p) {
 static Val *
 eval_id(Val *s, size_t p) {
 	Val *a;
-	if (!set_prefix1_arg(s, p, &a)) {
+	if (!get_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	upd_prefix1(s, p, a);
+	return s;
+}
+
+static Val * eval(Val *);
+
+static Val *
+eval_do(Val *s, size_t p) {
+	Val *a;
+	if (!get_prefix1_arg(s, p, &a)) {
+		printf("? %s:%d prefix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (a->hdr.t != VLST) {
+		printf("? %s:%d argument not a list\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		return NULL;
+	}
+	a->hdr.t = VSEQ;
+	Val *b = eval(a);
+	free_v(a);
+	if (b == NULL) {
+		return NULL;
+	}
+	upd_prefix1(s, p, b);
 	return s;
 }
 
@@ -1313,21 +1383,22 @@ typedef struct symtof_ {
 
 #define NSYMS 15
 symtof Syms[] = {
-	(symtof) {"id",  1, eval_id}, /* technical symbol */
-	(symtof) {"*",   10, eval_mul},
-	(symtof) {"/",   10, eval_div},
-	(symtof) {"+",   20, eval_plu},
-	(symtof) {"-",   20, eval_min},
-	(symtof) {"<",   30, eval_les},
-	(symtof) {"<=",  30, eval_leq},
-	(symtof) {">",   30, eval_gre},
-	(symtof) {">=",  30, eval_geq},
-	(symtof) {"=",   30, eval_eq},
-	(symtof) {"/=",  30, eval_neq},
-	(symtof) {"~=",  30, eval_eqv},
-	(symtof) {"not", 40, eval_not},
-	(symtof) {"and", 50, eval_and},
-	(symtof) {"or",  50, eval_or},
+	(symtof) {"id",  10, eval_id}, /* technical symbol */
+	(symtof) {"do",  10, eval_do},
+	(symtof) {"*",   20, eval_mul},
+	(symtof) {"/",   20, eval_div},
+	(symtof) {"+",   30, eval_plu},
+	(symtof) {"-",   30, eval_min},
+	(symtof) {"<",   40, eval_les},
+	(symtof) {"<=",  40, eval_leq},
+	(symtof) {">",   40, eval_gre},
+	(symtof) {">=",  40, eval_geq},
+	(symtof) {"=",   40, eval_eq},
+	(symtof) {"/=",  40, eval_neq},
+	(symtof) {"~=",  40, eval_eqv},
+	(symtof) {"not", 50, eval_not},
+	(symtof) {"and", 60, eval_and},
+	(symtof) {"or",  60, eval_or},
 };
 
 static unsigned int
@@ -1471,8 +1542,6 @@ eval(Val *a) {
 		return b;
 	}
 	if (a->hdr.t == VSEQ) {
-		printf("# %s:%d ", __FUNCTION__,__LINE__); print_v(a); printf("\n");
-		/* b = copy_v(a); */
 		b = malloc(sizeof(Val));
 		b->hdr.t = VSEQ;
 		b->seq.v.n = 0;
@@ -1485,9 +1554,9 @@ eval(Val *a) {
 			}
 			b = push_v(b, c);
 		}
-		/* symbol application */
+		/* symbol application: consumes the seq */
 		while (b->seq.v.n > 0) {
-			printf("# %s:%d ", __FUNCTION__,__LINE__); print_v(b); printf("\n");
+			/* reduce seq of 1 element to its element */
 			if (b->seq.v.n == 1) {
 				c = copy_v(b->seq.v.v[0]);
 				free_v(b);
@@ -1496,7 +1565,7 @@ eval(Val *a) {
 			unsigned int hiprio = minprio()+1;
 			size_t symat = 0;
 			bool symfound = false;
-			/* evaluation from left to right (for same priority) */
+			/* apply symbols from left to right (for same priority symbols) */
 			for (size_t i=0; i < b->seq.v.n; ++i) {
 				c = b->seq.v.v[i];
 				if (c->hdr.t == VSYM) {
@@ -1508,8 +1577,7 @@ eval(Val *a) {
 				} 
 			}
 			if (!symfound) { 
-				/* multiple seq items without any symbol */
-				printf("? %s:%d seq-value without symbol\n",
+				printf("? %s:%d sequence without symbol\n",
 						__FUNCTION__,__LINE__);
 				free_v(b);
 				return NULL;
@@ -1517,12 +1585,14 @@ eval(Val *a) {
 			/* apply the symbol */
 			c = b->seq.v.v[symat]->sym.v(b, symat);
 			if (c == NULL) {
+				printf("? %s:%d symbol application failed\n",
+						__FUNCTION__,__LINE__);
 				free_v(b);
 				return NULL;
 			}
 			b = c;
 		}
-		/* empty seq, return nil */
+		/* empty seq, means nil value */
 		free_v(b);
 		c = malloc(sizeof(Val));
 		c->hdr.t = VNIL;

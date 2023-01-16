@@ -14,7 +14,9 @@ Whitespace expected to separate words.
 
 `2` (evaluates to) 2
 
-`(+)` + (symbol)
+`(+)` + (the symbol)
+
+`(id *)` * symbol id returns its argument (used for testing higher order operations)
 
 `2 * 3` 6, valid because of an implicit top-level ()
 
@@ -47,6 +49,14 @@ Whitespace expected to separate words.
 `2, (3,4),4` list includes a sub-list
 
 `2, +, 3` also a list (you can guess where this is going)
+
+### Higher order (i.e. apply)
+
+`do` means evaluate following list as an expression
+
+`do (2, +, 3)` 5
+
+`4 ~= 2. * do (1, +, 1)` 1 (true)
 
 ### Invalid expressions
 
