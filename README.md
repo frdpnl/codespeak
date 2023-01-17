@@ -53,6 +53,10 @@ Whitespace expected to separate words.
 
 `2, +, 3` also a list (you can guess where this is going)
 
+`list` also defines a list
+
+`list 1 2 3` list 1, 2, 3
+
 ### Higher order (i.e. apply)
 
 `do` means evaluate following list as an expression
@@ -60,6 +64,8 @@ Whitespace expected to separate words.
 `do (2, +, 3)` 5
 
 `4 ~= 2. * do (1, +, 1)` 1 (true)
+
+`do (list 1 + 2)` 3
 
 ### Invalid expressions
 

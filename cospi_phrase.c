@@ -963,7 +963,7 @@ copy_prefixn_arg(Val *s, size_t p, Val **pa) {
 	a->seq.v.n = 0;
 	a->seq.v.v = NULL;
 	for (size_t i=p+1; i<s->seq.v.n; ++i) {
-		a = push_v(a, s->seq.v.v[i]);
+		a = push_v(a, copy_v(s->seq.v.v[i]));
 	}
 	*pa = a;
 	return true;
