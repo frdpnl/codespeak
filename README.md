@@ -8,7 +8,8 @@ Presented by examples.
 ### Symbolic application
 
 Note: `()` means sub-expression.
-It also expresses symbol application, or a single value.
+It expresses symbol application, or a single value.
+After evaluation, no `()` are left.
 
 Whitespace expected to separate words.
 
@@ -32,6 +33,8 @@ Whitespace expected to separate words.
 
 `2 = 2 = 2.` 0 (false), true is 1, so different from 2
 
+`(2,) ~= (2.,)` 1 (true)
+
 `(2,3,+) = (2, (2 + 1), +)` 1
 
 `2 and (not -2)` 0, precedence
@@ -40,9 +43,9 @@ Whitespace expected to separate words.
 
 ### List
 
-`,` means list
+`,` defines a list
 
-`2, 3` list of 2 natural numbers
+`2, 3` list of 2 natural numbers (implicit ())
 
 `2, (3 * 4), 4` list of 3 numbers
 
@@ -62,7 +65,7 @@ Whitespace expected to separate words.
 
 `2 3 4` symbolic application (implicit ()), but no symbols present
 
-`2, 3 + 4` symbol + is unexpected, needs () or ,
+`2, 3 + 4` symbol + is unexpected, needs a () or ,
 
 `2, = 2,` 2 is unexpected, needs () or ,
 

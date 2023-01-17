@@ -845,6 +845,18 @@ push_v(Val *a, Val *b) {
 	return a;
 }
 
+/* -------- symbol definitions ------------
+ * recommended interface (resource management):
+ * 1. work off copies of arguments
+ * 2. produce a fresh value (can be one of the copies)
+ * 3. replace symbol operation expression with that fresh value
+ * (delete previous values in the expression, add new one)
+ * 4. cleanup behind you (working copies)
+ * So, an optimization could be to reuse one existing argument for result
+ * and avoid alloc/free of original argument. 
+ * But, loss of flexibility isn't worth it (for compiler).
+ * */
+
 static Val * eval(Val *a);
 
 static bool 
@@ -885,7 +897,7 @@ get_eval_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	return true;
 }
 static bool
-get_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
+copy_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not infixed\n", 
@@ -927,7 +939,7 @@ get_eval_prefix1_arg(Val *s, size_t p, Val **pa) {
 	return true;
 }
 static bool
-get_prefix1_arg(Val *s, size_t p, Val **pa) {
+copy_prefix1_arg(Val *s, size_t p, Val **pa) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to one argument\n", 
@@ -939,6 +951,19 @@ get_prefix1_arg(Val *s, size_t p, Val **pa) {
 		printf("? %s:%d argument null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
+	}
+	*pa = a;
+	return true;
+}
+static bool
+copy_prefixn_arg(Val *s, size_t p, Val **pa) {
+	Val *a;
+	a = malloc(sizeof(*a));
+	a->hdr.t = VSEQ;  /* because we copy, keep seq type */
+	a->seq.v.n = 0;
+	a->seq.v.v = NULL;
+	for (size_t i=p+1; i<s->seq.v.n; ++i) {
+		a = push_v(a, s->seq.v.v[i]);
 	}
 	*pa = a;
 	return true;
@@ -967,11 +992,20 @@ upd_prefix1(Val *s, size_t p, Val *a) {
 	}
 	s->seq.v.n -= 1;
 }
+static void
+upd_prefixn(Val *s, size_t p, Val *a) {
+	/* consumed n-p seq item */
+	for (size_t i=p; i < s->seq.v.n; ++i) {
+		free_v(s->seq.v.v[i]);
+	}
+	s->seq.v.v[p] = a;
+	s->seq.v.n = p+1;
+}
 
 static Val *
 eval_mul(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1001,7 +1035,7 @@ eval_mul(Val *s, size_t p) {
 static Val *
 eval_div(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1039,7 +1073,7 @@ eval_div(Val *s, size_t p) {
 static Val *
 eval_plu(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1069,7 +1103,7 @@ eval_plu(Val *s, size_t p) {
 static Val *
 eval_min(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1099,7 +1133,7 @@ eval_min(Val *s, size_t p) {
 static Val *
 eval_les(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1131,7 +1165,7 @@ eval_les(Val *s, size_t p) {
 static Val *
 eval_leq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1163,7 +1197,7 @@ eval_leq(Val *s, size_t p) {
 static Val *
 eval_gre(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1195,7 +1229,7 @@ eval_gre(Val *s, size_t p) {
 static Val *
 eval_geq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1227,7 +1261,7 @@ eval_geq(Val *s, size_t p) {
 static Val *
 eval_eq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1244,7 +1278,7 @@ eval_eq(Val *s, size_t p) {
 static Val *
 eval_neq(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1261,7 +1295,7 @@ eval_neq(Val *s, size_t p) {
 static Val *
 eval_eqv(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1278,7 +1312,7 @@ eval_eqv(Val *s, size_t p) {
 static Val *
 eval_and(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1300,7 +1334,7 @@ eval_and(Val *s, size_t p) {
 static Val *
 eval_or(Val *s, size_t p) {
 	Val *a, *b;
-	if (!get_infix_arg(s, p, &a, &b)) {
+	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1322,7 +1356,7 @@ eval_or(Val *s, size_t p) {
 static Val *
 eval_not(Val *s, size_t p) {
 	Val *a;
-	if (!get_prefix1_arg(s, p, &a)) {
+	if (!copy_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1340,7 +1374,7 @@ eval_not(Val *s, size_t p) {
 static Val *
 eval_id(Val *s, size_t p) {
 	Val *a;
-	if (!get_prefix1_arg(s, p, &a)) {
+	if (!copy_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1354,7 +1388,7 @@ static Val * eval(Val *);
 static Val *
 eval_do(Val *s, size_t p) {
 	Val *a;
-	if (!get_prefix1_arg(s, p, &a)) {
+	if (!copy_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1375,6 +1409,19 @@ eval_do(Val *s, size_t p) {
 	return s;
 }
 
+static Val *
+eval_list(Val *s, size_t p) {
+	Val *a;
+	if (!copy_prefixn_arg(s, p, &a)) {
+		printf("? %s:%d prefix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	a->hdr.t = VLST;
+	upd_prefixn(s, p, a);
+	return s;
+}
+
 typedef struct symtof_ {
 	char str[WSZ];
 	unsigned int prio;
@@ -1383,22 +1430,23 @@ typedef struct symtof_ {
 
 #define NSYMS 15
 symtof Syms[] = {
-	(symtof) {"id",  10, eval_id}, /* technical symbol */
-	(symtof) {"do",  10, eval_do},
-	(symtof) {"*",   20, eval_mul},
-	(symtof) {"/",   20, eval_div},
-	(symtof) {"+",   30, eval_plu},
-	(symtof) {"-",   30, eval_min},
-	(symtof) {"<",   40, eval_les},
-	(symtof) {"<=",  40, eval_leq},
-	(symtof) {">",   40, eval_gre},
-	(symtof) {">=",  40, eval_geq},
-	(symtof) {"=",   40, eval_eq},
-	(symtof) {"/=",  40, eval_neq},
-	(symtof) {"~=",  40, eval_eqv},
-	(symtof) {"not", 50, eval_not},
-	(symtof) {"and", 60, eval_and},
-	(symtof) {"or",  60, eval_or},
+	(symtof) {"id",   10, eval_id}, /* technical symbol */
+	(symtof) {"do",   10, eval_do},
+	(symtof) {"list", 10, eval_list},
+	(symtof) {"*",    20, eval_mul},
+	(symtof) {"/",    20, eval_div},
+	(symtof) {"+",    30, eval_plu},
+	(symtof) {"-",    30, eval_min},
+	(symtof) {"<",    40, eval_les},
+	(symtof) {"<=",   40, eval_leq},
+	(symtof) {">",    40, eval_gre},
+	(symtof) {">=",   40, eval_geq},
+	(symtof) {"=",    40, eval_eq},
+	(symtof) {"/=",   40, eval_neq},
+	(symtof) {"~=",   40, eval_eqv},
+	(symtof) {"not",  50, eval_not},
+	(symtof) {"and",  60, eval_and},
+	(symtof) {"or",   60, eval_or},
 };
 
 static unsigned int
@@ -1542,6 +1590,7 @@ eval(Val *a) {
 		return b;
 	}
 	if (a->hdr.t == VSEQ) {
+		/* work on copy of seq, which gets reduced, and destroyed */
 		b = malloc(sizeof(Val));
 		b->hdr.t = VSEQ;
 		b->seq.v.n = 0;
@@ -1554,7 +1603,7 @@ eval(Val *a) {
 			}
 			b = push_v(b, c);
 		}
-		/* symbol application: consumes the seq */
+		/* symbol application: consumes the seq, until 1 item left */
 		while (b->seq.v.n > 0) {
 			/* reduce seq of 1 element to its element */
 			if (b->seq.v.n == 1) {
