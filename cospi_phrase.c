@@ -1651,6 +1651,116 @@ eval(Val *a) {
 			__FUNCTION__,__LINE__);
 	return NULL;
 }
+
+/* ------------ Phrases, list of expressions --------- */
+
+typedef struct {
+	size_t n;
+	char **x;
+} Phrase;
+
+static Phrase *
+phrase() {
+	Phrase *a = malloc(sizeof(*a));
+	a->n = 0;
+	a->x = NULL;
+	return a;
+}
+
+static void
+free_ph(Phrase *a) {
+	if (a == NULL) {
+		return;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		free(a->x[i]);
+	}
+	free(a->x);
+	free(a);
+}
+
+static void
+print_ph(Phrase *a) {
+	if (a == NULL) {
+		printf("? %s:%d phrase is empty\n",
+				__FUNCTION__,__LINE__);
+		return;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		printf("%s; ", a->x[i]);
+	}
+	printf("\n");
+}
+
+static Phrase *
+push_ph(Phrase *a, char *b) {
+	if (a == NULL) {
+		printf("? %s:%d phrase is null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (b == NULL) {
+		printf("? %s:%d pushed expression is null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	char **c = malloc((a->n +1)*sizeof(c));
+	if (a->n > 0) {
+		memcpy(c, a->x, a->n * sizeof(char*));
+	}
+	c[a->n] = b;
+	if (a->n > 0) {
+		free(a->x);
+	}
+	++(a->n);
+	a->x = c;
+	return a;
+}
+
+/* expression max size is 64 words */
+#define XSZ 64*WSZ
+
+static Phrase *
+read_exprs(char *a) {
+	size_t boff = 0;
+	char buf[XSZ];
+	buf[0] = '\0';
+	size_t read;
+	Phrase *b = phrase();
+	char *x = NULL;
+	for (size_t off = 0; a[off] != '\0'; off += read) {
+		read = grapheme_next_character_break_utf8(
+				a+off, SIZE_MAX);
+		if (strncmp(";", a+off, read) == 0) {
+			if (boff) {
+				x = malloc(1 + boff*sizeof(*x));
+				strncpy(x, buf, 1+boff);
+				b = push_ph(b, x);
+				boff = 0;
+			}
+			continue;
+		} 
+		if (boff+read >= XSZ) {
+			printf("\n? %s:%d expression too big (%luB)!\n", 
+					__FUNCTION__,
+					__LINE__,
+					boff+read);
+			free_ph(b);
+			return NULL;
+		}
+		/* default case: add character to current word */
+		memcpy(buf+boff, a+off, read*sizeof(char));
+		boff += read;
+		buf[boff] = '\0';
+	}
+	if (boff) {
+		x = malloc(1 + boff*sizeof(*x));
+		strncpy(x, buf, 1+boff);
+		b = push_ph(b, x);
+	}
+	return b;
+}
+
 /* ----- main ----- */
 
 static void
@@ -1665,30 +1775,43 @@ main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 	char *s = argv[1];
-	printf("# input:\t %s", s);
-	Expr *lw = read_words(s);
-	if (lw == NULL) {
+	printf("# input:\t %s\n", s);
+	Phrase *lx = read_exprs(s);
+	printf("# phrase:\t "); print_ph(lx);
+	if (lx == NULL) {
 		return EXIT_FAILURE;
 	}
-	Sem *ls = read_semes(lw);
-	free_x(lw);
-	if (ls == NULL) {
-		return EXIT_FAILURE;
+	for (size_t i=0; i<lx->n; ++i) {
+		printf("# expression:\t %s", lx->x[i]);
+		Expr *lw = read_words(lx->x[i]);
+		if (lw == NULL) {
+			free_ph(lx);
+			return EXIT_FAILURE;
+		}
+		Sem *ls = read_semes(lw);
+		free_x(lw);
+		if (ls == NULL) {
+			free_ph(lx);
+			return EXIT_FAILURE;
+		}
+		printf("# semes:\t "); print_s(ls); printf("\n");
+		Val *v = read_val(ls);
+		free_s(ls);
+		free(ls);
+		if (v == NULL) {
+			free_ph(lx);
+			return EXIT_FAILURE;
+		}
+		printf("# values:\t "); print_v(v); printf("\n");
+		Val *ev = eval(v);
+		free_v(v);
+		if (ev == NULL) {
+			free_ph(lx);
+			return EXIT_FAILURE;
+		}
+		printf("= "); print_v(ev); printf("\n\n");
+		free_v(ev);
 	}
-	printf("# semes:\t "); print_s(ls); printf("\n");
-	Val *v = read_val(ls);
-	free_s(ls);
-	free(ls);
-	if (v == NULL) {
-		return EXIT_FAILURE;
-	}
-	printf("# values:\t "); print_v(v); printf("\n");
-	Val *ev = eval(v);
-	free_v(v);
-	if (ev == NULL) {
-		return EXIT_FAILURE;
-	}
-	printf("= "); print_v(ev); printf("\n\n");
-	free_v(ev);
+	free_ph(lx);
 	return EXIT_SUCCESS;
 }
