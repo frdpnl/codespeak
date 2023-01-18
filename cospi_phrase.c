@@ -1428,7 +1428,7 @@ typedef struct symtof_ {
 	Val* (*f)(Val *s, size_t p);
 } symtof;
 
-#define NSYMS 15
+#define NSYMS 17
 symtof Syms[] = {
 	(symtof) {"id",   10, eval_id}, /* technical symbol */
 	(symtof) {"do",   10, eval_do},
