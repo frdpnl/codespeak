@@ -49,18 +49,18 @@ typedef struct {
 typedef struct {
 	size_t n;
 	Word *w;
-} Listw;
+} Expr;
 
-static Listw *
-listw() {
-	Listw *a = malloc(sizeof(*a));
+static Expr *
+expr() {
+	Expr *a = malloc(sizeof(*a));
 	a->n = 0;
 	a->w = NULL;
 	return a;
 }
 
 static void
-free_lw(Listw *a) {
+free_x(Expr *a) {
 	if (a == NULL) {
 		return;
 	}
@@ -89,8 +89,8 @@ word_str(char *a, size_t n) {
 	return b;
 }
 
-static Listw *
-push_wz(Listw *a, Word *b) {
+static Expr *
+push_xz(Expr *a, Word *b) {
 	if (a == NULL) {
 		printf("? %s:%d list is null\n", 
 				__FUNCTION__, __LINE__);
@@ -131,7 +131,7 @@ print_w(Word *a) {
 }
 
 static void
-print_lw(Listw *a) {
+print_x(Expr *a) {
 	if (a == NULL) {
 		printf("list of words is empty\n");
 		return;
@@ -146,13 +146,13 @@ print_lw(Listw *a) {
 
 /* ----- extract words from raw text ----- */
 
-static Listw *
+static Expr *
 read_words(char *a) {
 	size_t boff = 0;
 	char buf[WSZ];
 	buf[0] = '\0';
 	size_t read;
-	Listw *b = listw();
+	Expr *b = expr();
 	Word *w = NULL;
 	for (size_t off = 0; a[off] != '\0'; off += read) {
 		read = grapheme_next_character_break_utf8(
@@ -160,37 +160,37 @@ read_words(char *a) {
 		if (strncmp("(", a+off, read) == 0) {
 			if (boff) {
 				w = word_str(buf, boff);
-				b = push_wz(b, w);
+				b = push_xz(b, w);
 				boff = 0;
 			}
 			w = word(LEFT);
-			b = push_wz(b, w);
+			b = push_xz(b, w);
 			continue;
 		} 
 		if (strncmp(")", a+off, read) == 0) {
 			if (boff) {
 				w = word_str(buf, boff);
-				b = push_wz(b, w);
+				b = push_xz(b, w);
 				boff = 0;
 			}
 			w = word(RIGHT);
-			b = push_wz(b, w);
+			b = push_xz(b, w);
 			continue;
 		} 
 		if (strncmp(",", a+off, read) == 0) {
 			if (boff) {
 				w = word_str(buf, boff);
-				b = push_wz(b, w);
+				b = push_xz(b, w);
 				boff = 0;
 			}
 			w = word(SEP);
-			b = push_wz(b, w);
+			b = push_xz(b, w);
 			continue;
 		} 
 		if (isspace((int)*(a+off))) {
 			if (boff) {
 				w = word_str(buf, boff);
-				b = push_wz(b, w);
+				b = push_xz(b, w);
 				boff = 0;
 			}
 			continue;
@@ -200,7 +200,7 @@ read_words(char *a) {
 					__FUNCTION__,
 					__LINE__,
 					boff+read);
-			free_lw(b);
+			free_x(b);
 			return NULL;
 		}
 		/* default case: add character to current word */
@@ -211,7 +211,7 @@ read_words(char *a) {
 	printf("\n");
 	if (boff) {
 		w = word_str(buf, boff);
-		b = push_wz(b, w);
+		b = push_xz(b, w);
 	}
 	return b;
 }
@@ -481,7 +481,7 @@ lst_of(Sem *a) {
 }
 
 static Sem *
-read_seme(Listw *a, size_t from, size_t tox) {
+read_seme(Expr *a, size_t from, size_t tox) {
 	if (from == tox) {
 		return sem_nil();
 	}
@@ -598,7 +598,7 @@ read_seme(Listw *a, size_t from, size_t tox) {
 }
 
 static Sem *
-read_semes(Listw *a) {
+read_semes(Expr *a) {
 	if (a == NULL) {
 		printf("? %s:%d null list of words\n",
 				__FUNCTION__,__LINE__);
@@ -1666,12 +1666,12 @@ main(int argc, char **argv) {
 	}
 	char *s = argv[1];
 	printf("# input:\t %s", s);
-	Listw *lw = read_words(s);
+	Expr *lw = read_words(s);
 	if (lw == NULL) {
 		return EXIT_FAILURE;
 	}
 	Sem *ls = read_semes(lw);
-	free_lw(lw);
+	free_x(lw);
 	if (ls == NULL) {
 		return EXIT_FAILURE;
 	}
