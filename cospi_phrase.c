@@ -959,11 +959,11 @@ static bool
 copy_prefixn_arg(Val *s, size_t p, Val **pa) {
 	Val *a;
 	a = malloc(sizeof(*a));
-	a->hdr.t = VSEQ;  /* because we copy, keep seq type */
-	a->seq.v.n = 0;
-	a->seq.v.v = NULL;
-	for (size_t i=p+1; i<s->seq.v.n; ++i) {
-		a = push_v(a, copy_v(s->seq.v.v[i]));
+	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
+	a->seq.v.n = s->seq.v.n -p-1; 
+	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
+	for (size_t i=p+1; i < s->seq.v.n; ++i) {
+		a->seq.v.v[i-p-1] = copy_v(s->seq.v.v[i]);
 	}
 	*pa = a;
 	return true;
