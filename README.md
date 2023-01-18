@@ -57,7 +57,7 @@ Whitespace expected to separate words.
 
 `list 1 2 3` list 1, 2, 3
 
-### Higher order (i.e. apply)
+### Higher order (do, list)
 
 `do` means evaluate following list as an expression
 `do` is the inverse of `list`.
