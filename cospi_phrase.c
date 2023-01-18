@@ -1728,6 +1728,7 @@ read_exprs(char *a) {
 	size_t read;
 	Phrase *b = phrase();
 	char *x = NULL;
+	bool inspace = false;
 	for (size_t off = 0; a[off] != '\0'; off += read) {
 		read = grapheme_next_character_break_utf8(
 				a+off, SIZE_MAX);
@@ -1738,6 +1739,7 @@ read_exprs(char *a) {
 				b = push_ph(b, x);
 				boff = 0;
 			}
+			inspace = false;
 			continue;
 		} 
 		if (boff+read >= XSZ) {
@@ -1747,6 +1749,17 @@ read_exprs(char *a) {
 					boff+read);
 			free_ph(b);
 			return NULL;
+		}
+		if (isspace((int)*(a+off))) {
+			if (inspace) { /* remove repeated space */
+				continue;
+			}
+			if (boff == 0) { /* left trim */
+				continue;
+			}
+			inspace = true;
+		} else {
+			inspace = false;
 		}
 		/* default case: add character to current word */
 		memcpy(buf+boff, a+off, read*sizeof(char));
@@ -1777,7 +1790,7 @@ main(int argc, char **argv) {
 	char *s = argv[1];
 	printf("# input:\t %s\n", s);
 	Phrase *lx = read_exprs(s);
-	printf("# phrase:\t "); print_ph(lx);
+	printf("# phrase:\t "); print_ph(lx); printf("\n");
 	if (lx == NULL) {
 		return EXIT_FAILURE;
 	}
