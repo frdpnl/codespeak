@@ -94,18 +94,18 @@ and to my taste and limitations :)
 
 A program is a sequence of paragraphs (not here yet).
 
-A paragraph is a sequence of sentences (not here yet).
+A paragraph is a sequence of phrases (not here yet).
 
-A sentence is a sequence of expressions (expressions in progress).
+A phrase is a sequence of expressions.
 
 An expression can include symbols, that are loosely evaluated (totally symbol dependent, Minimal Program).
 
 Envisioning something like:
 
 ```
-2, 3, 4; call it times. 
-3th time; take it; call it p. 
-2 * p + 1; print it.
+2, 3, 4; call it times 
+3th time; take it; call it p 
+2 * p + 1; print it
 ```
 
 `take p` removes p from list.
