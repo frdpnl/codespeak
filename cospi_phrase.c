@@ -1776,6 +1776,10 @@ read_exprs(char *a) {
 
 /* ----- Phrase environment ----- */
 
+/* the interface to the usual functions changed.
+ * probably need to retrofit the code above to match it...
+ */
+
 typedef struct {
 	char name[WSZ];
 	Val *v;
@@ -1786,8 +1790,30 @@ typedef struct {
 	Symbol **s;
 } Env;
 
+static void
+print_sym(Symbol *a) {
+	if (a == NULL) {
+		printf("? %s:%d symbol null\n",
+				__FUNCTION__,__LINE__);
+		return;
+	}
+	printf("%s ", a->name);
+	print_v(a->v);
+}
+static void
+print_env(Env *a) {
+	if (a == NULL) {
+		printf("? %s:%d environment null\n",
+				__FUNCTION__,__LINE__);
+		return;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		print_sym(a->s[i]);
+		printf("\n");
+	}
+}
 static Symbol *
-make_sym(char *a, Val *b) {
+symbol(char *a, Val *b) {
 	if (a == NULL || b == NULL) {
 		printf("? %s:%d null values for symbol\n",
 				__FUNCTION__,__LINE__);
@@ -1846,7 +1872,8 @@ found_sym_id(Env *a, char *b, size_t *id) {
 	for (size_t i=0; i<a->n; ++i) {
 		Symbol *c = a->s[i];
 		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
-			if (id) {
+			/* NULL id means caller just interested by presence */
+			if (id) { 
 				*id = i;
 			}
 			return true;
@@ -1867,8 +1894,10 @@ added_sym(Env *a, Symbol *b) {
 		return false;
 	}
 	if (found_sym_id(a, b->name, NULL)) {
-
-
+		printf("? %s:%d symbol already defined (%s)\n",
+				__FUNCTION__,__LINE__, b->name);
+		return false;
+	}
 	Symbol **c = malloc((a->n +1)*sizeof(Symbol*));
 	if (a->n > 0) {
 		memcpy(c, a->s, a->n * sizeof(Symbol*));
@@ -1882,31 +1911,89 @@ added_sym(Env *a, Symbol *b) {
 	return a;
 }
 static bool
-updated_sym(Env *a, char *b, Val *c) {
+upded_sym(Env *a, Symbol *b) {
 	if (a == NULL) {
 		printf("? %s:%d environment null\n",
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	if (b == NULL || strlen(b) == 0) {
-		printf("? %s:%d symbol name null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	if (c == NULL) {
+	if (b == NULL) { 
 		printf("? %s:%d pushed symbol null\n",
 				__FUNCTION__,__LINE__);
 		return false;
 	}
+	if (strlen(b->name) == 0) {
+		printf("? %s:%d symbol name null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
 	size_t id;
-	if (!found_sym_id(a, b, &id)) {
+	if (!found_sym_id(a, b->name, &id)) {
 		printf("? %s:%d symbol not found (%s)\n",
-				__FUNCTION__,__LINE__, b);
+				__FUNCTION__,__LINE__, b->name);
 		return false;
 	}
 	free_v(a->s[id]->v);
-	a->s[id]->v = c;
+	a->s[id]->v = b;
 	return true;
+}
+static bool
+upded_or_added_sym(Env *a, Symbol *b) {
+	if (upded_sym(a, b)) {
+		return true;
+	}
+	if (added_sym(a, b)) {
+		return true;
+	}
+	return false;
+}
+static Env *
+eval_ph(Phrase *a) {
+	if (a == NULL) {
+		printf("? %s:%d phrase null\n",
+			__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	Env *b = malloc(sizeof(*b));
+	b->n = 0;
+	b->s = NULL;
+	for (size_t i=0; i<a->n; ++i) {
+		printf("# expression %lu:\t %s", i, a->x[i]);
+		Expr *lw = read_words(a->x[i]);
+		if (lw == NULL) {
+			free_ph(a);
+			return NULL;
+		}
+		Sem *ls = read_semes(lw);
+		free_x(lw);
+		if (ls == NULL) {
+			free_ph(a);
+			return NULL;
+		}
+		printf("# semes %lu:\t ", i); print_s(ls); printf("\n");
+		Val *v = read_val(ls);
+		free_s(ls);
+		free(ls);
+		if (v == NULL) {
+			free_ph(a);
+			return NULL;
+		}
+		printf("# values %lu:\t ", i); print_v(v); printf("\n");
+		Val *ev = eval(v);
+		free_v(v);
+		if (ev == NULL) {
+			free_ph(a);
+			return NULL;
+		}
+		printf("= "); print_v(ev); printf("\n");
+		Symbol *c = symbol("it", ev);
+		if (!upded_or_added_sym(b, c)) {
+			free_sym(c);
+			free_ph(a);
+			return NULL;
+		}
+	}
+	return b;
 }
 
 /* ----- main ----- */
@@ -1925,41 +2012,16 @@ main(int argc, char **argv) {
 	char *s = argv[1];
 	printf("# input:\t %s\n", s);
 	Phrase *lx = read_exprs(s);
-	printf("# phrase:\t "); print_ph(lx); printf("\n");
 	if (lx == NULL) {
 		return EXIT_FAILURE;
 	}
-	for (size_t i=0; i<lx->n; ++i) {
-		printf("# expression %lld:\t %s", i, lx->x[i]);
-		Expr *lw = read_words(lx->x[i]);
-		if (lw == NULL) {
-			free_ph(lx);
-			return EXIT_FAILURE;
-		}
-		Sem *ls = read_semes(lw);
-		free_x(lw);
-		if (ls == NULL) {
-			free_ph(lx);
-			return EXIT_FAILURE;
-		}
-		printf("# semes %lld:\t ", i); print_s(ls); printf("\n");
-		Val *v = read_val(ls);
-		free_s(ls);
-		free(ls);
-		if (v == NULL) {
-			free_ph(lx);
-			return EXIT_FAILURE;
-		}
-		printf("# values %lld:\t ", i); print_v(v); printf("\n");
-		Val *ev = eval(v);
-		free_v(v);
-		if (ev == NULL) {
-			free_ph(lx);
-			return EXIT_FAILURE;
-		}
-		printf("= "); print_v(ev); printf("\n\n");
-		free_v(ev);
-	}
+	printf("# phrase:\t "); print_ph(lx); printf("\n");
+	Env *e = eval_ph(lx);
 	free_ph(lx);
+	if (e == NULL) {
+		return EXIT_FAILURE;
+	}
+	print_env(e);
+	free_env(e);
 	return EXIT_SUCCESS;
 }
