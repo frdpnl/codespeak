@@ -616,10 +616,10 @@ typedef enum {VNIL, VNAT, VREA, VSYM, VLST, VSEQ} vtype;
 
 typedef union Val_ Val;
 
-typedef struct vList_ {
+typedef struct List_v_ {
 	size_t n;
 	Val **v;
-} vList;
+} List_v;
 
 typedef union Val_ {
 	struct {
@@ -640,11 +640,11 @@ typedef union Val_ {
 	} sym;
 	struct {
 		vtype t;
-		vList v;
+		List_v v;
 	} lst;
 	struct {
 		vtype t;
-		vList v;
+		List_v v;
 	} seq;
 } Val;
 
@@ -1774,6 +1774,141 @@ read_exprs(char *a) {
 	return b;
 }
 
+/* ----- Phrase environment ----- */
+
+typedef struct {
+	char name[WSZ];
+	Val *v;
+} Symbol;
+
+typedef struct {
+	size_t n;
+	Symbol **s;
+} Env;
+
+static Symbol *
+make_sym(char *a, Val *b) {
+	if (a == NULL || b == NULL) {
+		printf("? %s:%d null values for symbol\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (strlen(a) == 0) {
+		printf("? %s:%d empty name\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	};
+	if (strlen(a) >= WSZ) {
+		printf("? %s:%d symbol name too long (%s)\n",
+				__FUNCTION__,__LINE__, a);
+		return NULL;
+	};
+	Symbol *c = malloc(sizeof(*c));
+	strncpy(c->name, a, WSZ*sizeof(char));
+	c->v = b;
+	return c;
+}
+static void
+free_sym(Symbol *a) {
+	if (a == NULL) {
+		printf("? %s:%d null symbol\n",
+				__FUNCTION__, __LINE__);
+		return;
+	}
+	free_v(a->v);
+	free(a);
+}
+static void 
+free_env(Env *a) {
+	if (a == NULL) {
+		printf("? %s:%d null environment\n",
+				__FUNCTION__, __LINE__);
+		return;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		free_sym(a->s[i]);
+	}
+	free(a->s);
+	free(a);
+}
+static bool
+found_sym_id(Env *a, char *b, size_t *id) {
+	if (a == NULL) {
+		printf("? %s:%d environment null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	if (b == NULL || strlen(b) == 0) {
+		printf("? %s:%d symbol name null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		Symbol *c = a->s[i];
+		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
+			if (id) {
+				*id = i;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+static bool
+added_sym(Env *a, Symbol *b) {
+	if (a == NULL) {
+		printf("? %s:%d environment null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	if (b == NULL) {
+		printf("? %s:%d pushed symbol null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	if (found_sym_id(a, b->name, NULL)) {
+
+
+	Symbol **c = malloc((a->n +1)*sizeof(Symbol*));
+	if (a->n > 0) {
+		memcpy(c, a->s, a->n * sizeof(Symbol*));
+	}
+	c[a->n] = b;
+	if (a->n > 0) {
+		free(a->s);
+	}
+	++(a->n);
+	a->s = c;
+	return a;
+}
+static bool
+updated_sym(Env *a, char *b, Val *c) {
+	if (a == NULL) {
+		printf("? %s:%d environment null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	if (b == NULL || strlen(b) == 0) {
+		printf("? %s:%d symbol name null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	if (c == NULL) {
+		printf("? %s:%d pushed symbol null\n",
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	size_t id;
+	if (!found_sym_id(a, b, &id)) {
+		printf("? %s:%d symbol not found (%s)\n",
+				__FUNCTION__,__LINE__, b);
+		return false;
+	}
+	free_v(a->s[id]->v);
+	a->s[id]->v = c;
+	return true;
+}
+
 /* ----- main ----- */
 
 static void
@@ -1795,7 +1930,7 @@ main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 	for (size_t i=0; i<lx->n; ++i) {
-		printf("# expression:\t %s", lx->x[i]);
+		printf("# expression %lld:\t %s", i, lx->x[i]);
 		Expr *lw = read_words(lx->x[i]);
 		if (lw == NULL) {
 			free_ph(lx);
@@ -1807,7 +1942,7 @@ main(int argc, char **argv) {
 			free_ph(lx);
 			return EXIT_FAILURE;
 		}
-		printf("# semes:\t "); print_s(ls); printf("\n");
+		printf("# semes %lld:\t ", i); print_s(ls); printf("\n");
 		Val *v = read_val(ls);
 		free_s(ls);
 		free(ls);
@@ -1815,7 +1950,7 @@ main(int argc, char **argv) {
 			free_ph(lx);
 			return EXIT_FAILURE;
 		}
-		printf("# values:\t "); print_v(v); printf("\n");
+		printf("# values %lld:\t ", i); print_v(v); printf("\n");
 		Val *ev = eval(v);
 		free_v(v);
 		if (ev == NULL) {
