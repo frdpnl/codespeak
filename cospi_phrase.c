@@ -1777,7 +1777,6 @@ read_exprs(char *a) {
 /* ----- Phrase environment ----- */
 
 /* the interface to the usual functions changed.
- * probably need to retrofit the code above to match it...
  */
 
 typedef struct {
@@ -1797,7 +1796,7 @@ print_sym(Symbol *a) {
 				__FUNCTION__,__LINE__);
 		return;
 	}
-	printf("%s=", a->name);
+	printf("'%s = ", a->name);
 	print_v(a->v);
 }
 static void
@@ -1989,7 +1988,7 @@ eval_ph(Phrase *a) {
 			free_env(b);
 			return NULL;
 		}
-		printf("= "); print_v(ev); printf("\n");
+		printf("# = "); print_v(ev); printf("\n");
 		Symbol *c = symbol("it", ev);
 		if (!upded_or_added_sym(b, c)) {
 			free_sym(c);

@@ -1,6 +1,14 @@
 # codespeak
 Personal programming language
 
+## Phrase
+
+A phrase is a sequence of expressions.
+
+` 23 ; (3 + 4); 2,3,4` evaluates to the list 2, 3, 4.
+
+`it` builtin symbol that stores the previous evaluation.
+
 ## Expression
 
 Presented by examples.
