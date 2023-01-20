@@ -1989,13 +1989,14 @@ eval_ph(Phrase *a) {
 			return NULL;
 		}
 		printf("# = "); print_v(ev); printf("\n");
-		Symbol *c = symbol("it", ev);
-		if (!upded_or_added_sym(b, c)) {
-			free_sym(c);
+		Symbol *it = symbol("it", ev);
+		if (!upded_or_added_sym(b, it)) {
+			free_sym(it);
 			free_env(b);
 			return NULL;
 		}
-		printf("# env: "); print_env(b);
+		printf("# env:\n"); 
+		print_env(b);
 	}
 	return b;
 }
