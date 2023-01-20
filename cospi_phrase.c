@@ -660,10 +660,10 @@ print_v(Val *a) {
 			printf("Nil ");
 			break;
 		case VNAT:
-			printf("n%lld ", a->nat.v);
+			printf("%lld ", a->nat.v);
 			break;
 		case VREA:
-			printf("r%.2lf ", a->rea.v);
+			printf("%.2lf ", a->rea.v);
 			break;
 		case VSYM:
 			printf("'%p(%d) ", a->sym.v, a->sym.prio);
@@ -1797,7 +1797,7 @@ print_sym(Symbol *a) {
 				__FUNCTION__,__LINE__);
 		return;
 	}
-	printf("%s ", a->name);
+	printf("%s=", a->name);
 	print_v(a->v);
 }
 static void
@@ -1882,7 +1882,7 @@ found_sym_id(Env *a, char *b, size_t *id) {
 	return false;
 }
 static bool
-added_sym(Env *a, Symbol *b) {
+added_sym(Env *a, Symbol *b, bool err) {
 	if (a == NULL) {
 		printf("? %s:%d environment null\n",
 				__FUNCTION__,__LINE__);
@@ -1894,8 +1894,10 @@ added_sym(Env *a, Symbol *b) {
 		return false;
 	}
 	if (found_sym_id(a, b->name, NULL)) {
-		printf("? %s:%d symbol already defined (%s)\n",
-				__FUNCTION__,__LINE__, b->name);
+		if (err) {
+			printf("? %s:%d symbol already defined (%s)\n",
+					__FUNCTION__,__LINE__, b->name);
+		}
 		return false;
 	}
 	Symbol **c = malloc((a->n +1)*sizeof(Symbol*));
@@ -1911,7 +1913,7 @@ added_sym(Env *a, Symbol *b) {
 	return a;
 }
 static bool
-upded_sym(Env *a, Symbol *b) {
+upded_sym(Env *a, Symbol *b, bool err) {
 	if (a == NULL) {
 		printf("? %s:%d environment null\n",
 				__FUNCTION__,__LINE__);
@@ -1929,20 +1931,22 @@ upded_sym(Env *a, Symbol *b) {
 	}
 	size_t id;
 	if (!found_sym_id(a, b->name, &id)) {
-		printf("? %s:%d symbol not found (%s)\n",
-				__FUNCTION__,__LINE__, b->name);
+		if (err) {
+			printf("? %s:%d symbol not found (%s)\n",
+					__FUNCTION__,__LINE__, b->name);
+		}
 		return false;
 	}
-	free_v(a->s[id]->v);
-	a->s[id]->v = b;
+	free_sym(a->s[id]);
+	a->s[id] = b;
 	return true;
 }
 static bool
 upded_or_added_sym(Env *a, Symbol *b) {
-	if (upded_sym(a, b)) {
+	if (upded_sym(a, b, false)) {
 		return true;
 	}
-	if (added_sym(a, b)) {
+	if (added_sym(a, b, true)) {
 		return true;
 	}
 	return false;
@@ -1961,13 +1965,13 @@ eval_ph(Phrase *a) {
 		printf("# expression %lu:\t %s", i, a->x[i]);
 		Expr *lw = read_words(a->x[i]);
 		if (lw == NULL) {
-			free_ph(a);
+			free_env(b);
 			return NULL;
 		}
 		Sem *ls = read_semes(lw);
 		free_x(lw);
 		if (ls == NULL) {
-			free_ph(a);
+			free_env(b);
 			return NULL;
 		}
 		printf("# semes %lu:\t ", i); print_s(ls); printf("\n");
@@ -1975,23 +1979,24 @@ eval_ph(Phrase *a) {
 		free_s(ls);
 		free(ls);
 		if (v == NULL) {
-			free_ph(a);
+			free_env(b);
 			return NULL;
 		}
 		printf("# values %lu:\t ", i); print_v(v); printf("\n");
 		Val *ev = eval(v);
 		free_v(v);
 		if (ev == NULL) {
-			free_ph(a);
+			free_env(b);
 			return NULL;
 		}
 		printf("= "); print_v(ev); printf("\n");
 		Symbol *c = symbol("it", ev);
 		if (!upded_or_added_sym(b, c)) {
 			free_sym(c);
-			free_ph(a);
+			free_env(b);
 			return NULL;
 		}
+		printf("# env: "); print_env(b);
 	}
 	return b;
 }

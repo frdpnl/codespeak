@@ -8,7 +8,7 @@ Presented by examples.
 ### Symbolic application
 
 Note: `()` means sub-expression.
-It expresses symbol application, or a single value.
+It represents symbol application or a single value.
 After evaluation, no `()` are left.
 
 Whitespace expected to separate words.
@@ -16,10 +16,6 @@ Whitespace expected to separate words.
 `2` (evaluates to) 2
 
 `(+)` + (the symbol)
-
-`(id *)` * symbol id returns its argument (used for testing higher order operations)
-
-`2 * 3` 6, valid because of an implicit top-level ()
 
 `2 * 3 + 2.0` 8.0 
 
@@ -31,21 +27,15 @@ Whitespace expected to separate words.
 
 `2 /= 2.` 1, different types
 
-`2 = 2 = 2.` 0 (false), true is 1, so different from 2
-
 `(2,) ~= (2.,)` 1 (true)
 
 `(2,3,+) = (2, (2 + 1), +)` 1
 
 `2 and (not -2)` 0, precedence
 
-`2 = 3 or 3 = 2. * 3` 0, and/or have lower precedence
-
 ### List
 
 `,` defines a list
-
-`2, 3` list of 2 natural numbers (implicit ())
 
 `2, (3 * 4), 4` list of 3 numbers
 
