@@ -117,12 +117,12 @@ print_w(Word *a) {
 	char *typtxt[] = { "Sep", "Left", "Right", "Str"};
 	switch (a->t) {
 		case STR:
-			printf("? %s[%s]", typtxt[a->t], a->v);
+			printf("%s[%s]", typtxt[a->t], a->v);
 			break;
 		case SEP:
 		case LEFT: 
 		case RIGHT:
-			printf("? %s", typtxt[a->t]);
+			printf("%s", typtxt[a->t]);
 			break;
 		default:
 			printf("? %s:%d unknown word type ", 
@@ -133,7 +133,8 @@ print_w(Word *a) {
 static void
 print_x(Expr *a) {
 	if (a == NULL) {
-		printf("list of words is empty\n");
+		printf("? %s:%d list of words is empty\n",
+				__FUNCTION__,__LINE__);
 		return;
 	}
 	printf("(");
