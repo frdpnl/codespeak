@@ -33,6 +33,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <assert.h>
 
 /* ----- words to evaluate --------- */
 
@@ -1493,6 +1494,7 @@ read_val(Sem *a) {
 		return NULL;
 	}
 	Val *b = malloc(sizeof(Val));
+	assert(b != NULL && "value allocation error");
 	if (a->hdr.t == SNIL ) {
 		b->hdr.t = VNIL;
 		return b;
@@ -1718,7 +1720,7 @@ push_ph(Phrase *a, char *b) {
 	return a;
 }
 
-/* expression max size is 64 words */
+/* expression is 64 words max */
 #define XSZ 64*WSZ
 
 static Phrase *
@@ -1728,6 +1730,7 @@ read_exprs(char *a) {
 	buf[0] = '\0';
 	size_t read;
 	Phrase *b = phrase();
+	assert(b != NULL && "Phrase allocation error");
 	char *x = NULL;
 	bool inspace = false;
 	for (size_t off = 0; a[off] != '\0'; off += read) {
@@ -1775,10 +1778,9 @@ read_exprs(char *a) {
 	return b;
 }
 
-/* ----- Phrase environment ----- */
+/* -------------- Phrase -------------- */
 
-/* the interface to the usual functions changed.
- */
+/* Environment: defined symbols across a phrase */
 
 typedef struct {
 	char name[WSZ];
@@ -1910,7 +1912,7 @@ added_sym(Env *a, Symbol *b, bool err) {
 	}
 	++(a->n);
 	a->s = c;
-	return a;
+	return true;
 }
 static bool
 upded_sym(Env *a, Symbol *b, bool err) {
@@ -1963,16 +1965,19 @@ eval_ph(Phrase *a) {
 	b->s = NULL;
 	for (size_t i=0; i<a->n; ++i) {
 		printf("# expression %lu:\t %s", i, a->x[i]);
-		Expr *lw = read_words(a->x[i]);
-		if (lw == NULL) {
+		Expr *ex = read_words(a->x[i]);
+		/* a is freed where allocated, not here but by caller */
+		if (ex == NULL) {
 			free_env(b);
-			return NULL;
+			b = NULL;
+			break;
 		}
-		Sem *ls = read_semes(lw);
-		free_x(lw);
+		Sem *ls = read_semes(ex);
+		free_x(ex);
 		if (ls == NULL) {
 			free_env(b);
-			return NULL;
+			b = NULL;
+			break;
 		}
 		printf("# semes %lu:\t ", i); print_s(ls); printf("\n");
 		Val *v = read_val(ls);
@@ -1980,21 +1985,30 @@ eval_ph(Phrase *a) {
 		free(ls);
 		if (v == NULL) {
 			free_env(b);
-			return NULL;
+			b = NULL;
+			break;
 		}
 		printf("# values %lu:\t ", i); print_v(v); printf("\n");
 		Val *ev = eval(v);
 		free_v(v);
 		if (ev == NULL) {
 			free_env(b);
-			return NULL;
+			b = NULL;
+			break;
 		}
 		printf("# = "); print_v(ev); printf("\n");
 		Symbol *it = symbol("it", ev);
+		if (it == NULL) {
+			free_env(b);
+			b = NULL;
+			break;
+		}
 		if (!upded_or_added_sym(b, it)) {
 			free_sym(it);
+			it = NULL;
 			free_env(b);
-			return NULL;
+			b = NULL;
+			break;
 		}
 		printf("# env:\n"); 
 		print_env(b);
