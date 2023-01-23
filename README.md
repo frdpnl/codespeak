@@ -1,10 +1,10 @@
 # codespeak
 A personal programming language.
 
-This is currently a prototype, to explore language design ideas and to explore interpreters, and later compilers.
-For example, this project should help me identify essential problems and the key solutions.
+This is a prototype, meant to explore language design ideas, interpreters and later compilers.
+For example, this project should expose key questions, which then lead me to learn about their seminal answers.
 
-I deliberately ignore some common advice regarding C (separate source files, makefile).
+I intentionally ignore some common advice regarding C. 
 
 ## Phrase
 
@@ -134,5 +134,4 @@ Inspired by nanopass; several small steps to evaluation (inefficient most of the
 Long-term objective is to compile to WASM (yes, not here yet).
 
 Beyond long-term project is to provide WASM runtime to GPU.
-
 
