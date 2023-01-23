@@ -1,5 +1,10 @@
 # codespeak
-Personal programming language
+A personal programming language.
+
+This is currently a prototype, to explore language design ideas and to explore interpreters, and later compilers.
+For example, this project should help me identify essential problems and the key solutions.
+
+I deliberately ignore some common advice regarding C (separate source files, makefile).
 
 ## Phrase
 
@@ -16,7 +21,7 @@ By example:
 ```
 evaluates to the list 2, 3, 4.
 
-`it` builtin symbol that stores the previous evaluation.
+`it` is a builtin symbol that stores the previous evaluation.
 
 ## Expression
 
@@ -88,6 +93,8 @@ Whitespace expected to separate words.
 `2 + 3., 4` cannot add a natural number to a list
 
 ## Known bugs
+
+After reading the book *Fluent C* (C design patterns), some refactoring is necessary :)
 
 
 ## Background
