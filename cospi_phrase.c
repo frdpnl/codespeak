@@ -614,7 +614,7 @@ read_semes(Expr *a) {
 
 /* ----- evaluation, pass 1 ----- */
 
-typedef enum {VNIL, VNAT, VREA, VSYM, VLST, VSEQ} vtype;
+typedef enum {VNIL, VNAT, VREA, VSYMVAL, VSYMBASE, VLST, VSEQ} vtype;
 
 typedef union Val_ Val;
 
@@ -637,9 +637,13 @@ typedef union Val_ {
 	} rea;
 	struct {
 		vtype t;
+		Val *v;
+	} symval;
+	struct {
+		vtype t;
 		unsigned int prio;
 		Val* (*v)(Val *s, size_t p);
-	} sym;
+	} symbase;
 	struct {
 		vtype t;
 		List_v v;
@@ -667,8 +671,11 @@ print_v(Val *a) {
 		case VREA:
 			printf("%.2lf ", a->rea.v);
 			break;
-		case VSYM:
-			printf("'%p(%d) ", a->sym.v, a->sym.prio);
+		case VSYMVAL:
+			print_v(a->symval.v); 
+			break;
+		case VSYMBASE:
+			printf("'%p(%d) ", a->symbase.v, a->symbase.prio);
 			break;
 		case VLST:
 			printf("{ ");
@@ -699,7 +706,8 @@ free_v(Val *a) {
 	}
 	switch (a->hdr.t) {
 		case VNIL:
-		case VSYM:
+		case VSYMVAL:  /* symval holds a pointer to val in Env */
+		case VSYMBASE: /* symbase holds pointer to val in Syms */
 		case VNAT:
 		case VREA:
 			break;
@@ -741,8 +749,11 @@ isequal_v(Val *a, Val *b) {
 	if (a->hdr.t == VREA) {
 		return (a->rea.v == b->rea.v);
 	}
-	if (a->hdr.t == VSYM) {
-		return (a->sym.v == b->sym.v);
+	if (a->hdr.t == VSYMBASE) {
+		return (a->symbase.v == b->symbase.v);
+	}
+	if (a->hdr.t == VSYMVAL) {
+		return isequal_v(a->symval.v, b->symval.v);
 	}
 	if (a->hdr.t == VLST) {
 		for (size_t i=0; i<a->lst.v.n; ++i) { 
@@ -783,8 +794,11 @@ isequiv_v(Val *a, Val *b) {
 	if (a->hdr.t == VREA) {
 		return (a->rea.v == b->rea.v);
 	}
-	if (a->hdr.t == VSYM) {
-		return (a->sym.v == b->sym.v);
+	if (a->hdr.t == VSYMBASE) {
+		return (a->symbase.v == b->symbase.v);
+	}
+	if (a->hdr.t == VSYMVAL) {
+		return isequiv_v(a->symval.v, b->symval.v);
 	}
 	if (a->hdr.t == VLST) {
 		for (size_t i=0; i<a->lst.v.n; ++i) { 
@@ -808,7 +822,9 @@ copy_v(Val *a) {
 	}
 	Val *b = malloc(sizeof(Val));
 	memcpy(b, a, sizeof(Val));
-	if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
+	if (a->hdr.t == VSYMVAL) {
+		b->symval.v = copy_v(a->symval.v);
+	} else if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
 		b->seq.v.v = malloc(a->seq.v.n * sizeof(Val*));
 		for (size_t i=0; i<a->seq.v.n; ++i) {
 			b->seq.v.v[i] = copy_v(a->seq.v.v[i]);
@@ -1424,33 +1440,34 @@ eval_list(Val *s, size_t p) {
 	return s;
 }
 
-typedef struct symtof_ {
-	char str[WSZ];
+/* --------------- builtin or base function symbols -------------------- */
+
+typedef struct Symbase_ {
+	char name[WSZ];
 	unsigned int prio;
 	Val* (*f)(Val *s, size_t p);
-} symtof;
+} Symbase;
 
 #define NSYMS 17
-symtof Syms[] = {
-	(symtof) {"id",   10, eval_id}, /* technical symbol */
-	(symtof) {"do",   10, eval_do},
-	(symtof) {"list", 10, eval_list},
-	(symtof) {"*",    20, eval_mul},
-	(symtof) {"/",    20, eval_div},
-	(symtof) {"+",    30, eval_plu},
-	(symtof) {"-",    30, eval_min},
-	(symtof) {"<",    40, eval_les},
-	(symtof) {"<=",   40, eval_leq},
-	(symtof) {">",    40, eval_gre},
-	(symtof) {">=",   40, eval_geq},
-	(symtof) {"=",    40, eval_eq},
-	(symtof) {"/=",   40, eval_neq},
-	(symtof) {"~=",   40, eval_eqv},
-	(symtof) {"not",  50, eval_not},
-	(symtof) {"and",  60, eval_and},
-	(symtof) {"or",   60, eval_or},
+Symbase Syms[] = {
+	(Symbase) {"id",   10, eval_id}, /* technical symbol */
+	(Symbase) {"do",   10, eval_do},
+	(Symbase) {"list", 10, eval_list},
+	(Symbase) {"*",    20, eval_mul},
+	(Symbase) {"/",    20, eval_div},
+	(Symbase) {"+",    30, eval_plu},
+	(Symbase) {"-",    30, eval_min},
+	(Symbase) {"<",    40, eval_les},
+	(Symbase) {"<=",   40, eval_leq},
+	(Symbase) {">",    40, eval_gre},
+	(Symbase) {">=",   40, eval_geq},
+	(Symbase) {"=",    40, eval_eq},
+	(Symbase) {"/=",   40, eval_neq},
+	(Symbase) {"~=",   40, eval_eqv},
+	(Symbase) {"not",  50, eval_not},
+	(Symbase) {"and",  60, eval_and},
+	(Symbase) {"or",   60, eval_or},
 };
-
 static unsigned int
 minprio() {
 	unsigned int m = 0;
@@ -1461,13 +1478,112 @@ minprio() {
 	}
 	return m;
 }
-
-static symtof *
-find_sym(char *a) {
+static Symbase *
+get_symbase(char *a) {
 	for (size_t i=0; i<NSYMS; ++i) {
-		symtof *b = Syms+i;
-		if (strncmp(b->str, a, WSZ) == 0) {
+		Symbase *b = Syms+i;
+		if (strncmp(b->name, a, WSZ) == 0) {
 			return b;
+		}
+	}
+	return NULL;
+}
+
+/* --------------- user defined value symbols -------------------- */
+
+typedef struct {
+	char name[WSZ];
+	Val *v;
+} Symval;
+
+typedef struct {
+	size_t n;
+	Symval **s;
+} Env;
+
+static void
+print_symval(Symval *a) {
+	if (a == NULL) {
+		printf("? %s:%d symbol null\n",
+				__FUNCTION__,__LINE__);
+		return;
+	}
+	printf("'%s = ", a->name);
+	print_v(a->v);
+}
+static void
+print_env(Env *a) {
+	if (a == NULL) {
+		printf("? %s:%d environment null\n",
+				__FUNCTION__,__LINE__);
+		return;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		print_symval(a->s[i]);
+		printf("\n");
+	}
+}
+static Symval *
+symval(char *a, Val *b) {
+	if (a == NULL || b == NULL) {
+		printf("? %s:%d null values for symbol\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (strlen(a) == 0) {
+		printf("? %s:%d empty name\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	};
+	if (strlen(a) >= WSZ) {
+		printf("? %s:%d symbol name too long (%s)\n",
+				__FUNCTION__,__LINE__, a);
+		return NULL;
+	};
+	Symval *c = malloc(sizeof(*c));
+	strncpy(c->name, a, WSZ*sizeof(char));
+	c->v = b;
+	return c;
+}
+static void
+free_symval(Symval *a) {
+	if (a == NULL) {
+		printf("? %s:%d null symbol\n",
+				__FUNCTION__, __LINE__);
+		return;
+	}
+	free_v(a->v);
+	free(a);
+}
+static void 
+free_env(Env *a) {
+	if (a == NULL) {
+		printf("? %s:%d null environment\n",
+				__FUNCTION__, __LINE__);
+		return;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		free_symval(a->s[i]);
+	}
+	free(a->s);
+	free(a);
+}
+static Symval *
+get_symval(Env *a, char *b) {
+	if (a == NULL) {
+		printf("? %s:%d environment null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (b == NULL || strlen(b) == 0) {
+		printf("? %s:%d symbol name null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		Symval *c = a->s[i];
+		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
+			return c;
 		}
 	}
 	return NULL;
@@ -1482,83 +1598,93 @@ isatom_v(Val *a) {
 	}
 	return (a->hdr.t == VNIL 
 			|| a->hdr.t == VNAT 
-			|| a->hdr.t == VREA 
-			|| a->hdr.t == VSYM);
+			|| a->hdr.t == VREA
+			|| a->hdr.t == VSYMVAL 
+			|| a->hdr.t == VSYMBASE);
 }
 
 static Val *
-read_val(Sem *a) {
-	if (a == NULL) {
+read_val(Env *a, Sem *b) {
+	if (b == NULL) {
 		printf("? %s:%d seme is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
-	Val *b = malloc(sizeof(Val));
-	assert(b != NULL && "value allocation error");
-	if (a->hdr.t == SNIL ) {
-		b->hdr.t = VNIL;
-		return b;
+	Val *c = malloc(sizeof(Val));
+	assert(c != NULL && "value allocation error");
+	if (b->hdr.t == SNIL ) {
+		c->hdr.t = VNIL;
+		return c;
 	}
-	if (a->hdr.t == SNAT) {
-		b->hdr.t = VNAT;
-		b->nat.v = a->nat.v;
-		return b;
+	if (b->hdr.t == SNAT) {
+		c->hdr.t = VNAT;
+		c->nat.v = b->nat.v;
+		return c;
 	}
-	if (a->hdr.t == SREA) {
-		b->hdr.t = VREA;
-		b->rea.v = a->rea.v;
-		return b;
+	if (b->hdr.t == SREA) {
+		c->hdr.t = VREA;
+		c->rea.v = b->rea.v;
+		return c;
 	}
-	if (a->hdr.t == SSYM) {
-		b->hdr.t = VSYM;
-		symtof *s = find_sym(a->sym.v);
-		if (s == NULL) {
-			printf("? %s:%d unknown symbol '%s\n",
-					__FUNCTION__,__LINE__,a->sym.v);
-			free_v(b);
-			return NULL;
+	if (b->hdr.t == SSYM) {
+		/* is it a base symbol? (builtin function) */
+		Symbase *sb = get_symbase(b->sym.v);
+		if (sb != NULL) {
+			c->hdr.t = VSYMBASE;
+			c->symbase.prio = sb->prio;
+			c->symbase.v = sb->f;
+			return c;
 		}
-		b->sym.prio = s->prio;
-		b->sym.v = s->f;
-		return b;
+		/* is it a user defined value symbol? */
+		Symval *sv = get_symval(a, b->sym.v);
+		if (sv != NULL) {
+			c->hdr.t = VSYMVAL;
+			c->symval.v = sv->v;
+			return c;
+		}
+		/* later: user defined function symbol... */
+		printf("? %s:%d unknown symbol seme\n",
+				__FUNCTION__,__LINE__);
+		free_v(c);
+		return NULL;
 	}
-	if (a->hdr.t == SLST) {
-		b->hdr.t = VLST;
-		b->lst.v.n = 0;
-		b->lst.v.v = NULL;
-		size_t n = a->lst.v.n;
-		Sem *l = a->lst.v.s;
-		Val *c;
+	if (b->hdr.t == SLST) {
+		c->hdr.t = VLST;
+		c->lst.v.n = 0;
+		c->lst.v.v = NULL;
+		size_t n = b->lst.v.n;
+		Sem *l = b->lst.v.s;
+		Val *d;
 		for (size_t i=0; i<n; ++i) {
-			c = read_val(l+i);
-			if (c == NULL) {
-				free_v(b);
+			d = read_val(a, l+i);
+			if (d == NULL) {
+				free_v(c);
 				return NULL;
 			}
-			b = push_v(b, c);
+			c = push_v(c, d);
 		}
-		return b;
+		return c;
 	}
-	if (a->hdr.t == SSEQ) {
-		b->hdr.t = VSEQ;
-		b->seq.v.n = 0;
-		b->seq.v.v = NULL;
-		size_t n = a->seq.v.n;
-		Sem *l = a->seq.v.s;
-		Val *c;
+	if (b->hdr.t == SSEQ) {
+		c->hdr.t = VSEQ;
+		c->seq.v.n = 0;
+		c->seq.v.v = NULL;
+		size_t n = b->seq.v.n;
+		Sem *l = b->seq.v.s;
+		Val *d;
 		for (size_t i=0; i<n; ++i) {
-			c = read_val(l+i);
-			if (c == NULL) {
-				free_v(b);
+			d = read_val(a, l+i);
+			if (d == NULL) {
+				free_v(c);
 				return NULL;
 			}
-			b = push_v(b, c);
+			c = push_v(c, d);
 		}
-		return b;
+		return c;
 	}
 	printf("? %s:%d unknown seme\n",
 			__FUNCTION__,__LINE__);
-	free_v(b);
+	free_v(c);
 	return NULL;
 }
 
@@ -1620,22 +1746,22 @@ eval(Val *a) {
 			/* apply symbols from left to right (for same priority symbols) */
 			for (size_t i=0; i < b->seq.v.n; ++i) {
 				c = b->seq.v.v[i];
-				if (c->hdr.t == VSYM) {
-					if (c->sym.prio < hiprio) {
-						hiprio = c->sym.prio;
+				if (c->hdr.t == VSYMBASE) {
+					if (c->symbase.prio < hiprio) {
+						hiprio = c->symbase.prio;
 						symat = i;
 						symfound = true;
 					}
 				} 
 			}
 			if (!symfound) { 
-				printf("? %s:%d sequence without symbol\n",
+				printf("? %s:%d sequence without function symbol\n",
 						__FUNCTION__,__LINE__);
 				free_v(b);
 				return NULL;
 			}
 			/* apply the symbol */
-			c = b->seq.v.v[symat]->sym.v(b, symat);
+			c = b->seq.v.v[symat]->symbase.v(b, symat);
 			if (c == NULL) {
 				printf("? %s:%d symbol application failed\n",
 						__FUNCTION__,__LINE__);
@@ -1782,109 +1908,8 @@ read_exprs(char *a) {
 
 /* Environment: defined symbols across a phrase */
 
-typedef struct {
-	char name[WSZ];
-	Val *v;
-} Symbol;
-
-typedef struct {
-	size_t n;
-	Symbol **s;
-} Env;
-
-static void
-print_sym(Symbol *a) {
-	if (a == NULL) {
-		printf("? %s:%d symbol null\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
-	printf("'%s = ", a->name);
-	print_v(a->v);
-}
-static void
-print_env(Env *a) {
-	if (a == NULL) {
-		printf("? %s:%d environment null\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
-	for (size_t i=0; i<a->n; ++i) {
-		print_sym(a->s[i]);
-		printf("\n");
-	}
-}
-static Symbol *
-symbol(char *a, Val *b) {
-	if (a == NULL || b == NULL) {
-		printf("? %s:%d null values for symbol\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	if (strlen(a) == 0) {
-		printf("? %s:%d empty name\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	};
-	if (strlen(a) >= WSZ) {
-		printf("? %s:%d symbol name too long (%s)\n",
-				__FUNCTION__,__LINE__, a);
-		return NULL;
-	};
-	Symbol *c = malloc(sizeof(*c));
-	strncpy(c->name, a, WSZ*sizeof(char));
-	c->v = b;
-	return c;
-}
-static void
-free_sym(Symbol *a) {
-	if (a == NULL) {
-		printf("? %s:%d null symbol\n",
-				__FUNCTION__, __LINE__);
-		return;
-	}
-	free_v(a->v);
-	free(a);
-}
-static void 
-free_env(Env *a) {
-	if (a == NULL) {
-		printf("? %s:%d null environment\n",
-				__FUNCTION__, __LINE__);
-		return;
-	}
-	for (size_t i=0; i<a->n; ++i) {
-		free_sym(a->s[i]);
-	}
-	free(a->s);
-	free(a);
-}
 static bool
-found_sym_id(Env *a, char *b, size_t *id) {
-	if (a == NULL) {
-		printf("? %s:%d environment null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	if (b == NULL || strlen(b) == 0) {
-		printf("? %s:%d symbol name null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	for (size_t i=0; i<a->n; ++i) {
-		Symbol *c = a->s[i];
-		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
-			/* NULL id means caller just interested by presence */
-			if (id) { 
-				*id = i;
-			}
-			return true;
-		}
-	}
-	return false;
-}
-static bool
-added_sym(Env *a, Symbol *b, bool err) {
+added_sym(Env *a, Symval *b, bool err) {
 	if (a == NULL) {
 		printf("? %s:%d environment null\n",
 				__FUNCTION__,__LINE__);
@@ -1895,16 +1920,16 @@ added_sym(Env *a, Symbol *b, bool err) {
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	if (found_sym_id(a, b->name, NULL)) {
+	if (get_symval(a, b->name) != NULL) {
 		if (err) {
 			printf("? %s:%d symbol already defined (%s)\n",
 					__FUNCTION__,__LINE__, b->name);
 		}
 		return false;
 	}
-	Symbol **c = malloc((a->n +1)*sizeof(Symbol*));
+	Symval **c = malloc((a->n +1)*sizeof(Symval*));
 	if (a->n > 0) {
-		memcpy(c, a->s, a->n * sizeof(Symbol*));
+		memcpy(c, a->s, a->n * sizeof(Symval*));
 	}
 	c[a->n] = b;
 	if (a->n > 0) {
@@ -1915,7 +1940,7 @@ added_sym(Env *a, Symbol *b, bool err) {
 	return true;
 }
 static bool
-upded_sym(Env *a, Symbol *b, bool err) {
+upded_sym(Env *a, Symval *b, bool err) {
 	if (a == NULL) {
 		printf("? %s:%d environment null\n",
 				__FUNCTION__,__LINE__);
@@ -1931,20 +1956,19 @@ upded_sym(Env *a, Symbol *b, bool err) {
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	size_t id;
-	if (!found_sym_id(a, b->name, &id)) {
+	Symval *c = get_symval(a, b->name);
+	if (c == NULL) {
 		if (err) {
 			printf("? %s:%d symbol not found (%s)\n",
 					__FUNCTION__,__LINE__, b->name);
 		}
 		return false;
 	}
-	free_sym(a->s[id]);
-	a->s[id] = b;
+	c->v = b->v;
 	return true;
 }
 static bool
-upded_or_added_sym(Env *a, Symbol *b) {
+upded_or_added_sym(Env *a, Symval *b) {
 	if (upded_sym(a, b, false)) {
 		return true;
 	}
@@ -1953,6 +1977,7 @@ upded_or_added_sym(Env *a, Symbol *b) {
 	}
 	return false;
 }
+
 static Env *
 eval_ph(Phrase *a) {
 	if (a == NULL) {
@@ -1980,7 +2005,7 @@ eval_ph(Phrase *a) {
 			break;
 		}
 		printf("# semes %lu:\t ", i); print_s(ls); printf("\n");
-		Val *v = read_val(ls);
+		Val *v = read_val(b, ls);
 		free_s(ls);
 		free(ls);
 		if (v == NULL) {
@@ -1997,14 +2022,14 @@ eval_ph(Phrase *a) {
 			break;
 		}
 		printf("# = "); print_v(ev); printf("\n");
-		Symbol *it = symbol("it", ev);
+		Symval *it = symval("it", ev);
 		if (it == NULL) {
 			free_env(b);
 			b = NULL;
 			break;
 		}
 		if (!upded_or_added_sym(b, it)) {
-			free_sym(it);
+			free_symval(it);
 			it = NULL;
 			free_env(b);
 			b = NULL;
