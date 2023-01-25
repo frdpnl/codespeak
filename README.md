@@ -21,16 +21,18 @@ By example:
 ```
 evaluates to the list 2, 3, 4.
 
-`it` is a builtin symbol that stores the previous evaluation.
+`it` is a builtin symbol that stores the previous expression's value.
+
+` 23; it * 2` 46
 
 ## Expression
 
 Presented by examples.
 
-### Symbolic application
+### Symbolic reduction
 
-Note: `()` means sub-expression.
-It represents symbol application or a single value.
+Note: `()` means sub-expression, that is reduced to a value.
+It expresses symbol application or a single value.
 After evaluation, no `()` are left.
 
 Whitespace expected to separate words.
@@ -94,7 +96,7 @@ Whitespace expected to separate words.
 
 ## Known bugs
 
-After reading the book *Fluent C* (C design patterns), some refactoring is necessary :)
+After reading the book *Fluent C* (C design patterns), some refactoring is necessary).
 
 
 ## Background

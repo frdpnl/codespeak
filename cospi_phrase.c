@@ -706,10 +706,12 @@ free_v(Val *a) {
 	}
 	switch (a->hdr.t) {
 		case VNIL:
-		case VSYMVAL:  /* symval holds a pointer to val in Env */
-		case VSYMBASE: /* symbase holds pointer to val in Syms */
 		case VNAT:
 		case VREA:
+		case VSYMBASE: /* symbase holds pointer to val in Syms */
+			break;
+		case VSYMVAL: 
+			free_v(a->symval.v);
 			break;
 		case VSEQ:
 			for (size_t i=0; i<a->seq.v.n; ++i) {
@@ -1542,7 +1544,7 @@ symval(char *a, Val *b) {
 	};
 	Symval *c = malloc(sizeof(*c));
 	strncpy(c->name, a, WSZ*sizeof(char));
-	c->v = b;
+	c->v = copy_v(b);
 	return c;
 }
 static void
@@ -1699,7 +1701,11 @@ eval(Val *a) {
 	}
 	Val *b = NULL;
 	if (isatom_v(a)) {
-		b = copy_v(a);
+		if (a->hdr.t == VSYMVAL) {
+			b = copy_v(a->symval.v);
+		} else {
+			b = copy_v(a);
+		}
 		return b;
 	}
 	Val *c;
@@ -1964,7 +1970,8 @@ upded_sym(Env *a, Symval *b, bool err) {
 		}
 		return false;
 	}
-	c->v = b->v;
+	c->v = copy_v(b->v);
+	free_symval(b);
 	return true;
 }
 static bool
@@ -2023,6 +2030,7 @@ eval_ph(Phrase *a) {
 		}
 		printf("# = "); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
+		free_v(ev);
 		if (it == NULL) {
 			free_env(b);
 			b = NULL;
