@@ -98,7 +98,7 @@ Whitespace expected to separate words.
 
 ## Known bugs
 
-After reading the book *Fluent C* (C design patterns), some refactoring is necessary).
+After reading the book *Fluent C* (C design patterns), some refactoring is necessary.
 
 
 ## Background
