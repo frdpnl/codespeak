@@ -834,7 +834,21 @@ copy_v(Val *a) {
 	}
 	return b;
 }
-
+static Val *
+copy_v_notsymval(Val *a) {
+	if (a == NULL) {
+		printf("? %s:%d value is null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	Val *b = NULL;
+	if (a->hdr.t == VSYMVAL) {
+		b = copy_v(a->symval.v);
+	} else {
+		b = copy_v(a);
+	}
+	return b;
+}
 static Val *
 push_v(Val *a, Val *b) {
 	if (a == NULL) {
@@ -1571,7 +1585,7 @@ free_env(Env *a) {
 	free(a);
 }
 static Symval *
-get_symval(Env *a, char *b) {
+get_symval(Env *a, char *b, size_t *pid) {
 	if (a == NULL) {
 		printf("? %s:%d environment null\n",
 				__FUNCTION__,__LINE__);
@@ -1585,6 +1599,9 @@ get_symval(Env *a, char *b) {
 	for (size_t i=0; i<a->n; ++i) {
 		Symval *c = a->s[i];
 		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
+			if (pid) {
+				*pid = i;
+			}
 			return c;
 		}
 	}
@@ -1638,7 +1655,7 @@ read_val(Env *a, Sem *b) {
 			return c;
 		}
 		/* is it a user defined value symbol? */
-		Symval *sv = get_symval(a, b->sym.v);
+		Symval *sv = get_symval(a, b->sym.v, NULL);
 		if (sv != NULL) {
 			c->hdr.t = VSYMVAL;
 			c->symval.v = sv->v;
@@ -1694,6 +1711,7 @@ read_val(Env *a, Sem *b) {
 
 static Val *
 eval(Val *a) {
+	/* eval() returns a fresh value, leaves a untouched */
 	if (a == NULL) {
 		printf("? %s:%d value is null\n",
 				__FUNCTION__,__LINE__);
@@ -1701,11 +1719,7 @@ eval(Val *a) {
 	}
 	Val *b = NULL;
 	if (isatom_v(a)) {
-		if (a->hdr.t == VSYMVAL) {
-			b = copy_v(a->symval.v);
-		} else {
-			b = copy_v(a);
-		}
+		b = copy_v_notsymval(a);
 		return b;
 	}
 	Val *c;
@@ -1725,7 +1739,7 @@ eval(Val *a) {
 		return b;
 	}
 	if (a->hdr.t == VSEQ) {
-		/* work on copy of seq, which gets reduced, and destroyed */
+		/* work on copy of seq, which gets progressively reduced, and destroyed */
 		b = malloc(sizeof(Val));
 		b->hdr.t = VSEQ;
 		b->seq.v.n = 0;
@@ -1742,9 +1756,10 @@ eval(Val *a) {
 		while (b->seq.v.n > 0) {
 			/* reduce seq of 1 element to its element */
 			if (b->seq.v.n == 1) {
-				c = copy_v(b->seq.v.v[0]);
-				free_v(b);
-				return c;
+				c = b->seq.v.v[0];
+				Val *d = copy_v_notsymval(c);
+				free_v(b); /* frees c */
+				return d;
 			}
 			unsigned int hiprio = minprio()+1;
 			size_t symat = 0;
@@ -1926,7 +1941,7 @@ added_sym(Env *a, Symval *b, bool err) {
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	if (get_symval(a, b->name) != NULL) {
+	if (get_symval(a, b->name, NULL) != NULL) {
 		if (err) {
 			printf("? %s:%d symbol already defined (%s)\n",
 					__FUNCTION__,__LINE__, b->name);
@@ -1962,7 +1977,8 @@ upded_sym(Env *a, Symval *b, bool err) {
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	Symval *c = get_symval(a, b->name);
+	size_t id;
+	Symval *c = get_symval(a, b->name, &id);
 	if (c == NULL) {
 		if (err) {
 			printf("? %s:%d symbol not found (%s)\n",
@@ -1970,13 +1986,13 @@ upded_sym(Env *a, Symval *b, bool err) {
 		}
 		return false;
 	}
-	c->v = copy_v(b->v);
-	free_symval(b);
+	free_symval(a->s[id]);
+	a->s[id] = b;
 	return true;
 }
 static bool
 upded_or_added_sym(Env *a, Symval *b) {
-	if (upded_sym(a, b, false)) {
+	if (upded_sym(a, b, true)) {
 		return true;
 	}
 	if (added_sym(a, b, true)) {
@@ -2030,6 +2046,7 @@ eval_ph(Phrase *a) {
 		}
 		printf("# = "); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
+		printf("# it: "); print_symval(it); printf("\n");
 		free_v(ev);
 		if (it == NULL) {
 			free_env(b);

@@ -4,7 +4,7 @@ A personal programming language.
 This is a prototype, meant to explore language design ideas, interpreters and later compilers.
 For example, this project should expose key questions, which then lead me to learn about their seminal answers.
 
-I intentionally ignore some common advice regarding C. 
+I intentionally ignore some common C practices. 
 
 ## Phrase
 
@@ -106,7 +106,7 @@ according to my findings from the study of natural languages
 (such as the Classic style, Chomsky's Minimal Program. More details to come),
 and to my taste and limitations :)
 
-*Language does not need grammar, but grammar needs language.* (reference needed)
+*Language does not need grammar, but grammar needs language.* (Sylavin Auroux interview)
 
 A program is a sequence of paragraphs (not here yet).
 
