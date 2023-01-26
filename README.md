@@ -12,7 +12,7 @@ A phrase is a sequence of expressions.
 
 By example:
 
-` 23 ; 3 + 4 ; 2, 3,4` 
+` 23 ; 3 + 4 ; 2,3,4` 
 
 ``` 
 23 ;
@@ -31,8 +31,8 @@ Presented by examples.
 
 ### Symbolic reduction
 
-Note: `()` means sub-expression, that is reduced to a value.
-It expresses symbol application or a single value.
+Note: `()` expresses symbol application or a single value.
+The parenthesized expression ends up reduced to a single value.
 After evaluation, no `()` are left.
 
 Whitespace expected to separate words.
@@ -84,6 +84,8 @@ Whitespace expected to separate words.
 
 `do (do (list (list +)))` + (the symbol)
 
+`1 + 2; it, *, 2; do it` 6 
+
 ### Invalid expressions
 
 `2 3 4` symbolic application (implicit ()), but no symbols present
@@ -114,7 +116,7 @@ A paragraph is a sequence of phrases (not here yet).
 
 A phrase is a sequence of expressions.
 
-An expression can include symbols, that are loosely evaluated (totally symbol dependent, Minimal Program).
+An expression can include symbols, that trigger computation (totally symbol dependent, see Minimal Program).
 
 Envisioning something like:
 
