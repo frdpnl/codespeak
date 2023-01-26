@@ -149,7 +149,7 @@ print_x(Expr *a) {
 /* ----- extract words from raw text ----- */
 
 static Expr *
-read_words(char *a) {
+exp_of_words(char *a) {
 	size_t boff = 0;
 	char buf[WSZ];
 	buf[0] = '\0';
@@ -600,7 +600,7 @@ read_seme(Expr *a, size_t from, size_t tox) {
 }
 
 static Sem *
-read_semes(Expr *a) {
+seme_of_exp(Expr *a) {
 	if (a == NULL) {
 		printf("? %s:%d null list of words\n",
 				__FUNCTION__,__LINE__);
@@ -614,7 +614,7 @@ read_semes(Expr *a) {
 
 /* ----- evaluation, pass 1 ----- */
 
-typedef enum {VNIL, VNAT, VREA, VSYMVAL, VSYMBASE, VLST, VSEQ} vtype;
+typedef enum {VNIL, VNAT, VREA, VSYMOP, VLST, VSEQ} vtype;
 
 typedef union Val_ Val;
 
@@ -637,13 +637,9 @@ typedef union Val_ {
 	} rea;
 	struct {
 		vtype t;
-		Val *v;
-	} symval;
-	struct {
-		vtype t;
 		unsigned int prio;
 		Val* (*v)(Val *s, size_t p);
-	} symbase;
+	} symop;
 	struct {
 		vtype t;
 		List_v v;
@@ -671,11 +667,8 @@ print_v(Val *a) {
 		case VREA:
 			printf("%.2lf ", a->rea.v);
 			break;
-		case VSYMVAL:
-			print_v(a->symval.v); 
-			break;
-		case VSYMBASE:
-			printf("'%p(%d) ", a->symbase.v, a->symbase.prio);
+		case VSYMOP:
+			printf("'%p(%d) ", a->symop.v, a->symop.prio);
 			break;
 		case VLST:
 			printf("{ ");
@@ -708,10 +701,7 @@ free_v(Val *a) {
 		case VNIL:
 		case VNAT:
 		case VREA:
-		case VSYMBASE: /* symbase holds pointer to val in Syms */
-			break;
-		case VSYMVAL: 
-			free_v(a->symval.v);
+		case VSYMOP: /* symop holds pointer to val in Syms */
 			break;
 		case VSEQ:
 			for (size_t i=0; i<a->seq.v.n; ++i) {
@@ -751,11 +741,8 @@ isequal_v(Val *a, Val *b) {
 	if (a->hdr.t == VREA) {
 		return (a->rea.v == b->rea.v);
 	}
-	if (a->hdr.t == VSYMBASE) {
-		return (a->symbase.v == b->symbase.v);
-	}
-	if (a->hdr.t == VSYMVAL) {
-		return isequal_v(a->symval.v, b->symval.v);
+	if (a->hdr.t == VSYMOP) {
+		return (a->symop.v == b->symop.v);
 	}
 	if (a->hdr.t == VLST) {
 		for (size_t i=0; i<a->lst.v.n; ++i) { 
@@ -796,11 +783,8 @@ isequiv_v(Val *a, Val *b) {
 	if (a->hdr.t == VREA) {
 		return (a->rea.v == b->rea.v);
 	}
-	if (a->hdr.t == VSYMBASE) {
-		return (a->symbase.v == b->symbase.v);
-	}
-	if (a->hdr.t == VSYMVAL) {
-		return isequiv_v(a->symval.v, b->symval.v);
+	if (a->hdr.t == VSYMOP) {
+		return (a->symop.v == b->symop.v);
 	}
 	if (a->hdr.t == VLST) {
 		for (size_t i=0; i<a->lst.v.n; ++i) { 
@@ -824,28 +808,11 @@ copy_v(Val *a) {
 	}
 	Val *b = malloc(sizeof(Val));
 	memcpy(b, a, sizeof(Val));
-	if (a->hdr.t == VSYMVAL) {
-		b->symval.v = copy_v(a->symval.v);
-	} else if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
+	if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
 		b->seq.v.v = malloc(a->seq.v.n * sizeof(Val*));
 		for (size_t i=0; i<a->seq.v.n; ++i) {
 			b->seq.v.v[i] = copy_v(a->seq.v.v[i]);
 		}
-	}
-	return b;
-}
-static Val *
-copy_v_notsymval(Val *a) {
-	if (a == NULL) {
-		printf("? %s:%d value is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	Val *b = NULL;
-	if (a->hdr.t == VSYMVAL) {
-		b = copy_v(a->symval.v);
-	} else {
-		b = copy_v(a);
 	}
 	return b;
 }
@@ -879,7 +846,7 @@ push_v(Val *a, Val *b) {
 	return a;
 }
 
-/* -------- symbol definitions ------------
+/* -------- operation symbol definitions ------------
  * recommended interface (resource management):
  * 1. work off copies of arguments
  * 2. produce a fresh value (can be one of the copies)
@@ -1458,31 +1425,31 @@ eval_list(Val *s, size_t p) {
 
 /* --------------- builtin or base function symbols -------------------- */
 
-typedef struct Symbase_ {
+typedef struct Symop_ {
 	char name[WSZ];
 	unsigned int prio;
 	Val* (*f)(Val *s, size_t p);
-} Symbase;
+} Symop;
 
 #define NSYMS 17
-Symbase Syms[] = {
-	(Symbase) {"id",   10, eval_id}, /* technical symbol */
-	(Symbase) {"do",   10, eval_do},
-	(Symbase) {"list", 10, eval_list},
-	(Symbase) {"*",    20, eval_mul},
-	(Symbase) {"/",    20, eval_div},
-	(Symbase) {"+",    30, eval_plu},
-	(Symbase) {"-",    30, eval_min},
-	(Symbase) {"<",    40, eval_les},
-	(Symbase) {"<=",   40, eval_leq},
-	(Symbase) {">",    40, eval_gre},
-	(Symbase) {">=",   40, eval_geq},
-	(Symbase) {"=",    40, eval_eq},
-	(Symbase) {"/=",   40, eval_neq},
-	(Symbase) {"~=",   40, eval_eqv},
-	(Symbase) {"not",  50, eval_not},
-	(Symbase) {"and",  60, eval_and},
-	(Symbase) {"or",   60, eval_or},
+Symop Syms[] = {
+	(Symop) {"id",   10, eval_id}, /* technical symbol */
+	(Symop) {"do",   10, eval_do},
+	(Symop) {"list", 10, eval_list},
+	(Symop) {"*",    20, eval_mul},
+	(Symop) {"/",    20, eval_div},
+	(Symop) {"+",    30, eval_plu},
+	(Symop) {"-",    30, eval_min},
+	(Symop) {"<",    40, eval_les},
+	(Symop) {"<=",   40, eval_leq},
+	(Symop) {">",    40, eval_gre},
+	(Symop) {">=",   40, eval_geq},
+	(Symop) {"=",    40, eval_eq},
+	(Symop) {"/=",   40, eval_neq},
+	(Symop) {"~=",   40, eval_eqv},
+	(Symop) {"not",  50, eval_not},
+	(Symop) {"and",  60, eval_and},
+	(Symop) {"or",   60, eval_or},
 };
 static unsigned int
 minprio() {
@@ -1494,10 +1461,10 @@ minprio() {
 	}
 	return m;
 }
-static Symbase *
-get_symbase(char *a) {
+static Symop *
+get_symop(char *a) {
 	for (size_t i=0; i<NSYMS; ++i) {
-		Symbase *b = Syms+i;
+		Symop *b = Syms+i;
 		if (strncmp(b->name, a, WSZ) == 0) {
 			return b;
 		}
@@ -1536,8 +1503,9 @@ print_env(Env *a) {
 	}
 	for (size_t i=0; i<a->n; ++i) {
 		print_symval(a->s[i]);
-		printf("\n");
+		printf(", ");
 	}
+	printf("\n");
 }
 static Symval *
 symval(char *a, Val *b) {
@@ -1618,56 +1586,58 @@ isatom_v(Val *a) {
 	return (a->hdr.t == VNIL 
 			|| a->hdr.t == VNAT 
 			|| a->hdr.t == VREA
-			|| a->hdr.t == VSYMVAL 
-			|| a->hdr.t == VSYMBASE);
+			|| a->hdr.t == VSYMOP);
 }
 
 static Val *
-read_val(Env *a, Sem *b) {
+val_of_seme(Env *a, Sem *b) {
+	/* returns fresh value, a, b untouched */
 	if (b == NULL) {
 		printf("? %s:%d seme is null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
-	Val *c = malloc(sizeof(Val));
-	assert(c != NULL && "value allocation error");
+	Val *c = NULL;
 	if (b->hdr.t == SNIL ) {
+		c = malloc(sizeof(*c));
 		c->hdr.t = VNIL;
 		return c;
 	}
 	if (b->hdr.t == SNAT) {
+		c = malloc(sizeof(*c));
 		c->hdr.t = VNAT;
 		c->nat.v = b->nat.v;
 		return c;
 	}
 	if (b->hdr.t == SREA) {
+		c = malloc(sizeof(*c));
 		c->hdr.t = VREA;
 		c->rea.v = b->rea.v;
 		return c;
 	}
 	if (b->hdr.t == SSYM) {
-		/* is it a base symbol? (builtin function) */
-		Symbase *sb = get_symbase(b->sym.v);
+		/* is it a operation symbol? */
+		Symop *sb = get_symop(b->sym.v);
 		if (sb != NULL) {
-			c->hdr.t = VSYMBASE;
-			c->symbase.prio = sb->prio;
-			c->symbase.v = sb->f;
+			c = malloc(sizeof(*c));
+			c->hdr.t = VSYMOP;
+			c->symop.prio = sb->prio;
+			c->symop.v = sb->f;
 			return c;
 		}
-		/* is it a user defined value symbol? */
+		/* is it a user-defined value symbol? */
 		Symval *sv = get_symval(a, b->sym.v, NULL);
 		if (sv != NULL) {
-			c->hdr.t = VSYMVAL;
-			c->symval.v = sv->v;
+			c = copy_v(sv->v);
 			return c;
 		}
 		/* later: user defined function symbol... */
 		printf("? %s:%d unknown symbol seme\n",
 				__FUNCTION__,__LINE__);
-		free_v(c);
 		return NULL;
 	}
 	if (b->hdr.t == SLST) {
+		c = malloc(sizeof(*c));
 		c->hdr.t = VLST;
 		c->lst.v.n = 0;
 		c->lst.v.v = NULL;
@@ -1675,7 +1645,7 @@ read_val(Env *a, Sem *b) {
 		Sem *l = b->lst.v.s;
 		Val *d;
 		for (size_t i=0; i<n; ++i) {
-			d = read_val(a, l+i);
+			d = val_of_seme(a, l+i);
 			if (d == NULL) {
 				free_v(c);
 				return NULL;
@@ -1685,6 +1655,7 @@ read_val(Env *a, Sem *b) {
 		return c;
 	}
 	if (b->hdr.t == SSEQ) {
+		c = malloc(sizeof(*c));
 		c->hdr.t = VSEQ;
 		c->seq.v.n = 0;
 		c->seq.v.v = NULL;
@@ -1692,7 +1663,7 @@ read_val(Env *a, Sem *b) {
 		Sem *l = b->seq.v.s;
 		Val *d;
 		for (size_t i=0; i<n; ++i) {
-			d = read_val(a, l+i);
+			d = val_of_seme(a, l+i);
 			if (d == NULL) {
 				free_v(c);
 				return NULL;
@@ -1703,7 +1674,6 @@ read_val(Env *a, Sem *b) {
 	}
 	printf("? %s:%d unknown seme\n",
 			__FUNCTION__,__LINE__);
-	free_v(c);
 	return NULL;
 }
 
@@ -1719,12 +1689,12 @@ eval(Val *a) {
 	}
 	Val *b = NULL;
 	if (isatom_v(a)) {
-		b = copy_v_notsymval(a);
+		b = copy_v(a);
 		return b;
 	}
 	Val *c;
 	if (a->hdr.t == VLST) {
-		b = malloc(sizeof(Val));
+		b = malloc(sizeof(*b));
 		b->hdr.t = VLST;
 		b->lst.v.n = 0;
 		b->lst.v.v = NULL;
@@ -1740,7 +1710,7 @@ eval(Val *a) {
 	}
 	if (a->hdr.t == VSEQ) {
 		/* work on copy of seq, which gets progressively reduced, and destroyed */
-		b = malloc(sizeof(Val));
+		b = malloc(sizeof(*b));
 		b->hdr.t = VSEQ;
 		b->seq.v.n = 0;
 		b->seq.v.v = NULL;
@@ -1757,8 +1727,8 @@ eval(Val *a) {
 			/* reduce seq of 1 element to its element */
 			if (b->seq.v.n == 1) {
 				c = b->seq.v.v[0];
-				Val *d = copy_v_notsymval(c);
-				free_v(b); /* frees c */
+				Val *d = copy_v(c);
+				free_v(b);
 				return d;
 			}
 			unsigned int hiprio = minprio()+1;
@@ -1767,9 +1737,9 @@ eval(Val *a) {
 			/* apply symbols from left to right (for same priority symbols) */
 			for (size_t i=0; i < b->seq.v.n; ++i) {
 				c = b->seq.v.v[i];
-				if (c->hdr.t == VSYMBASE) {
-					if (c->symbase.prio < hiprio) {
-						hiprio = c->symbase.prio;
+				if (c->hdr.t == VSYMOP) {
+					if (c->symop.prio < hiprio) {
+						hiprio = c->symop.prio;
 						symat = i;
 						symfound = true;
 					}
@@ -1781,8 +1751,8 @@ eval(Val *a) {
 				free_v(b);
 				return NULL;
 			}
-			/* apply the symbol */
-			c = b->seq.v.v[symat]->symbase.v(b, symat);
+			/* apply the symbol, returns the reduced seq */
+			c = b->seq.v.v[symat]->symop.v(b, symat);
 			if (c == NULL) {
 				printf("? %s:%d symbol application failed\n",
 						__FUNCTION__,__LINE__);
@@ -1793,7 +1763,7 @@ eval(Val *a) {
 		}
 		/* empty seq, means nil value */
 		free_v(b);
-		c = malloc(sizeof(Val));
+		c = malloc(sizeof(*c));
 		c->hdr.t = VNIL;
 		return c;
 	}
@@ -1871,7 +1841,7 @@ push_ph(Phrase *a, char *b) {
 #define XSZ 64*WSZ
 
 static Phrase *
-read_exprs(char *a) {
+phrase_of_str(char *a) {
 	size_t boff = 0;
 	char buf[XSZ];
 	buf[0] = '\0';
@@ -1991,8 +1961,8 @@ upded_sym(Env *a, Symval *b, bool err) {
 	return true;
 }
 static bool
-upded_or_added_sym(Env *a, Symval *b) {
-	if (upded_sym(a, b, true)) {
+store_sym(Env *a, Symval *b) {
+	if (upded_sym(a, b, false)) {
 		return true;
 	}
 	if (added_sym(a, b, true)) {
@@ -2013,55 +1983,47 @@ eval_ph(Phrase *a) {
 	b->s = NULL;
 	for (size_t i=0; i<a->n; ++i) {
 		printf("# expression %lu:\t %s", i, a->x[i]);
-		Expr *ex = read_words(a->x[i]);
+		Expr *ex = exp_of_words(a->x[i]);
 		/* a is freed where allocated, not here but by caller */
 		if (ex == NULL) {
 			free_env(b);
-			b = NULL;
-			break;
+			return NULL;
 		}
-		Sem *ls = read_semes(ex);
+		Sem *sm = seme_of_exp(ex);
 		free_x(ex);
-		if (ls == NULL) {
+		if (sm == NULL) {
 			free_env(b);
-			b = NULL;
-			break;
+			return NULL;
 		}
-		printf("# semes %lu:\t ", i); print_s(ls); printf("\n");
-		Val *v = read_val(b, ls);
-		free_s(ls);
-		free(ls);
+		printf("# seme %lu:\t ", i); print_s(sm); printf("\n");
+		Val *v = val_of_seme(b, sm);
+		free_s(sm);
+		free(sm);
 		if (v == NULL) {
 			free_env(b);
-			b = NULL;
-			break;
+			return NULL;
 		}
-		printf("# values %lu:\t ", i); print_v(v); printf("\n");
+		printf("# value %lu:\t ", i); print_v(v); printf("\n");
 		Val *ev = eval(v);
 		free_v(v);
 		if (ev == NULL) {
 			free_env(b);
-			b = NULL;
-			break;
+			return NULL;
 		}
 		printf("# = "); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
-		printf("# it: "); print_symval(it); printf("\n");
 		free_v(ev);
+		printf("# it: "); print_symval(it); printf("\n");
 		if (it == NULL) {
 			free_env(b);
-			b = NULL;
-			break;
+			return NULL;
 		}
-		if (!upded_or_added_sym(b, it)) {
+		if (!store_sym(b, it)) {
 			free_symval(it);
-			it = NULL;
 			free_env(b);
-			b = NULL;
-			break;
+			return NULL;
 		}
-		printf("# env:\n"); 
-		print_env(b);
+		printf("# env: "); print_env(b); printf("\n");
 	}
 	return b;
 }
@@ -2081,13 +2043,13 @@ main(int argc, char **argv) {
 	}
 	char *s = argv[1];
 	printf("# input:\t %s\n", s);
-	Phrase *lx = read_exprs(s);
-	if (lx == NULL) {
+	Phrase *ph = phrase_of_str(s);
+	if (ph == NULL) {
 		return EXIT_FAILURE;
 	}
-	printf("# phrase:\t "); print_ph(lx); printf("\n");
-	Env *e = eval_ph(lx);
-	free_ph(lx);
+	printf("# phrase:\t "); print_ph(ph); printf("\n");
+	Env *e = eval_ph(ph);
+	free_ph(ph);
 	if (e == NULL) {
 		return EXIT_FAILURE;
 	}
