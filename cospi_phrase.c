@@ -1553,7 +1553,7 @@ free_env(Env *a) {
 	free(a);
 }
 static Symval *
-get_symval(Env *a, char *b, size_t *pid) {
+get_symval_id(Env *a, char *b, size_t *id) {
 	if (a == NULL) {
 		printf("? %s:%d environment null\n",
 				__FUNCTION__,__LINE__);
@@ -1567,13 +1567,28 @@ get_symval(Env *a, char *b, size_t *pid) {
 	for (size_t i=0; i<a->n; ++i) {
 		Symval *c = a->s[i];
 		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
-			if (pid) {
-				*pid = i;
+			if (id != NULL) {
+				*id = i;
 			}
 			return c;
 		}
 	}
 	return NULL;
+}
+
+static Symval *
+get_symval(Env *a, char *b) {
+	if (a == NULL) {
+		printf("? %s:%d environment null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (b == NULL || strlen(b) == 0) {
+		printf("? %s:%d symbol name null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	return get_symval_id(a, b, NULL);
 }
 
 static bool
@@ -1626,7 +1641,7 @@ val_of_seme(Env *a, Sem *b) {
 			return c;
 		}
 		/* is it a user-defined value symbol? */
-		Symval *sv = get_symval(a, b->sym.v, NULL);
+		Symval *sv = get_symval(a, b->sym.v);
 		if (sv != NULL) {
 			c = copy_v(sv->v);
 			return c;
@@ -1680,26 +1695,82 @@ val_of_seme(Env *a, Sem *b) {
 /* ----- evaluation, pass 2 ----- */
 
 static Val *
+eval_seq(Val *a) {
+	/* work on copy of seq, which gets progressively reduced, and destroyed */
+	Val *b = malloc(sizeof(*b));
+	assert(b != NULL);
+	b->hdr.t = VSEQ;
+	b->seq.v.n = 0;
+	b->seq.v.v = NULL;
+	for (size_t i=0; i < a->seq.v.n; ++i) {
+		c = eval(a->seq.v.v[i]);
+		if (c == NULL) {
+			free_v(b);
+			return NULL;
+		}
+		b = push_v(b, c);
+	}
+	/* symbol application: consumes the seq, until 1 item left */
+	while (b->seq.v.n > 0) {
+		/* stop: seq of 1 element reduced to this element */
+		if (b->seq.v.n == 1) {
+			c = b->seq.v.v[0];
+			Val *d = copy_v(c);
+			free_v(b);
+			return d;
+		}
+		unsigned int hiprio = minprio()+1;
+		size_t symat = 0;
+		bool symfound = false;
+		/* apply symbols from left to right (for same priority symbols) */
+		for (size_t i=0; i < b->seq.v.n; ++i) {
+			c = b->seq.v.v[i];
+			if (c->hdr.t == VSYMOP) {
+				if (c->symop.prio < hiprio) {
+					hiprio = c->symop.prio;
+					symat = i;
+					symfound = true;
+				}
+			} 
+		}
+		if (!symfound) { 
+			printf("? %s:%d sequence without function symbol\n",
+					__FUNCTION__,__LINE__);
+			free_v(b);
+			return NULL;
+		}
+		/* apply the symbol, returns the reduced seq */
+		c = b->seq.v.v[symat]->symop.v(b, symat);
+		if (c == NULL) {
+			printf("? %s:%d symbol application failed\n",
+					__FUNCTION__,__LINE__);
+			free_v(b);
+			return NULL;
+		}
+		b = c;
+	}
+	/* empty seq, means nil value */
+	free_v(b);
+	c = malloc(sizeof(*c));
+	c->hdr.t = VNIL;
+	return c;
+}
+
+static Val *
 eval(Val *a) {
 	/* eval() returns a fresh value, leaves a untouched */
-	if (a == NULL) {
-		printf("? %s:%d value is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	Val *b = NULL;
+	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		b = copy_v(a);
+		Val *b = copy_v(a);
 		return b;
 	}
-	Val *c;
 	if (a->hdr.t == VLST) {
-		b = malloc(sizeof(*b));
+		Val *b = malloc(sizeof(*b));
 		b->hdr.t = VLST;
 		b->lst.v.n = 0;
 		b->lst.v.v = NULL;
 		for (size_t i=0; i < a->lst.v.n; ++i) {
-			c = eval(a->lst.v.v[i]);
+			Val *c = eval(a->lst.v.v[i]);
 			if (c == NULL) {
 				free_v(b);
 				return NULL;
@@ -1709,63 +1780,7 @@ eval(Val *a) {
 		return b;
 	}
 	if (a->hdr.t == VSEQ) {
-		/* work on copy of seq, which gets progressively reduced, and destroyed */
-		b = malloc(sizeof(*b));
-		b->hdr.t = VSEQ;
-		b->seq.v.n = 0;
-		b->seq.v.v = NULL;
-		for (size_t i=0; i < a->seq.v.n; ++i) {
-			c = eval(a->seq.v.v[i]);
-			if (c == NULL) {
-				free_v(b);
-				return NULL;
-			}
-			b = push_v(b, c);
-		}
-		/* symbol application: consumes the seq, until 1 item left */
-		while (b->seq.v.n > 0) {
-			/* reduce seq of 1 element to its element */
-			if (b->seq.v.n == 1) {
-				c = b->seq.v.v[0];
-				Val *d = copy_v(c);
-				free_v(b);
-				return d;
-			}
-			unsigned int hiprio = minprio()+1;
-			size_t symat = 0;
-			bool symfound = false;
-			/* apply symbols from left to right (for same priority symbols) */
-			for (size_t i=0; i < b->seq.v.n; ++i) {
-				c = b->seq.v.v[i];
-				if (c->hdr.t == VSYMOP) {
-					if (c->symop.prio < hiprio) {
-						hiprio = c->symop.prio;
-						symat = i;
-						symfound = true;
-					}
-				} 
-			}
-			if (!symfound) { 
-				printf("? %s:%d sequence without function symbol\n",
-						__FUNCTION__,__LINE__);
-				free_v(b);
-				return NULL;
-			}
-			/* apply the symbol, returns the reduced seq */
-			c = b->seq.v.v[symat]->symop.v(b, symat);
-			if (c == NULL) {
-				printf("? %s:%d symbol application failed\n",
-						__FUNCTION__,__LINE__);
-				free_v(b);
-				return NULL;
-			}
-			b = c;
-		}
-		/* empty seq, means nil value */
-		free_v(b);
-		c = malloc(sizeof(*c));
-		c->hdr.t = VNIL;
-		return c;
+		return eval_seq(a);
 	}
 	printf("? %s:%d unknown value\n",
 			__FUNCTION__,__LINE__);
@@ -1911,7 +1926,7 @@ added_sym(Env *a, Symval *b, bool err) {
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	if (get_symval(a, b->name, NULL) != NULL) {
+	if (get_symval(a, b->name) != NULL) {
 		if (err) {
 			printf("? %s:%d symbol already defined (%s)\n",
 					__FUNCTION__,__LINE__, b->name);
@@ -1948,7 +1963,7 @@ upded_sym(Env *a, Symval *b, bool err) {
 		return false;
 	}
 	size_t id;
-	Symval *c = get_symval(a, b->name, &id);
+	Symval *c = get_symval_id(a, b->name, &id);
 	if (c == NULL) {
 		if (err) {
 			printf("? %s:%d symbol not found (%s)\n",
@@ -1956,7 +1971,7 @@ upded_sym(Env *a, Symval *b, bool err) {
 		}
 		return false;
 	}
-	free_symval(a->s[id]);
+	free_symval(c);
 	a->s[id] = b;
 	return true;
 }
@@ -2013,7 +2028,6 @@ eval_ph(Phrase *a) {
 		printf("# = "); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
 		free_v(ev);
-		printf("# it: "); print_symval(it); printf("\n");
 		if (it == NULL) {
 			free_env(b);
 			return NULL;
