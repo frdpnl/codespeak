@@ -2,7 +2,6 @@
 A personal programming language.
 
 This is a prototype, meant to explore language design ideas, interpreters and later compilers.
-For example, this project should expose key questions, which then lead me to learn about their seminal answers.
 
 I intentionally ignore some common C practices. 
 

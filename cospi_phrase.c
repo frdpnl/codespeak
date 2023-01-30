@@ -1918,11 +1918,7 @@ phrase_of_str(char *a) {
 
 static bool
 added_sym(Env *a, Symval *b, bool err) {
-	if (a == NULL) {
-		printf("? %s:%d environment null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
+	assert(a != NULL && "environment null");
 	if (b == NULL) {
 		printf("? %s:%d pushed symbol null\n",
 				__FUNCTION__,__LINE__);
@@ -1949,11 +1945,7 @@ added_sym(Env *a, Symval *b, bool err) {
 }
 static bool
 upded_sym(Env *a, Symval *b, bool err) {
-	if (a == NULL) {
-		printf("? %s:%d environment null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
+	assert(a != NULL && "environment null");
 	if (b == NULL) { 
 		printf("? %s:%d pushed symbol null\n",
 				__FUNCTION__,__LINE__);
@@ -1990,12 +1982,9 @@ store_sym(Env *a, Symval *b) {
 
 static Env *
 eval_ph(Phrase *a) {
-	if (a == NULL) {
-		printf("? %s:%d phrase null\n",
-			__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL && "phrase null");
 	Env *b = malloc(sizeof(*b));
+	assert(b != NULL);
 	b->n = 0;
 	b->s = NULL;
 	for (size_t i=0; i<a->n; ++i) {
