@@ -952,7 +952,7 @@ store_sym(Env *a, Symval *b) {
  * But, loss of flexibility isn't worth it (for compiler).
  * */
 
-static Val * eval(Env *e, Val *a);
+static Val * eval(Env *e, Val *a, bool strict);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -968,20 +968,20 @@ prefixed2(size_t p, size_t n) {
 }
 
 static bool
-copy_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
+eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta, Val **pb, bool strictb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not infixed\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = copy_v(s->seq.v.v[p-1]); 
+	a = eval(e, s->seq.v.v[p-1], stricta); 
 	if (a == NULL) {
 		printf("? %s:%d 1st argument null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	b = copy_v(s->seq.v.v[p+1]);
+	b = eval(e, s->seq.v.v[p+1], strictb);
 	if (b == NULL) {
 		printf("? %s:%d 2nd argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -993,14 +993,14 @@ copy_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	return true;
 }
 static bool
-copy_prefix1_arg(Val *s, size_t p, Val **pa) {
+eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to one argument\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = copy_v(s->seq.v.v[p+1]);
+	a = eval(e, s->seq.v.v[p+1], stricta);
 	if (a == NULL) {
 		printf("? %s:%d argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -1010,20 +1010,20 @@ copy_prefix1_arg(Val *s, size_t p, Val **pa) {
 	return true;
 }
 static bool
-copy_prefix2_arg(Val *s, size_t p, Val **pa, Val **pb) {
+eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta, Val **pb, bool strictb) {
 	Val *a, *b;
 	if (!prefixed2(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to 2 arguments\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = copy_v(s->seq.v.v[p+1]);
+	a = eval(e, s->seq.v.v[p+1], stricta);
 	if (a == NULL) {
 		printf("? %s:%d argument null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	b = copy_v(s->seq.v.v[p+2]);
+	b = eval(e, s->seq.v.v[p+2], strictb);
 	if (b == NULL) {
 		printf("? %s:%d argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -1035,14 +1035,14 @@ copy_prefix2_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	return true;
 }
 static bool
-copy_prefixn_arg(Val *s, size_t p, Val **pa) {
+eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta) {
 	Val *a;
 	a = malloc(sizeof(*a));
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
 	a->seq.v.n = s->seq.v.n -p-1; 
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		a->seq.v.v[i-p-1] = copy_v(s->seq.v.v[i]);
+		a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], stricta);
 	}
 	*pa = a;
 	return true;
@@ -1094,7 +1094,7 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 static Val *
 eval_mul(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1124,7 +1124,7 @@ eval_mul(Env *e, Val *s, size_t p) {
 static Val *
 eval_div(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1162,7 +1162,7 @@ eval_div(Env *e, Val *s, size_t p) {
 static Val *
 eval_plu(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1192,7 +1192,7 @@ eval_plu(Env *e, Val *s, size_t p) {
 static Val *
 eval_min(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1222,7 +1222,7 @@ eval_min(Env *e, Val *s, size_t p) {
 static Val *
 eval_les(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1254,7 +1254,7 @@ eval_les(Env *e, Val *s, size_t p) {
 static Val *
 eval_leq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1286,7 +1286,7 @@ eval_leq(Env *e, Val *s, size_t p) {
 static Val *
 eval_gre(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1318,7 +1318,7 @@ eval_gre(Env *e, Val *s, size_t p) {
 static Val *
 eval_geq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1350,7 +1350,7 @@ eval_geq(Env *e, Val *s, size_t p) {
 static Val *
 eval_eq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1367,7 +1367,7 @@ eval_eq(Env *e, Val *s, size_t p) {
 static Val *
 eval_neq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1384,7 +1384,7 @@ eval_neq(Env *e, Val *s, size_t p) {
 static Val *
 eval_eqv(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1401,7 +1401,7 @@ eval_eqv(Env *e, Val *s, size_t p) {
 static Val *
 eval_and(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1423,7 +1423,7 @@ eval_and(Env *e, Val *s, size_t p) {
 static Val *
 eval_or(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_infix_arg(s, p, &a, &b)) {
+	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s:%d infix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1445,7 +1445,7 @@ eval_or(Env *e, Val *s, size_t p) {
 static Val *
 eval_not(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!copy_prefix1_arg(s, p, &a)) {
+	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1463,7 +1463,7 @@ eval_not(Env *e, Val *s, size_t p) {
 static Val *
 eval_id(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!copy_prefix1_arg(s, p, &a)) {
+	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1472,12 +1472,10 @@ eval_id(Env *e, Val *s, size_t p) {
 	return s;
 }
 
-static Val * eval(Env *e, Val *);
-
 static Val *
 eval_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!copy_prefix1_arg(s, p, &a)) {
+	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1489,7 +1487,7 @@ eval_do(Env *e, Val *s, size_t p) {
 		return NULL;
 	}
 	a->hdr.t = VSEQ;
-	Val *b = eval(e, a);
+	Val *b = eval(e, a, false);
 	free_v(a);
 	if (b == NULL) {
 		return NULL;
@@ -1500,7 +1498,7 @@ eval_do(Env *e, Val *s, size_t p) {
 static Val *
 eval_list(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!copy_prefixn_arg(s, p, &a)) {
+	if (!eval_prefixn_arg(e, s, p, &a, false)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1512,20 +1510,13 @@ eval_list(Env *e, Val *s, size_t p) {
 static Val *
 eval_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!copy_prefix2_arg(s, p, &a, &b)) {
+	if (!eval_prefix2_arg(e, s, p, &a, false, &b, false)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
-	if (a->hdr.t == VSYMUNK) {
-		printf("? %s:%d 1st argument a new symbol\n", 
-				__FUNCTION__,__LINE__);
-		free_v(a);
-		free_v(b);
-		return NULL;
-	}
 	if (b->hdr.t != VSYMUNK) {
-		printf("? %s:%d 2nd argument not a new symbol\n", 
+		printf("? %s:%d 2nd argument is not a new symbol\n", 
 				__FUNCTION__,__LINE__);
 		free_v(a);
 		free_v(b);
@@ -1710,35 +1701,24 @@ eval_seq(Env *e, Val *a) {
 	b->seq.v.n = 0;
 	b->seq.v.v = NULL;
 	/* eval seq items, in case items generate symbols */
+	printf("eval_seq 1: "); print_v(a); printf("\n");
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		Val *c = eval(e, a->seq.v.v[i]);
+		Val *c = eval(e, a->seq.v.v[i], false);
 		if (c == NULL) {
 			free_v(b);
 			return NULL;
 		}
 		b = push_v(b, c);
 	}
+	printf("eval_seq 2: "); print_v(b); printf("\n");
 	/* symbol application: consumes the seq, until 1 item left */
 	Val *c = NULL;  /* shorthand */
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
-			c = b->seq.v.v[0];
-			if (c->hdr.t == VSYMUNK) {
-				/* symbol must now be defined */
-				Symval *sv = get_symval(e, c->symunk.v);
-				if (sv == NULL) {
-					printf("? %s:%d undefined symbol (%s)\n",
-							__FUNCTION__,__LINE__,
-							c->symunk.v);
-					free_v(b);
-					return NULL;
-				}
-				c = sv->v;
-			} 
-			Val *d = copy_v(c);
+			c = copy_v(b->seq.v.v[0]);
 			free_v(b);
-			return d;
+			return c;
 		}
 		unsigned int hiprio = minprio()+1;
 		size_t symat = 0;
@@ -1778,12 +1758,24 @@ eval_seq(Env *e, Val *a) {
 }
 
 static Val *
-eval(Env *e, Val *a) {
+eval(Env *e, Val *a, bool strict) {
 	/* eval() returns a fresh value, leaves a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		Val *b = copy_v(a);
+		Val *b;
+		if (strict && a->hdr.t == VSYMUNK) {
+			Symval *sv = get_symval(e, a->symunk.v);
+			if (sv == NULL) {
+				printf("? %s:%d undefined symbol (%s)\n",
+						__FUNCTION__,__LINE__,
+						a->symunk.v);
+				return NULL;
+			}
+			b = copy_v(sv->v);
+		} else {
+			b = copy_v(a);
+		}
 		return b;
 	}
 	if (a->hdr.t == VLST) {
@@ -1792,7 +1784,7 @@ eval(Env *e, Val *a) {
 		b->lst.v.n = 0;
 		b->lst.v.v = NULL;
 		for (size_t i=0; i < a->lst.v.n; ++i) {
-			Val *c = eval(e, a->lst.v.v[i]);
+			Val *c = eval(e, a->lst.v.v[i], strict);
 			if (c == NULL) {
 				free_v(b);
 				return NULL;
@@ -1954,7 +1946,7 @@ eval_ph(Phrase *a) {
 			return NULL;
 		}
 		printf("# value %lu:\t ", i); print_v(v); printf("\n");
-		Val *ev = eval(b, v);
+		Val *ev = eval(b, v, false);
 		free_v(v);
 		if (ev == NULL) {
 			free_env(b);

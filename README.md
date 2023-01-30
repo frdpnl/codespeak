@@ -9,20 +9,17 @@ I intentionally ignore some common C practices.
 
 A phrase is a sequence of expressions.
 
-By example:
+For example:
 
 ` 23 ; 3 + 4 ; 2,3,4` 
 
-``` 
-23 ;
-3 + 4 ;
-2,3,  4
-```
 evaluates to the list 2, 3, 4.
 
 `it` is a builtin symbol that stores the previous expression's value.
 
-` 23; it * 2` 46
+`23; it * 2` 46
+
+`2, +, n ; call it A` gives the list 2, +, n (n is undefined at this point, still valid)
 
 ## Expression
 
@@ -36,11 +33,7 @@ After evaluation, no `()` are left.
 
 Whitespace expected to separate words.
 
-`2` (evaluates to) 2
-
-`(+)` + (the symbol)
-
-`2 * 3 + 2.0` 8.0 
+`(+)` the symbol + (builtin)
 
 `2 * 2 > 3.` 1 (true), precedence applies
 
@@ -54,7 +47,9 @@ Whitespace expected to separate words.
 
 `(2,3,+) = (2, (2 + 1), +)` 1
 
-`2 and (not -2)` 0, precedence
+`2 and (not -2)` 0
+
+`x` the not yet defined symbol x (valid expression)
 
 ### List
 
@@ -70,7 +65,11 @@ Whitespace expected to separate words.
 
 `list 1 2 3` list 1, 2, 3
 
-### Higher order (do, list)
+### Builtin operators
+
+`3 ; call it p` defines the symbol p, worth 3
+
+### Higher order: do, list, id
 
 `do` means evaluate following list as an expression
 `do` is the inverse of `list`.
@@ -83,7 +82,13 @@ Whitespace expected to separate words.
 
 `do (do (list (list +)))` + (the symbol)
 
-`1 + 2; it, *, 2; do it` 6 
+`1 + 2 ; it, *, 2 ; do it` 6
+
+`2, *, n ; call it a ; call 2 n ; do a` 4 
+
+`2, -, n ; call it a ; call 2 n ; id a` the list 2, -, 2
+
+`id` evaluates to its argument (strictly evaluated)
 
 ### Invalid expressions
 
