@@ -20,7 +20,7 @@
  * 13.10.2022 created.
  *
  * gcc -static -std=gnu99 -Wall -g -I../local/include -L../local/lib this_file.c -lgrapheme 
- * warning, valgrind prefers dynamic libs.
+ * warning, valgrind prefers dynamic libs by default.
  *
  */
 
@@ -107,43 +107,6 @@ push_xz(Expr *a, Word *b) {
 	a->n++;
 	free(b);
 	return a;
-}
-
-static void
-print_w(Word *a) {
-	if (a == NULL) {
-		printf("Null");
-		return;
-	}
-	char *typtxt[] = { "Sep", "Left", "Right", "Str"};
-	switch (a->t) {
-		case STR:
-			printf("%s[%s]", typtxt[a->t], a->v);
-			break;
-		case SEP:
-		case LEFT: 
-		case RIGHT:
-			printf("%s", typtxt[a->t]);
-			break;
-		default:
-			printf("? %s:%d unknown word type ", 
-					__FUNCTION__, __LINE__);
-	}
-}
-
-static void
-print_x(Expr *a) {
-	if (a == NULL) {
-		printf("? %s:%d list of words is empty\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
-	printf("(");
-	for (size_t i=0; i<a->n; ++i) {
-		print_w(a->w+i);
-		printf(" ");
-	}
-	printf(")");
 }
 
 /* ----- extract words from raw text ----- */
@@ -324,15 +287,6 @@ sem_sym(char *a) {
 	b->sym.t = SSYM;
 	strncpy(b->sym.v, a, WSZ);
 	b->sym.v[WSZ-1] = '\0';
-	return b;
-}
-
-static Sem *
-sem_lst() {
-	Sem *b = malloc(sizeof(*b));
-	b->lst.t = SLST;
-	b->lst.v.n = 0;
-	b->lst.v.s = NULL;
 	return b;
 }
 
@@ -623,6 +577,16 @@ typedef struct List_v_ {
 	Val **v;
 } List_v;
 
+typedef struct {
+	char name[WSZ];
+	Val *v;
+} Symval;
+
+typedef struct {
+	size_t n;
+	Symval **s;
+} Env;
+
 typedef union Val_ {
 	struct {
 		vtype t;
@@ -638,7 +602,7 @@ typedef union Val_ {
 	struct {
 		vtype t;
 		unsigned int prio;
-		Val* (*v)(Val *s, size_t p);
+		Val* (*v)(Env *e, Val *s, size_t p);
 	} symop;
 	struct {
 		stype t;
@@ -860,7 +824,7 @@ push_v(Val *a, Val *b) {
  * But, loss of flexibility isn't worth it (for compiler).
  * */
 
-static Val * eval(Val *a);
+static Val * eval(Env *e, Val *a);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -871,34 +835,6 @@ prefixed1(size_t p, size_t n) {
 	return (p >= 0 && p < n-1);
 }
 
-static bool
-get_eval_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
-	Val *a, *b;
-	if (!infixed(p, s->seq.v.n)) {
-		printf("? %s:%d symbol not infixed\n", 
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	a = eval(s->seq.v.v[p-1]); 
-	/* this is already evaluated by eval(), so will just copy_v().
-	 * right now, keep eval() instead of a direct copy_v(), 
-	 * in order to support later flexibility */
-	if (a == NULL) {
-		printf("? %s:%d 1st argument null\n", 
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	b = eval(s->seq.v.v[p+1]);
-	if (b == NULL) {
-		printf("? %s:%d 2nd argument null\n", 
-				__FUNCTION__,__LINE__);
-		free_v(a);
-		return false;
-	}
-	*pa = a;
-	*pb = b;
-	return true;
-}
 static bool
 copy_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	Val *a, *b;
@@ -922,23 +858,6 @@ copy_infix_arg(Val *s, size_t p, Val **pa, Val **pb) {
 	}
 	*pa = a;
 	*pb = b;
-	return true;
-}
-static bool
-get_eval_prefix1_arg(Val *s, size_t p, Val **pa) {
-	Val *a;
-	if (!prefixed1(p, s->seq.v.n)) {
-		printf("? %s:%d symbol not prefixed to one argument\n", 
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	a = eval(s->seq.v.v[p+1]);
-	if (a == NULL) {
-		printf("? %s:%d argument null\n", 
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	*pa = a;
 	return true;
 }
 static bool
@@ -1006,7 +925,7 @@ upd_prefixn(Val *s, size_t p, Val *a) {
 }
 
 static Val *
-eval_mul(Val *s, size_t p) {
+eval_mul(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1036,7 +955,7 @@ eval_mul(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_div(Val *s, size_t p) {
+eval_div(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1074,7 +993,7 @@ eval_div(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_plu(Val *s, size_t p) {
+eval_plu(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1104,7 +1023,7 @@ eval_plu(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_min(Val *s, size_t p) {
+eval_min(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1134,7 +1053,7 @@ eval_min(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_les(Val *s, size_t p) {
+eval_les(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1166,7 +1085,7 @@ eval_les(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_leq(Val *s, size_t p) {
+eval_leq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1198,7 +1117,7 @@ eval_leq(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_gre(Val *s, size_t p) {
+eval_gre(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1230,7 +1149,7 @@ eval_gre(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_geq(Val *s, size_t p) {
+eval_geq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1262,7 +1181,7 @@ eval_geq(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_eq(Val *s, size_t p) {
+eval_eq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1279,7 +1198,7 @@ eval_eq(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_neq(Val *s, size_t p) {
+eval_neq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1296,7 +1215,7 @@ eval_neq(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_eqv(Val *s, size_t p) {
+eval_eqv(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1313,7 +1232,7 @@ eval_eqv(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_and(Val *s, size_t p) {
+eval_and(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1335,7 +1254,7 @@ eval_and(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_or(Val *s, size_t p) {
+eval_or(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!copy_infix_arg(s, p, &a, &b)) {
 		printf("? %s:%d infix expression invalid\n", 
@@ -1357,7 +1276,7 @@ eval_or(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_not(Val *s, size_t p) {
+eval_not(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!copy_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
@@ -1375,7 +1294,7 @@ eval_not(Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_id(Val *s, size_t p) {
+eval_id(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!copy_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
@@ -1386,10 +1305,10 @@ eval_id(Val *s, size_t p) {
 	return s;
 }
 
-static Val * eval(Val *);
+static Val * eval(Env *e, Val *);
 
 static Val *
-eval_do(Val *s, size_t p) {
+eval_do(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!copy_prefix1_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
@@ -1403,7 +1322,7 @@ eval_do(Val *s, size_t p) {
 		return NULL;
 	}
 	a->hdr.t = VSEQ;
-	Val *b = eval(a);
+	Val *b = eval(e, a);
 	free_v(a);
 	if (b == NULL) {
 		return NULL;
@@ -1413,7 +1332,7 @@ eval_do(Val *s, size_t p) {
 }
 
 static Val *
-eval_list(Val *s, size_t p) {
+eval_list(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!copy_prefixn_arg(s, p, &a)) {
 		printf("? %s:%d prefix expression invalid\n", 
@@ -1430,7 +1349,7 @@ eval_list(Val *s, size_t p) {
 typedef struct Symop_ {
 	char name[WSZ];
 	unsigned int prio;
-	Val* (*f)(Val *s, size_t p);
+	Val* (*f)(Env *e, Val *s, size_t p);
 } Symop;
 
 #define NSYMS 17
@@ -1475,16 +1394,6 @@ get_symop(char *a) {
 }
 
 /* --------------- user defined value symbols -------------------- */
-
-typedef struct {
-	char name[WSZ];
-	Val *v;
-} Symval;
-
-typedef struct {
-	size_t n;
-	Symval **s;
-} Env;
 
 static void
 print_symval(Symval *a) {
@@ -1558,16 +1467,8 @@ get_symval_id(Env *a, char *b, size_t *id) {
 
 static Symval *
 get_symval(Env *a, char *b) {
-	if (a == NULL) {
-		printf("? %s:%d environment null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	if (b == NULL || strlen(b) == 0) {
-		printf("? %s:%d symbol name null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL && "env null");
+	assert((b != NULL || strlen(b) != 0) && "symbol null");
 	return get_symval_id(a, b, NULL);
 }
 
@@ -1674,7 +1575,7 @@ val_of_seme(Env *a, Sem *b) {
 /* ----- evaluation, pass 2 ----- */
 
 static Val *
-eval_seq(Val *a) {
+eval_seq(Env *e, Val *a) {
 	/* work on copy of seq, which gets progressively reduced, and destroyed */
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
@@ -1683,7 +1584,7 @@ eval_seq(Val *a) {
 	b->seq.v.v = NULL;
 	/* eval seq items, in case items generate symbols */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		Val *c = eval(a->seq.v.v[i]);
+		Val *c = eval(e, a->seq.v.v[i]);
 		if (c == NULL) {
 			free_v(b);
 			return NULL;
@@ -1693,9 +1594,21 @@ eval_seq(Val *a) {
 	/* symbol application: consumes the seq, until 1 item left */
 	Val *c = NULL;  /* shorthand */
 	while (b->seq.v.n > 0) {
-		/* stop: seq of 1 element reduced to this element */
+		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
 			c = b->seq.v.v[0];
+			if (c->hdr.t == VSYMUNK) {
+				/* symbol must now be defined */
+				Symval *sv = get_symval(e, c->symunk.v);
+				if (sv == NULL) {
+					printf("? %s:%d undefined symbol (%s)\n",
+							__FUNCTION__,__LINE__,
+							c->symunk.v);
+					free_v(b);
+					return NULL;
+				}
+				c = sv->v;
+			} 
 			Val *d = copy_v(c);
 			free_v(b);
 			return d;
@@ -1703,7 +1616,7 @@ eval_seq(Val *a) {
 		unsigned int hiprio = minprio()+1;
 		size_t symat = 0;
 		bool symfound = false;
-		/* apply symbols from left to right (for same priority symbols) */
+		/* apply symops from left to right (for same priority symbols) */
 		for (size_t i=0; i < b->seq.v.n; ++i) {
 			c = b->seq.v.v[i];
 			if (c->hdr.t == VSYMOP) {
@@ -1721,7 +1634,7 @@ eval_seq(Val *a) {
 			return NULL;
 		}
 		/* apply the symbol, returns the reduced seq */
-		c = b->seq.v.v[symat]->symop.v(b, symat);
+		c = b->seq.v.v[symat]->symop.v(e, b, symat);
 		if (c == NULL) {
 			printf("? %s:%d symbol application failed\n",
 					__FUNCTION__,__LINE__);
@@ -1738,8 +1651,9 @@ eval_seq(Val *a) {
 }
 
 static Val *
-eval(Val *a) {
+eval(Env *e, Val *a) {
 	/* eval() returns a fresh value, leaves a untouched */
+	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
 		Val *b = copy_v(a);
@@ -1751,7 +1665,7 @@ eval(Val *a) {
 		b->lst.v.n = 0;
 		b->lst.v.v = NULL;
 		for (size_t i=0; i < a->lst.v.n; ++i) {
-			Val *c = eval(a->lst.v.v[i]);
+			Val *c = eval(e, a->lst.v.v[i]);
 			if (c == NULL) {
 				free_v(b);
 				return NULL;
@@ -1761,7 +1675,7 @@ eval(Val *a) {
 		return b;
 	}
 	if (a->hdr.t == VSEQ) {
-		return eval_seq(a);
+		return eval_seq(e, a);
 	}
 	printf("? %s:%d unknown value\n",
 			__FUNCTION__,__LINE__);
@@ -1778,6 +1692,7 @@ typedef struct {
 static Phrase *
 phrase() {
 	Phrase *a = malloc(sizeof(*a));
+	assert(a != NULL);
 	a->n = 0;
 	a->x = NULL;
 	return a;
@@ -1785,9 +1700,7 @@ phrase() {
 
 static void
 free_ph(Phrase *a) {
-	if (a == NULL) {
-		return;
-	}
+	assert(a != NULL);
 	for (size_t i=0; i<a->n; ++i) {
 		free(a->x[i]);
 	}
@@ -1797,11 +1710,7 @@ free_ph(Phrase *a) {
 
 static void
 print_ph(Phrase *a) {
-	if (a == NULL) {
-		printf("? %s:%d phrase is empty\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
+	assert(a != NULL);
 	for (size_t i=0; i<a->n; ++i) {
 		printf("%s; ", a->x[i]);
 	}
@@ -1810,16 +1719,8 @@ print_ph(Phrase *a) {
 
 static Phrase *
 push_ph(Phrase *a, char *b) {
-	if (a == NULL) {
-		printf("? %s:%d phrase is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	if (b == NULL) {
-		printf("? %s:%d pushed expression is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL);
+	assert(b != NULL);
 	char **c = malloc((a->n +1)*sizeof(c));
 	if (a->n > 0) {
 		memcpy(c, a->x, a->n * sizeof(char*));
@@ -1898,11 +1799,7 @@ phrase_of_str(char *a) {
 static bool
 added_sym(Env *a, Symval *b, bool err) {
 	assert(a != NULL && "environment null");
-	if (b == NULL) {
-		printf("? %s:%d pushed symbol null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
+	assert(b != NULL && "symbol null");
 	if (get_symval(a, b->name) != NULL) {
 		if (err) {
 			printf("? %s:%d symbol already defined (%s)\n",
@@ -1925,16 +1822,8 @@ added_sym(Env *a, Symval *b, bool err) {
 static bool
 upded_sym(Env *a, Symval *b, bool err) {
 	assert(a != NULL && "environment null");
-	if (b == NULL) { 
-		printf("? %s:%d pushed symbol null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
-	if (strlen(b->name) == 0) {
-		printf("? %s:%d symbol name null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
+	assert(b != NULL && "symbol null");
+	assert(strlen(b->name) != 0);
 	size_t id;
 	Symval *c = get_symval_id(a, b->name, &id);
 	if (c == NULL) {
@@ -1989,13 +1878,13 @@ eval_ph(Phrase *a) {
 			return NULL;
 		}
 		printf("# value %lu:\t ", i); print_v(v); printf("\n");
-		Val *ev = eval(v);
+		Val *ev = eval(b, v);
 		free_v(v);
 		if (ev == NULL) {
 			free_env(b);
 			return NULL;
 		}
-		printf("# %lu = ", i); print_v(ev); printf("\n");
+		printf("# %lu: ", i); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
 		free_v(ev);
 		if (it == NULL) {
