@@ -1663,7 +1663,6 @@ eval_seq(Env *e, Val *a) {
 	b->seq.v.n = 0;
 	b->seq.v.v = NULL;
 	/* eval seq items, in case items generate symbols */
-	printf("eval_seq 1: "); print_v(a); printf("\n");
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		Val *c = eval(e, a->seq.v.v[i], false);
 		if (c == NULL) {
@@ -1672,7 +1671,6 @@ eval_seq(Env *e, Val *a) {
 		}
 		b = push_v(b, c);
 	}
-	printf("eval_seq 2: "); print_v(b); printf("\n");
 	/* symbol application: consumes the seq, until 1 item left */
 	Val *c = NULL;  /* shorthand */
 	while (b->seq.v.n > 0) {
@@ -1800,8 +1798,7 @@ print_ph(Phrase *a) {
 
 static Phrase *
 push_ph(Phrase *a, char *b) {
-	assert(a != NULL);
-	assert(b != NULL);
+	assert(a != NULL && b != NULL);
 	char **c = malloc((a->n +1)*sizeof(c));
 	if (a->n > 0) {
 		memcpy(c, a->x, a->n * sizeof(char*));
@@ -1886,7 +1883,7 @@ eval_ph(Phrase *a) {
 	b->n = 0;
 	b->s = NULL;
 	for (size_t i=0; i<a->n; ++i) {
-		printf("# expression %lu:\t %s", i, a->x[i]);
+		printf("# expression %lu:\t %s\n", i, a->x[i]);
 		Expr *ex = exp_of_words(a->x[i]);
 		/* a is freed where allocated, not here but by caller */
 		if (ex == NULL) {
