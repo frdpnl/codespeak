@@ -812,6 +812,134 @@ push_v(Val *a, Val *b) {
 	return a;
 }
 
+static void
+print_symval(Symval *a) {
+	assert(a != NULL);
+	printf("'%s = ", a->name);
+	print_v(a->v);
+}
+static void
+print_env(Env *a) {
+	assert(a != NULL);
+	for (size_t i=0; i<a->n; ++i) {
+		print_symval(a->s[i]);
+		printf(", ");
+	}
+	printf("\n");
+}
+static Symval *
+symval(char *a, Val *b) {
+	assert(a != NULL && "name is null");
+	assert(b != NULL && "val is null");
+	if (strlen(a) == 0) {
+		printf("? %s:%d empty name\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	};
+	if (strlen(a) >= WSZ) {
+		printf("? %s:%d symbol name too long (%s)\n",
+				__FUNCTION__,__LINE__, a);
+		return NULL;
+	};
+	Symval *c = malloc(sizeof(*c));
+	strncpy(c->name, a, WSZ*sizeof(char));
+	c->v = copy_v(b);
+	return c;
+}
+static void
+free_symval(Symval *a) {
+	assert(a != NULL);
+	free_v(a->v);
+	free(a);
+}
+static void 
+free_env(Env *a) {
+	assert(a != NULL);
+	for (size_t i=0; i<a->n; ++i) {
+		free_symval(a->s[i]);
+	}
+	free(a->s);
+	free(a);
+}
+static Symval *
+get_symval_id(Env *a, char *b, size_t *id) {
+	assert(a != NULL && "env is null");
+	assert(b != NULL && "name is null");
+	if (strlen(b) == 0) {
+		printf("? %s:%d symbol name null\n",
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	for (size_t i=0; i<a->n; ++i) {
+		Symval *c = a->s[i];
+		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
+			if (id != NULL) {
+				*id = i;
+			}
+			return c;
+		}
+	}
+	return NULL;
+}
+
+static Symval *
+get_symval(Env *a, char *b) {
+	assert(a != NULL && "env null");
+	assert((b != NULL || strlen(b) != 0) && "symbol null");
+	return get_symval_id(a, b, NULL);
+}
+
+static bool
+added_sym(Env *a, Symval *b, bool err) {
+	assert(a != NULL && "environment null");
+	assert(b != NULL && "symbol null");
+	if (get_symval(a, b->name) != NULL) {
+		if (err) {
+			printf("? %s:%d symbol already defined (%s)\n",
+					__FUNCTION__,__LINE__, b->name);
+		}
+		return false;
+	}
+	Symval **c = malloc((a->n +1)*sizeof(Symval*));
+	if (a->n > 0) {
+		memcpy(c, a->s, a->n * sizeof(Symval*));
+	}
+	c[a->n] = b;
+	if (a->n > 0) {
+		free(a->s);
+	}
+	++(a->n);
+	a->s = c;
+	return true;
+}
+static bool
+upded_sym(Env *a, Symval *b, bool err) {
+	assert(a != NULL && "environment null");
+	assert(b != NULL && "symbol null");
+	assert(strlen(b->name) != 0);
+	size_t id;
+	Symval *c = get_symval_id(a, b->name, &id);
+	if (c == NULL) {
+		if (err) {
+			printf("? %s:%d symbol not found (%s)\n",
+					__FUNCTION__,__LINE__, b->name);
+		}
+		return false;
+	}
+	free_symval(c);
+	a->s[id] = b;
+	return true;
+}
+static bool
+store_sym(Env *a, Symval *b) {
+	if (upded_sym(a, b, false)) {
+		return true;
+	}
+	if (added_sym(a, b, true)) {
+		return true;
+	}
+	return false;
+}
 /* -------- operation symbol definitions ------------
  * recommended interface (resource management):
  * 1. work off copies of arguments
@@ -833,6 +961,10 @@ infixed(size_t p, size_t n) {
 static bool 
 prefixed1(size_t p, size_t n) {
 	return (p >= 0 && p < n-1);
+}
+static bool 
+prefixed2(size_t p, size_t n) {
+	return (p >= 0 && p < n-2);
 }
 
 static bool
@@ -878,6 +1010,31 @@ copy_prefix1_arg(Val *s, size_t p, Val **pa) {
 	return true;
 }
 static bool
+copy_prefix2_arg(Val *s, size_t p, Val **pa, Val **pb) {
+	Val *a, *b;
+	if (!prefixed2(p, s->seq.v.n)) {
+		printf("? %s:%d symbol not prefixed to 2 arguments\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	a = copy_v(s->seq.v.v[p+1]);
+	if (a == NULL) {
+		printf("? %s:%d argument null\n", 
+				__FUNCTION__,__LINE__);
+		return false;
+	}
+	b = copy_v(s->seq.v.v[p+2]);
+	if (b == NULL) {
+		printf("? %s:%d argument null\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		return false;
+	}
+	*pa = a;
+	*pb = b;
+	return true;
+}
+static bool
 copy_prefixn_arg(Val *s, size_t p, Val **pa) {
 	Val *a;
 	a = malloc(sizeof(*a));
@@ -903,19 +1060,29 @@ upd_infix(Val *s, size_t p, Val *a) {
 	s->seq.v.n -= 2;
 }
 static void
-upd_prefix1(Val *s, size_t p, Val *a) {
+upd_prefixk(Val *s, size_t p, Val *a, size_t k) {
 	/* consumed 1 seq item */
-	for (size_t i=p; i < s->seq.v.n && i < p+2; ++i) {
+	for (size_t i=p; i < s->seq.v.n && i < p+k+1; ++i) {
 		free_v(s->seq.v.v[i]);
 	}
 	s->seq.v.v[p] = a;
-	for (size_t i=p+2; i < s->seq.v.n; ++i) {
-		s->seq.v.v[i-1] = s->seq.v.v[i];
+	for (size_t i=p+k+1; i < s->seq.v.n; ++i) {
+		s->seq.v.v[i-k] = s->seq.v.v[i];
 	}
-	s->seq.v.n -= 1;
+	s->seq.v.n -= k;
 }
 static void
-upd_prefixn(Val *s, size_t p, Val *a) {
+upd_prefix1(Val *s, size_t p, Val *a) {
+	/* consumed 1 seq item */
+	upd_prefixk(s, p, a, 1);
+}
+static void
+upd_prefix2(Val *s, size_t p, Val *a) {
+	/* consumed 2 seq item */
+	upd_prefixk(s, p, a, 2);
+}
+static void
+upd_prefixall(Val *s, size_t p, Val *a) {
 	/* consumed n-p seq item */
 	for (size_t i=p; i < s->seq.v.n; ++i) {
 		free_v(s->seq.v.v[i]);
@@ -1330,7 +1497,6 @@ eval_do(Env *e, Val *s, size_t p) {
 	upd_prefix1(s, p, b);
 	return s;
 }
-
 static Val *
 eval_list(Env *e, Val *s, size_t p) {
 	Val *a;
@@ -1340,7 +1506,43 @@ eval_list(Env *e, Val *s, size_t p) {
 		return NULL;
 	}
 	a->hdr.t = VLST;
-	upd_prefixn(s, p, a);
+	upd_prefixall(s, p, a);
+	return s;
+}
+static Val *
+eval_call(Env *e, Val *s, size_t p) {
+	Val *a, *b;
+	if (!copy_prefix2_arg(s, p, &a, &b)) {
+		printf("? %s:%d prefix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (a->hdr.t == VSYMUNK) {
+		printf("? %s:%d 1st argument a new symbol\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	if (b->hdr.t != VSYMUNK) {
+		printf("? %s:%d 2nd argument not a new symbol\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		free_v(b);
+		return NULL;
+	}
+	Symval *sv = symval(b->symunk.v, a);
+	free_v(b);
+	if (sv == NULL) {
+		free_v(a);
+		return NULL;
+	}
+	if (!added_sym(e, sv, true)) {
+		free_symval(sv);
+		free_v(a);
+		return NULL;
+	}
+	upd_prefix2(s, p, a);
 	return s;
 }
 
@@ -1352,11 +1554,12 @@ typedef struct Symop_ {
 	Val* (*f)(Env *e, Val *s, size_t p);
 } Symop;
 
-#define NSYMS 17
+#define NSYMS 18
 Symop Syms[] = {
 	(Symop) {"id",   10, eval_id}, /* technical symbol */
 	(Symop) {"do",   10, eval_do},
 	(Symop) {"list", 10, eval_list},
+	(Symop) {"call", 10, eval_call},
 	(Symop) {"*",    20, eval_mul},
 	(Symop) {"/",    20, eval_div},
 	(Symop) {"+",    30, eval_plu},
@@ -1395,82 +1598,6 @@ get_symop(char *a) {
 
 /* --------------- user defined value symbols -------------------- */
 
-static void
-print_symval(Symval *a) {
-	assert(a != NULL);
-	printf("'%s = ", a->name);
-	print_v(a->v);
-}
-static void
-print_env(Env *a) {
-	assert(a != NULL);
-	for (size_t i=0; i<a->n; ++i) {
-		print_symval(a->s[i]);
-		printf(", ");
-	}
-	printf("\n");
-}
-static Symval *
-symval(char *a, Val *b) {
-	assert(a != NULL && "name is null");
-	assert(b != NULL && "val is null");
-	if (strlen(a) == 0) {
-		printf("? %s:%d empty name\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	};
-	if (strlen(a) >= WSZ) {
-		printf("? %s:%d symbol name too long (%s)\n",
-				__FUNCTION__,__LINE__, a);
-		return NULL;
-	};
-	Symval *c = malloc(sizeof(*c));
-	strncpy(c->name, a, WSZ*sizeof(char));
-	c->v = copy_v(b);
-	return c;
-}
-static void
-free_symval(Symval *a) {
-	assert(a != NULL);
-	free_v(a->v);
-	free(a);
-}
-static void 
-free_env(Env *a) {
-	assert(a != NULL);
-	for (size_t i=0; i<a->n; ++i) {
-		free_symval(a->s[i]);
-	}
-	free(a->s);
-	free(a);
-}
-static Symval *
-get_symval_id(Env *a, char *b, size_t *id) {
-	assert(a != NULL && "env is null");
-	assert(b != NULL && "name is null");
-	if (strlen(b) == 0) {
-		printf("? %s:%d symbol name null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	for (size_t i=0; i<a->n; ++i) {
-		Symval *c = a->s[i];
-		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
-			if (id != NULL) {
-				*id = i;
-			}
-			return c;
-		}
-	}
-	return NULL;
-}
-
-static Symval *
-get_symval(Env *a, char *b) {
-	assert(a != NULL && "env null");
-	assert((b != NULL || strlen(b) != 0) && "symbol null");
-	return get_symval_id(a, b, NULL);
-}
 
 static bool
 isatom_v(Val *a) {
@@ -1796,57 +1923,6 @@ phrase_of_str(char *a) {
 
 /* Environment: defined symbols across a phrase */
 
-static bool
-added_sym(Env *a, Symval *b, bool err) {
-	assert(a != NULL && "environment null");
-	assert(b != NULL && "symbol null");
-	if (get_symval(a, b->name) != NULL) {
-		if (err) {
-			printf("? %s:%d symbol already defined (%s)\n",
-					__FUNCTION__,__LINE__, b->name);
-		}
-		return false;
-	}
-	Symval **c = malloc((a->n +1)*sizeof(Symval*));
-	if (a->n > 0) {
-		memcpy(c, a->s, a->n * sizeof(Symval*));
-	}
-	c[a->n] = b;
-	if (a->n > 0) {
-		free(a->s);
-	}
-	++(a->n);
-	a->s = c;
-	return true;
-}
-static bool
-upded_sym(Env *a, Symval *b, bool err) {
-	assert(a != NULL && "environment null");
-	assert(b != NULL && "symbol null");
-	assert(strlen(b->name) != 0);
-	size_t id;
-	Symval *c = get_symval_id(a, b->name, &id);
-	if (c == NULL) {
-		if (err) {
-			printf("? %s:%d symbol not found (%s)\n",
-					__FUNCTION__,__LINE__, b->name);
-		}
-		return false;
-	}
-	free_symval(c);
-	a->s[id] = b;
-	return true;
-}
-static bool
-store_sym(Env *a, Symval *b) {
-	if (upded_sym(a, b, false)) {
-		return true;
-	}
-	if (added_sym(a, b, true)) {
-		return true;
-	}
-	return false;
-}
 
 static Env *
 eval_ph(Phrase *a) {
