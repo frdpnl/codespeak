@@ -1702,8 +1702,9 @@ eval_seq(Val *a) {
 	b->hdr.t = VSEQ;
 	b->seq.v.n = 0;
 	b->seq.v.v = NULL;
+	/* eval seq items, in case items generate symbols */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		c = eval(a->seq.v.v[i]);
+		Val *c = eval(a->seq.v.v[i]);
 		if (c == NULL) {
 			free_v(b);
 			return NULL;
@@ -1711,6 +1712,7 @@ eval_seq(Val *a) {
 		b = push_v(b, c);
 	}
 	/* symbol application: consumes the seq, until 1 item left */
+	Val *c = NULL;  /* shorthand */
 	while (b->seq.v.n > 0) {
 		/* stop: seq of 1 element reduced to this element */
 		if (b->seq.v.n == 1) {
