@@ -55,6 +55,7 @@ typedef struct {
 static Expr *
 expr() {
 	Expr *a = malloc(sizeof(*a));
+	assert(a != NULL);
 	a->n = 0;
 	a->w = NULL;
 	return a;
@@ -62,9 +63,7 @@ expr() {
 
 static void
 free_x(Expr *a) {
-	if (a == NULL) {
-		return;
-	}
+	assert(a != NULL);
 	free(a->w);
 	free(a);
 }
@@ -72,6 +71,7 @@ free_x(Expr *a) {
 static Word *
 word(wtype a) {
 	Word *b = malloc(sizeof(*b));
+	assert(b != NULL);
 	b->t = a;
 	b->v[0] = '\0';
 	return b;
@@ -92,12 +92,9 @@ word_str(char *a, size_t n) {
 
 static Expr *
 push_xz(Expr *a, Word *b) {
-	if (a == NULL) {
-		printf("? %s:%d list is null\n", 
-				__FUNCTION__, __LINE__);
-		return NULL;
-	}
+	assert(a != NULL);
 	Word *c = malloc((a->n+1)*sizeof(Word));
+	assert(c != NULL);
 	memcpy(c+a->n, b, sizeof(Word));
 	if (a->n) {
 		memcpy(c, a->w, a->n*sizeof(Word));
@@ -173,7 +170,6 @@ exp_of_words(char *a) {
 		boff += read;
 		buf[boff] = '\0';
 	}
-	printf("\n");
 	if (boff) {
 		w = word_str(buf, boff);
 		b = push_xz(b, w);
@@ -181,7 +177,7 @@ exp_of_words(char *a) {
 	return b;
 }
 
-/* ----- identify words, as semes, 1st level semes ----- */
+/* ----- From words to semes (increased semantics) ----- */
 
 typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;
 
@@ -220,11 +216,7 @@ typedef union Sem_ {
 
 static void
 print_s(Sem *a) {
-	if (a == NULL) {
-		printf("? %s:%d null seme\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
+	assert(a != NULL);
 	switch (a->hdr.t) {
 		case SNIL:
 			printf("Nil ");
@@ -261,6 +253,7 @@ print_s(Sem *a) {
 static Sem *
 sem_nil() {
 	Sem *b = malloc(sizeof(*b));
+	assert(b != NULL);
 	b->hdr.t = SNIL;
 	return b;
 }
@@ -268,6 +261,7 @@ sem_nil() {
 static Sem *
 sem_nat(long long a) {
 	Sem *b = malloc(sizeof(*b));
+	assert(b != NULL);
 	b->nat.t = SNAT;
 	b->nat.v = a;
 	return b;
@@ -276,6 +270,7 @@ sem_nat(long long a) {
 static Sem *
 sem_rea(double a) {
 	Sem *b = malloc(sizeof(*b));
+	assert(b != NULL);
 	b->rea.t = SREA;
 	b->rea.v = a;
 	return b;
@@ -284,6 +279,7 @@ sem_rea(double a) {
 static Sem *
 sem_sym(char *a) {
 	Sem *b = malloc(sizeof(*b));
+	assert(b != NULL);
 	b->sym.t = SSYM;
 	strncpy(b->sym.v, a, WSZ);
 	b->sym.v[WSZ-1] = '\0';
@@ -293,6 +289,7 @@ sem_sym(char *a) {
 static Sem *
 sem_seq() {
 	Sem *b = malloc(sizeof(*b));
+	assert(b != NULL);
 	b->lst.t = SSEQ;
 	b->lst.v.n = 0;
 	b->lst.v.s = NULL;
@@ -301,11 +298,7 @@ sem_seq() {
 
 static void 
 free_s(Sem *a) {
-	if (a == NULL) {
-		printf("? %s:%d null seme\n",
-				__FUNCTION__, __LINE__);
-		return;
-	}
+	assert(a != NULL);
 	switch (a->hdr.t) {
 		case SNIL:
 		case SNAT:
@@ -387,22 +380,15 @@ issym(Word *a) {
 
 static Sem *
 push_s(Sem *a, Sem *b) {
-	if (a == NULL) {
-		printf("? %s:%d seq or lst seme is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	if (b == NULL) {
-		printf("? %s:%d pushed seme is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL && "seq or lst is null");
+	assert(b != NULL && "pushed seme is null");
 	if (a->hdr.t != SSEQ && a->hdr.t != SLST) {
 		printf("? %s:%d not a seq or lst seme\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
 	Sem *c = malloc((a->seq.v.n +1)*sizeof(Sem));
+	assert(c != NULL);
 	memcpy(c, a->seq.v.s, a->seq.v.n * sizeof(Sem));
 	memcpy(c + a->seq.v.n, b, sizeof(Sem));
 	++(a->seq.v.n);
@@ -413,11 +399,7 @@ push_s(Sem *a, Sem *b) {
 
 static Sem *
 lst_of(Sem *a) {
-	if (a == NULL) {
-		printf("? %s:%d seme is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL);
 	if (a->hdr.t != SSEQ && a->hdr.t != SLST) {
 		printf("? %s:%d not a seq or lst seme\n",
 				__FUNCTION__,__LINE__);
@@ -437,7 +419,7 @@ lst_of(Sem *a) {
 }
 
 static Sem *
-read_seme(Expr *a, size_t from, size_t tox) {
+seme_of_exp_part(Expr *a, size_t from, size_t tox) {
 	if (from == tox) {
 		return sem_nil();
 	}
@@ -477,7 +459,7 @@ read_seme(Expr *a, size_t from, size_t tox) {
 					} else if (a->w[ip].t == RIGHT) {
 						--inpar;
 						if (inpar == 0) {
-							c = read_seme(a, iw+1, ip);
+							c = seme_of_exp_part(a, iw+1, ip);
 							if (c == NULL) {
 								free_s(b);
 								return NULL;
@@ -555,15 +537,11 @@ read_seme(Expr *a, size_t from, size_t tox) {
 
 static Sem *
 seme_of_exp(Expr *a) {
-	if (a == NULL) {
-		printf("? %s:%d null list of words\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL);
 	if (a->n == 0) {
 		return sem_nil();
 	} 
-	return read_seme(a, 0, a->n);
+	return seme_of_exp_part(a, 0, a->n);
 }
 
 /* ----- evaluation, pass 1 ----- */
@@ -620,11 +598,7 @@ typedef union Val_ {
 
 static void
 print_v(Val *a) {
-	if (a == NULL) {
-		printf("? %s:%d null value\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
+	assert(a != NULL);
 	switch (a->hdr.t) {
 		case VNIL:
 			printf("Nil ");
@@ -663,11 +637,7 @@ print_v(Val *a) {
 
 static void 
 free_v(Val *a) {
-	if (a == NULL) {
-		printf("? %s:%d null value\n",
-				__FUNCTION__, __LINE__);
-		return;
-	}
+	assert(a != NULL);
 	switch (a->hdr.t) {
 		case VNIL:
 		case VNAT:
@@ -696,11 +666,7 @@ free_v(Val *a) {
 
 static bool
 isequal_v(Val *a, Val *b) {
-	if (a == NULL || b == NULL) {
-		printf("? %s:%d value is null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
+	assert(a != NULL && b != NULL);
 	if (a->hdr.t != b->hdr.t) {
 		return false;
 	}
@@ -735,11 +701,7 @@ isequal_v(Val *a, Val *b) {
 
 static bool
 isequiv_v(Val *a, Val *b) {
-	if (a == NULL || b == NULL) {
-		printf("? %s:%d value is null\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
+	assert(a != NULL && b != NULL);
 	if (a->hdr.t == VNAT && b->hdr.t == VREA) {
 		return ((double)a->nat.v == b->rea.v);
 	}
@@ -885,7 +847,7 @@ get_symval_id(Env *a, char *b, size_t *id) {
 static Symval *
 get_symval(Env *a, char *b) {
 	assert(a != NULL && "env null");
-	assert((b != NULL || strlen(b) != 0) && "symbol null");
+	assert((b != NULL && strlen(b) != 0) && "symbol null");
 	return get_symval_id(a, b, NULL);
 }
 
