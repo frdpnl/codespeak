@@ -614,7 +614,7 @@ seme_of_exp(Expr *a) {
 
 /* ----- evaluation, pass 1 ----- */
 
-typedef enum {VNIL, VNAT, VREA, VSYMOP, VLST, VSEQ} vtype;
+typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMUNK, VLST, VSEQ} vtype;
 
 typedef union Val_ Val;
 
@@ -640,6 +640,10 @@ typedef union Val_ {
 		unsigned int prio;
 		Val* (*v)(Val *s, size_t p);
 	} symop;
+	struct {
+		stype t;
+		char v[WSZ];
+	} symunk;
 	struct {
 		vtype t;
 		List_v v;
@@ -669,6 +673,9 @@ print_v(Val *a) {
 			break;
 		case VSYMOP:
 			printf("'%p(%d) ", a->symop.v, a->symop.prio);
+			break;
+		case VSYMUNK:
+			printf("'%s(?) ", a->symunk.v);
 			break;
 		case VLST:
 			printf("{ ");
@@ -701,6 +708,7 @@ free_v(Val *a) {
 		case VNIL:
 		case VNAT:
 		case VREA:
+		case VSYMUNK:
 		case VSYMOP: /* symop holds pointer to val in Syms */
 			break;
 		case VSEQ:
@@ -744,6 +752,9 @@ isequal_v(Val *a, Val *b) {
 	if (a->hdr.t == VSYMOP) {
 		return (a->symop.v == b->symop.v);
 	}
+	if (a->hdr.t == VSYMUNK) {
+		return (strncmp(a->symunk.v, b->symunk.v, WSZ*sizeof(char)) == 0);
+	}
 	if (a->hdr.t == VLST) {
 		for (size_t i=0; i<a->lst.v.n; ++i) { 
 			bool c = isequal_v(a->lst.v.v[i], b->lst.v.v[i]);
@@ -786,6 +797,9 @@ isequiv_v(Val *a, Val *b) {
 	if (a->hdr.t == VSYMOP) {
 		return (a->symop.v == b->symop.v);
 	}
+	if (a->hdr.t == VSYMUNK) {
+		return (strncmp(a->symunk.v, b->symunk.v, WSZ*sizeof(char)) == 0);
+	}
 	if (a->hdr.t == VLST) {
 		for (size_t i=0; i<a->lst.v.n; ++i) { 
 			bool c = isequiv_v(a->lst.v.v[i], b->lst.v.v[i]);
@@ -801,11 +815,7 @@ isequiv_v(Val *a, Val *b) {
 }
 static Val *
 copy_v(Val *a) {
-	if (a == NULL) {
-		printf("? %s:%d value is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL);
 	Val *b = malloc(sizeof(Val));
 	memcpy(b, a, sizeof(Val));
 	if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
@@ -818,16 +828,8 @@ copy_v(Val *a) {
 }
 static Val *
 push_v(Val *a, Val *b) {
-	if (a == NULL) {
-		printf("? %s:%d seq or list is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	if (b == NULL) {
-		printf("? %s:%d pushed value is null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL && "seq is null");
+	assert(b != NULL && "val is null");
 	if (a->hdr.t != VSEQ && a->hdr.t != VLST) {
 		printf("? %s:%d not a seq or list val\n",
 				__FUNCTION__,__LINE__);
@@ -1486,21 +1488,13 @@ typedef struct {
 
 static void
 print_symval(Symval *a) {
-	if (a == NULL) {
-		printf("? %s:%d symbol null\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
+	assert(a != NULL);
 	printf("'%s = ", a->name);
 	print_v(a->v);
 }
 static void
 print_env(Env *a) {
-	if (a == NULL) {
-		printf("? %s:%d environment null\n",
-				__FUNCTION__,__LINE__);
-		return;
-	}
+	assert(a != NULL);
 	for (size_t i=0; i<a->n; ++i) {
 		print_symval(a->s[i]);
 		printf(", ");
@@ -1509,11 +1503,8 @@ print_env(Env *a) {
 }
 static Symval *
 symval(char *a, Val *b) {
-	if (a == NULL || b == NULL) {
-		printf("? %s:%d null values for symbol\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
+	assert(a != NULL && "name is null");
+	assert(b != NULL && "val is null");
 	if (strlen(a) == 0) {
 		printf("? %s:%d empty name\n",
 				__FUNCTION__,__LINE__);
@@ -1531,21 +1522,13 @@ symval(char *a, Val *b) {
 }
 static void
 free_symval(Symval *a) {
-	if (a == NULL) {
-		printf("? %s:%d null symbol\n",
-				__FUNCTION__, __LINE__);
-		return;
-	}
+	assert(a != NULL);
 	free_v(a->v);
 	free(a);
 }
 static void 
 free_env(Env *a) {
-	if (a == NULL) {
-		printf("? %s:%d null environment\n",
-				__FUNCTION__, __LINE__);
-		return;
-	}
+	assert(a != NULL);
 	for (size_t i=0; i<a->n; ++i) {
 		free_symval(a->s[i]);
 	}
@@ -1554,12 +1537,9 @@ free_env(Env *a) {
 }
 static Symval *
 get_symval_id(Env *a, char *b, size_t *id) {
-	if (a == NULL) {
-		printf("? %s:%d environment null\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
-	}
-	if (b == NULL || strlen(b) == 0) {
+	assert(a != NULL && "env is null");
+	assert(b != NULL && "name is null");
+	if (strlen(b) == 0) {
 		printf("? %s:%d symbol name null\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1593,14 +1573,11 @@ get_symval(Env *a, char *b) {
 
 static bool
 isatom_v(Val *a) {
-	if (a==NULL) {
-		printf("? %s:%d null value\n",
-				__FUNCTION__,__LINE__);
-		return false;
-	}
+	assert(a != NULL);
 	return (a->hdr.t == VNIL 
 			|| a->hdr.t == VNAT 
 			|| a->hdr.t == VREA
+			|| a->hdr.t == VSYMUNK
 			|| a->hdr.t == VSYMOP);
 }
 
@@ -1631,7 +1608,7 @@ val_of_seme(Env *a, Sem *b) {
 		return c;
 	}
 	if (b->hdr.t == SSYM) {
-		/* is it a operation symbol? */
+		/* is it a known operation symbol? */
 		Symop *sb = get_symop(b->sym.v);
 		if (sb != NULL) {
 			c = malloc(sizeof(*c));
@@ -1640,16 +1617,18 @@ val_of_seme(Env *a, Sem *b) {
 			c->symop.v = sb->f;
 			return c;
 		}
-		/* is it a user-defined value symbol? */
+		/* is it a known user-defined value symbol? */
 		Symval *sv = get_symval(a, b->sym.v);
 		if (sv != NULL) {
 			c = copy_v(sv->v);
 			return c;
 		}
-		/* later: user defined function symbol... */
-		printf("? %s:%d unknown symbol seme\n",
-				__FUNCTION__,__LINE__);
-		return NULL;
+		/* could be a yet undefined symbol, defined by a function (ex: call it n) */
+		c = malloc(sizeof(*c));
+		assert(c != NULL);
+		c->hdr.t = VSYMUNK;
+		strncpy(c->symunk.v, b->sym.v, WSZ*sizeof(char));
+		return c;
 	}
 	if (b->hdr.t == SLST) {
 		c = malloc(sizeof(*c));
@@ -2016,7 +1995,7 @@ eval_ph(Phrase *a) {
 			free_env(b);
 			return NULL;
 		}
-		printf("# = "); print_v(ev); printf("\n");
+		printf("# %lu = ", i); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
 		free_v(ev);
 		if (it == NULL) {
