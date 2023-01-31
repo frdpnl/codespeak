@@ -1427,12 +1427,6 @@ eval_print(Env *e, Val *s, size_t p) {
 				__FUNCTION__,__LINE__);
 		return NULL;
 	}
-	if (a->hdr.t != VLST) {
-		printf("? %s:%d argument not a list\n", 
-				__FUNCTION__,__LINE__);
-		free_v(a);
-		return NULL;
-	}
 	print_v(a);
 	printf("\n");
 	free_v(a);
