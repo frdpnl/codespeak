@@ -112,7 +112,7 @@ according to my findings from the study of natural languages
 (such as the Classic style, Chomsky's Minimal Program. More details to come),
 and to my taste and limitations :)
 
-*Language does not need grammar, but grammar needs language.* (Sylavin Auroux interview)
+*Language does not need grammar, but grammar needs language.* (Sylvain Auroux interview)
 
 A program is a sequence of paragraphs (not here yet).
 
@@ -132,7 +132,7 @@ Envisioning something like:
 
 `take p` removes p from list.
 
-For the learning experience, all is in C (gnu99), and theory is introduced when needed (a learning exercise).
+For the learning experience, all is in C (gnu99), and theory is introduced when needed.
 
 Single dependency is suckless.org's libgrapheme, for unicode support in source code.
 (like other suckless.org programs - `st`, `dwm` - it is excellent).
@@ -141,5 +141,4 @@ Inspired by nanopass; several small steps to evaluation (inefficient most of the
 
 Long-term objective is to compile to WASM (yes, not here yet).
 
-Beyond long-term project is to provide WASM runtime to GPU.
 

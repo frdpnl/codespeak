@@ -1023,7 +1023,7 @@ upd_infix(Val *s, size_t p, Val *a) {
 }
 static void
 upd_prefixk(Val *s, size_t p, Val *a, size_t k) {
-	/* consumed 1 seq item */
+	/* consume k seq item */
 	for (size_t i=p; i < s->seq.v.n && i < p+k+1; ++i) {
 		free_v(s->seq.v.v[i]);
 	}
@@ -1035,22 +1035,18 @@ upd_prefixk(Val *s, size_t p, Val *a, size_t k) {
 }
 static void
 upd_prefix1(Val *s, size_t p, Val *a) {
-	/* consumed 1 seq item */
+	/* consume 1 seq item */
 	upd_prefixk(s, p, a, 1);
 }
 static void
 upd_prefix2(Val *s, size_t p, Val *a) {
-	/* consumed 2 seq item */
+	/* consume 2 seq item */
 	upd_prefixk(s, p, a, 2);
 }
 static void
 upd_prefixall(Val *s, size_t p, Val *a) {
-	/* consumed n-p seq item */
-	for (size_t i=p; i < s->seq.v.n; ++i) {
-		free_v(s->seq.v.v[i]);
-	}
-	s->seq.v.v[p] = a;
-	s->seq.v.n = p+1;
+	/* consume n-p-1 (all remaining items) seq item */
+	upd_prefixk(s, p, a, s->seq.v.n - p - 1);
 }
 
 static Val *
@@ -1604,7 +1600,7 @@ val_of_seme(Env *a, Sem *b) {
 			c = copy_v(sv->v);
 			return c;
 		}
-		/* could be a yet undefined symbol, defined by a function (ex: call it n) */
+		/* could be a yet undefined symbol, used by a function (ex: call it n) */
 		c = malloc(sizeof(*c));
 		assert(c != NULL);
 		c->hdr.t = VSYMUNK;
@@ -1652,7 +1648,7 @@ val_of_seme(Env *a, Sem *b) {
 	return NULL;
 }
 
-/* ----- evaluation, pass 2 ----- */
+/* ----- evaluation, pass 2, symbolic computation ----- */
 
 static Val *
 eval_seq(Env *e, Val *a) {
@@ -1761,7 +1757,7 @@ eval(Env *e, Val *a, bool strict) {
 	return NULL;
 }
 
-/* ------------ Phrases, list of expressions --------- */
+/* ------------ Phrase, list of expressions --------- */
 
 typedef struct {
 	size_t n;
@@ -1873,7 +1869,6 @@ phrase_of_str(char *a) {
 /* -------------- Phrase -------------- */
 
 /* Environment: defined symbols across a phrase */
-
 
 static Env *
 eval_ph(Phrase *a) {
