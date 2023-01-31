@@ -66,7 +66,7 @@ Whitespace expected to separate words.
 
 `eval` evaluates its argument (strictly evaluated)
 
-`2, n, 3; call it A; call * n; eval A; print it` displays 6
+`2, n, 3; call it A; call * n; do A; print it` 
 
 ### Invalid expressions
 

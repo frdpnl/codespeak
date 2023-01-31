@@ -851,6 +851,21 @@ lookup(Env *a, char *b) {
 	return lookup_id(a, b, NULL);
 }
 
+static Symop * lookup_op(char *a);
+
+static Val *
+solv_op(char *c) {
+	Symop *op = lookup_op(c);
+	if (op == NULL) {
+		return NULL;
+	}
+	Val *a = malloc(sizeof(*b));
+	assert(a != NULL);
+	a->hdr.t = VSYMOP;
+	a->symop.prio = op->prio;
+	a->symop.v = op->f;
+	return a;
+}
 static Val *
 solv_env(Env *e, char *c) {
 	Symval *sv = lookup(e, c);
@@ -1566,7 +1581,7 @@ minprio() {
 	return m;
 }
 static Symop *
-get_symop(char *a) {
+lookup_op(char *a) {
 	for (size_t i=0; i<NSYMS; ++i) {
 		Symop *b = Syms+i;
 		if (strncmp(b->name, a, WSZ) == 0) {
@@ -1612,7 +1627,7 @@ val_of_seme(Env *a, Sem *b) {
 		return c;
 	}
 	if (b->hdr.t == SSYM) {
-		/*Symop *sb = get_symop(b->sym.v);
+		/*Symop *sb = lookup_op(b->sym.v);
 		if (sb != NULL) {
 			c = malloc(sizeof(*c));
 			c->hdr.t = VSYMOP;
@@ -1672,6 +1687,7 @@ val_of_seme(Env *a, Sem *b) {
 static Val *
 eval_seq(Env *e, Val *a) {
 	/* work on copy of seq, which gets progressively reduced, and destroyed */
+	printf("1: "); print_v(a); printf("\n");
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VSEQ;
@@ -1685,6 +1701,7 @@ eval_seq(Env *e, Val *a) {
 		}
 		b = push_v(b, c);
 	}
+	printf("2: "); print_v(b); printf("\n");
 	/* symbol application: consumes the seq, until 1 item left */
 	Val *c = NULL;  /* shorthand */
 	while (b->seq.v.n > 0) {
@@ -1738,22 +1755,14 @@ eval(Env *e, Val *a, bool strict) {
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
 		if (a->hdr.t == VSYM) {
-			Symop *op = get_symop(a->sym.v);
-			if (op != NULL) {
-				Val *b = malloc(sizeof(*b));
-				assert(b != NULL);
-				b->hdr.t = VSYMOP;
-				b->symop.prio = op->prio;
-				b->symop.v = op->f;
-				return b;
+			Val *b = solv_env(e, a->sym.v);
+			if (b == NULL && strict) {
+				return NULL;
+			} 
+			if (b == NULL) {
+				return copy_v(a);
 			}
-			if (strict) {
-				Val *b = solv_env(e, a->sym.v);
-				if (b == NULL) {
-					return NULL;
-				}
-				return copy_v(b);
-			}
+			return eval(e, b, strict);
 		} 
 		return copy_v(a);
 	}
