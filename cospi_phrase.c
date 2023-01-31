@@ -893,7 +893,7 @@ upded_sym(Env *a, Symval *b, bool err) {
 	return true;
 }
 static bool
-store_sym(Env *a, Symval *b) {
+stored_sym(Env *a, Symval *b) {
 	if (upded_sym(a, b, false)) {
 		return true;
 	}
@@ -1418,6 +1418,30 @@ eval_not(Env *e, Val *s, size_t p) {
 	upd_prefix1(s, p, a);
 	return s;
 }
+
+static Val *
+eval_print(Env *e, Val *s, size_t p) {
+	Val *a;
+	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+		printf("? %s:%d prefix expression invalid\n", 
+				__FUNCTION__,__LINE__);
+		return NULL;
+	}
+	if (a->hdr.t != VLST) {
+		printf("? %s:%d argument not a list\n", 
+				__FUNCTION__,__LINE__);
+		free_v(a);
+		return NULL;
+	}
+	print_v(a);
+	printf("\n");
+	free_v(a);
+	a = malloc(sizeof(*a));
+	assert(a != NULL);
+	a->hdr.t = VNIL;
+	upd_prefix1(s, p, a);
+	return s;
+}
 static Val *
 eval_id(Env *e, Val *s, size_t p) {
 	Val *a;
@@ -1429,7 +1453,6 @@ eval_id(Env *e, Val *s, size_t p) {
 	upd_prefix1(s, p, a);
 	return s;
 }
-
 static Val *
 eval_do(Env *e, Val *s, size_t p) {
 	Val *a;
@@ -1468,7 +1491,7 @@ eval_list(Env *e, Val *s, size_t p) {
 static Val *
 eval_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!eval_prefix2_arg(e, s, p, &a, false, &b, false)) {
+	if (!eval_prefix2_arg(e, s, p, &a, true, &b, false)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1486,7 +1509,7 @@ eval_call(Env *e, Val *s, size_t p) {
 		free_v(a);
 		return NULL;
 	}
-	if (!added_sym(e, sv, true)) {
+	if (!stored_sym(e, sv)) {
 		free_symval(sv);
 		free_v(a);
 		return NULL;
@@ -1503,12 +1526,13 @@ typedef struct Symop_ {
 	Val* (*f)(Env *e, Val *s, size_t p);
 } Symop;
 
-#define NSYMS 18
+#define NSYMS 19
 Symop Syms[] = {
 	(Symop) {"id",   10, eval_id}, /* technical symbol */
 	(Symop) {"do",   10, eval_do},
 	(Symop) {"list", 10, eval_list},
 	(Symop) {"call", 10, eval_call},
+	(Symop) {"print", 10, eval_print},
 	(Symop) {"*",    20, eval_mul},
 	(Symop) {"/",    20, eval_div},
 	(Symop) {"+",    30, eval_plu},
@@ -1585,7 +1609,6 @@ val_of_seme(Env *a, Sem *b) {
 		return c;
 	}
 	if (b->hdr.t == SSYM) {
-		/* is it a known operation symbol? */
 		Symop *sb = get_symop(b->sym.v);
 		if (sb != NULL) {
 			c = malloc(sizeof(*c));
@@ -1594,13 +1617,13 @@ val_of_seme(Env *a, Sem *b) {
 			c->symop.v = sb->f;
 			return c;
 		}
-		/* is it a known user-defined value symbol? */
+		/*
 		Symval *sv = get_symval(a, b->sym.v);
 		if (sv != NULL) {
 			c = copy_v(sv->v);
 			return c;
 		}
-		/* could be a yet undefined symbol, used by a function (ex: call it n) */
+		*/
 		c = malloc(sizeof(*c));
 		assert(c != NULL);
 		c->hdr.t = VSYMUNK;
@@ -1719,20 +1742,22 @@ eval(Env *e, Val *a, bool strict) {
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		Val *b;
-		if (strict && a->hdr.t == VSYMUNK) {
-			Symval *sv = get_symval(e, a->symunk.v);
-			if (sv == NULL) {
-				printf("? %s:%d undefined symbol (%s)\n",
-						__FUNCTION__,__LINE__,
-						a->symunk.v);
-				return NULL;
+		if (a->hdr.t == VSYMUNK && strict) {
+			/* TODO move to a separate function */
+			Val *b = a;
+			while (b->hdr.t == VSYMUNK) {
+				Symval *sv = get_symval(e, b->symunk.v);
+				if (sv == NULL) {
+					printf("? %s:%d undefined symbol (%s)\n",
+							__FUNCTION__,__LINE__,
+							a->symunk.v);
+					return NULL;
+				}
+				b = sv->v;
 			}
-			b = copy_v(sv->v);
-		} else {
-			b = copy_v(a);
-		}
-		return b;
+			return copy_v(b);
+		} 
+		return copy_v(a);
 	}
 	if (a->hdr.t == VLST) {
 		Val *b = malloc(sizeof(*b));
@@ -1913,7 +1938,7 @@ eval_ph(Phrase *a) {
 			free_env(b);
 			return NULL;
 		}
-		if (!store_sym(b, it)) {
+		if (!stored_sym(b, it)) {
 			free_symval(it);
 			free_env(b);
 			return NULL;

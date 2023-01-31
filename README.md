@@ -7,19 +7,17 @@ I intentionally ignore some common C practices.
 
 ## Phrase
 
-A phrase is a sequence of expressions.
+A phrase is a sequence of expressions, separated by `;`.
 
 For example:
 
-` 23 ; 3 + 4 ; 2,3,4` 
+` 3 + 4 ; call it n; 2, n, 4` evaluates to the list 2, n, 4 
 
-evaluates to the list 2, 3, 4.
-
-`it` is a builtin symbol that stores the previous expression's value.
+`it` is a builtin symbol that stores the previous expression's value
 
 `23; 2 * it` 46
 
-`2, +, n ; call it A` defines symbol A, the list 2, +, n (n is undefined at this point, still valid)
+`2, +, n ; call it A` defines symbol A, the list 2, +, n (n is undefined at this point, still a valid expression)
 
 ## Expression
 
@@ -100,9 +98,9 @@ Whitespace expected to separate words.
 
 `2 + 3., 4` cannot add a natural number to a list
 
-## Known bugs
+`2 + 3; call it p; call 34 p` p already defined
 
-After reading the book *Fluent C* (C design patterns), some refactoring is necessary.
+## Known bugs
 
 
 ## Background
