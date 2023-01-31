@@ -17,9 +17,9 @@ evaluates to the list 2, 3, 4.
 
 `it` is a builtin symbol that stores the previous expression's value.
 
-`23; it * 2` 46
+`23; 2 * it` 46
 
-`2, +, n ; call it A` gives the list 2, +, n (n is undefined at this point, still valid)
+`2, +, n ; call it A` defines symbol A, the list 2, +, n (n is undefined at this point, still valid)
 
 ## Expression
 
