@@ -35,9 +35,11 @@ Whitespace expected to separate words.
 
 ### Builtin symbols
 
-`3 ; call it p` defines the symbol p, worth 3
+`3 ; call it p` defines the symbol p, worth 3, equivalent to `call 3 p`
 
 `3; print it` displays (stdout) 3
+
+### List and Do
 
 `,` defines a list
 
@@ -60,13 +62,11 @@ Whitespace expected to separate words.
 
 `1, +, 3; list it; do it; do it` 4, or `do (do (list (list 1 + 3)))`
 
-`2, *, n ; call it a ; call 2 n ; do a` 4 
-
-`2, -, n ; call it a ; call 2 n ; id a` the list 2, -, 2
-
-`eval` evaluates its argument (strictly evaluated)
-
 `2, n, 3; call it A; call * n; do A; print it` 
+
+`2, -, n ; call it A ; call 2 n ; id a` the list 2, -, 2
+
+`id` evaluates its argument (strictly evaluated)
 
 ### Invalid expressions
 
