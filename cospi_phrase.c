@@ -843,45 +843,16 @@ lookup_id(Env *a, char *b, size_t *id) {
 	}
 	return NULL;
 }
-
-static Symval *
+static Val *
 lookup(Env *a, char *b) {
 	assert(a != NULL && "env null");
-	assert((b != NULL && strlen(b) != 0) && "symbol null");
-	return lookup_id(a, b, NULL);
-}
-
-/*
-static Val *
-solv_op(char *c) {
-	Symop *op = lookup_op(c);
-	if (op == NULL) {
-		return NULL;
-	}
-	Val *a = malloc(sizeof(*b));
-	assert(a != NULL);
-	a->hdr.t = VSYMOP;
-	a->symop.prio = op->prio;
-	a->symop.v = op->f;
-	return a;
-}
-static Val *
-solv_env(Env *e, char *c) {
-	Symval *sv = lookup(e, c);
+	assert((b != NULL && strlen(b) != 0) && "symbol name null");
+	Symval *sv = lookup_id(a, b, NULL);
 	if (sv == NULL) {
 		return NULL;
 	}
-	Val *a = sv->v;
-	while (a->hdr.t == VSYM) {
-		sv = lookup(e, a->sym.v);
-		if (sv == NULL) {
-			return NULL;
-		}
-		a = sv->v;
-	}
-	return a;
+	return sv->v;
 }
-*/
 
 static bool
 added_sym(Env *a, Symval *b, bool err) {
@@ -934,6 +905,19 @@ stored_sym(Env *a, Symval *b) {
 	}
 	return false;
 }
+static bool
+is_sym(Val *a, const char *s) {
+	assert(a != NULL);
+	if (a->hdr.t != VSYM) {
+		return false;
+	}
+	return strncmp(a->sym.v, s, WSZ*sizeof(char)) == 0;
+}
+static bool
+isit_v(Val *a) {
+	return is_sym(a, "it");
+}
+
 /* -------- operation symbol definitions ------------
  * recommended interface (resource management):
  * 1. work off copies of arguments
@@ -941,12 +925,9 @@ stored_sym(Env *a, Symval *b) {
  * 3. replace symbol operation expression with that fresh value
  * (delete previous values in the expression, add new one)
  * 4. cleanup behind you (working copies)
- * So, an optimization could be to reuse one existing argument for result
- * and avoid alloc/free of original argument. 
- * But, loss of flexibility isn't worth it (for compiler).
  * */
 
-static Val * eval(Env *e, Val *a, bool strict);
+static Val * eval(Env *e, Val *a, bool solv);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -962,20 +943,20 @@ prefixed2(size_t p, size_t n) {
 }
 
 static bool
-eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta, Val **pb, bool strictb) {
+eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool solva, Val **pb, bool solvb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not infixed\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p-1], stricta); 
+	a = eval(e, s->seq.v.v[p-1], solva); 
 	if (a == NULL) {
 		printf("? %s:%d 1st argument null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	b = eval(e, s->seq.v.v[p+1], strictb);
+	b = eval(e, s->seq.v.v[p+1], solvb);
 	if (b == NULL) {
 		printf("? %s:%d 2nd argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -987,14 +968,14 @@ eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta, Val **pb, bool 
 	return true;
 }
 static bool
-eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta) {
+eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool solva) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to one argument\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p+1], stricta);
+	a = eval(e, s->seq.v.v[p+1], solva);
 	if (a == NULL) {
 		printf("? %s:%d argument is null\n", 
 				__FUNCTION__,__LINE__);
@@ -1004,20 +985,20 @@ eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta) {
 	return true;
 }
 static bool
-eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta, Val **pb, bool strictb) {
+eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool solva, Val **pb, bool solvb) {
 	Val *a, *b;
 	if (!prefixed2(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to 2 arguments\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p+1], stricta);
+	a = eval(e, s->seq.v.v[p+1], solva);
 	if (a == NULL) {
 		printf("? %s:%d 1st argument is null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	b = eval(e, s->seq.v.v[p+2], strictb);
+	b = eval(e, s->seq.v.v[p+2], solvb);
 	if (b == NULL) {
 		printf("? %s:%d 2nd argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -1029,14 +1010,14 @@ eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta, Val **pb, boo
 	return true;
 }
 static bool
-eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool stricta) {
+eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool solva) {
 	Val *a;
 	a = malloc(sizeof(*a));
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
 	a->seq.v.n = s->seq.v.n -p-1; 
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], stricta);
+		a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], solva);
 	}
 	*pa = a;
 	return true;
@@ -1490,7 +1471,7 @@ eval_do(Env *e, Val *s, size_t p) {
 		return NULL;
 	}
 	a->hdr.t = VSEQ;
-	Val *b = eval(e, a, true);
+	Val *b = eval(e, a, false);
 	free_v(a);
 	if (b == NULL) {
 		return NULL;
@@ -1605,77 +1586,88 @@ isatom_v(Val *a) {
 }
 
 static Val *
-val_of_seme(Env *a, Sem *b) {
+val_of_seme(Env *e, Sem *s) {
 	/* returns fresh value, a, b untouched */
-	assert(b != NULL && "seme null");
-	Val *c = NULL;
-	if (b->hdr.t == SNIL ) {
-		c = malloc(sizeof(*c));
-		c->hdr.t = VNIL;
-		return c;
+	assert(s != NULL && "seme null");
+	Val *a = NULL;
+	if (s->hdr.t == SNIL ) {
+		a = malloc(sizeof(*a));
+		a->hdr.t = VNIL;
+		return a;
 	}
-	if (b->hdr.t == SNAT) {
-		c = malloc(sizeof(*c));
-		c->hdr.t = VNAT;
-		c->nat.v = b->nat.v;
-		return c;
+	if (s->hdr.t == SNAT) {
+		a = malloc(sizeof(*a));
+		a->hdr.t = VNAT;
+		a->nat.v = s->nat.v;
+		return a;
 	}
-	if (b->hdr.t == SREA) {
-		c = malloc(sizeof(*c));
-		c->hdr.t = VREA;
-		c->rea.v = b->rea.v;
-		return c;
+	if (s->hdr.t == SREA) {
+		a = malloc(sizeof(*a));
+		a->hdr.t = VREA;
+		a->rea.v = s->rea.v;
+		return a;
 	}
-	if (b->hdr.t == SSYM) {
-		Symop *sb = lookup_op(b->sym.v);
-		if (sb != NULL) {
-			c = malloc(sizeof(*c));
-			c->hdr.t = VSYMOP;
-			c->symop.prio = sb->prio;
-			c->symop.v = sb->f;
-			return c;
+	if (s->hdr.t == SSYM) {
+		/* builtin operators, and special symbol 'it are solvd */
+		Symop *so = lookup_op(s->sym.v);
+		if (so != NULL) {
+			a = malloc(sizeof(*a));
+			a->hdr.t = VSYMOP;
+			a->symop.prio = so->prio;
+			a->symop.v = so->f;
+			return a;
 		}
-		c = malloc(sizeof(*c));
-		assert(c != NULL);
-		c->hdr.t = VSYM;
-		strncpy(c->sym.v, b->sym.v, WSZ*sizeof(char));
-		return c;
-	}
-	if (b->hdr.t == SLST) {
-		c = malloc(sizeof(*c));
-		c->hdr.t = VLST;
-		c->lst.v.n = 0;
-		c->lst.v.v = NULL;
-		size_t n = b->lst.v.n;
-		Sem *l = b->lst.v.s;
-		Val *d;
-		for (size_t i=0; i<n; ++i) {
-			d = val_of_seme(a, l+i);
-			if (d == NULL) {
-				free_v(c);
+		a = malloc(sizeof(*a));
+		assert(a != NULL);
+		a->hdr.t = VSYM;
+		strncpy(a->sym.v, s->sym.v, WSZ*sizeof(char));
+		if (isit_v(a)) {
+			Val *b = lookup(e, a->sym.v);
+			free_v(a);
+			if (b == NULL) {
+				printf("? %s:%d 'it' symbol undefined\n",
+						__FUNCTION__,__LINE__);
 				return NULL;
 			}
-			c = push_v(c, d);
+			return copy_v(b);
 		}
-		return c;
+		return a;
 	}
-	if (b->hdr.t == SSEQ) {
-		c = malloc(sizeof(*c));
-		c->hdr.t = VSEQ;
-		c->seq.v.n = 0;
-		c->seq.v.v = NULL;
-		size_t n = b->seq.v.n;
-		Sem *l = b->seq.v.s;
+	if (s->hdr.t == SLST) {
+		a = malloc(sizeof(*a));
+		a->hdr.t = VLST;
+		a->lst.v.n = 0;
+		a->lst.v.v = NULL;
+		size_t n = s->lst.v.n;
+		Sem *l = s->lst.v.s;
 		Val *d;
 		for (size_t i=0; i<n; ++i) {
-			d = val_of_seme(a, l+i);
+			d = val_of_seme(e, l+i);
 			if (d == NULL) {
-				free_v(c);
+				free_v(a);
 				return NULL;
 			}
-			c = push_v(c, d);
+			a = push_v(a, d);
 		}
-		return c;
+		return a;
+	}
+	if (s->hdr.t == SSEQ) {
+		a = malloc(sizeof(*a));
+		a->hdr.t = VSEQ;
+		a->seq.v.n = 0;
+		a->seq.v.v = NULL;
+		size_t n = s->seq.v.n;
+		Sem *l = s->seq.v.s;
+		Val *d;
+		for (size_t i=0; i<n; ++i) {
+			d = val_of_seme(e, l+i);
+			if (d == NULL) {
+				free_v(a);
+				return NULL;
+			}
+			a = push_v(a, d);
+		}
+		return a;
 	}
 	printf("? %s:%d unknown seme\n",
 			__FUNCTION__,__LINE__);
@@ -1685,25 +1677,34 @@ val_of_seme(Env *a, Sem *b) {
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
 static Val *
-eval_seq(Env *e, Val *a, bool strict) {
-	/* work on copy of seq, which gets progressively reduced, and destroyed */
-	printf("1: "); print_v(a); printf("\n");
+eval_members1(Env *e, Val *a, bool solv) {
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
-	b->hdr.t = VSEQ;
+	b->hdr.t = a->hdr.t; /* SEQ or LST */
 	b->seq.v.n = 0;
 	b->seq.v.v = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		Val *c = eval(e, a->seq.v.v[i], strict);
+		Val *c = eval(e, a->seq.v.v[i], solv);
 		if (c == NULL) {
+			printf("? %s:%d list or seq item unknown\n",
+					__FUNCTION__,__LINE__);
 			free_v(b);
 			return NULL;
 		}
 		b = push_v(b, c);
 	}
-	printf("2: "); print_v(b); printf("\n");
+	return b;
+}
+
+static Val *
+eval_seq(Env *e, Val *a, bool solv) {
+	/* work on copy of seq, which gets progressively reduced, and destroyed */
+	Val *b = eval_members1(e, a, solv);
+	if (b == NULL) {
+		return NULL;
+	}
 	/* symbol application: consumes the seq, until 1 item left */
-	Val *c = NULL;  /* shorthand */
+	Val *c;
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
@@ -1749,41 +1750,27 @@ eval_seq(Env *e, Val *a, bool strict) {
 }
 
 static Val *
-eval(Env *e, Val *a, bool strict) {
-	/* eval() returns a fresh value, leaves a untouched */
+eval(Env *e, Val *a, bool solv) {
+	/* returns a fresh value, 'a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		if (a->hdr.t == VSYM && strict) {
-			Symval *sv = lookup(e, a->sym.v);
-			if (sv == NULL) {
-				printf("? %s:%d unknown symbol '%s\n",
+		if (a->hdr.t == VSYM && solv) {
+			Val *b = lookup(e, a->sym.v);
+			if (b == NULL) {
+				printf("? %s:%d unknown symbol '%s'\n",
 					__FUNCTION__,__LINE__, a->sym.v);
 				return NULL;
 			}
-			return copy_v(sv->v);
+			return copy_v(b);
 		} 
 		return copy_v(a);
 	}
 	if (a->hdr.t == VLST) {
-		Val *b = malloc(sizeof(*b));
-		b->hdr.t = VLST;
-		b->lst.v.n = 0;
-		b->lst.v.v = NULL;
-		for (size_t i=0; i < a->lst.v.n; ++i) {
-			Val *c = eval(e, a->lst.v.v[i], strict);
-			if (c == NULL) {
-				printf("? %s:%d list item is null\n",
-						__FUNCTION__,__LINE__);
-				free_v(b);
-				return NULL;
-			}
-			b = push_v(b, c);
-		}
-		return b;
+		return eval_members1(e, a, solv);
 	}
 	if (a->hdr.t == VSEQ) {
-		return eval_seq(e, a, strict);
+		return eval_seq(e, a, solv);
 	}
 	printf("? %s:%d unknown value\n",
 			__FUNCTION__,__LINE__);
