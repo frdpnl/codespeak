@@ -18,9 +18,9 @@ eval_div	cospi_phrase.c	/^eval_div(Env *e, Val *s, size_t p) {$/
 eval_do	cospi_phrase.c	/^eval_do(Env *e, Val *s, size_t p) {$/
 eval_eq	cospi_phrase.c	/^eval_eq(Env *e, Val *s, size_t p) {$/
 eval_eqv	cospi_phrase.c	/^eval_eqv(Env *e, Val *s, size_t p) {$/
-eval_eval	cospi_phrase.c	/^eval_eval(Env *e, Val *s, size_t p) {$/
 eval_geq	cospi_phrase.c	/^eval_geq(Env *e, Val *s, size_t p) {$/
 eval_gre	cospi_phrase.c	/^eval_gre(Env *e, Val *s, size_t p) {$/
+eval_id	cospi_phrase.c	/^eval_id(Env *e, Val *s, size_t p) {$/
 eval_infix_arg	cospi_phrase.c	/^eval_infix_arg(Env *e, Val *s, size_t p, Val **pa,/
 eval_leq	cospi_phrase.c	/^eval_leq(Env *e, Val *s, size_t p) {$/
 eval_les	cospi_phrase.c	/^eval_les(Env *e, Val *s, size_t p) {$/
@@ -36,7 +36,7 @@ eval_prefix1_arg	cospi_phrase.c	/^eval_prefix1_arg(Env *e, Val *s, size_t p, Val
 eval_prefix2_arg	cospi_phrase.c	/^eval_prefix2_arg(Env *e, Val *s, size_t p, Val **p/
 eval_prefixn_arg	cospi_phrase.c	/^eval_prefixn_arg(Env *e, Val *s, size_t p, Val **p/
 eval_print	cospi_phrase.c	/^eval_print(Env *e, Val *s, size_t p) {$/
-eval_seq	cospi_phrase.c	/^eval_seq(Env *e, Val *a) {$/
+eval_seq	cospi_phrase.c	/^eval_seq(Env *e, Val *a, bool strict) {$/
 exp_of_words	cospi_phrase.c	/^exp_of_words(char *a) {$/
 expr	cospi_phrase.c	/^expr() {$/
 free_env	cospi_phrase.c	/^free_env(Env *a) {$/
@@ -77,8 +77,6 @@ sem_seq	cospi_phrase.c	/^sem_seq() {$/
 sem_sym	cospi_phrase.c	/^sem_sym(char *a) {$/
 seme_of_exp	cospi_phrase.c	/^seme_of_exp(Expr *a) {$/
 seme_of_exp_part	cospi_phrase.c	/^seme_of_exp_part(Expr *a, size_t from, size_t tox)/
-solv_env	cospi_phrase.c	/^solv_env(Env *e, char *c) {$/
-solv_op	cospi_phrase.c	/^solv_op(char *c) {$/
 stored_sym	cospi_phrase.c	/^stored_sym(Env *a, Symval *b) {$/
 stype	cospi_phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} /
 symval	cospi_phrase.c	/^symval(char *a, Val *b) {$/
