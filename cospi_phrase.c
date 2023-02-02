@@ -1435,7 +1435,7 @@ eval_not(Env *e, Val *s, size_t p) {
 static Val *
 eval_print(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+	if (!eval_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1446,7 +1446,7 @@ eval_print(Env *e, Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_id(Env *e, Val *s, size_t p) {
+eval_solve(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s:%d prefix expression invalid\n", 
@@ -1459,7 +1459,7 @@ eval_id(Env *e, Val *s, size_t p) {
 static Val *
 eval_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+	if (!eval_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1482,7 +1482,7 @@ eval_do(Env *e, Val *s, size_t p) {
 static Val *
 eval_list(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!eval_prefixn_arg(e, s, p, &a, true)) {
+	if (!eval_prefixn_arg(e, s, p, &a, false)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -1531,7 +1531,7 @@ typedef struct Symop_ {
 
 #define NSYMS 19
 Symop Syms[] = {
-	(Symop) {"id",    10, eval_id},
+	(Symop) {"solve",    10, eval_solve},
 	(Symop) {"do",    10, eval_do},
 	(Symop) {"list",  10, eval_list},
 	(Symop) {"call",  10, eval_call},

@@ -9,11 +9,11 @@ A phrase is a sequence of expressions, separated by `;`.
 
 For example:
 
-`2 * 3.; print it` displays 6. (stdout)
+`2 * 3.; print it` displays 6
 
 `it` is a builtin symbol that stores the previous expression's value
 
-`2, +, n ; call it A` defines symbol A, the list 2, +, n (n is undefined at this point, still a valid expression)
+`2, +, n ; print it` displays 2, +, n 
 
 ### Symbolic reduction
 
@@ -37,8 +37,6 @@ Whitespace expected to separate words.
 
 `3 ; call it p` defines the symbol p, worth 3, equivalent to `call 3 p`
 
-`3; print it` displays (stdout) 3
-
 ### List and Do
 
 `,` defines a list
@@ -54,19 +52,15 @@ Whitespace expected to separate words.
 `do` means evaluate following list as an expression
 `do` is the inverse of `list`.
 
-`1 + 2 ; it, *, 2 ; do it` 6
-
 `2, +, 3; do it` 5
+
+`1 + 2 ; it, *, 2 ; do it; print it` 6
 
 `list 1 + 2; do it` 3, or `do (list 1 + 2)` but sequence preferred
 
 `1, +, 3; list it; do it; do it` 4, or `do (do (list (list 1 + 3)))`
 
-`2, n, 3; call it A; call * n; do A; print it` 
-
-`2, -, n ; call it A ; call 2 n ; id a` the list 2, -, 2
-
-`id` evaluates its argument (strictly evaluated)
+`solve` evaluates its argument (strictly evaluated)
 
 ### Invalid expressions
 
