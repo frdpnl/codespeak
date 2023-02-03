@@ -85,7 +85,7 @@ word_str(char *a, size_t n) {
 		return NULL;
 	}
 	Word *b = word(STR);
-	memcpy(b->v, a, n*sizeof(char));
+	memmove(b->v, a, n*sizeof(char));
 	b->v[n] = '\0';
 	return b;
 }
@@ -95,9 +95,9 @@ push_xz(Expr *a, Word *b) {
 	assert(a != NULL);
 	Word *c = malloc((a->n+1)*sizeof(Word));
 	assert(c != NULL);
-	memcpy(c+a->n, b, sizeof(Word));
+	memmove(c+a->n, b, sizeof(Word));
 	if (a->n) {
-		memcpy(c, a->w, a->n*sizeof(Word));
+		memmove(c, a->w, a->n*sizeof(Word));
 		free(a->w);
 	}
 	a->w = c;
@@ -166,7 +166,7 @@ exp_of_words(char *a) {
 			return NULL;
 		}
 		/* default case: add character to current word */
-		memcpy(buf+boff, a+off, read*sizeof(char));
+		memmove(buf+boff, a+off, read*sizeof(char));
 		boff += read;
 		buf[boff] = '\0';
 	}
@@ -389,8 +389,8 @@ push_s(Sem *a, Sem *b) {
 	}
 	Sem *c = malloc((a->seq.v.n +1)*sizeof(Sem));
 	assert(c != NULL);
-	memcpy(c, a->seq.v.s, a->seq.v.n * sizeof(Sem));
-	memcpy(c + a->seq.v.n, b, sizeof(Sem));
+	memmove(c, a->seq.v.s, a->seq.v.n * sizeof(Sem));
+	memmove(c + a->seq.v.n, b, sizeof(Sem));
 	++(a->seq.v.n);
 	free(a->seq.v.s);
 	a->seq.v.s = c;
@@ -743,7 +743,7 @@ static Val *
 copy_v(Val *a) {
 	assert(a != NULL);
 	Val *b = malloc(sizeof(Val));
-	memcpy(b, a, sizeof(Val));
+	memmove(b, a, sizeof(Val));
 	if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
 		b->seq.v.v = malloc(a->seq.v.n * sizeof(Val*));
 		for (size_t i=0; i<a->seq.v.n; ++i) {
@@ -763,7 +763,7 @@ push_v(Val *a, Val *b) {
 	}
 	Val **c = malloc((a->seq.v.n +1)*sizeof(Val*));
 	if (a->seq.v.n > 0) {
-		memcpy(c, a->seq.v.v, a->seq.v.n * sizeof(Val*));
+		memmove(c, a->seq.v.v, a->seq.v.n * sizeof(Val*));
 	}
 	c[a->seq.v.n] = b;
 	if (a->seq.v.n > 0) {
@@ -867,7 +867,7 @@ added_sym(Env *a, Symval *b, bool err) {
 	}
 	Symval **c = malloc((a->n +1)*sizeof(Symval*));
 	if (a->n > 0) {
-		memcpy(c, a->s, a->n * sizeof(Symval*));
+		memmove(c, a->s, a->n * sizeof(Symval*));
 	}
 	c[a->n] = b;
 	if (a->n > 0) {
@@ -1587,7 +1587,7 @@ isatom_v(Val *a) {
 
 static Val *
 val_of_seme(Env *e, Sem *s) {
-	/* returns fresh value, a, b untouched */
+	/* returns fresh value, 's untouched */
 	assert(s != NULL && "seme null");
 	Val *a = NULL;
 	if (s->hdr.t == SNIL ) {
@@ -1608,7 +1608,7 @@ val_of_seme(Env *e, Sem *s) {
 		return a;
 	}
 	if (s->hdr.t == SSYM) {
-		/* builtin operators, and special symbol 'it are solvd */
+		/* builtin operators, and special symbol 'it are solved */
 		Symop *so = lookup_op(s->sym.v);
 		if (so != NULL) {
 			a = malloc(sizeof(*a));
@@ -1678,6 +1678,7 @@ val_of_seme(Env *e, Sem *s) {
 
 static Val *
 eval_members1(Env *e, Val *a, bool solv) {
+	/* works on SEQ and LST */
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = a->hdr.t; /* SEQ or LST */
@@ -1817,7 +1818,7 @@ push_ph(Phrase *a, char *b) {
 	assert(a != NULL && b != NULL);
 	char **c = malloc((a->n +1)*sizeof(c));
 	if (a->n > 0) {
-		memcpy(c, a->x, a->n * sizeof(char*));
+		memmove(c, a->x, a->n * sizeof(char*));
 	}
 	c[a->n] = b;
 	if (a->n > 0) {
@@ -1874,7 +1875,7 @@ phrase_of_str(char *a) {
 			inspace = false;
 		}
 		/* default case: add character to current word */
-		memcpy(buf+boff, a+off, read*sizeof(char));
+		memmove(buf+boff, a+off, read*sizeof(char));
 		boff += read;
 		buf[boff] = '\0';
 	}
