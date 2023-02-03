@@ -1,97 +1,97 @@
-Env	cospi_phrase.c	/^} Env;$/
-Expr	cospi_phrase.c	/^} Expr;$/
-List	cospi_phrase.c	/^} List;$/
-List_v	cospi_phrase.c	/^} List_v;$/
-Mcospi_phrase	cospi_phrase.c	/^main(int argc, char **argv) {$/
-Phrase	cospi_phrase.c	/^} Phrase;$/
-Sem	cospi_phrase.c	/^typedef union Sem_ Sem;$/
-Symop	cospi_phrase.c	/^} Symop;$/
-Symval	cospi_phrase.c	/^} Symval;$/
-Val	cospi_phrase.c	/^typedef union Val_ Val;$/
-Word	cospi_phrase.c	/^} Word;$/
-added_sym	cospi_phrase.c	/^added_sym(Env *a, Symval *b, bool err) {$/
-copy_v	cospi_phrase.c	/^copy_v(Val *a) {$/
-eval	cospi_phrase.c	/^eval(Env *e, Val *a, bool solv) {$/
-eval_and	cospi_phrase.c	/^eval_and(Env *e, Val *s, size_t p) {$/
-eval_call	cospi_phrase.c	/^eval_call(Env *e, Val *s, size_t p) {$/
-eval_div	cospi_phrase.c	/^eval_div(Env *e, Val *s, size_t p) {$/
-eval_do	cospi_phrase.c	/^eval_do(Env *e, Val *s, size_t p) {$/
-eval_eq	cospi_phrase.c	/^eval_eq(Env *e, Val *s, size_t p) {$/
-eval_eqv	cospi_phrase.c	/^eval_eqv(Env *e, Val *s, size_t p) {$/
-eval_geq	cospi_phrase.c	/^eval_geq(Env *e, Val *s, size_t p) {$/
-eval_gre	cospi_phrase.c	/^eval_gre(Env *e, Val *s, size_t p) {$/
-eval_infix_arg	cospi_phrase.c	/^eval_infix_arg(Env *e, Val *s, size_t p, Val **pa,/
-eval_leq	cospi_phrase.c	/^eval_leq(Env *e, Val *s, size_t p) {$/
-eval_les	cospi_phrase.c	/^eval_les(Env *e, Val *s, size_t p) {$/
-eval_list	cospi_phrase.c	/^eval_list(Env *e, Val *s, size_t p) {$/
-eval_members1	cospi_phrase.c	/^eval_members1(Env *e, Val *a, bool solv) {$/
-eval_min	cospi_phrase.c	/^eval_min(Env *e, Val *s, size_t p) {$/
-eval_mul	cospi_phrase.c	/^eval_mul(Env *e, Val *s, size_t p) {$/
-eval_neq	cospi_phrase.c	/^eval_neq(Env *e, Val *s, size_t p) {$/
-eval_not	cospi_phrase.c	/^eval_not(Env *e, Val *s, size_t p) {$/
-eval_or	cospi_phrase.c	/^eval_or(Env *e, Val *s, size_t p) {$/
-eval_ph	cospi_phrase.c	/^eval_ph(Phrase *a) {$/
-eval_plu	cospi_phrase.c	/^eval_plu(Env *e, Val *s, size_t p) {$/
-eval_prefix1_arg	cospi_phrase.c	/^eval_prefix1_arg(Env *e, Val *s, size_t p, Val **p/
-eval_prefix2_arg	cospi_phrase.c	/^eval_prefix2_arg(Env *e, Val *s, size_t p, Val **p/
-eval_prefixn_arg	cospi_phrase.c	/^eval_prefixn_arg(Env *e, Val *s, size_t p, Val **p/
-eval_print	cospi_phrase.c	/^eval_print(Env *e, Val *s, size_t p) {$/
-eval_seq	cospi_phrase.c	/^eval_seq(Env *e, Val *a, bool solv) {$/
-eval_solve	cospi_phrase.c	/^eval_solve(Env *e, Val *s, size_t p) {$/
-exp_of_words	cospi_phrase.c	/^exp_of_words(char *a) {$/
-expr	cospi_phrase.c	/^expr() {$/
-free_env	cospi_phrase.c	/^free_env(Env *a) {$/
-free_ph	cospi_phrase.c	/^free_ph(Phrase *a) {$/
-free_s	cospi_phrase.c	/^free_s(Sem *a) {$/
-free_symval	cospi_phrase.c	/^free_symval(Symval *a) {$/
-free_v	cospi_phrase.c	/^free_v(Val *a) {$/
-free_x	cospi_phrase.c	/^free_x(Expr *a) {$/
-infixed	cospi_phrase.c	/^infixed(size_t p, size_t n) {$/
-is_sym	cospi_phrase.c	/^is_sym(Val *a, const char *s) {$/
-isatom_v	cospi_phrase.c	/^isatom_v(Val *a) {$/
-isequal_v	cospi_phrase.c	/^isequal_v(Val *a, Val *b) {$/
-isequiv_v	cospi_phrase.c	/^isequiv_v(Val *a, Val *b) {$/
-isit_v	cospi_phrase.c	/^isit_v(Val *a) {$/
-isnat	cospi_phrase.c	/^isnat(Word *a) {$/
-isrea	cospi_phrase.c	/^isrea(Word *a) {$/
-issym	cospi_phrase.c	/^issym(Word *a) {$/
-lookup	cospi_phrase.c	/^lookup(Env *a, char *b) {$/
-lookup_id	cospi_phrase.c	/^lookup_id(Env *a, char *b, size_t *id) {$/
-lookup_op	cospi_phrase.c	/^lookup_op(char *a) {$/
-lst_of	cospi_phrase.c	/^lst_of(Sem *a) {$/
-minprio	cospi_phrase.c	/^minprio() {$/
-phrase	cospi_phrase.c	/^phrase() {$/
-phrase_of_str	cospi_phrase.c	/^phrase_of_str(char *a) {$/
-prefixed1	cospi_phrase.c	/^prefixed1(size_t p, size_t n) {$/
-prefixed2	cospi_phrase.c	/^prefixed2(size_t p, size_t n) {$/
-print_env	cospi_phrase.c	/^print_env(Env *a) {$/
-print_ph	cospi_phrase.c	/^print_ph(Phrase *a) {$/
-print_s	cospi_phrase.c	/^print_s(Sem *a) {$/
-print_symval	cospi_phrase.c	/^print_symval(Symval *a) {$/
-print_v	cospi_phrase.c	/^print_v(Val *a) {$/
-push_ph	cospi_phrase.c	/^push_ph(Phrase *a, char *b) {$/
-push_s	cospi_phrase.c	/^push_s(Sem *a, Sem *b) {$/
-push_v	cospi_phrase.c	/^push_v(Val *a, Val *b) {$/
-push_xz	cospi_phrase.c	/^push_xz(Expr *a, Word *b) {$/
-sem_nat	cospi_phrase.c	/^sem_nat(long long a) {$/
-sem_nil	cospi_phrase.c	/^sem_nil() {$/
-sem_rea	cospi_phrase.c	/^sem_rea(double a) {$/
-sem_seq	cospi_phrase.c	/^sem_seq() {$/
-sem_sym	cospi_phrase.c	/^sem_sym(char *a) {$/
-seme_of_exp	cospi_phrase.c	/^seme_of_exp(Expr *a) {$/
-seme_of_exp_part	cospi_phrase.c	/^seme_of_exp_part(Expr *a, size_t from, size_t tox)/
-stored_sym	cospi_phrase.c	/^stored_sym(Env *a, Symval *b) {$/
-stype	cospi_phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} /
-symval	cospi_phrase.c	/^symval(char *a, Val *b) {$/
-upd_infix	cospi_phrase.c	/^upd_infix(Val *s, size_t p, Val *a) {$/
-upd_prefix1	cospi_phrase.c	/^upd_prefix1(Val *s, size_t p, Val *a) {$/
-upd_prefix2	cospi_phrase.c	/^upd_prefix2(Val *s, size_t p, Val *a) {$/
-upd_prefixall	cospi_phrase.c	/^upd_prefixall(Val *s, size_t p, Val *a) {$/
-upd_prefixk	cospi_phrase.c	/^upd_prefixk(Val *s, size_t p, Val *a, size_t k) {$/
-upded_sym	cospi_phrase.c	/^upded_sym(Env *a, Symval *b, bool err) {$/
-usage	cospi_phrase.c	/^usage(const char *exe) {$/
-val_of_seme	cospi_phrase.c	/^val_of_seme(Env *e, Sem *s) {$/
-vtype	cospi_phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYM, VLST/
-word	cospi_phrase.c	/^word(wtype a) {$/
-word_str	cospi_phrase.c	/^word_str(char *a, size_t n) {$/
-wtype	cospi_phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/
+Env	phrase.c	/^} Env;$/
+Expr	phrase.c	/^} Expr;$/
+List	phrase.c	/^} List;$/
+List_v	phrase.c	/^} List_v;$/
+Mphrase	phrase.c	/^main(int argc, char **argv) {$/
+Phrase	phrase.c	/^} Phrase;$/
+Sem	phrase.c	/^typedef union Sem_ Sem;$/
+Symop	phrase.c	/^} Symop;$/
+Symval	phrase.c	/^} Symval;$/
+Val	phrase.c	/^typedef union Val_ Val;$/
+Word	phrase.c	/^} Word;$/
+added_sym	phrase.c	/^added_sym(Env *a, Symval *b, bool err) {$/
+copy_v	phrase.c	/^copy_v(Val *a) {$/
+eval	phrase.c	/^eval(Env *e, Val *a, bool solv) {$/
+eval_and	phrase.c	/^eval_and(Env *e, Val *s, size_t p) {$/
+eval_call	phrase.c	/^eval_call(Env *e, Val *s, size_t p) {$/
+eval_div	phrase.c	/^eval_div(Env *e, Val *s, size_t p) {$/
+eval_do	phrase.c	/^eval_do(Env *e, Val *s, size_t p) {$/
+eval_eq	phrase.c	/^eval_eq(Env *e, Val *s, size_t p) {$/
+eval_eqv	phrase.c	/^eval_eqv(Env *e, Val *s, size_t p) {$/
+eval_geq	phrase.c	/^eval_geq(Env *e, Val *s, size_t p) {$/
+eval_gre	phrase.c	/^eval_gre(Env *e, Val *s, size_t p) {$/
+eval_infix_arg	phrase.c	/^eval_infix_arg(Env *e, Val *s, size_t p, Val **pa,/
+eval_leq	phrase.c	/^eval_leq(Env *e, Val *s, size_t p) {$/
+eval_les	phrase.c	/^eval_les(Env *e, Val *s, size_t p) {$/
+eval_list	phrase.c	/^eval_list(Env *e, Val *s, size_t p) {$/
+eval_members1	phrase.c	/^eval_members1(Env *e, Val *a, bool solv) {$/
+eval_min	phrase.c	/^eval_min(Env *e, Val *s, size_t p) {$/
+eval_mul	phrase.c	/^eval_mul(Env *e, Val *s, size_t p) {$/
+eval_neq	phrase.c	/^eval_neq(Env *e, Val *s, size_t p) {$/
+eval_not	phrase.c	/^eval_not(Env *e, Val *s, size_t p) {$/
+eval_or	phrase.c	/^eval_or(Env *e, Val *s, size_t p) {$/
+eval_ph	phrase.c	/^eval_ph(Phrase *a) {$/
+eval_plu	phrase.c	/^eval_plu(Env *e, Val *s, size_t p) {$/
+eval_prefix1_arg	phrase.c	/^eval_prefix1_arg(Env *e, Val *s, size_t p, Val **p/
+eval_prefix2_arg	phrase.c	/^eval_prefix2_arg(Env *e, Val *s, size_t p, Val **p/
+eval_prefixn_arg	phrase.c	/^eval_prefixn_arg(Env *e, Val *s, size_t p, Val **p/
+eval_print	phrase.c	/^eval_print(Env *e, Val *s, size_t p) {$/
+eval_seq	phrase.c	/^eval_seq(Env *e, Val *a, bool solv) {$/
+eval_solve	phrase.c	/^eval_solve(Env *e, Val *s, size_t p) {$/
+exp_of_words	phrase.c	/^exp_of_words(char *a) {$/
+expr	phrase.c	/^expr() {$/
+free_env	phrase.c	/^free_env(Env *a) {$/
+free_ph	phrase.c	/^free_ph(Phrase *a) {$/
+free_s	phrase.c	/^free_s(Sem *a) {$/
+free_symval	phrase.c	/^free_symval(Symval *a) {$/
+free_v	phrase.c	/^free_v(Val *a) {$/
+free_x	phrase.c	/^free_x(Expr *a) {$/
+infixed	phrase.c	/^infixed(size_t p, size_t n) {$/
+is_sym	phrase.c	/^is_sym(Val *a, const char *s) {$/
+isatom_v	phrase.c	/^isatom_v(Val *a) {$/
+isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/
+isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/
+isit_v	phrase.c	/^isit_v(Val *a) {$/
+isnat	phrase.c	/^isnat(Word *a) {$/
+isrea	phrase.c	/^isrea(Word *a) {$/
+issym	phrase.c	/^issym(Word *a) {$/
+lookup	phrase.c	/^lookup(Env *a, char *b) {$/
+lookup_id	phrase.c	/^lookup_id(Env *a, char *b, size_t *id) {$/
+lookup_op	phrase.c	/^lookup_op(char *a) {$/
+lst_of	phrase.c	/^lst_of(Sem *a) {$/
+minprio	phrase.c	/^minprio() {$/
+phrase	phrase.c	/^phrase() {$/
+phrase_of_str	phrase.c	/^phrase_of_str(char *a) {$/
+prefixed1	phrase.c	/^prefixed1(size_t p, size_t n) {$/
+prefixed2	phrase.c	/^prefixed2(size_t p, size_t n) {$/
+print_env	phrase.c	/^print_env(Env *a) {$/
+print_ph	phrase.c	/^print_ph(Phrase *a) {$/
+print_s	phrase.c	/^print_s(Sem *a) {$/
+print_symval	phrase.c	/^print_symval(Symval *a) {$/
+print_v	phrase.c	/^print_v(Val *a) {$/
+push_ph	phrase.c	/^push_ph(Phrase *a, char *b) {$/
+push_s	phrase.c	/^push_s(Sem *a, Sem *b) {$/
+push_v	phrase.c	/^push_v(Val *a, Val *b) {$/
+push_xz	phrase.c	/^push_xz(Expr *a, Word *b) {$/
+sem_nat	phrase.c	/^sem_nat(long long a) {$/
+sem_nil	phrase.c	/^sem_nil() {$/
+sem_rea	phrase.c	/^sem_rea(double a) {$/
+sem_seq	phrase.c	/^sem_seq() {$/
+sem_sym	phrase.c	/^sem_sym(char *a) {$/
+seme_of_exp	phrase.c	/^seme_of_exp(Expr *a) {$/
+seme_of_exp_part	phrase.c	/^seme_of_exp_part(Expr *a, size_t from, size_t tox)/
+stored_sym	phrase.c	/^stored_sym(Env *a, Symval *b) {$/
+stype	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} /
+symval	phrase.c	/^symval(char *a, Val *b) {$/
+upd_infix	phrase.c	/^upd_infix(Val *s, size_t p, Val *a) {$/
+upd_prefix1	phrase.c	/^upd_prefix1(Val *s, size_t p, Val *a) {$/
+upd_prefix2	phrase.c	/^upd_prefix2(Val *s, size_t p, Val *a) {$/
+upd_prefixall	phrase.c	/^upd_prefixall(Val *s, size_t p, Val *a) {$/
+upd_prefixk	phrase.c	/^upd_prefixk(Val *s, size_t p, Val *a, size_t k) {$/
+upded_sym	phrase.c	/^upded_sym(Env *a, Symval *b, bool err) {$/
+usage	phrase.c	/^usage(const char *exe) {$/
+val_of_seme	phrase.c	/^val_of_seme(Env *e, Sem *s) {$/
+vtype	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYM, VLST/
+word	phrase.c	/^word(wtype a) {$/
+word_str	phrase.c	/^word_str(char *a, size_t n) {$/
+wtype	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/
