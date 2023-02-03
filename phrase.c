@@ -1899,7 +1899,7 @@ eval_ph(Phrase *a) {
 	b->n = 0;
 	b->s = NULL;
 	for (size_t i=0; i<a->n; ++i) {
-		printf("# expression %lu:\t %s\n", i, a->x[i]);
+		printf("# %3lu %5s: %s\n", i, "expr", a->x[i]);
 		Expr *ex = exp_of_words(a->x[i]);
 		/* a is freed where allocated, not here but by caller */
 		if (ex == NULL) {
@@ -1912,7 +1912,7 @@ eval_ph(Phrase *a) {
 			free_env(b);
 			return NULL;
 		}
-		printf("# seme %lu:\t ", i); print_s(sm); printf("\n");
+		printf("# %3lu %5s: ", i, "seme"); print_s(sm); printf("\n");
 		Val *v = val_of_seme(b, sm);
 		free_s(sm);
 		free(sm);
@@ -1920,14 +1920,14 @@ eval_ph(Phrase *a) {
 			free_env(b);
 			return NULL;
 		}
-		printf("# value %lu:\t ", i); print_v(v); printf("\n");
+		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
 		Val *ev = eval(b, v, false);
 		free_v(v);
 		if (ev == NULL) {
 			free_env(b);
 			return NULL;
 		}
-		printf("# %lu: ", i); print_v(ev); printf("\n");
+		printf("# %3lu %5s: ", i, "eval"); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
 		free_v(ev);
 		if (it == NULL) {
@@ -1939,7 +1939,7 @@ eval_ph(Phrase *a) {
 			free_env(b);
 			return NULL;
 		}
-		printf("# env: "); print_env(b); printf("\n");
+		printf("# %3lu %5s: ", i, "env"); print_env(b); 
 	}
 	return b;
 }
@@ -1948,28 +1948,57 @@ eval_ph(Phrase *a) {
 
 static void
 usage(const char *exe) {
-	printf("usage: %s expression\n", exe);
+	printf("usage: %s\n", exe);
+}
+
+static char *
+read_stdin() {
+	const rsize_t Maxsz = 2048;
+	char *line = malloc(Maxsz*sizeof(*line));
+	assert(line != NULL);
+	line = gets_s(line, Maxsz);
+	if (line) {
+		return line;
+	}
+	if (feof(stdin) == 0) {
+		free(line);
+		return NULL;
+	}
+	if (ferror(stdin) != 0) {
+		printf("? %s:%d %s\n",
+				__FUNCTION__,__LINE__,
+				strerror(errno));
+		free(line);
+		return NULL;
+	}
+	printf("? %s:%d undefined error\n",
+			__FUNCTION__,__LINE__);
+	free(line);
+	return NULL;
 }
 
 int
 main(int argc, char **argv) {
-	if (argc < 2) {
+	if (argc != 1) {
 		usage(argv[0]);
 		return EXIT_FAILURE;
 	}
-	char *s = argv[1];
-	printf("# input:\t %s\n", s);
+	char *s = read_stdin();
+	if (s == NULL) {
+		return EXIT_FAILURE;
+	}
+	printf("# input:\t '%s'\n", s);
 	Phrase *ph = phrase_of_str(s);
 	if (ph == NULL) {
 		return EXIT_FAILURE;
 	}
-	printf("# phrase:\t "); print_ph(ph); printf("\n");
+	printf("# phrase:\t "); print_ph(ph); 
 	Env *e = eval_ph(ph);
 	free_ph(ph);
 	if (e == NULL) {
 		return EXIT_FAILURE;
 	}
-	print_env(e);
 	free_env(e);
+	free(s);
 	return EXIT_SUCCESS;
 }

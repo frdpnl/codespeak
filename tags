@@ -73,6 +73,7 @@ push_ph	phrase.c	/^push_ph(Phrase *a, char *b) {$/
 push_s	phrase.c	/^push_s(Sem *a, Sem *b) {$/
 push_v	phrase.c	/^push_v(Val *a, Val *b) {$/
 push_xz	phrase.c	/^push_xz(Expr *a, Word *b) {$/
+read_stdin	phrase.c	/^read_stdin() {$/
 sem_nat	phrase.c	/^sem_nat(long long a) {$/
 sem_nil	phrase.c	/^sem_nil() {$/
 sem_rea	phrase.c	/^sem_rea(double a) {$/

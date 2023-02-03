@@ -1,0 +1,28 @@
+# input:	 '1, +, 2 ; list it; do it; do it; print it'
+# phrase:	 1, +, 2 ; list it; do it; do it; print it; 
+#   0  expr: 1, +, 2 
+#   0  seme: { 1N + 2N } 
+#   0 value: { 1 0x403fa3^30 2 } 
+#   0  eval: { 1 0x403fa3^30 2 } 
+#   0   env: it={ 1 0x403fa3^30 2 }  
+#   1  expr: list it
+#   1  seme: ( list it ) 
+#   1 value: ( 0x405382^10 { 1 0x403fa3^30 2 } ) 
+#   1  eval: { { 1 0x403fa3^30 2 } } 
+#   1   env: it={ { 1 0x403fa3^30 2 } }  
+#   2  expr: do it
+#   2  seme: ( do it ) 
+#   2 value: ( 0x405292^10 { { 1 0x403fa3^30 2 } } ) 
+#   2  eval: { 1 0x403fa3^30 2 } 
+#   2   env: it={ 1 0x403fa3^30 2 }  
+#   3  expr: do it
+#   3  seme: ( do it ) 
+#   3 value: ( 0x405292^10 { 1 0x403fa3^30 2 } ) 
+#   3  eval: 3 
+#   3   env: it=3  
+#   4  expr: print it
+#   4  seme: ( print it ) 
+#   4 value: ( 0x405190^10 3 ) 
+3 
+#   4  eval: 3 
+#   4   env: it=3  
