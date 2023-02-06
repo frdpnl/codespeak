@@ -1989,6 +1989,7 @@ main(int argc, char **argv) {
 	}
 	printf("# input:\t '%s'\n", s);
 	Phrase *ph = phrase_of_str(s);
+	free(s);
 	if (ph == NULL) {
 		return EXIT_FAILURE;
 	}
@@ -1999,6 +2000,5 @@ main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 	free_env(e);
-	free(s);
 	return EXIT_SUCCESS;
 }
