@@ -1895,57 +1895,48 @@ phrase_of_str(char *a) {
 
 /* Environment: defined symbols across a phrase */
 
-static Env *
-eval_ph(Phrase *a) {
+static bool
+eval_ph(Env *e_o, Phrase *a) {
+	assert(e_o != NULL && "environment null");
 	assert(a != NULL && "phrase null");
-	Env *b = malloc(sizeof(*b));
-	assert(b != NULL);
-	b->n = 0;
-	b->s = NULL;
 	for (size_t i=0; i<a->n; ++i) {
 		printf("# %3lu %5s: %s\n", i, "expr", a->x[i]);
 		Expr *ex = exp_of_words(a->x[i]);
 		/* a is freed where allocated, not here but by caller */
 		if (ex == NULL) {
-			free_env(b);
-			return NULL;
+			return false;
 		}
 		Sem *sm = seme_of_exp(ex);
 		free_x(ex);
 		if (sm == NULL) {
-			free_env(b);
-			return NULL;
+			return false;
 		}
 		printf("# %3lu %5s: ", i, "seme"); print_s(sm); printf("\n");
-		Val *v = val_of_seme(b, sm);
+		Val *v = val_of_seme(e_o, sm);
 		free_s(sm);
 		free(sm);
 		if (v == NULL) {
-			free_env(b);
-			return NULL;
+			return false;
 		}
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
-		Val *ev = eval(b, v, false);
+		Val *ev = eval(e_o, v, false);
 		free_v(v);
 		if (ev == NULL) {
-			free_env(b);
-			return NULL;
+			return false;
 		}
 		printf("# %3lu %5s: ", i, "eval"); print_v(ev); printf("\n");
 		Symval *it = symval("it", ev);
 		free_v(ev);
 		if (it == NULL) {
-			free_env(b);
-			return NULL;
+			return false;
 		}
-		if (!stored_sym(b, it)) {
+		if (!stored_sym(e_o, it)) {
 			free_symval(it);
-			free_env(b);
-			return NULL;
+			return false;
 		}
-		printf("# %3lu %5s: ", i, "env"); print_env(b); 
+		printf("# %3lu %5s: ", i, "env"); print_env(e_o); 
 	}
-	return b;
+	return true;
 }
 
 /* ----- main ----- */
@@ -1955,8 +1946,10 @@ usage(const char *exe) {
 	printf("usage: %s\n", exe);
 }
 
-static bool
-readline(char **s_out) {
+enum Rstatus {LINE, EMPTY, END, ERR};
+
+static enum Rstatus 
+readline(char **s_o) {
 	char *line = NULL;
 	size_t linesz = 0;
 	ssize_t rd = 0;
@@ -1964,24 +1957,25 @@ readline(char **s_out) {
 	rd = getline(&line, &linesz, stdin);
 	if (rd == -1) {
 		if (ferror(stdin) != 0) {
-			if (errno == EINVAL) {
-				*s_out = NULL;
-				return true;
-			}
 			printf("? %s:%d %s\n",
 					__FUNCTION__,__LINE__,
 					strerror(errno));
-			return false;
+			return ERR;
 		}
 		free(line);
-		*s_out = NULL;
-		return true;
+		*s_o = NULL;
+		return END;
 	}
 	if (isspace((int)line[rd-1])) {
 		line[rd-1] = '\0';
 	}
-	*s_out = line;
-	return true;
+	if (strlen(line) == 0) {
+		free(line);
+		*s_o = NULL;
+		return EMPTY;
+	}
+	*s_o = line;
+	return LINE;
 }
 
 int
@@ -1990,25 +1984,37 @@ main(int argc, char **argv) {
 		usage(argv[0]);
 		return EXIT_FAILURE;
 	}
-	Env *e = NULL;
+	Env *e = malloc(sizeof(*e));
+	assert(e != NULL);
+	e->n = 0;
+	e->s = NULL;
 	char *line;
 	while (1) {
-		if (!readline(&line)) {
-			return EXIT_FAILURE;
+		enum Rstatus lrc = readline(&line);
+		switch (lrc) {
+			case ERR:
+				free_env(e);
+				return EXIT_FAILURE;
+			case END:
+				free_env(e);
+				return EXIT_SUCCESS;
+			case EMPTY:
+				continue;
+			case LINE:
+				printf("#   line:\t '%s'\n", line);
+				break;
 		}
-		if (line == NULL) {
-			return EXIT_SUCCESS;
-		}
-		printf("# line:\t '%s'\n", line);
 		Phrase *ph = phrase_of_str(line);
 		free(line);
 		if (ph == NULL) {
+			free_env(e);
 			return EXIT_FAILURE;
 		}
 		printf("# phrase:\t "); print_ph(ph); 
-		e = eval_ph(ph);
+		bool evrc = eval_ph(e, ph);
 		free_ph(ph);
-		if (e == NULL) {
+		if (!evrc) {
+			free_env(e);
 			return EXIT_FAILURE;
 		}
 	}
