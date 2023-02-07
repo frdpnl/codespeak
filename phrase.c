@@ -611,10 +611,10 @@ print_v(Val *a) {
 			printf("%.2lf ", a->rea.v);
 			break;
 		case VSYMOP:
-			printf("%s_%d ", a->symop.name, a->symop.prio);
+			printf("`%s ", a->symop.name);
 			break;
 		case VSYM:
-			printf("%s ", a->sym.v);
+			printf("'%s ", a->sym.v);
 			break;
 		case VLST:
 			printf("{ ");
@@ -1462,7 +1462,7 @@ eval_resolve(Env *e, Val *s, size_t p) {
 static Val *
 eval_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, false)) {
+	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s:%d prefix expression invalid\n", 
 				__FUNCTION__,__LINE__);
 		return NULL;
@@ -2001,7 +2001,7 @@ main(int argc, char **argv) {
 			case EMPTY:
 				continue;
 			case LINE:
-				printf("#   line:\t '%s'\n", line);
+				printf("# ----line: \"%s\"\n", line);
 				break;
 		}
 		Phrase *ph = phrase_of_str(line);
@@ -2010,7 +2010,7 @@ main(int argc, char **argv) {
 			free_env(e);
 			return EXIT_FAILURE;
 		}
-		printf("# phrase:\t "); print_ph(ph); 
+		printf("# --phrase: "); print_ph(ph); 
 		bool evrc = eval_ph(e, ph);
 		free_ph(ph);
 		if (!evrc) {

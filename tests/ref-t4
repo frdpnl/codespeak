@@ -1,13 +1,13 @@
-#   line:	 'n; call it p '
-# phrase:	 n; call it p ; 
+# ----line: "n; call it p "
+# --phrase: n; call it p ; 
 #   0  expr: n
 #   0  seme: ( n ) 
-#   0 value: ( n ) 
-#   0  eval: n 
-#   0   env: it=n  
+#   0 value: ( 'n ) 
+#   0  eval: 'n 
+#   0   env: it='n  
 #   1  expr: call it p 
 #   1  seme: ( call it p ) 
-#   1 value: ( call_10 n p ) 
+#   1 value: ( `call 'n 'p ) 
 ? eval:1767 unknown symbol 'n'
 ? eval_prefix2_arg:1001 1st argument is null
 ? eval_call:1502 prefix expression invalid
