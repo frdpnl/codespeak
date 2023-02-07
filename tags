@@ -4,6 +4,7 @@ List	phrase.c	/^} List;$/
 List_v	phrase.c	/^} List_v;$/
 Mphrase	phrase.c	/^main(int argc, char **argv) {$/
 Phrase	phrase.c	/^} Phrase;$/
+Rstatus	phrase.c	/^enum Rstatus {LINE, EMPTY, END, ERR};$/
 Sem	phrase.c	/^typedef union Sem_ Sem;$/
 Symop	phrase.c	/^} Symop;$/
 Symval	phrase.c	/^} Symval;$/
@@ -11,7 +12,7 @@ Val	phrase.c	/^typedef union Val_ Val;$/
 Word	phrase.c	/^} Word;$/
 added_sym	phrase.c	/^added_sym(Env *a, Symval *b, bool err) {$/
 copy_v	phrase.c	/^copy_v(Val *a) {$/
-eval	phrase.c	/^eval(Env *e, Val *a, bool solv) {$/
+eval	phrase.c	/^eval(Env *e, Val *a, bool resolve) {$/
 eval_and	phrase.c	/^eval_and(Env *e, Val *s, size_t p) {$/
 eval_call	phrase.c	/^eval_call(Env *e, Val *s, size_t p) {$/
 eval_div	phrase.c	/^eval_div(Env *e, Val *s, size_t p) {$/
@@ -24,20 +25,20 @@ eval_infix_arg	phrase.c	/^eval_infix_arg(Env *e, Val *s, size_t p, Val **pa,/
 eval_leq	phrase.c	/^eval_leq(Env *e, Val *s, size_t p) {$/
 eval_les	phrase.c	/^eval_les(Env *e, Val *s, size_t p) {$/
 eval_list	phrase.c	/^eval_list(Env *e, Val *s, size_t p) {$/
-eval_members1	phrase.c	/^eval_members1(Env *e, Val *a, bool solv) {$/
+eval_members1	phrase.c	/^eval_members1(Env *e, Val *a, bool resolve) {$/
 eval_min	phrase.c	/^eval_min(Env *e, Val *s, size_t p) {$/
 eval_mul	phrase.c	/^eval_mul(Env *e, Val *s, size_t p) {$/
 eval_neq	phrase.c	/^eval_neq(Env *e, Val *s, size_t p) {$/
 eval_not	phrase.c	/^eval_not(Env *e, Val *s, size_t p) {$/
 eval_or	phrase.c	/^eval_or(Env *e, Val *s, size_t p) {$/
-eval_ph	phrase.c	/^eval_ph(Phrase *a) {$/
+eval_ph	phrase.c	/^eval_ph(Env *e_o, Phrase *a) {$/
 eval_plu	phrase.c	/^eval_plu(Env *e, Val *s, size_t p) {$/
 eval_prefix1_arg	phrase.c	/^eval_prefix1_arg(Env *e, Val *s, size_t p, Val **p/
 eval_prefix2_arg	phrase.c	/^eval_prefix2_arg(Env *e, Val *s, size_t p, Val **p/
 eval_prefixn_arg	phrase.c	/^eval_prefixn_arg(Env *e, Val *s, size_t p, Val **p/
 eval_print	phrase.c	/^eval_print(Env *e, Val *s, size_t p) {$/
-eval_seq	phrase.c	/^eval_seq(Env *e, Val *a, bool solv) {$/
-eval_solve	phrase.c	/^eval_solve(Env *e, Val *s, size_t p) {$/
+eval_resolve	phrase.c	/^eval_resolve(Env *e, Val *s, size_t p) {$/
+eval_seq	phrase.c	/^eval_seq(Env *e, Val *a, bool resolve) {$/
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/
 expr	phrase.c	/^expr() {$/
 free_env	phrase.c	/^free_env(Env *a) {$/
@@ -73,7 +74,7 @@ push_ph	phrase.c	/^push_ph(Phrase *a, char *b) {$/
 push_s	phrase.c	/^push_s(Sem *a, Sem *b) {$/
 push_v	phrase.c	/^push_v(Val *a, Val *b) {$/
 push_xz	phrase.c	/^push_xz(Expr *a, Word *b) {$/
-read_stdin	phrase.c	/^read_stdin() {$/
+readline	phrase.c	/^static enum Rstatus $/
 sem_nat	phrase.c	/^sem_nat(long long a) {$/
 sem_nil	phrase.c	/^sem_nil() {$/
 sem_rea	phrase.c	/^sem_rea(double a) {$/

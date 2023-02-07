@@ -1,4 +1,4 @@
-# input:	 'n; call it p '
+#   line:	 'n; call it p '
 # phrase:	 n; call it p ; 
 #   0  expr: n
 #   0  seme: ( n ) 
@@ -7,8 +7,8 @@
 #   0   env: it=n  
 #   1  expr: call it p 
 #   1  seme: ( call it p ) 
-#   1 value: ( 0x405402^10 n p ) 
-? eval:1763 unknown symbol 'n'
-? eval_prefix2_arg:998 1st argument is null
-? eval_call:1499 prefix expression invalid
-? eval_seq:1740 symbol application failed
+#   1 value: ( call_10 n p ) 
+? eval:1767 unknown symbol 'n'
+? eval_prefix2_arg:1001 1st argument is null
+? eval_call:1502 prefix expression invalid
+? eval_seq:1744 symbol application failed

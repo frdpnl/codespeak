@@ -1,4 +1,4 @@
-# input:	 '3; call it p; call 4 p; p; print it; solve it; print it'
+#   line:	 '3; call it p; call 4 p; p; print it; solve it; print it'
 # phrase:	 3; call it p; call 4 p; p; print it; solve it; print it; 
 #   0  expr: 3
 #   0  seme: ( 3N ) 
@@ -7,12 +7,12 @@
 #   0   env: it=3  
 #   1  expr: call it p
 #   1  seme: ( call it p ) 
-#   1 value: ( 0x405402^10 3 p ) 
+#   1 value: ( call_10 3 p ) 
 #   1  eval: 3 
 #   1   env: it=3  p=3  
 #   2  expr: call 4 p
 #   2  seme: ( call 4N p ) 
-#   2 value: ( 0x405402^10 4 p ) 
+#   2 value: ( call_10 4 p ) 
 #   2  eval: 4 
 #   2   env: it=4  p=4  
 #   3  expr: p
@@ -22,18 +22,11 @@
 #   3   env: it=p  p=4  
 #   4  expr: print it
 #   4  seme: ( print it ) 
-#   4 value: ( 0x405190^10 p ) 
+#   4 value: ( print_10 p ) 
 p 
 #   4  eval: p 
 #   4   env: it=p  p=4  
 #   5  expr: solve it
 #   5  seme: ( solve it ) 
-#   5 value: ( 0x40521c^10 p ) 
-#   5  eval: 4 
-#   5   env: it=4  p=4  
-#   6  expr: print it
-#   6  seme: ( print it ) 
-#   6 value: ( 0x405190^10 4 ) 
-4 
-#   6  eval: 4 
-#   6   env: it=4  p=4  
+#   5 value: ( solve p ) 
+? eval_seq:1736 sequence without function symbol

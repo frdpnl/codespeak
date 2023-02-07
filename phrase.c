@@ -581,6 +581,7 @@ typedef union Val_ {
 		vtype t;
 		unsigned int prio;
 		Val* (*v)(Env *e, Val *s, size_t p);
+		char name[WSZ];
 	} symop;
 	struct {
 		stype t;
@@ -610,7 +611,7 @@ print_v(Val *a) {
 			printf("%.2lf ", a->rea.v);
 			break;
 		case VSYMOP:
-			printf("%p^%d ", a->symop.v, a->symop.prio);
+			printf("%s_%d ", a->symop.name, a->symop.prio);
 			break;
 		case VSYM:
 			printf("%s ", a->sym.v);
@@ -929,7 +930,7 @@ isit_v(Val *a) {
  * 4. cleanup behind you (working copies)
  * */
 
-static Val * eval(Env *e, Val *a, bool solv);
+static Val * eval(Env *e, Val *a, bool resolve);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -945,20 +946,20 @@ prefixed2(size_t p, size_t n) {
 }
 
 static bool
-eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool solva, Val **pb, bool solvb) {
+eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool resolvea, Val **pb, bool resolveb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not infixed\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p-1], solva); 
+	a = eval(e, s->seq.v.v[p-1], resolvea); 
 	if (a == NULL) {
 		printf("? %s:%d 1st argument null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	b = eval(e, s->seq.v.v[p+1], solvb);
+	b = eval(e, s->seq.v.v[p+1], resolveb);
 	if (b == NULL) {
 		printf("? %s:%d 2nd argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -970,14 +971,14 @@ eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool solva, Val **pb, bool so
 	return true;
 }
 static bool
-eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool solva) {
+eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool resolvea) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to one argument\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p+1], solva);
+	a = eval(e, s->seq.v.v[p+1], resolvea);
 	if (a == NULL) {
 		printf("? %s:%d argument is null\n", 
 				__FUNCTION__,__LINE__);
@@ -987,20 +988,20 @@ eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool solva) {
 	return true;
 }
 static bool
-eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool solva, Val **pb, bool solvb) {
+eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool resolvea, Val **pb, bool resolveb) {
 	Val *a, *b;
 	if (!prefixed2(p, s->seq.v.n)) {
 		printf("? %s:%d symbol not prefixed to 2 arguments\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p+1], solva);
+	a = eval(e, s->seq.v.v[p+1], resolvea);
 	if (a == NULL) {
 		printf("? %s:%d 1st argument is null\n", 
 				__FUNCTION__,__LINE__);
 		return false;
 	}
-	b = eval(e, s->seq.v.v[p+2], solvb);
+	b = eval(e, s->seq.v.v[p+2], resolveb);
 	if (b == NULL) {
 		printf("? %s:%d 2nd argument null\n", 
 				__FUNCTION__,__LINE__);
@@ -1012,14 +1013,14 @@ eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool solva, Val **pb, bool 
 	return true;
 }
 static bool
-eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool solva) {
+eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool resolvea) {
 	Val *a;
 	a = malloc(sizeof(*a));
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
 	a->seq.v.n = s->seq.v.n -p-1; 
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], solva);
+		a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], resolvea);
 	}
 	*pa = a;
 	return true;
@@ -1448,7 +1449,7 @@ eval_print(Env *e, Val *s, size_t p) {
 	return s;
 }
 static Val *
-eval_solve(Env *e, Val *s, size_t p) {
+eval_resolve(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s:%d prefix expression invalid\n", 
@@ -1533,7 +1534,7 @@ typedef struct Symop_ {
 
 #define NSYMS 19
 Symop Syms[] = {
-	(Symop) {"solve",    10, eval_solve},
+	(Symop) {"resolve",    10, eval_resolve},
 	(Symop) {"do",    10, eval_do},
 	(Symop) {"list",  10, eval_list},
 	(Symop) {"call",  10, eval_call},
@@ -1610,13 +1611,14 @@ val_of_seme(Env *e, Sem *s) {
 		return a;
 	}
 	if (s->hdr.t == SSYM) {
-		/* builtin operators, and special symbol 'it are solved */
+		/* builtin operators, and special symbol 'it are resolveed */
 		Symop *so = lookup_op(s->sym.v);
 		if (so != NULL) {
 			a = malloc(sizeof(*a));
 			a->hdr.t = VSYMOP;
 			a->symop.prio = so->prio;
 			a->symop.v = so->f;
+			memmove(a->symop.name, so->name, strlen(so->name));
 			return a;
 		}
 		a = malloc(sizeof(*a));
@@ -1679,7 +1681,7 @@ val_of_seme(Env *e, Sem *s) {
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
 static Val *
-eval_members1(Env *e, Val *a, bool solv) {
+eval_members1(Env *e, Val *a, bool resolve) {
 	/* works on SEQ and LST */
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
@@ -1687,7 +1689,7 @@ eval_members1(Env *e, Val *a, bool solv) {
 	b->seq.v.n = 0;
 	b->seq.v.v = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		Val *c = eval(e, a->seq.v.v[i], solv);
+		Val *c = eval(e, a->seq.v.v[i], resolve);
 		if (c == NULL) {
 			printf("? %s:%d list or seq item unknown\n",
 					__FUNCTION__,__LINE__);
@@ -1700,9 +1702,9 @@ eval_members1(Env *e, Val *a, bool solv) {
 }
 
 static Val *
-eval_seq(Env *e, Val *a, bool solv) {
+eval_seq(Env *e, Val *a, bool resolve) {
 	/* work on copy of seq, which gets progressively reduced, and destroyed */
-	Val *b = eval_members1(e, a, solv);
+	Val *b = eval_members1(e, a, resolve);
 	if (b == NULL) {
 		return NULL;
 	}
@@ -1753,12 +1755,12 @@ eval_seq(Env *e, Val *a, bool solv) {
 }
 
 static Val *
-eval(Env *e, Val *a, bool solv) {
+eval(Env *e, Val *a, bool resolve) {
 	/* returns a fresh value, 'a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		if (a->hdr.t == VSYM && solv) {
+		if (a->hdr.t == VSYM && resolve) {
 			Val *b = lookup(e, a->sym.v);
 			if (b == NULL) {
 				printf("? %s:%d unknown symbol '%s'\n",
@@ -1770,10 +1772,10 @@ eval(Env *e, Val *a, bool solv) {
 		return copy_v(a);
 	}
 	if (a->hdr.t == VLST) {
-		return eval_members1(e, a, solv);
+		return eval_members1(e, a, resolve);
 	}
 	if (a->hdr.t == VSEQ) {
-		return eval_seq(e, a, solv);
+		return eval_seq(e, a, resolve);
 	}
 	printf("? %s:%d unknown value\n",
 			__FUNCTION__,__LINE__);
@@ -1834,7 +1836,7 @@ push_ph(Phrase *a, char *b) {
 	return a;
 }
 
-/* expression is 64 words max */
+/* expression is 64 words large */
 #define XSZ 64*WSZ
 
 static Phrase *
@@ -1892,8 +1894,6 @@ phrase_of_str(char *a) {
 }
 
 /* -------------- Phrase -------------- */
-
-/* Environment: defined symbols across a phrase */
 
 static bool
 eval_ph(Env *e_o, Phrase *a) {
