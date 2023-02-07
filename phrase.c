@@ -816,7 +816,9 @@ free_symval(Symval *a) {
 }
 static void 
 free_env(Env *a) {
-	assert(a != NULL);
+	if (a == NULL) {
+		return;
+	}
 	for (size_t i=0; i<a->n; ++i) {
 		free_symval(a->s[i]);
 	}
@@ -1815,7 +1817,10 @@ print_ph(Phrase *a) {
 
 static Phrase *
 push_ph(Phrase *a, char *b) {
-	assert(a != NULL && b != NULL);
+	assert(b != NULL);
+	if (a == NULL) {
+		a = phrase();
+	}
 	char **c = malloc((a->n +1)*sizeof(c));
 	if (a->n > 0) {
 		memmove(c, a->x, a->n * sizeof(char*));
@@ -1838,8 +1843,7 @@ phrase_of_str(char *a) {
 	char buf[XSZ];
 	buf[0] = '\0';
 	size_t read;
-	Phrase *b = phrase();
-	assert(b != NULL && "Phrase allocation error");
+	Phrase *b = NULL;
 	char *x = NULL;
 	bool inspace = false;
 	for (size_t off = 0; a[off] != '\0'; off += read) {
@@ -1951,30 +1955,33 @@ usage(const char *exe) {
 	printf("usage: %s\n", exe);
 }
 
-static char *
-read_stdin() {
-	const rsize_t Maxsz = 2048;
-	char *line = malloc(Maxsz*sizeof(*line));
-	assert(line != NULL);
-	line = gets_s(line, Maxsz);
-	if (line) {
-		return line;
-	}
-	if (feof(stdin) == 0) {
+static bool
+readline(char **s_out) {
+	char *line = NULL;
+	size_t linesz = 0;
+	ssize_t rd = 0;
+	errno = 0;
+	rd = getline(&line, &linesz, stdin);
+	if (rd == -1) {
+		if (ferror(stdin) != 0) {
+			if (errno == EINVAL) {
+				*s_out = NULL;
+				return true;
+			}
+			printf("? %s:%d %s\n",
+					__FUNCTION__,__LINE__,
+					strerror(errno));
+			return false;
+		}
 		free(line);
-		return NULL;
+		*s_out = NULL;
+		return true;
 	}
-	if (ferror(stdin) != 0) {
-		printf("? %s:%d %s\n",
-				__FUNCTION__,__LINE__,
-				strerror(errno));
-		free(line);
-		return NULL;
+	if (isspace((int)line[rd-1])) {
+		line[rd-1] = '\0';
 	}
-	printf("? %s:%d undefined error\n",
-			__FUNCTION__,__LINE__);
-	free(line);
-	return NULL;
+	*s_out = line;
+	return true;
 }
 
 int
@@ -1983,21 +1990,27 @@ main(int argc, char **argv) {
 		usage(argv[0]);
 		return EXIT_FAILURE;
 	}
-	char *s = read_stdin();
-	if (s == NULL) {
-		return EXIT_FAILURE;
-	}
-	printf("# input:\t '%s'\n", s);
-	Phrase *ph = phrase_of_str(s);
-	free(s);
-	if (ph == NULL) {
-		return EXIT_FAILURE;
-	}
-	printf("# phrase:\t "); print_ph(ph); 
-	Env *e = eval_ph(ph);
-	free_ph(ph);
-	if (e == NULL) {
-		return EXIT_FAILURE;
+	Env *e = NULL;
+	char *line;
+	while (1) {
+		if (!readline(&line)) {
+			return EXIT_FAILURE;
+		}
+		if (line == NULL) {
+			return EXIT_SUCCESS;
+		}
+		printf("# line:\t '%s'\n", line);
+		Phrase *ph = phrase_of_str(line);
+		free(line);
+		if (ph == NULL) {
+			return EXIT_FAILURE;
+		}
+		printf("# phrase:\t "); print_ph(ph); 
+		e = eval_ph(ph);
+		free_ph(ph);
+		if (e == NULL) {
+			return EXIT_FAILURE;
+		}
 	}
 	free_env(e);
 	return EXIT_SUCCESS;
