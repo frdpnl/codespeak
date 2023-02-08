@@ -48,11 +48,9 @@ free_symval	phrase.c	/^free_symval(Symval *a) {$/
 free_v	phrase.c	/^free_v(Val *a) {$/
 free_x	phrase.c	/^free_x(Expr *a) {$/
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/
-is_sym	phrase.c	/^is_sym(Val *a, const char *s) {$/
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/
 isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/
-isit_v	phrase.c	/^isit_v(Val *a) {$/
 isnat	phrase.c	/^isnat(Word *a) {$/
 isrea	phrase.c	/^isrea(Word *a) {$/
 issym	phrase.c	/^issym(Word *a) {$/
@@ -72,7 +70,7 @@ print_symval	phrase.c	/^print_symval(Symval *a) {$/
 print_v	phrase.c	/^print_v(Val *a) {$/
 push_ph	phrase.c	/^push_ph(Phrase *a, char *b) {$/
 push_s	phrase.c	/^push_s(Sem *a, Sem *b) {$/
-push_v	phrase.c	/^push_v(Val *a, Val *b) {$/
+push_v	phrase.c	/^push_v(vtype t, Val *a, Val *b) {$/
 push_xz	phrase.c	/^push_xz(Expr *a, Word *b) {$/
 readline	phrase.c	/^static enum Rstatus $/
 sem_nat	phrase.c	/^sem_nat(long long a) {$/

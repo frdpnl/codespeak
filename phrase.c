@@ -638,7 +638,9 @@ print_v(Val *a) {
 
 static void 
 free_v(Val *a) {
-	assert(a != NULL);
+	if (a == NULL) {
+		return;
+	}
 	switch (a->hdr.t) {
 		case VNIL:
 		case VNAT:
@@ -754,13 +756,19 @@ copy_v(Val *a) {
 	return b;
 }
 static Val *
-push_v(Val *a, Val *b) {
-	assert(a != NULL && "seq is null");
+push_v(vtype t, Val *a, Val *b) {
 	assert(b != NULL && "val is null");
-	if (a->hdr.t != VSEQ && a->hdr.t != VLST) {
-		printf("? %s:%d not a seq or list val\n",
+	if (t != VSEQ && t != VLST) {
+		printf("? %s:%d not a seq or list\n",
 				__FUNCTION__,__LINE__);
 		return NULL;
+	}
+	if (a == NULL) {
+		a = malloc(sizeof(*a));
+		assert(a != NULL);
+		a->hdr.t = t;
+		a->seq.v.n = 0;
+		a->seq.v.v = NULL;
 	}
 	Val **c = malloc((a->seq.v.n +1)*sizeof(Val*));
 	if (a->seq.v.n > 0) {
@@ -774,7 +782,6 @@ push_v(Val *a, Val *b) {
 	a->seq.v.v = c;
 	return a;
 }
-
 static void
 print_symval(Symval *a) {
 	assert(a != NULL);
@@ -907,18 +914,6 @@ stored_sym(Env *a, Symval *b) {
 		return true;
 	}
 	return false;
-}
-static bool
-is_sym(Val *a, const char *s) {
-	assert(a != NULL);
-	if (a->hdr.t != VSYM) {
-		return false;
-	}
-	return strncmp(a->sym.v, s, WSZ*sizeof(char)) == 0;
-}
-static bool
-isit_v(Val *a) {
-	return is_sym(a, "it");
 }
 
 /* -------- operation symbol definitions ------------
@@ -1611,7 +1606,7 @@ val_of_seme(Env *e, Sem *s) {
 		return a;
 	}
 	if (s->hdr.t == SSYM) {
-		/* builtin operators, and special symbol 'it are resolveed */
+		/* builtin operators, and special symbol 'it are resolved now */
 		Symop *so = lookup_op(s->sym.v);
 		if (so != NULL) {
 			a = malloc(sizeof(*a));
@@ -1621,27 +1616,22 @@ val_of_seme(Env *e, Sem *s) {
 			memmove(a->symop.name, so->name, strlen(so->name));
 			return a;
 		}
-		a = malloc(sizeof(*a));
-		assert(a != NULL);
-		a->hdr.t = VSYM;
-		strncpy(a->sym.v, s->sym.v, WSZ*sizeof(char));
-		if (isit_v(a)) {
-			Val *b = lookup(e, a->sym.v);
-			free_v(a);
-			if (b == NULL) {
+		if (strncmp(s->sym.v, "it", 3) == 0) {
+			a = lookup(e, "it");
+			if (a == NULL) {
 				printf("? %s:%d 'it' symbol undefined\n",
 						__FUNCTION__,__LINE__);
 				return NULL;
 			}
-			return copy_v(b);
+			return copy_v(a);
 		}
+		a = malloc(sizeof(*a));
+		assert(a != NULL);
+		a->hdr.t = VSYM;
+		memmove(a->sym.v, s->sym.v, strlen(s->sym.v));
 		return a;
 	}
 	if (s->hdr.t == SLST) {
-		a = malloc(sizeof(*a));
-		a->hdr.t = VLST;
-		a->lst.v.n = 0;
-		a->lst.v.v = NULL;
 		size_t n = s->lst.v.n;
 		Sem *l = s->lst.v.s;
 		Val *d;
@@ -1651,15 +1641,11 @@ val_of_seme(Env *e, Sem *s) {
 				free_v(a);
 				return NULL;
 			}
-			a = push_v(a, d);
+			a = push_v(VLST, a, d);
 		}
 		return a;
 	}
 	if (s->hdr.t == SSEQ) {
-		a = malloc(sizeof(*a));
-		a->hdr.t = VSEQ;
-		a->seq.v.n = 0;
-		a->seq.v.v = NULL;
 		size_t n = s->seq.v.n;
 		Sem *l = s->seq.v.s;
 		Val *d;
@@ -1669,7 +1655,7 @@ val_of_seme(Env *e, Sem *s) {
 				free_v(a);
 				return NULL;
 			}
-			a = push_v(a, d);
+			a = push_v(VSEQ, a, d);
 		}
 		return a;
 	}
@@ -1683,11 +1669,9 @@ val_of_seme(Env *e, Sem *s) {
 static Val *
 eval_members1(Env *e, Val *a, bool resolve) {
 	/* works on SEQ and LST */
-	Val *b = malloc(sizeof(*b));
-	assert(b != NULL);
-	b->hdr.t = a->hdr.t; /* SEQ or LST */
-	b->seq.v.n = 0;
-	b->seq.v.v = NULL;
+	assert(a != NULL && "val is null");
+	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
+	Val *b = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		Val *c = eval(e, a->seq.v.v[i], resolve);
 		if (c == NULL) {
@@ -1696,7 +1680,7 @@ eval_members1(Env *e, Val *a, bool resolve) {
 			free_v(b);
 			return NULL;
 		}
-		b = push_v(b, c);
+		b = push_v(a->hdr.t, b, c);
 	}
 	return b;
 }
