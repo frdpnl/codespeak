@@ -1,5 +1,5 @@
 # ----line: "n; call it p "
-# --phrase: n; call it p ; 
+# --phrase: n ; call it p  ; 
 #   0  expr: n
 #   0  seme: ( n ) 
 #   0 value: ( 'n ) 
@@ -8,7 +8,7 @@
 #   1  expr: call it p 
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 'n 'p ) 
-? eval:1767 unknown symbol 'n'
-? eval_prefix2_arg:1001 1st argument is null
-? eval_call:1502 prefix expression invalid
-? eval_seq:1744 symbol application failed
+? eval: unknown symbol 'n'
+? eval_prefix2_arg: 1st argument is null
+? eval_call: prefix expression invalid
+? eval_seq: symbol application failed

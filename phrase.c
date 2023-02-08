@@ -80,8 +80,8 @@ word(wtype a) {
 static Word *
 word_str(char *a, size_t n) {
 	if (n >= WSZ) {
-		printf("? %s:%d word to big\n", 
-				__FUNCTION__, __LINE__);
+		printf("? %s: word to big\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	Word *b = word(STR);
@@ -158,9 +158,8 @@ exp_of_words(char *a) {
 			continue;
 		} 
 		if (boff+read >= WSZ) {
-			printf("\n? %s:%d word too big (%luB)!\n", 
+			printf("\n? %s: word too big (%luB)!\n", 
 					__FUNCTION__,
-					__LINE__,
 					boff+read);
 			free_x(b);
 			return NULL;
@@ -245,8 +244,8 @@ print_s(Sem *a) {
 			printf(") ");
 			break;
 		default:
-			printf("? %s:%d unknown seme\n",
-					__FUNCTION__, __LINE__);
+			printf("? %s: unknown seme\n",
+					__FUNCTION__);
 	}
 }
 
@@ -318,16 +317,16 @@ free_s(Sem *a) {
 			free(a->lst.v.s);
 			break;
 		default:
-			printf("? %s:%d unknown seme\n",
-					__FUNCTION__,__LINE__);
+			printf("? %s: unknown seme\n",
+					__FUNCTION__);
 	}
 }
 
 static Sem* 
 isnat(Word *a) {
 	if (a->t != STR) {
-		printf("? %s:%d word is not a string\n",
-				__FUNCTION__, __LINE__);
+		printf("? %s word is not a string\n",
+				__FUNCTION__);
 		return NULL;
 	}
 	const char *err;
@@ -337,8 +336,8 @@ isnat(Word *a) {
 		return sem_nat(n);
 	}
 	if (errno == ERANGE) {
-		printf("? %s:%d natural number out of range %s\n", 
-				__FUNCTION__, __LINE__, a->v);
+		printf("? %s: natural number out of range %s\n", 
+				__FUNCTION__, a->v);
 	} 
 	return NULL;
 }
@@ -346,8 +345,8 @@ isnat(Word *a) {
 static Sem *
 isrea(Word *a) {
 	if (a->t != STR) {
-		printf("? %s:%d word is not a string\n",
-				__FUNCTION__, __LINE__);
+		printf("? %s word is not a string\n",
+				__FUNCTION__);
 		return NULL;
 	}
 	char *err = NULL;
@@ -358,11 +357,11 @@ isrea(Word *a) {
 	}
 	if (errno == ERANGE) {
 		if (f == 0) {
-			printf("? %s:%d real underflow %s\n", 
-					__FUNCTION__, __LINE__, a->v);
+			printf("? %s: real underflow %s\n", 
+					__FUNCTION__, a->v);
 		} else {
-			printf("? %s:%d real overflow %s\n", 
-					__FUNCTION__, __LINE__, a->v);
+			printf("? %s: real overflow %s\n", 
+					__FUNCTION__, a->v);
 		}
 	}
 	return NULL;
@@ -371,8 +370,8 @@ isrea(Word *a) {
 static Sem *
 issym(Word *a) {
 	if (a->t != STR) {
-		printf("? %s:%d word is not a string\n",
-				__FUNCTION__, __LINE__);
+		printf("? %s: word is not a string\n",
+				__FUNCTION__);
 		return NULL;
 	}
 	return sem_sym(a->v);
@@ -383,8 +382,8 @@ push_s(Sem *a, Sem *b) {
 	assert(a != NULL && "seq or lst is null");
 	assert(b != NULL && "pushed seme is null");
 	if (a->hdr.t != SSEQ && a->hdr.t != SLST) {
-		printf("? %s:%d not a seq or lst seme\n",
-				__FUNCTION__,__LINE__);
+		printf("? %s: not a seq or lst seme\n",
+				__FUNCTION__);
 		return NULL;
 	}
 	Sem *c = malloc((a->seq.v.n +1)*sizeof(Sem));
@@ -401,15 +400,15 @@ static Sem *
 lst_of(Sem *a) {
 	assert(a != NULL);
 	if (a->hdr.t != SSEQ && a->hdr.t != SLST) {
-		printf("? %s:%d not a seq or lst seme\n",
-				__FUNCTION__,__LINE__);
+		printf("? %s: not a seq or lst seme\n",
+				__FUNCTION__);
 		free_s(a);
 		free(a);
 		return NULL;
 	}
 	if (a->hdr.t == SSEQ && a->seq.v.n > 1) {
-		printf("? %s:%d cannot add a list element to a seq-seme\n",
-				__FUNCTION__,__LINE__);
+		printf("? %s: cannot add a list element to a seq-seme\n",
+				__FUNCTION__);
 		free_s(a);
 		free(a);
 		return NULL;
@@ -446,8 +445,8 @@ seme_of_exp_part(Expr *a, size_t from, size_t tox) {
 				break;
 			case LEFT:
 				if (b->hdr.t == SLST && !lst_expect1) {
-					printf("? %s:%d unexpected list element\n",
-							__FUNCTION__, __LINE__);
+					printf("? %s: unexpected list element\n",
+							__FUNCTION__);
 					free_s(b);
 					free(b);
 					return NULL;
@@ -476,8 +475,8 @@ seme_of_exp_part(Expr *a, size_t from, size_t tox) {
 					}
 				}
 				if (inpar != 0) {
-					printf("? %s:%d unmatched %s\n",
-							__FUNCTION__,__LINE__,
+					printf("? %s: unmatched %s\n",
+							__FUNCTION__,
 							inpar < 0 ? ")" : "(");
 					free_s(b);
 					free(b);
@@ -485,15 +484,15 @@ seme_of_exp_part(Expr *a, size_t from, size_t tox) {
 				}
 				break;
 			case RIGHT:
-				printf("? %s:%d unmatched )\n",
-						__FUNCTION__,__LINE__);
+				printf("? %s: unmatched )\n",
+						__FUNCTION__);
 				free_s(b);
 				free(b);
 				return NULL;
 			case STR:
 				if (b->hdr.t == SLST && !lst_expect1) {
-					printf("? %s:%d unexpected list element\n",
-							__FUNCTION__, __LINE__);
+					printf("? %s: unexpected list element\n",
+							__FUNCTION__);
 					free_s(b);
 					free(b);
 					return NULL;
@@ -506,8 +505,8 @@ seme_of_exp_part(Expr *a, size_t from, size_t tox) {
 					c = issym(a->w+iw);
 				}
 				if (c == NULL) {
-					printf("? %s:%d unknown word\n",
-							__FUNCTION__,__LINE__);
+					printf("? %s: unknown word\n",
+							__FUNCTION__);
 					free_s(b);
 					free(b);
 					return NULL;
@@ -520,8 +519,8 @@ seme_of_exp_part(Expr *a, size_t from, size_t tox) {
 				pushed = true;
 				break;
 			default:
-				printf("? %s:%d unexpected word\n",
-						__FUNCTION__,__LINE__);
+				printf("? %s: unexpected word\n",
+						__FUNCTION__);
 				free_s(b);
 				free(b);
 				return NULL;
@@ -631,8 +630,8 @@ print_v(Val *a) {
 			printf(") ");
 			break;
 		default:
-			printf("? %s:%d unknown value\n",
-					__FUNCTION__, __LINE__);
+			printf("? %s: unknown value\n",
+					__FUNCTION__);
 	}
 }
 
@@ -661,8 +660,8 @@ free_v(Val *a) {
 			free(a->lst.v.v);
 			break;
 		default:
-			printf("? %s:%d unknown value\n",
-					__FUNCTION__,__LINE__);
+			printf("? %s: unknown value\n",
+					__FUNCTION__);
 	}
 	free(a);
 }
@@ -697,8 +696,8 @@ isequal_v(Val *a, Val *b) {
 		}
 		return true;
 	}
-	printf("? %s:%d unsupported value\n",
-			__FUNCTION__,__LINE__);
+	printf("? %s: unsupported value\n",
+			__FUNCTION__);
 	return false;
 }
 
@@ -738,8 +737,8 @@ isequiv_v(Val *a, Val *b) {
 		}
 		return true;
 	}
-	printf("? %s:%d unsupported value\n",
-			__FUNCTION__,__LINE__);
+	printf("? %s: unsupported value\n",
+			__FUNCTION__);
 	return false;
 }
 static Val *
@@ -759,8 +758,8 @@ static Val *
 push_v(vtype t, Val *a, Val *b) {
 	assert(b != NULL && "val is null");
 	if (t != VSEQ && t != VLST) {
-		printf("? %s:%d not a seq or list\n",
-				__FUNCTION__,__LINE__);
+		printf("? %s: not a seq or list\n",
+				__FUNCTION__);
 		return NULL;
 	}
 	if (a == NULL) {
@@ -802,13 +801,13 @@ symval(char *a, Val *b) {
 	assert(a != NULL && "name is null");
 	assert(b != NULL && "val is null");
 	if (strlen(a) == 0) {
-		printf("? %s:%d empty name\n",
-				__FUNCTION__,__LINE__);
+		printf("? %s: empty name\n",
+				__FUNCTION__);
 		return NULL;
 	};
 	if (strlen(a) >= WSZ) {
-		printf("? %s:%d symbol name too long (%s)\n",
-				__FUNCTION__,__LINE__, a);
+		printf("? %s: symbol name too long (%s)\n",
+				__FUNCTION__, a);
 		return NULL;
 	};
 	Symval *c = malloc(sizeof(*c));
@@ -838,8 +837,8 @@ lookup_id(Env *a, char *b, size_t *id) {
 	assert(a != NULL && "env is null");
 	assert(b != NULL && "name is null");
 	if (strlen(b) == 0) {
-		printf("? %s:%d symbol name null\n",
-				__FUNCTION__,__LINE__);
+		printf("? %s: symbol name null\n",
+				__FUNCTION__);
 		return NULL;
 	}
 	for (size_t i=0; i<a->n; ++i) {
@@ -870,8 +869,8 @@ added_sym(Env *a, Symval *b, bool err) {
 	assert(b != NULL && "symbol null");
 	if (lookup(a, b->name) != NULL) {
 		if (err) {
-			printf("? %s:%d symbol already defined (%s)\n",
-					__FUNCTION__,__LINE__, b->name);
+			printf("? %s: symbol already defined (%s)\n",
+					__FUNCTION__, b->name);
 		}
 		return false;
 	}
@@ -896,8 +895,8 @@ upded_sym(Env *a, Symval *b, bool err) {
 	Symval *c = lookup_id(a, b->name, &id);
 	if (c == NULL) {
 		if (err) {
-			printf("? %s:%d symbol not found (%s)\n",
-					__FUNCTION__,__LINE__, b->name);
+			printf("? %s: symbol not found (%s)\n",
+					__FUNCTION__, b->name);
 		}
 		return false;
 	}
@@ -944,20 +943,20 @@ static bool
 eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool resolvea, Val **pb, bool resolveb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
-		printf("? %s:%d symbol not infixed\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: symbol not infixed\n", 
+				__FUNCTION__);
 		return false;
 	}
 	a = eval(e, s->seq.v.v[p-1], resolvea); 
 	if (a == NULL) {
-		printf("? %s:%d 1st argument null\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: 1st argument null\n", 
+				__FUNCTION__);
 		return false;
 	}
 	b = eval(e, s->seq.v.v[p+1], resolveb);
 	if (b == NULL) {
-		printf("? %s:%d 2nd argument null\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: 2nd argument null\n", 
+				__FUNCTION__);
 		free_v(a);
 		return false;
 	}
@@ -969,14 +968,14 @@ static bool
 eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool resolvea) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
-		printf("? %s:%d symbol not prefixed to one argument\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: symbol not prefixed to one argument\n", 
+				__FUNCTION__);
 		return false;
 	}
 	a = eval(e, s->seq.v.v[p+1], resolvea);
 	if (a == NULL) {
-		printf("? %s:%d argument is null\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: argument is null\n", 
+				__FUNCTION__);
 		return false;
 	}
 	*pa = a;
@@ -986,20 +985,20 @@ static bool
 eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool resolvea, Val **pb, bool resolveb) {
 	Val *a, *b;
 	if (!prefixed2(p, s->seq.v.n)) {
-		printf("? %s:%d symbol not prefixed to 2 arguments\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: symbol not prefixed to 2 arguments\n", 
+				__FUNCTION__);
 		return false;
 	}
 	a = eval(e, s->seq.v.v[p+1], resolvea);
 	if (a == NULL) {
-		printf("? %s:%d 1st argument is null\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: 1st argument is null\n", 
+				__FUNCTION__);
 		return false;
 	}
 	b = eval(e, s->seq.v.v[p+2], resolveb);
 	if (b == NULL) {
-		printf("? %s:%d 2nd argument null\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: 2nd argument null\n", 
+				__FUNCTION__);
 		free_v(a);
 		return false;
 	}
@@ -1064,14 +1063,14 @@ static Val *
 eval_mul(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1094,22 +1093,22 @@ static Val *
 eval_div(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
 	}
 	if ((b->hdr.t == VNAT && b->nat.v == 0) 
 			|| (b->hdr.t == VREA && b->rea.v == 0.)) {
-		printf("? %s:%d division by 0\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: division by 0\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1132,14 +1131,14 @@ static Val *
 eval_plu(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1162,14 +1161,14 @@ static Val *
 eval_min(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1192,15 +1191,15 @@ static Val *
 eval_les(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1224,15 +1223,15 @@ static Val *
 eval_leq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1256,15 +1255,15 @@ static Val *
 eval_gre(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1288,15 +1287,15 @@ static Val *
 eval_geq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s:%d arguments not numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1320,8 +1319,8 @@ static Val *
 eval_eq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	bool c = isequal_v(a, b);
@@ -1337,8 +1336,8 @@ static Val *
 eval_neq(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	bool c = isequal_v(a, b);
@@ -1354,8 +1353,8 @@ static Val *
 eval_eqv(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	bool c = isequiv_v(a, b);
@@ -1371,13 +1370,13 @@ static Val *
 eval_and(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
-		printf("? %s:%d arguments not natural numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not natural numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1393,13 +1392,13 @@ static Val *
 eval_or(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s:%d infix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: infix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
-		printf("? %s:%d arguments not natural numbers\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: arguments not natural numbers\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1415,13 +1414,13 @@ static Val *
 eval_not(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
-		printf("? %s:%d prefix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if ((a->hdr.t != VNAT)) {
-		printf("? %s:%d argument not natural number (boolean)\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: argument not natural number (boolean)\n", 
+				__FUNCTION__);
 		free_v(a);
 		return NULL;
 	}
@@ -1434,8 +1433,8 @@ static Val *
 eval_print(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, false)) {
-		printf("? %s:%d prefix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	print_v(a);
@@ -1447,8 +1446,8 @@ static Val *
 eval_resolve(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
-		printf("? %s:%d prefix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	upd_prefix1(s, p, a);
@@ -1458,13 +1457,13 @@ static Val *
 eval_do(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
-		printf("? %s:%d prefix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if (a->hdr.t != VLST) {
-		printf("? %s:%d argument not a list\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: argument not a list\n", 
+				__FUNCTION__);
 		free_v(a);
 		return NULL;
 	}
@@ -1481,8 +1480,8 @@ static Val *
 eval_list(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!eval_prefixn_arg(e, s, p, &a, false)) {
-		printf("? %s:%d prefix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	a->hdr.t = VLST;
@@ -1493,13 +1492,13 @@ static Val *
 eval_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!eval_prefix2_arg(e, s, p, &a, true, &b, false)) {
-		printf("? %s:%d prefix expression invalid\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
 		return NULL;
 	}
 	if (b->hdr.t != VSYM) {
-		printf("? %s:%d 2nd argument is not a symbol\n", 
-				__FUNCTION__,__LINE__);
+		printf("? %s: 2nd argument is not a symbol\n", 
+				__FUNCTION__);
 		free_v(a);
 		free_v(b);
 		return NULL;
@@ -1613,14 +1612,14 @@ val_of_seme(Env *e, Sem *s) {
 			a->hdr.t = VSYMOP;
 			a->symop.prio = so->prio;
 			a->symop.v = so->f;
-			memmove(a->symop.name, so->name, strlen(so->name));
+			strncpy(a->symop.name, so->name, 1+strlen(so->name));
 			return a;
 		}
 		if (strncmp(s->sym.v, "it", 3) == 0) {
 			a = lookup(e, "it");
 			if (a == NULL) {
-				printf("? %s:%d 'it' symbol undefined\n",
-						__FUNCTION__,__LINE__);
+				printf("? %s: 'it' symbol undefined\n",
+						__FUNCTION__);
 				return NULL;
 			}
 			return copy_v(a);
@@ -1628,7 +1627,7 @@ val_of_seme(Env *e, Sem *s) {
 		a = malloc(sizeof(*a));
 		assert(a != NULL);
 		a->hdr.t = VSYM;
-		memmove(a->sym.v, s->sym.v, strlen(s->sym.v));
+		strncpy(a->sym.v, s->sym.v, 1+strlen(s->sym.v));
 		return a;
 	}
 	if (s->hdr.t == SLST) {
@@ -1659,8 +1658,8 @@ val_of_seme(Env *e, Sem *s) {
 		}
 		return a;
 	}
-	printf("? %s:%d unknown seme\n",
-			__FUNCTION__,__LINE__);
+	printf("? %s: unknown seme\n",
+			__FUNCTION__);
 	return NULL;
 }
 
@@ -1675,8 +1674,8 @@ eval_members1(Env *e, Val *a, bool resolve) {
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		Val *c = eval(e, a->seq.v.v[i], resolve);
 		if (c == NULL) {
-			printf("? %s:%d list or seq item unknown\n",
-					__FUNCTION__,__LINE__);
+			printf("? %s: list or seq item unknown\n",
+					__FUNCTION__);
 			free_v(b);
 			return NULL;
 		}
@@ -1716,16 +1715,16 @@ eval_seq(Env *e, Val *a, bool resolve) {
 			} 
 		}
 		if (!symfound) { 
-			printf("? %s:%d sequence without function symbol\n",
-					__FUNCTION__,__LINE__);
+			printf("? %s: sequence without function symbol\n",
+					__FUNCTION__);
 			free_v(b);
 			return NULL;
 		}
 		/* apply the symbol, returns the reduced seq */
 		c = b->seq.v.v[symat]->symop.v(e, b, symat);
 		if (c == NULL) {
-			printf("? %s:%d symbol application failed\n",
-					__FUNCTION__,__LINE__);
+			printf("? %s: symbol application failed\n",
+					__FUNCTION__);
 			free_v(b);
 			return NULL;
 		}
@@ -1747,8 +1746,8 @@ eval(Env *e, Val *a, bool resolve) {
 		if (a->hdr.t == VSYM && resolve) {
 			Val *b = lookup(e, a->sym.v);
 			if (b == NULL) {
-				printf("? %s:%d unknown symbol '%s'\n",
-					__FUNCTION__,__LINE__, a->sym.v);
+				printf("? %s: unknown symbol '%s'\n",
+					__FUNCTION__, a->sym.v);
 				return NULL;
 			}
 			return copy_v(b);
@@ -1761,8 +1760,8 @@ eval(Env *e, Val *a, bool resolve) {
 	if (a->hdr.t == VSEQ) {
 		return eval_seq(e, a, resolve);
 	}
-	printf("? %s:%d unknown value\n",
-			__FUNCTION__,__LINE__);
+	printf("? %s: unknown value\n",
+			__FUNCTION__);
 	return NULL;
 }
 
@@ -1796,7 +1795,7 @@ static void
 print_ph(Phrase *a) {
 	assert(a != NULL);
 	for (size_t i=0; i<a->n; ++i) {
-		printf("%s; ", a->x[i]);
+		printf("%s ; ", a->x[i]);
 	}
 	printf("\n");
 }
@@ -1846,9 +1845,8 @@ phrase_of_str(char *a) {
 			continue;
 		} 
 		if (boff+read >= XSZ) {
-			printf("\n? %s:%d expression too big (%luB)!\n", 
+			printf("\n? %s: expression too big (%luB)!\n", 
 					__FUNCTION__,
-					__LINE__,
 					boff+read);
 			free_ph(b);
 			return NULL;
@@ -1941,8 +1939,8 @@ readline(char **s_o) {
 	rd = getline(&line, &linesz, stdin);
 	if (rd == -1) {
 		if (ferror(stdin) != 0) {
-			printf("? %s:%d %s\n",
-					__FUNCTION__,__LINE__,
+			printf("? %s: %s\n",
+					__FUNCTION__,
 					strerror(errno));
 			return ERR;
 		}

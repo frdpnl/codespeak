@@ -1,5 +1,5 @@
 # ----line: "1, +, 2 ; list it; do it; do it; print it"
-# --phrase: 1, +, 2 ; list it; do it; do it; print it; 
+# --phrase: 1, +, 2  ; list it ; do it ; do it ; print it ; 
 #   0  expr: 1, +, 2 
 #   0  seme: { 1N + 2N } 
 #   0 value: { 1 `+ 2 } 

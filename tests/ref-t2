@@ -1,5 +1,5 @@
 # ----line: "3; call it p; call 4 p; p; print it; solve it; print it"
-# --phrase: 3; call it p; call 4 p; p; print it; solve it; print it; 
+# --phrase: 3 ; call it p ; call 4 p ; p ; print it ; solve it ; print it ; 
 #   0  expr: 3
 #   0  seme: ( 3N ) 
 #   0 value: ( 3 ) 
@@ -29,4 +29,4 @@
 #   5  expr: solve it
 #   5  seme: ( solve it ) 
 #   5 value: ( 'solve 'p ) 
-? eval_seq:1736 sequence without function symbol
+? eval_seq: sequence without function symbol

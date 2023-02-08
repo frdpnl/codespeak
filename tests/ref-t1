@@ -1,5 +1,5 @@
 # ----line: "2 * 3.; call it   p ; p, ~=,6; print it ; do it ; print it"
-# --phrase: 2 * 3.; call it p ; p, ~=,6; print it ; do it ; print it; 
+# --phrase: 2 * 3. ; call it p  ; p, ~=,6 ; print it  ; do it  ; print it ; 
 #   0  expr: 2 * 3.
 #   0  seme: ( 2N * 3.00R ) 
 #   0 value: ( 2 `* 3.00 ) 
