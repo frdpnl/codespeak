@@ -667,6 +667,31 @@ free_v(Val *a) {
 }
 
 static bool
+istrue_v(Val *a) {
+	assert(a != NULL);
+	if (a->hdr.t == VNIL) {
+		return false;
+	}
+	if (a->hdr.t == VNAT) {
+		return a->nat.v != 0;
+	}
+	if (a->hdr.t == VREA) {
+		return a->rea.v != 0.;
+	}
+	if (a->hdr.t == VSYMOP) {
+		return a->symop.v != NULL;
+	}
+	if (a->hdr.t == VSYM) {
+		return true;
+	}
+	if (a->hdr.t == VLST) {
+		return a->lst.v.n > 0;
+	}
+	printf("? %s: unsupported value\n",
+			__FUNCTION__);
+	return false;
+}
+static bool
 isequal_v(Val *a, Val *b) {
 	assert(a != NULL && b != NULL);
 	if (a->hdr.t != b->hdr.t) {
@@ -1042,6 +1067,11 @@ upd_prefixk(Val *s, size_t p, Val *a, size_t k) {
 		s->seq.v.v[i-k] = s->seq.v.v[i];
 	}
 	s->seq.v.n -= k;
+}
+static void
+upd_prefix0(Val *s, size_t p, Val *a) {
+	/* consume 0 seq item */
+	upd_prefixk(s, p, a, 0);
 }
 static void
 upd_prefix1(Val *s, size_t p, Val *a) {
@@ -1517,6 +1547,32 @@ eval_call(Env *e, Val *s, size_t p) {
 	upd_prefix2(s, p, a);
 	return s;
 }
+static Val *
+eval_true(Env *e, Val *s, size_t p) {
+	Val *a;
+	a = lookup(e, "it");
+	if (a == NULL) {
+		printf("? %s: 'it' undefined\n", 
+				__FUNCTION__);
+		return NULL;
+	}
+	Val *b = malloc(sizeof(*b));
+	assert(b != NULL);
+	b->hdr.t = VNAT;
+	b->nat.v = istrue_v(a);
+	upd_prefix0(s, p, b);
+	return s;
+}
+static Val *
+eval_false(Env *e, Val *s, size_t p) {
+	Val *a = eval_true(e, s, p);
+	if (a == NULL) {
+		return NULL;
+	}
+	a->nat.v = !a->nat.v;
+	return s;
+}
+
 
 /* --------------- builtin or base function symbols -------------------- */
 
@@ -1526,8 +1582,10 @@ typedef struct Symop_ {
 	Val* (*f)(Env *e, Val *s, size_t p);
 } Symop;
 
-#define NSYMS 19
+#define NSYMS 21
 Symop Syms[] = {
+	(Symop) {"true",    10, eval_true},
+	(Symop) {"false",   10, eval_false},
 	(Symop) {"resolve",    10, eval_resolve},
 	(Symop) {"do",    10, eval_do},
 	(Symop) {"list",  10, eval_list},
@@ -1772,7 +1830,7 @@ eval(Env *e, Val *a, bool resolve) {
 	return NULL;
 }
 
-/* ------------ Phrase, list of expressions --------- */
+/* ------------ Phrase, a line, a list of expressions --------- */
 
 typedef struct {
 	size_t n;
