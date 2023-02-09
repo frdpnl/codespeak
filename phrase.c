@@ -1758,7 +1758,6 @@ eval_seq(Env *e, Val *b, bool resolve) {
 			/* except, execute sequence of single unary function */
 			if (!(d->hdr.t == VSYMOP && d->symop.ary == 0)) {
 				c = copy_v(d);
-				free_v(b);
 				return c;
 			}
 		}
@@ -1779,7 +1778,6 @@ eval_seq(Env *e, Val *b, bool resolve) {
 		if (!symfound) { 
 			printf("? %s: sequence without function symbol\n",
 					__FUNCTION__);
-			free_v(b);
 			return NULL;
 		}
 		/* apply the symbol, returns the reduced seq */
@@ -1787,13 +1785,11 @@ eval_seq(Env *e, Val *b, bool resolve) {
 		if (c == NULL) {
 			printf("? %s: symbol application failed\n",
 					__FUNCTION__);
-			free_v(b);
 			return NULL;
 		}
 		b = c;
 	}
 	/* empty seq, means nil value */
-	free_v(b);
 	c = malloc(sizeof(*c));
 	c->hdr.t = VNIL;
 	return c;
@@ -1825,7 +1821,9 @@ eval(Env *e, Val *a, bool resolve) {
 		if (b == NULL) {
 			return NULL;
 		}
-		return eval_seq(e, b, resolve);
+		Val *c = eval_seq(e, b, resolve);
+		free_v(b);
+		return c;
 	}
 	printf("? %s: unknown value type\n",
 			__FUNCTION__);
