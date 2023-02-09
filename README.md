@@ -13,7 +13,7 @@ For example:
 
 `it` is a builtin symbol that stores the previous expression's value
 
-`2, +, n ; print it` displays 2, +, n 
+`2, +, n ; print it` displays the list 2, +, n 
 
 ### Symbolic reduction
 
@@ -31,7 +31,7 @@ Whitespace expected to separate words.
 
 `(2,) ~= (2.,)` 1 (true)
 
-`(2,3,+) = (2, (2 + 1), +)` 1
+`(2,3,+) = (2, (2 + 1), +)` 1 (true)
 
 ### Builtin symbols
 
@@ -43,14 +43,11 @@ Whitespace expected to separate words.
 
 `2, (3,4),4` list includes a sub-list
 
-`2, +, 3` also a list 
-
 `list` changes the rest of the expression into a list
 
 `list 1 + 3` the list 1, +, 3
 
 `do` means evaluate following list as an expression
-`do` is the inverse of `list`.
 
 `2, +, 3; do it` 5
 

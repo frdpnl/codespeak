@@ -1676,13 +1676,16 @@ val_of_seme(Env *e, Sem *s) {
 			strncpy(a->symop.name, so->name, 1+strlen(so->name));
 			return a;
 		}
+		a = lookup(e, s->sym.v);
 		if (strncmp(s->sym.v, "it", 3) == 0) {
-			a = lookup(e, "it");
 			if (a == NULL) {
 				printf("? %s: 'it' symbol undefined\n",
 						__FUNCTION__);
 				return NULL;
 			}
+			return copy_v(a);
+		}
+		if (a != NULL && a->hdr.t == VSYMOP) {
 			return copy_v(a);
 		}
 		a = malloc(sizeof(*a));
@@ -1729,7 +1732,6 @@ val_of_seme(Env *e, Sem *s) {
 static Val *
 eval_members1(Env *e, Val *a, bool resolve) {
 	/* works on SEQ and LST */
-	assert(a != NULL && "val is null");
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
@@ -1746,19 +1748,14 @@ eval_members1(Env *e, Val *a, bool resolve) {
 }
 
 static Val *
-eval_seq(Env *e, Val *a, bool resolve) {
-	/* work on copy of seq, which gets progressively reduced, and destroyed */
-	Val *b = eval_members1(e, a, resolve);
-	if (b == NULL) {
-		return NULL;
-	}
+eval_seq(Env *e, Val *b, bool resolve) {
 	/* symbol application: consumes the seq, until 1 item left */
 	Val *c;
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
 			Val *d = b->seq.v.v[0];
-			/* but, execute sequence of single unary function (so skip next) */
+			/* except, execute sequence of single unary function */
 			if (!(d->hdr.t == VSYMOP && d->symop.ary == 0)) {
 				c = copy_v(d);
 				free_v(b);
@@ -1808,20 +1805,14 @@ eval(Env *e, Val *a, bool resolve) {
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		if (a->hdr.t == VSYM) {
+		if (resolve && a->hdr.t == VSYM) {
 			Val *b = lookup(e, a->sym.v);
-			if (resolve) {
-				if (b == NULL) {
-					printf("? %s: unknown symbol '%s'\n",
-						__FUNCTION__, a->sym.v);
-					return NULL;
-				} 
-				return copy_v(b);
-			}
-			/* TODO adjust when supporting user defined functions */
-			if (b && b->hdr.t == VSYMOP) {
-				return copy_v(b);
+			if (b == NULL) {
+				printf("? %s: unknown symbol '%s'\n",
+					__FUNCTION__, a->sym.v);
+				return NULL;
 			} 
+			return copy_v(b);
 		} 
 		/* default: let the function handle it */
 		return copy_v(a);
@@ -1830,9 +1821,13 @@ eval(Env *e, Val *a, bool resolve) {
 		return eval_members1(e, a, resolve);
 	}
 	if (a->hdr.t == VSEQ) {
-		return eval_seq(e, a, resolve);
+		Val *b = eval_members1(e, a, resolve);
+		if (b == NULL) {
+			return NULL;
+		}
+		return eval_seq(e, b, resolve);
 	}
-	printf("? %s: unknown value\n",
+	printf("? %s: unknown value type\n",
 			__FUNCTION__);
 	return NULL;
 }
