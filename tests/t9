@@ -1,0 +1,6 @@
+
+* ; call it op1; call op1 op2; call op2 op3
+
+2, op3, 4. ; do it; print it
+
+
