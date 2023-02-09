@@ -1743,15 +1743,22 @@ eval(Env *e, Val *a, bool resolve) {
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		if (a->hdr.t == VSYM && resolve) {
+		if (a->hdr.t == VSYM) {
 			Val *b = lookup(e, a->sym.v);
-			if (b == NULL) {
-				printf("? %s: unknown symbol '%s'\n",
-					__FUNCTION__, a->sym.v);
-				return NULL;
+			if (resolve) {
+				if (b == NULL) {
+					printf("? %s: unknown symbol '%s'\n",
+						__FUNCTION__, a->sym.v);
+					return NULL;
+				} 
+				return copy_v(b);
 			}
-			return copy_v(b);
+			/* TODO adjust when supporting user defined functions */
+			if (b && b->hdr.t == VSYMOP) {
+				return copy_v(b);
+			} 
 		} 
+		/* default: let the function handle it */
 		return copy_v(a);
 	}
 	if (a->hdr.t == VLST) {

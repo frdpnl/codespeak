@@ -1,0 +1,28 @@
+# ----line: "* ; call it op; 1, op, 3; do it; print it"
+# --phrase: *  ; call it op ; 1, op, 3 ; do it ; print it ; 
+#   0  expr: * 
+#   0  seme: ( * ) 
+#   0 value: ( `* ) 
+#   0  eval: `* 
+#   0   env: it=`*  
+#   1  expr: call it op
+#   1  seme: ( call it op ) 
+#   1 value: ( `call `* 'op ) 
+#   1  eval: `* 
+#   1   env: it=`*  op=`*  
+#   2  expr: 1, op, 3
+#   2  seme: { 1N op 3N } 
+#   2 value: { 1 'op 3 } 
+#   2  eval: { 1 `* 3 } 
+#   2   env: it={ 1 `* 3 }  op=`*  
+#   3  expr: do it
+#   3  seme: ( do it ) 
+#   3 value: ( `do { 1 `* 3 } ) 
+#   3  eval: 3 
+#   3   env: it=3  op=`*  
+#   4  expr: print it
+#   4  seme: ( print it ) 
+#   4 value: ( `print 3 ) 
+3 
+#   4  eval: 3 
+#   4   env: it=3  op=`*  
