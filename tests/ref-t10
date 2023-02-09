@@ -1,0 +1,12 @@
+# ----line: "1 = 0; true"
+# --phrase: 1 = 0 ; true ; 
+#   0  expr: 1 = 0
+#   0  seme: ( 1N = 0N ) 
+#   0 value: ( 1 `= 0 ) 
+#   0  eval: 0 
+#   0   env: it=0  
+#   1  expr: true
+#   1  seme: ( true ) 
+#   1 value: ( `true ) 
+#   1  eval: 0 
+#   1   env: it=0  

@@ -19,6 +19,7 @@ eval_div	phrase.c	/^eval_div(Env *e, Val *s, size_t p) {$/
 eval_do	phrase.c	/^eval_do(Env *e, Val *s, size_t p) {$/
 eval_eq	phrase.c	/^eval_eq(Env *e, Val *s, size_t p) {$/
 eval_eqv	phrase.c	/^eval_eqv(Env *e, Val *s, size_t p) {$/
+eval_false	phrase.c	/^eval_false(Env *e, Val *s, size_t p) {$/
 eval_geq	phrase.c	/^eval_geq(Env *e, Val *s, size_t p) {$/
 eval_gre	phrase.c	/^eval_gre(Env *e, Val *s, size_t p) {$/
 eval_infix_arg	phrase.c	/^eval_infix_arg(Env *e, Val *s, size_t p, Val **pa,/
@@ -39,6 +40,7 @@ eval_prefixn_arg	phrase.c	/^eval_prefixn_arg(Env *e, Val *s, size_t p, Val **p/
 eval_print	phrase.c	/^eval_print(Env *e, Val *s, size_t p) {$/
 eval_resolve	phrase.c	/^eval_resolve(Env *e, Val *s, size_t p) {$/
 eval_seq	phrase.c	/^eval_seq(Env *e, Val *a, bool resolve) {$/
+eval_true	phrase.c	/^eval_true(Env *e, Val *s, size_t p) {$/
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/
 expr	phrase.c	/^expr() {$/
 free_env	phrase.c	/^free_env(Env *a) {$/
@@ -54,6 +56,7 @@ isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/
 isnat	phrase.c	/^isnat(Word *a) {$/
 isrea	phrase.c	/^isrea(Word *a) {$/
 issym	phrase.c	/^issym(Word *a) {$/
+istrue_v	phrase.c	/^istrue_v(Val *a) {$/
 lookup	phrase.c	/^lookup(Env *a, char *b) {$/
 lookup_id	phrase.c	/^lookup_id(Env *a, char *b, size_t *id) {$/
 lookup_op	phrase.c	/^lookup_op(char *a) {$/
@@ -84,6 +87,7 @@ stored_sym	phrase.c	/^stored_sym(Env *a, Symval *b) {$/
 stype	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} /
 symval	phrase.c	/^symval(char *a, Val *b) {$/
 upd_infix	phrase.c	/^upd_infix(Val *s, size_t p, Val *a) {$/
+upd_prefix0	phrase.c	/^upd_prefix0(Val *s, size_t p, Val *a) {$/
 upd_prefix1	phrase.c	/^upd_prefix1(Val *s, size_t p, Val *a) {$/
 upd_prefix2	phrase.c	/^upd_prefix2(Val *s, size_t p, Val *a) {$/
 upd_prefixall	phrase.c	/^upd_prefixall(Val *s, size_t p, Val *a) {$/

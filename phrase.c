@@ -580,6 +580,7 @@ typedef union Val_ {
 		vtype t;
 		unsigned int prio;
 		Val* (*v)(Env *e, Val *s, size_t p);
+		int ary;
 		char name[WSZ];
 	} symop;
 	struct {
@@ -1580,31 +1581,32 @@ typedef struct Symop_ {
 	char name[WSZ];
 	unsigned int prio;
 	Val* (*f)(Env *e, Val *s, size_t p);
+	int ary;
 } Symop;
 
 #define NSYMS 21
 Symop Syms[] = {
-	(Symop) {"true",    10, eval_true},
-	(Symop) {"false",   10, eval_false},
-	(Symop) {"resolve",    10, eval_resolve},
-	(Symop) {"do",    10, eval_do},
-	(Symop) {"list",  10, eval_list},
-	(Symop) {"call",  10, eval_call},
-	(Symop) {"print", 10, eval_print},
-	(Symop) {"*",    20, eval_mul},
-	(Symop) {"/",    20, eval_div},
-	(Symop) {"+",    30, eval_plu},
-	(Symop) {"-",    30, eval_min},
-	(Symop) {"<",    40, eval_les},
-	(Symop) {"<=",   40, eval_leq},
-	(Symop) {">",    40, eval_gre},
-	(Symop) {">=",   40, eval_geq},
-	(Symop) {"=",    40, eval_eq},
-	(Symop) {"/=",   40, eval_neq},
-	(Symop) {"~=",   40, eval_eqv},
-	(Symop) {"not",  50, eval_not},
-	(Symop) {"and",  60, eval_and},
-	(Symop) {"or",   60, eval_or},
+	(Symop) {"true",    10, eval_true, 0},
+	(Symop) {"false",   10, eval_false, 0},
+	(Symop) {"resolve",    10, eval_resolve, 1},
+	(Symop) {"do",    10, eval_do, 1},
+	(Symop) {"list",  10, eval_list, -1},
+	(Symop) {"call",  10, eval_call, 2},
+	(Symop) {"print", 10, eval_print, 1},
+	(Symop) {"*",    20, eval_mul, 2},
+	(Symop) {"/",    20, eval_div, 2},
+	(Symop) {"+",    30, eval_plu, 2},
+	(Symop) {"-",    30, eval_min, 2},
+	(Symop) {"<",    40, eval_les, 2},
+	(Symop) {"<=",   40, eval_leq, 2},
+	(Symop) {">",    40, eval_gre, 2},
+	(Symop) {">=",   40, eval_geq, 2},
+	(Symop) {"=",    40, eval_eq, 2},
+	(Symop) {"/=",   40, eval_neq, 2},
+	(Symop) {"~=",   40, eval_eqv, 2},
+	(Symop) {"not",  50, eval_not, 1},
+	(Symop) {"and",  60, eval_and, 2},
+	(Symop) {"or",   60, eval_or, 2},
 };
 static unsigned int
 minprio() {
@@ -1670,6 +1672,7 @@ val_of_seme(Env *e, Sem *s) {
 			a->hdr.t = VSYMOP;
 			a->symop.prio = so->prio;
 			a->symop.v = so->f;
+			a->symop.ary = so->ary;
 			strncpy(a->symop.name, so->name, 1+strlen(so->name));
 			return a;
 		}
@@ -1754,9 +1757,13 @@ eval_seq(Env *e, Val *a, bool resolve) {
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
-			c = copy_v(b->seq.v.v[0]);
-			free_v(b);
-			return c;
+			Val *d = b->seq.v.v[0];
+			/* but, execute sequence of single unary function (so skip next) */
+			if (!(d->hdr.t == VSYMOP && d->symop.ary == 0)) {
+				c = copy_v(d);
+				free_v(b);
+				return c;
+			}
 		}
 		unsigned int hiprio = minprio()+1;
 		size_t symat = 0;
