@@ -4,7 +4,7 @@ List	phrase.c	/^} List;$/
 List_v	phrase.c	/^} List_v;$/
 Mphrase	phrase.c	/^main(int argc, char **argv) {$/
 Phrase	phrase.c	/^} Phrase;$/
-Rc	phrase.c	/^} Rc;$/
+Rc	phrase.c	/^} Rc;		\/* return type for evaluation *\/$/
 Rstatus	phrase.c	/^enum Rstatus {LINE, EMPTY, END, ERR};$/
 Sem	phrase.c	/^typedef union Sem_ Sem;$/
 Symop	phrase.c	/^} Symop;$/
@@ -97,7 +97,7 @@ upd_prefixk	phrase.c	/^upd_prefixk(Val *s, size_t p, Val *a, size_t k) {$/
 upded_sym	phrase.c	/^upded_sym(Env *a, Symval *b, bool err) {$/
 usage	phrase.c	/^usage(const char *exe) {$/
 val_of_seme	phrase.c	/^val_of_seme(Env *e, Sem *s) {$/
-voob	phrase.c	/^} voob;$/
+voob	phrase.c	/^} voob;  	\/* OOB for out of band *\/$/
 vtype	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYM, VLST/
 word	phrase.c	/^word(wtype a) {$/
 word_str	phrase.c	/^word_str(char *a, size_t n) {$/

@@ -570,14 +570,14 @@ typedef struct {
 
 typedef enum {
 	OK,
-	SKIP,	/* skip the rest of phrase (see `if) */
+	SKIP,	/* skip the rest of phrase (see `if), not an error */
 	FATAL
-} voob;
+} voob;  	/* OOB for out of band */
 
 typedef struct {
 	voob oob;
-	Val *v
-} Rc;
+	Val *v;
+} Rc;		/* return type for evaluation */
 
 typedef union Val_ {
 	struct {
@@ -594,7 +594,7 @@ typedef union Val_ {
 	struct {
 		vtype t;
 		unsigned int prio;
-		Val* (*v)(Env *e, Val *s, size_t p);
+		Rc (*v)(Env *e, Val *s, size_t p);
 		int arity;
 		char name[WSZ];
 	} symop;
@@ -988,19 +988,21 @@ eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lo
 				__FUNCTION__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p-1], looka); 
-	if (a == NULL) {
+	Rc rc = eval(e, s->seq.v.v[p-1], looka); 
+	if (rc.oob != OK) {
 		printf("? %s: 1st argument null\n", 
 				__FUNCTION__);
 		return false;
 	}
-	b = eval(e, s->seq.v.v[p+1], lookb);
-	if (b == NULL) {
+	a = rc.v;
+	rc = eval(e, s->seq.v.v[p+1], lookb);
+	if (rc.oob != OK) {
 		printf("? %s: 2nd argument null\n", 
 				__FUNCTION__);
 		free_v(a);
 		return false;
 	}
+	b = rc.v;
 	*pa = a;
 	*pb = b;
 	return true;
@@ -1013,12 +1015,13 @@ eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 				__FUNCTION__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p+1], looka);
-	if (a == NULL) {
+	Rc rc = eval(e, s->seq.v.v[p+1], looka);
+	if (rc.oob != OK) {
 		printf("? %s: argument is null\n", 
 				__FUNCTION__);
 		return false;
 	}
+	a = rc.v;
 	*pa = a;
 	return true;
 }
@@ -1030,19 +1033,21 @@ eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool 
 				__FUNCTION__);
 		return false;
 	}
-	a = eval(e, s->seq.v.v[p+1], looka);
-	if (a == NULL) {
+	Rc rc = eval(e, s->seq.v.v[p+1], looka);
+	if (rc.oob != OK) {
 		printf("? %s: 1st argument is null\n", 
 				__FUNCTION__);
 		return false;
 	}
-	b = eval(e, s->seq.v.v[p+2], lookb);
-	if (b == NULL) {
+	a = rc.v;
+	rc = eval(e, s->seq.v.v[p+2], lookb);
+	if (rc.oob != OK) {
 		printf("? %s: 2nd argument null\n", 
 				__FUNCTION__);
 		free_v(a);
 		return false;
 	}
+	b = rc.v;
 	*pa = a;
 	*pb = b;
 	return true;
@@ -1054,8 +1059,15 @@ eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
 	a->seq.v.n = s->seq.v.n -p-1; 
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
+	Rc rc;
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], looka);
+		//a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], looka);
+		rc = eval(e, s->seq.v.v[i], looka);
+		if (rc.oob != OK) {
+			free_v(a);
+			return false;
+		}
+		a->seq.v.v[i-p-1] = rc.v;
 	}
 	*pa = a;
 	return true;
@@ -1107,7 +1119,7 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 
 static Rc 
 eval_mul(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1134,12 +1146,12 @@ eval_mul(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_div(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1174,12 +1186,12 @@ eval_div(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc
 eval_plu(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1206,12 +1218,12 @@ eval_plu(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_min(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1238,12 +1250,12 @@ eval_min(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc
 eval_les(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1272,12 +1284,12 @@ eval_les(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc
 eval_leq(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1306,12 +1318,12 @@ eval_leq(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_gre(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1340,12 +1352,12 @@ eval_gre(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_geq(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1374,12 +1386,12 @@ eval_geq(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_eq(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1393,12 +1405,12 @@ eval_eq(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 1 : 0;
 	upd_infix(s, p, d);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_neq(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1412,12 +1424,12 @@ eval_neq(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 0 : 1;
 	upd_infix(s, p, d);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_eqv(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1431,12 +1443,12 @@ eval_eqv(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 1 : 0;
 	upd_infix(s, p, d);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_and(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1455,12 +1467,12 @@ eval_and(Env *e, Val *s, size_t p) {
 	a->nat.v = a->nat.v && b->nat.v;
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_or(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
@@ -1479,12 +1491,12 @@ eval_or(Env *e, Val *s, size_t p) {
 	a->nat.v = a->nat.v || b->nat.v;
 	free_v(b);
 	upd_infix(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_not(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
@@ -1499,13 +1511,13 @@ eval_not(Env *e, Val *s, size_t p) {
 	}
 	a->nat.v = (a->nat.v == 0 ? 1 : 0);
 	upd_prefix1(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 
 static Rc 
 eval_print(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
@@ -1515,12 +1527,12 @@ eval_print(Env *e, Val *s, size_t p) {
 	print_v(a);
 	printf("\n");
 	upd_prefix1(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_look(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
@@ -1528,141 +1540,129 @@ eval_look(Env *e, Val *s, size_t p) {
 		return rc;
 	}
 	upd_prefix1(s, p, a);
-	rc.v = s;
+	rc = (Rc) {OK, s};
 	return rc;
 }
 static Rc 
 eval_do(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	if (a->hdr.t != VLST) {
 		printf("? %s: argument not a list\n", 
 				__FUNCTION__);
 		free_v(a);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	a->hdr.t = VSEQ;
-	Val *b = eval(e, a, false);
+	Rc rc = eval(e, a, false);
 	free_v(a);
-	if (b == NULL) {
+	if (rc.oob != OK) {
 		return rc;
 	}
-	upd_prefix1(s, p, b);
-	rc.v = s;
-	return rc;
+	upd_prefix1(s, p, rc.v);
+	return (Rc) {OK, s};
 }
 static Rc 
 eval_list(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
 	Val *a;
 	if (!eval_prefixn_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	a->hdr.t = VLST;
 	upd_prefixall(s, p, a);
-	rv.v = s;
-	return rc;
+	return (Rc) {OK, s};
 }
 static Rc 
 eval_call(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_prefix2_arg(e, s, p, &a, true, &b, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	if (b->hdr.t != VSYM) {
 		printf("? %s: 2nd argument is not a symbol\n", 
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	Symval *sv = symval(b->sym.v, a);
 	free_v(b);
 	if (sv == NULL) {
 		free_v(a);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	if (!stored_sym(e, sv)) {
 		free_symval(sv);
 		free_v(a);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	upd_prefix2(s, p, a);
-	rc.v = s;
-	return rc;
+	return (Rc) {OK, s};
 }
 static Rc 
 eval_true(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
 	Val *a;
 	a = lookup(e, IT);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
 	b->nat.v = istrue_v(a);
 	upd_prefix0(s, p, b);
-	rc.v = s;
-	return rc;
+	return (Rc) {OK, s};
 }
 static Rc 
 eval_false(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
 	Val *a;
 	a = lookup(e, IT);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
 	b->nat.v = !istrue_v(a);
 	upd_prefix0(s, p, b);
-	rc.v = s;
-	return rc;
+	return (Rc) {OK, s};
 }
 static Rc 
 eval_if(Env *e, Val *s, size_t p) {
-	Rc rc = {FATAL, NULL};
 	if (p != s->seq.v.n - 2) {
 		printf("? %s: too many arguments to 'if'\n",
 				__FUNCTION__);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return rc;
+		return (Rc) {FATAL, NULL};
 	}
+	if (!istrue_v(a)) {
+		free_v(a);
+		return (Rc) {SKIP, NULL}; /* signal the end of phrase */
+	} 
+	free_v(a);
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
-	if (istrue_v(a)) {
-		b->hdr.t = VNAT;
-		b->nat.v = 1;
-	} else {
-		b->hdr.t = VNIL;
-	}
-	free_v(a);
+	b->hdr.t = VNAT;
+	b->nat.v = 1;
 	upd_prefix1(s, p, b);
-	rc.v = s;
-	return rc;
+	return (Rc) {OK, s};
 }
 
 
@@ -1671,7 +1671,7 @@ eval_if(Env *e, Val *s, size_t p) {
 typedef struct Symop_ {
 	char name[WSZ];
 	unsigned int prio;
-	Val* (*f)(Env *e, Val *s, size_t p);
+	Rc (*f)(Env *e, Val *s, size_t p);
 	int arity;
 } Symop;
 
@@ -1821,27 +1821,37 @@ val_of_seme(Env *e, Sem *s) {
 
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
-static Val *
+static Rc 
 eval_members1(Env *e, Val *a, bool look) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
+	Rc rc = (Rc) {FATAL, NULL};
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		Val *c = eval(e, a->seq.v.v[i], look);
-		if (c == NULL) {
+		rc = eval(e, a->seq.v.v[i], look);
+		if (rc.oob == FATAL) {
 			printf("? %s: list or seq item unknown\n",
 					__FUNCTION__);
 			free_v(b);
-			return NULL;
+			return rc;
+		} else if (rc.oob == SKIP) {
+			printf("? %s: list or seq item invalid\n",
+					__FUNCTION__);
+			free_v(b);
+			free_v(rc.v);
+			rc = (Rc) {FATAL, NULL};
+			return rc;
 		}
-		b = push_v(a->hdr.t, b, c);
+		b = push_v(a->hdr.t, b, rc.v);
 	}
-	return b;
+	rc = (Rc) {OK, b};
+	return rc;
 }
 
-static Val *
+static Rc 
 eval_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
+	Rc rc = (Rc) {FATAL, NULL};
 	Val *c;
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
@@ -1849,8 +1859,8 @@ eval_seq(Env *e, Val *b, bool look) {
 			Val *d = b->seq.v.v[0];
 			/* except, execute sequence of single unarity function */
 			if (!(d->hdr.t == VSYMOP && d->symop.arity == 0)) {
-				c = copy_v(d);
-				return c;
+				rc = (Rc) {OK, copy_v(d)};
+				return rc;
 			}
 		}
 		unsigned int hiprio = minprio()+1;
@@ -1870,56 +1880,64 @@ eval_seq(Env *e, Val *b, bool look) {
 		if (!symfound) { 
 			printf("? %s: sequence without function symbol\n",
 					__FUNCTION__);
-			return NULL;
+			return (Rc) {FATAL, NULL};
 		}
 		/* apply the symbol, returns the reduced seq */
-		c = b->seq.v.v[symat]->symop.v(e, b, symat);
-		if (c == NULL) {
+		rc = b->seq.v.v[symat]->symop.v(e, b, symat);
+		if (rc.oob == FATAL) {
 			printf("? %s: symbol application failed\n",
 					__FUNCTION__);
-			return NULL;
+			return rc;
 		}
-		b = c;
+		if (rc.oob == SKIP) {
+			return rc;
+		}
+		b = rc.v;
 	}
 	/* empty seq, means nil value */
 	c = malloc(sizeof(*c));
 	c->hdr.t = VNIL;
-	return c;
+	rc = (Rc) {OK, c};
+	return rc;
 }
 
-static Val *
+static Rc 
 eval(Env *e, Val *a, bool look) {
 	/* returns a fresh value, 'a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
+	Rc rc = (Rc) {FATAL, NULL};
 	if (isatom_v(a)) {
 		if (look && a->hdr.t == VSYM) {
 			Val *b = lookup(e, a->sym.v);
 			if (b == NULL) {
 				printf("? %s: unknown symbol '%s'\n",
 					__FUNCTION__, a->sym.v);
-				return NULL;
+				return (Rc) {FATAL, NULL};
 			} 
-			return copy_v(b);
+			rc = (Rc) {OK, copy_v(b)};
+			return rc;
 		} 
 		/* default: let the function handle it */
-		return copy_v(a);
+		rc = (Rc) {OK, copy_v(a)};
+		return rc;
 	}
 	if (a->hdr.t == VLST) {
 		return eval_members1(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		Val *b = eval_members1(e, a, look);
-		if (b == NULL) {
-			return NULL;
+		rc = eval_members1(e, a, look);
+		if (rc.oob != OK) {
+			return rc;
 		}
-		Val *c = eval_seq(e, b, look);
+		Val *b = rc.v;
+		rc = eval_seq(e, b, look);
 		free_v(b);
-		return c;
+		return rc;
 	}
 	printf("? %s: unknown value type\n",
 			__FUNCTION__);
-	return NULL;
+	return (Rc) {FATAL, NULL};
 }
 
 /* ------------ Phrase, a line, a list of expressions --------- */
@@ -2058,14 +2076,14 @@ eval_ph(Env *e_o, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
-		Val *ev = eval(e_o, v, false);
+		Rc rcv = eval(e_o, v, false);
 		free_v(v);
-		if (ev == NULL) {
+		if (rcv.oob == FATAL) {
 			return false;
 		}
-		printf("# %3lu %5s: ", i, "eval"); print_v(ev); printf("\n");
-		Symval *it = symval(IT, ev);
-		free_v(ev);
+		printf("# %3lu %5s: ", i, "eval"); print_v(rcv.v); printf("\n");
+		Symval *it = symval(IT, rcv.v);
+		free_v(rcv.v);
 		if (it == NULL) {
 			return false;
 		}
@@ -2074,6 +2092,9 @@ eval_ph(Env *e_o, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "env"); print_env(e_o); 
+		if (rcv.oob == SKIP) {
+			break;
+		}
 	}
 	return true;
 }
