@@ -12,7 +12,7 @@ Val	phrase.c	/^typedef union Val_ Val;$/
 Word	phrase.c	/^} Word;$/
 added_sym	phrase.c	/^added_sym(Env *a, Symval *b, bool err) {$/
 copy_v	phrase.c	/^copy_v(Val *a) {$/
-eval	phrase.c	/^eval(Env *e, Val *a, bool resolve) {$/
+eval	phrase.c	/^eval(Env *e, Val *a, bool look) {$/
 eval_and	phrase.c	/^eval_and(Env *e, Val *s, size_t p) {$/
 eval_call	phrase.c	/^eval_call(Env *e, Val *s, size_t p) {$/
 eval_div	phrase.c	/^eval_div(Env *e, Val *s, size_t p) {$/
@@ -26,7 +26,8 @@ eval_infix_arg	phrase.c	/^eval_infix_arg(Env *e, Val *s, size_t p, Val **pa,/
 eval_leq	phrase.c	/^eval_leq(Env *e, Val *s, size_t p) {$/
 eval_les	phrase.c	/^eval_les(Env *e, Val *s, size_t p) {$/
 eval_list	phrase.c	/^eval_list(Env *e, Val *s, size_t p) {$/
-eval_members1	phrase.c	/^eval_members1(Env *e, Val *a, bool resolve) {$/
+eval_look	phrase.c	/^eval_look(Env *e, Val *s, size_t p) {$/
+eval_members1	phrase.c	/^eval_members1(Env *e, Val *a, bool look) {$/
 eval_min	phrase.c	/^eval_min(Env *e, Val *s, size_t p) {$/
 eval_mul	phrase.c	/^eval_mul(Env *e, Val *s, size_t p) {$/
 eval_neq	phrase.c	/^eval_neq(Env *e, Val *s, size_t p) {$/
@@ -38,8 +39,7 @@ eval_prefix1_arg	phrase.c	/^eval_prefix1_arg(Env *e, Val *s, size_t p, Val **p/
 eval_prefix2_arg	phrase.c	/^eval_prefix2_arg(Env *e, Val *s, size_t p, Val **p/
 eval_prefixn_arg	phrase.c	/^eval_prefixn_arg(Env *e, Val *s, size_t p, Val **p/
 eval_print	phrase.c	/^eval_print(Env *e, Val *s, size_t p) {$/
-eval_resolve	phrase.c	/^eval_resolve(Env *e, Val *s, size_t p) {$/
-eval_seq	phrase.c	/^eval_seq(Env *e, Val *b, bool resolve) {$/
+eval_seq	phrase.c	/^eval_seq(Env *e, Val *b, bool look) {$/
 eval_true	phrase.c	/^eval_true(Env *e, Val *s, size_t p) {$/
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/
 expr	phrase.c	/^expr() {$/
