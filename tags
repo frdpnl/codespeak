@@ -4,6 +4,7 @@ List	phrase.c	/^} List;$/
 List_v	phrase.c	/^} List_v;$/
 Mphrase	phrase.c	/^main(int argc, char **argv) {$/
 Phrase	phrase.c	/^} Phrase;$/
+Rc	phrase.c	/^} Rc;$/
 Rstatus	phrase.c	/^enum Rstatus {LINE, EMPTY, END, ERR};$/
 Sem	phrase.c	/^typedef union Sem_ Sem;$/
 Symop	phrase.c	/^} Symop;$/
@@ -22,6 +23,7 @@ eval_eqv	phrase.c	/^eval_eqv(Env *e, Val *s, size_t p) {$/
 eval_false	phrase.c	/^eval_false(Env *e, Val *s, size_t p) {$/
 eval_geq	phrase.c	/^eval_geq(Env *e, Val *s, size_t p) {$/
 eval_gre	phrase.c	/^eval_gre(Env *e, Val *s, size_t p) {$/
+eval_if	phrase.c	/^eval_if(Env *e, Val *s, size_t p) {$/
 eval_infix_arg	phrase.c	/^eval_infix_arg(Env *e, Val *s, size_t p, Val **pa,/
 eval_leq	phrase.c	/^eval_leq(Env *e, Val *s, size_t p) {$/
 eval_les	phrase.c	/^eval_les(Env *e, Val *s, size_t p) {$/
@@ -95,6 +97,7 @@ upd_prefixk	phrase.c	/^upd_prefixk(Val *s, size_t p, Val *a, size_t k) {$/
 upded_sym	phrase.c	/^upded_sym(Env *a, Symval *b, bool err) {$/
 usage	phrase.c	/^usage(const char *exe) {$/
 val_of_seme	phrase.c	/^val_of_seme(Env *e, Sem *s) {$/
+voob	phrase.c	/^} voob;$/
 vtype	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYM, VLST/
 word	phrase.c	/^word(wtype a) {$/
 word_str	phrase.c	/^word_str(char *a, size_t n) {$/

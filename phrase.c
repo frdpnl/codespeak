@@ -543,7 +543,7 @@ seme_of_exp(Expr *a) {
 	return seme_of_exp_part(a, 0, a->n);
 }
 
-/* ----- evaluation, pass 1 ----- */
+/* ----- Evaluation, pass 1 ----- */
 
 typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYM, VLST, VSEQ} vtype;
 
@@ -554,6 +554,10 @@ typedef struct List_v_ {
 	Val **v;
 } List_v;
 
+/* Special environment symbols: */
+#define IT "it"
+#define OOB "oob"
+
 typedef struct {
 	char name[WSZ];
 	Val *v;
@@ -563,6 +567,17 @@ typedef struct {
 	size_t n;
 	Symval **s;
 } Env;
+
+typedef enum {
+	OK,
+	SKIP,	/* skip the rest of phrase (see `if) */
+	FATAL
+} voob;
+
+typedef struct {
+	voob oob;
+	Val *v
+} Rc;
 
 typedef union Val_ {
 	struct {
@@ -580,7 +595,7 @@ typedef union Val_ {
 		vtype t;
 		unsigned int prio;
 		Val* (*v)(Env *e, Val *s, size_t p);
-		int ary;
+		int arity;
 		char name[WSZ];
 	} symop;
 	struct {
@@ -950,7 +965,7 @@ stored_sym(Env *a, Symval *b) {
  * 4. cleanup behind you (working copies)
  * */
 
-static Val * eval(Env *e, Val *a, bool look);
+static Rc eval(Env *e, Val *a, bool look);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -1090,13 +1105,14 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 	upd_prefixk(s, p, a, s->seq.v.n - p - 1);
 }
 
-static Val *
+static Rc 
 eval_mul(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
@@ -1104,7 +1120,7 @@ eval_mul(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v *= b->nat.v;
@@ -1118,15 +1134,17 @@ eval_mul(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_div(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
@@ -1134,7 +1152,7 @@ eval_div(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if ((b->hdr.t == VNAT && b->nat.v == 0) 
 			|| (b->hdr.t == VREA && b->rea.v == 0.)) {
@@ -1142,7 +1160,7 @@ eval_div(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v /= b->nat.v;
@@ -1156,15 +1174,17 @@ eval_div(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc
 eval_plu(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
@@ -1172,7 +1192,7 @@ eval_plu(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v += b->nat.v;
@@ -1186,15 +1206,17 @@ eval_plu(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_min(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
@@ -1202,7 +1224,7 @@ eval_min(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v -= b->nat.v;
@@ -1216,15 +1238,17 @@ eval_min(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc
 eval_les(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1233,7 +1257,7 @@ eval_les(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v = a->nat.v < b->nat.v;
@@ -1248,15 +1272,17 @@ eval_les(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc
 eval_leq(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1265,7 +1291,7 @@ eval_leq(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v = a->nat.v <= b->nat.v;
@@ -1280,15 +1306,17 @@ eval_leq(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_gre(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1297,7 +1325,7 @@ eval_gre(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v = a->nat.v > b->nat.v;
@@ -1312,15 +1340,17 @@ eval_gre(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_geq(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1329,7 +1359,7 @@ eval_geq(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
 		a->nat.v = a->nat.v >= b->nat.v;
@@ -1344,15 +1374,17 @@ eval_geq(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_eq(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	bool c = isequal_v(a, b);
 	free_v(a);
@@ -1361,15 +1393,17 @@ eval_eq(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 1 : 0;
 	upd_infix(s, p, d);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_neq(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	bool c = isequal_v(a, b);
 	free_v(a);
@@ -1378,15 +1412,17 @@ eval_neq(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 0 : 1;
 	upd_infix(s, p, d);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_eqv(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	bool c = isequiv_v(a, b);
 	free_v(a);
@@ -1395,190 +1431,238 @@ eval_eqv(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 1 : 0;
 	upd_infix(s, p, d);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_and(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
 		printf("? %s: arguments not natural numbers\n", 
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	a->nat.v = (a->nat.v == 0 ? 0 : 1);
 	b->nat.v = (b->nat.v == 0 ? 0 : 1);
 	a->nat.v = a->nat.v && b->nat.v;
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_or(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
 		printf("? %s: arguments not natural numbers\n", 
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	a->nat.v = (a->nat.v == 0 ? 0 : 1);
 	b->nat.v = (b->nat.v == 0 ? 0 : 1);
 	a->nat.v = a->nat.v || b->nat.v;
 	free_v(b);
 	upd_infix(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_not(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if ((a->hdr.t != VNAT)) {
 		printf("? %s: argument not natural number (boolean)\n", 
 				__FUNCTION__);
 		free_v(a);
-		return NULL;
+		return rc;
 	}
 	a->nat.v = (a->nat.v == 0 ? 1 : 0);
 	upd_prefix1(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
 
-static Val *
+static Rc 
 eval_print(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	print_v(a);
 	printf("\n");
 	upd_prefix1(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_look(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	upd_prefix1(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_do(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a;
 	if (!eval_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if (a->hdr.t != VLST) {
 		printf("? %s: argument not a list\n", 
 				__FUNCTION__);
 		free_v(a);
-		return NULL;
+		return rc;
 	}
 	a->hdr.t = VSEQ;
 	Val *b = eval(e, a, false);
 	free_v(a);
 	if (b == NULL) {
-		return NULL;
+		return rc;
 	}
 	upd_prefix1(s, p, b);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_list(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a;
 	if (!eval_prefixn_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	a->hdr.t = VLST;
 	upd_prefixall(s, p, a);
-	return s;
+	rv.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_call(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a, *b;
 	if (!eval_prefix2_arg(e, s, p, &a, true, &b, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	if (b->hdr.t != VSYM) {
 		printf("? %s: 2nd argument is not a symbol\n", 
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return NULL;
+		return rc;
 	}
 	Symval *sv = symval(b->sym.v, a);
 	free_v(b);
 	if (sv == NULL) {
 		free_v(a);
-		return NULL;
+		return rc;
 	}
 	if (!stored_sym(e, sv)) {
 		free_symval(sv);
 		free_v(a);
-		return NULL;
+		return rc;
 	}
 	upd_prefix2(s, p, a);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_true(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a;
-	a = lookup(e, "it");
+	a = lookup(e, IT);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
 	b->nat.v = istrue_v(a);
 	upd_prefix0(s, p, b);
-	return s;
+	rc.v = s;
+	return rc;
 }
-static Val *
+static Rc 
 eval_false(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
 	Val *a;
-	a = lookup(e, "it");
+	a = lookup(e, IT);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
-		return NULL;
+		return rc;
 	}
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
 	b->nat.v = !istrue_v(a);
 	upd_prefix0(s, p, b);
-	return s;
+	rc.v = s;
+	return rc;
+}
+static Rc 
+eval_if(Env *e, Val *s, size_t p) {
+	Rc rc = {FATAL, NULL};
+	if (p != s->seq.v.n - 2) {
+		printf("? %s: too many arguments to 'if'\n",
+				__FUNCTION__);
+		return rc;
+	}
+	Val *a;
+	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
+		return rc;
+	}
+	Val *b = malloc(sizeof(*b));
+	assert(b != NULL);
+	if (istrue_v(a)) {
+		b->hdr.t = VNAT;
+		b->nat.v = 1;
+	} else {
+		b->hdr.t = VNIL;
+	}
+	free_v(a);
+	upd_prefix1(s, p, b);
+	rc.v = s;
+	return rc;
 }
 
 
@@ -1588,18 +1672,18 @@ typedef struct Symop_ {
 	char name[WSZ];
 	unsigned int prio;
 	Val* (*f)(Env *e, Val *s, size_t p);
-	int ary;
+	int arity;
 } Symop;
 
-#define NSYMS 21
+#define NSYMS 22
 Symop Syms[] = {
-	(Symop) {"true?",    10, eval_true, 0},
-	(Symop) {"false?",   10, eval_false, 0},
-	(Symop) {"look",    10, eval_look, 1},
-	(Symop) {"do",    10, eval_do, 1},
-	(Symop) {"list",  10, eval_list, -1},
-	(Symop) {"call",  10, eval_call, 2},
-	(Symop) {"print", 10, eval_print, 1},
+	(Symop) {"true?",  10, eval_true,  0},
+	(Symop) {"false?", 10, eval_false, 0},
+	(Symop) {"look",   10, eval_look,  1},
+	(Symop) {"do",     10, eval_do,    1},
+	(Symop) {"list",   10, eval_list, -1},
+	(Symop) {"call",   10, eval_call,  2},
+	(Symop) {"print",  10, eval_print, 1},
 	(Symop) {"*",    20, eval_mul, 2},
 	(Symop) {"/",    20, eval_div, 2},
 	(Symop) {"+",    30, eval_plu, 2},
@@ -1608,12 +1692,13 @@ Symop Syms[] = {
 	(Symop) {"<=",   40, eval_leq, 2},
 	(Symop) {">",    40, eval_gre, 2},
 	(Symop) {">=",   40, eval_geq, 2},
-	(Symop) {"=",    40, eval_eq, 2},
+	(Symop) {"=",    40, eval_eq,  2},
 	(Symop) {"/=",   40, eval_neq, 2},
 	(Symop) {"~=",   40, eval_eqv, 2},
 	(Symop) {"not",  50, eval_not, 1},
 	(Symop) {"and",  60, eval_and, 2},
-	(Symop) {"or",   60, eval_or, 2},
+	(Symop) {"or",   60, eval_or,  2},
+	(Symop) {"if",   80, eval_if,  1},
 };
 static unsigned int
 minprio() {
@@ -1679,12 +1764,12 @@ val_of_seme(Env *e, Sem *s) {
 			a->hdr.t = VSYMOP;
 			a->symop.prio = so->prio;
 			a->symop.v = so->f;
-			a->symop.ary = so->ary;
+			a->symop.arity = so->arity;
 			strncpy(a->symop.name, so->name, 1+strlen(so->name));
 			return a;
 		}
 		a = lookup(e, s->sym.v);
-		if (strncmp(s->sym.v, "it", 3) == 0) {
+		if (strncmp(s->sym.v, IT, 3) == 0) {
 			if (a == NULL) {
 				printf("? %s: 'it' symbol undefined\n",
 						__FUNCTION__);
@@ -1762,8 +1847,8 @@ eval_seq(Env *e, Val *b, bool look) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
 			Val *d = b->seq.v.v[0];
-			/* except, execute sequence of single unary function */
-			if (!(d->hdr.t == VSYMOP && d->symop.ary == 0)) {
+			/* except, execute sequence of single unarity function */
+			if (!(d->hdr.t == VSYMOP && d->symop.arity == 0)) {
 				c = copy_v(d);
 				return c;
 			}
@@ -1979,7 +2064,7 @@ eval_ph(Env *e_o, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "eval"); print_v(ev); printf("\n");
-		Symval *it = symval("it", ev);
+		Symval *it = symval(IT, ev);
 		free_v(ev);
 		if (it == NULL) {
 			return false;
