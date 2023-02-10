@@ -3,30 +3,37 @@
 #   0  expr: 3
 #   0  seme: ( 3N ) 
 #   0 value: ( 3 ) 
-#   0  eval: 3 
+#   0  eval: OK 3 
 #   0   env: it=3  
 #   1  expr: call it p
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 3 'p ) 
-#   1  eval: 3 
+#  eval_seq >> `call of ( `call 3 'p ) 
+#  eval_seq << OK ( 3 ) 
+#   1  eval: OK 3 
 #   1   env: it=3  p=3  
 #   2  expr: call 4 p
 #   2  seme: ( call 4N p ) 
 #   2 value: ( `call 4 'p ) 
-#   2  eval: 4 
+#  eval_seq >> `call of ( `call 4 'p ) 
+#  eval_seq << OK ( 4 ) 
+#   2  eval: OK 4 
 #   2   env: it=4  p=4  
 #   3  expr: p
 #   3  seme: ( p ) 
 #   3 value: ( 'p ) 
-#   3  eval: 'p 
+#   3  eval: OK 'p 
 #   3   env: it='p  p=4  
 #   4  expr: print it
 #   4  seme: ( print it ) 
 #   4 value: ( `print 'p ) 
+#  eval_seq >> `print of ( `print 'p ) 
 'p 
-#   4  eval: 'p 
+#  eval_seq << OK ( 'p ) 
+#   4  eval: OK 'p 
 #   4   env: it='p  p=4  
 #   5  expr: solve it
 #   5  seme: ( solve it ) 
 #   5 value: ( 'solve 'p ) 
 ? eval_seq: sequence without function symbol
+#   5  eval: FATAL null

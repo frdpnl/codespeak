@@ -650,6 +650,25 @@ print_v(Val *a) {
 					__FUNCTION__);
 	}
 }
+static void
+print_rc(Rc a) {
+	switch (a.oob) {
+		case OK:
+			printf("OK ");
+			break;
+		case SKIP:
+			printf("SKIP ");
+			break;
+		case FATAL:
+			printf("FATAL ");
+			break;
+	}
+	if (a.v != NULL) {
+		print_v(a.v);
+	} else {
+		printf("null");
+	}
+}
 
 static void 
 free_v(Val *a) {
@@ -1652,17 +1671,21 @@ eval_if(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		return (Rc) {FATAL, NULL};
 	}
-	if (!istrue_v(a)) {
-		free_v(a);
-		return (Rc) {SKIP, NULL}; /* signal the end of phrase */
-	} 
-	free_v(a);
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
-	b->nat.v = 1;
+	Rc rc;
+	if (istrue_v(a)) {
+		b->nat.v = 1;
+		rc.oob = OK;
+	} else {
+		b->nat.v = 0;
+		rc.oob = SKIP;
+	} 
+	free_v(a);
 	upd_prefix1(s, p, b);
-	return (Rc) {OK, s};
+	rc.v = s;
+	return rc;
 }
 
 
@@ -1851,7 +1874,7 @@ eval_members1(Env *e, Val *a, bool look) {
 static Rc 
 eval_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
-	Rc rc = (Rc) {FATAL, NULL};
+	Rc rc = (Rc) {OK, NULL};
 	Val *c;
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
@@ -1859,7 +1882,8 @@ eval_seq(Env *e, Val *b, bool look) {
 			Val *d = b->seq.v.v[0];
 			/* except, execute sequence of single unarity function */
 			if (!(d->hdr.t == VSYMOP && d->symop.arity == 0)) {
-				rc = (Rc) {OK, copy_v(d)};
+				rc.v = copy_v(d);
+				/* rc.oob comes from loop body */
 				return rc;
 			}
 		}
@@ -1883,15 +1907,17 @@ eval_seq(Env *e, Val *b, bool look) {
 			return (Rc) {FATAL, NULL};
 		}
 		/* apply the symbol, returns the reduced seq */
+		printf("#  %s >> `%s of ", 
+				__FUNCTION__, b->seq.v.v[symat]->symop.name);
+		print_v(b); printf("\n");
 		rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		if (rc.oob == FATAL) {
+			assert(rc.v == NULL);
 			printf("? %s: symbol application failed\n",
 					__FUNCTION__);
 			return rc;
 		}
-		if (rc.oob == SKIP) {
-			return rc;
-		}
+		printf("#  %s << ",__FUNCTION__); print_rc(rc); printf("\n");
 		b = rc.v;
 	}
 	/* empty seq, means nil value */
@@ -2078,10 +2104,10 @@ eval_ph(Env *e_o, Phrase *a) {
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
 		Rc rcv = eval(e_o, v, false);
 		free_v(v);
+		printf("# %3lu %5s: ", i, "eval"); print_rc(rcv); printf("\n"); 
 		if (rcv.oob == FATAL) {
 			return false;
 		}
-		printf("# %3lu %5s: ", i, "eval"); print_v(rcv.v); printf("\n");
 		Symval *it = symval(IT, rcv.v);
 		free_v(rcv.v);
 		if (it == NULL) {

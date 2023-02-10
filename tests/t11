@@ -1,0 +1,7 @@
+
+if 2 > 1. ; print correct
+if not 2 > 1. ; print incorrect
+
+4. > 2 ; if true? ; print true
+4. > 2 ; if false? ; print false
+

@@ -1,0 +1,76 @@
+# ----line: "if 2 > 1. ; print correct"
+# --phrase: if 2 > 1.  ; print correct ; 
+#   0  expr: if 2 > 1. 
+#   0  seme: ( if 2N > 1.00R ) 
+#   0 value: ( `if 2 `> 1.00 ) 
+#  eval_seq >> `> of ( `if 2 `> 1.00 ) 
+#  eval_seq << OK ( `if 1 ) 
+#  eval_seq >> `if of ( `if 1 ) 
+#  eval_seq << OK ( 1 ) 
+#   0  eval: OK 1 
+#   0   env: it=1  
+#   1  expr: print correct
+#   1  seme: ( print correct ) 
+#   1 value: ( `print 'correct ) 
+#  eval_seq >> `print of ( `print 'correct ) 
+'correct 
+#  eval_seq << OK ( 'correct ) 
+#   1  eval: OK 'correct 
+#   1   env: it='correct  
+# ----line: "if not 2 > 1. ; print incorrect"
+# --phrase: if not 2 > 1.  ; print incorrect ; 
+#   0  expr: if not 2 > 1. 
+#   0  seme: ( if not 2N > 1.00R ) 
+#   0 value: ( `if `not 2 `> 1.00 ) 
+#  eval_seq >> `> of ( `if `not 2 `> 1.00 ) 
+#  eval_seq << OK ( `if `not 1 ) 
+#  eval_seq >> `not of ( `if `not 1 ) 
+#  eval_seq << OK ( `if 0 ) 
+#  eval_seq >> `if of ( `if 0 ) 
+#  eval_seq << SKIP ( 0 ) 
+#   0  eval: SKIP 0 
+#   0   env: it=0  
+# ----line: "4. > 2 ; if true? ; print true"
+# --phrase: 4. > 2  ; if true?  ; print true ; 
+#   0  expr: 4. > 2 
+#   0  seme: ( 4.00R > 2N ) 
+#   0 value: ( 4.00 `> 2 ) 
+#  eval_seq >> `> of ( 4.00 `> 2 ) 
+#  eval_seq << OK ( 1 ) 
+#   0  eval: OK 1 
+#   0   env: it=1  
+#   1  expr: if true? 
+#   1  seme: ( if true? ) 
+#   1 value: ( `if `true? ) 
+#  eval_seq >> `true? of ( `if `true? ) 
+#  eval_seq << OK ( `if 1 ) 
+#  eval_seq >> `if of ( `if 1 ) 
+#  eval_seq << OK ( 1 ) 
+#   1  eval: OK 1 
+#   1   env: it=1  
+#   2  expr: print true
+#   2  seme: ( print true ) 
+#   2 value: ( `print 'true ) 
+#  eval_seq >> `print of ( `print 'true ) 
+'true 
+#  eval_seq << OK ( 'true ) 
+#   2  eval: OK 'true 
+#   2   env: it='true  
+# ----line: "4. > 2 ; if false? ; print false"
+# --phrase: 4. > 2  ; if false?  ; print false ; 
+#   0  expr: 4. > 2 
+#   0  seme: ( 4.00R > 2N ) 
+#   0 value: ( 4.00 `> 2 ) 
+#  eval_seq >> `> of ( 4.00 `> 2 ) 
+#  eval_seq << OK ( 1 ) 
+#   0  eval: OK 1 
+#   0   env: it=1  
+#   1  expr: if false? 
+#   1  seme: ( if false? ) 
+#   1 value: ( `if `false? ) 
+#  eval_seq >> `false? of ( `if `false? ) 
+#  eval_seq << OK ( `if 0 ) 
+#  eval_seq >> `if of ( `if 0 ) 
+#  eval_seq << SKIP ( 0 ) 
+#   1  eval: SKIP 0 
+#   1   env: it=0  

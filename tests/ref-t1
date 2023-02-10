@@ -3,32 +3,44 @@
 #   0  expr: 2 * 3.
 #   0  seme: ( 2N * 3.00R ) 
 #   0 value: ( 2 `* 3.00 ) 
-#   0  eval: 6.00 
+#  eval_seq >> `* of ( 2 `* 3.00 ) 
+#  eval_seq << OK ( 6.00 ) 
+#   0  eval: OK 6.00 
 #   0   env: it=6.00  
 #   1  expr: call it p 
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 6.00 'p ) 
-#   1  eval: 6.00 
+#  eval_seq >> `call of ( `call 6.00 'p ) 
+#  eval_seq << OK ( 6.00 ) 
+#   1  eval: OK 6.00 
 #   1   env: it=6.00  p=6.00  
 #   2  expr: p, ~=,6
 #   2  seme: { p ~= 6N } 
 #   2 value: { 'p `~= 6 } 
-#   2  eval: { 'p `~= 6 } 
+#   2  eval: OK { 'p `~= 6 } 
 #   2   env: it={ 'p `~= 6 }  p=6.00  
 #   3  expr: print it 
 #   3  seme: ( print it ) 
 #   3 value: ( `print { 'p `~= 6 } ) 
+#  eval_seq >> `print of ( `print { 'p `~= 6 } ) 
 { 'p `~= 6 } 
-#   3  eval: { 'p `~= 6 } 
+#  eval_seq << OK ( { 'p `~= 6 } ) 
+#   3  eval: OK { 'p `~= 6 } 
 #   3   env: it={ 'p `~= 6 }  p=6.00  
 #   4  expr: do it 
 #   4  seme: ( do it ) 
 #   4 value: ( `do { 'p `~= 6 } ) 
-#   4  eval: 1 
+#  eval_seq >> `do of ( `do { 'p `~= 6 } ) 
+#  eval_seq >> `~= of ( 6.00 `~= 6 ) 
+#  eval_seq << OK ( 1 ) 
+#  eval_seq << OK ( 1 ) 
+#   4  eval: OK 1 
 #   4   env: it=1  p=6.00  
 #   5  expr: print it
 #   5  seme: ( print it ) 
 #   5 value: ( `print 1 ) 
+#  eval_seq >> `print of ( `print 1 ) 
 1 
-#   5  eval: 1 
+#  eval_seq << OK ( 1 ) 
+#   5  eval: OK 1 
 #   5   env: it=1  p=6.00  

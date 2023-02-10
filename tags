@@ -70,6 +70,7 @@ prefixed1	phrase.c	/^prefixed1(size_t p, size_t n) {$/
 prefixed2	phrase.c	/^prefixed2(size_t p, size_t n) {$/
 print_env	phrase.c	/^print_env(Env *a) {$/
 print_ph	phrase.c	/^print_ph(Phrase *a) {$/
+print_rc	phrase.c	/^print_rc(Rc a) {$/
 print_s	phrase.c	/^print_s(Sem *a) {$/
 print_symval	phrase.c	/^print_symval(Symval *a) {$/
 print_v	phrase.c	/^print_v(Val *a) {$/
