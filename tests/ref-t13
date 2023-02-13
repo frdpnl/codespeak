@@ -1,0 +1,50 @@
+# ----line: "2 * 2 ; call it n ; if n - 1 > n * 2 ; print wrong"
+# --phrase: 2 * 2  ; call it n  ; if n - 1 > n * 2  ; print wrong ; 
+#   0  expr: 2 * 2 
+#   0  seme: ( 2N * 2N ) 
+#   0 value: ( 2 `* 2 ) 
+#  eval_seq >> `* of ( 2 `* 2 ) 
+#  eval_seq << OK ( 4 ) 
+#   0  eval: OK 4 
+#   0   env: it=4  
+#   1  expr: call it n 
+#   1  seme: ( call it n ) 
+#   1 value: ( `call 4 'n ) 
+#  eval_seq >> `call of ( `call 4 'n ) 
+#  eval_seq << OK ( 4 ) 
+#   1  eval: OK 4 
+#   1   env: it=4  n=4  
+#   2  expr: if n - 1 > n * 2 
+#   2  seme: ( if n - 1N > n * 2N ) 
+#   2 value: ( `if 'n `- 1 `> 'n `* 2 ) 
+#  eval_seq >> `* of ( `if 'n `- 1 `> 'n `* 2 ) 
+#  eval_seq << OK ( `if 'n `- 1 `> 8 ) 
+#  eval_seq >> `- of ( `if 'n `- 1 `> 8 ) 
+#  eval_seq << OK ( `if 3 `> 8 ) 
+#  eval_seq >> `> of ( `if 3 `> 8 ) 
+#  eval_seq << OK ( `if 0 ) 
+#  eval_seq >> `if of ( `if 0 ) 
+#  eval_seq << SKIP ( 0 ) 
+#   2  eval: SKIP 0 
+#   2   env: it=0  n=4  
+# ----line: "if false? ; print n * 2"
+# --phrase: if false?  ; print n * 2 ; 
+#   0  expr: if false? 
+#   0  seme: ( if false? ) 
+#   0 value: ( `if `false? ) 
+#  eval_seq >> `false? of ( `if `false? ) 
+#  eval_seq << OK ( `if 1 ) 
+#  eval_seq >> `if of ( `if 1 ) 
+#  eval_seq << OK ( 1 ) 
+#   0  eval: OK 1 
+#   0   env: it=1  n=4  
+#   1  expr: print n * 2
+#   1  seme: ( print n * 2N ) 
+#   1 value: ( `print 'n `* 2 ) 
+#  eval_seq >> `* of ( `print 'n `* 2 ) 
+#  eval_seq << OK ( `print 8 ) 
+#  eval_seq >> `print of ( `print 8 ) 
+8 
+#  eval_seq << OK ( 8 ) 
+#   1  eval: OK 8 
+#   1   env: it=8  n=4  

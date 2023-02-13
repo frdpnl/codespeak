@@ -1706,7 +1706,6 @@ Symop Syms[] = {
 	(Symop) {"do",     10, eval_do,    1},
 	(Symop) {"list",   10, eval_list, -1},
 	(Symop) {"call",   10, eval_call,  2},
-	(Symop) {"print",  10, eval_print, 1},
 	(Symop) {"*",    20, eval_mul, 2},
 	(Symop) {"/",    20, eval_div, 2},
 	(Symop) {"+",    30, eval_plu, 2},
@@ -1721,7 +1720,8 @@ Symop Syms[] = {
 	(Symop) {"not",  50, eval_not, 1},
 	(Symop) {"and",  60, eval_and, 2},
 	(Symop) {"or",   60, eval_or,  2},
-	(Symop) {"if",   80, eval_if,  1},
+	(Symop) {"print", 80, eval_print, 1},
+	(Symop) {"if",    100, eval_if,  1},
 };
 static unsigned int
 minprio() {
@@ -1849,9 +1849,8 @@ eval_members1(Env *e, Val *a, bool look) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
-	Rc rc = (Rc) {FATAL, NULL};
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		rc = eval(e, a->seq.v.v[i], look);
+		Rc rc = eval(e, a->seq.v.v[i], look);
 		if (rc.oob == FATAL) {
 			printf("? %s: list or seq item unknown\n",
 					__FUNCTION__);
@@ -1867,7 +1866,7 @@ eval_members1(Env *e, Val *a, bool look) {
 		}
 		b = push_v(a->hdr.t, b, rc.v);
 	}
-	rc = (Rc) {OK, b};
+	Rc rc = (Rc) {OK, b};
 	return rc;
 }
 

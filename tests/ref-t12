@@ -1,0 +1,17 @@
+# ----line: "call, 23, n; do it;"
+# --phrase: call, 23, n ; do it ; 
+#   0  expr: call, 23, n
+#   0  seme: { call 23N n } 
+#   0 value: { `call 23 'n } 
+#   0  eval: OK { `call 23 'n } 
+#   0   env: it={ `call 23 'n }  
+#   1  expr: do it
+#   1  seme: ( do it ) 
+#   1 value: ( `do { `call 23 'n } ) 
+#  eval_seq >> `do of ( `do { `call 23 'n } ) 
+? eval: unknown symbol 'n'
+? eval_members1: list or seq item unknown
+? eval_prefix1_arg: argument is null
+? eval_do: prefix expression invalid
+? eval_seq: symbol application failed
+#   1  eval: FATAL null
