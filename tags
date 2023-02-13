@@ -41,6 +41,7 @@ eval_prefix1_arg	phrase.c	/^eval_prefix1_arg(Env *e, Val *s, size_t p, Val **p/
 eval_prefix2_arg	phrase.c	/^eval_prefix2_arg(Env *e, Val *s, size_t p, Val **p/
 eval_prefixn_arg	phrase.c	/^eval_prefixn_arg(Env *e, Val *s, size_t p, Val **p/
 eval_print	phrase.c	/^eval_print(Env *e, Val *s, size_t p) {$/
+eval_rem	phrase.c	/^eval_rem(Env *e, Val *s, size_t p) {$/
 eval_seq	phrase.c	/^eval_seq(Env *e, Val *b, bool look) {$/
 eval_true	phrase.c	/^eval_true(Env *e, Val *s, size_t p) {$/
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/

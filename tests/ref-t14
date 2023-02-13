@@ -1,0 +1,61 @@
+# ----line: "rem: testing comments"
+# --phrase: rem: testing comments ; 
+#   0  expr: rem: testing comments
+#   0  seme: ( rem: testing comments ) 
+#   0 value: ( `rem: 'testing 'comments ) 
+#  eval_seq >> `rem: of ( `rem: 'testing 'comments ) 
+#  eval_seq << OK ( Nil ) 
+#   0  eval: OK Nil 
+#   0   env: it=Nil  
+# ----line: "if 5 > 4 ; rem: a simple test ; print it "
+# --phrase: if 5 > 4  ; rem: a simple test  ; print it  ; 
+#   0  expr: if 5 > 4 
+#   0  seme: ( if 5N > 4N ) 
+#   0 value: ( `if 5 `> 4 ) 
+#  eval_seq >> `> of ( `if 5 `> 4 ) 
+#  eval_seq << OK ( `if 1 ) 
+#  eval_seq >> `if of ( `if 1 ) 
+#  eval_seq << OK ( 1 ) 
+#   0  eval: OK 1 
+#   0   env: it=1  
+#   1  expr: rem: a simple test 
+#   1  seme: ( rem: a simple test ) 
+#   1 value: ( `rem: 'a 'simple 'test ) 
+#  eval_seq >> `rem: of ( `rem: 'a 'simple 'test ) 
+#  eval_seq << OK ( 1 ) 
+#   1  eval: OK 1 
+#   1   env: it=1  
+#   2  expr: print it 
+#   2  seme: ( print it ) 
+#   2 value: ( `print 1 ) 
+#  eval_seq >> `print of ( `print 1 ) 
+1 
+#  eval_seq << OK ( 1 ) 
+#   2  eval: OK 1 
+#   2   env: it=1  
+# ----line: "if true? ; print it ; rem: again"
+# --phrase: if true?  ; print it  ; rem: again ; 
+#   0  expr: if true? 
+#   0  seme: ( if true? ) 
+#   0 value: ( `if `true? ) 
+#  eval_seq >> `true? of ( `if `true? ) 
+#  eval_seq << OK ( `if 1 ) 
+#  eval_seq >> `if of ( `if 1 ) 
+#  eval_seq << OK ( 1 ) 
+#   0  eval: OK 1 
+#   0   env: it=1  
+#   1  expr: print it 
+#   1  seme: ( print it ) 
+#   1 value: ( `print 1 ) 
+#  eval_seq >> `print of ( `print 1 ) 
+1 
+#  eval_seq << OK ( 1 ) 
+#   1  eval: OK 1 
+#   1   env: it=1  
+#   2  expr: rem: again
+#   2  seme: ( rem: again ) 
+#   2 value: ( `rem: 'again ) 
+#  eval_seq >> `rem: of ( `rem: 'again ) 
+#  eval_seq << OK ( 1 ) 
+#   2  eval: OK 1 
+#   2   env: it=1  

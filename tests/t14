@@ -1,0 +1,5 @@
+
+rem: testing comments
+if 5 > 4 ; rem: a simple test ; print it 
+if true? ; print it ; rem: again
+

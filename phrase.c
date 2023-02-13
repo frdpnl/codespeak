@@ -1687,6 +1687,24 @@ eval_if(Env *e, Val *s, size_t p) {
 	rc.v = s;
 	return rc;
 }
+static Rc 
+eval_rem(Env *e, Val *s, size_t p) {
+	Rc rc;
+	Val *b;
+	Val *a = lookup(e, IT);
+	if (a == NULL) {
+		b = malloc(sizeof(*b));
+		assert(b != NULL);
+		b->hdr.t = VNIL;
+	} else {
+		b = copy_v(a);
+	}
+	upd_prefixall(s, p, b);
+	rc.oob = OK;
+	rc.v = s;
+	return rc;
+}
+
 
 
 /* --------------- builtin or base function symbols -------------------- */
@@ -1698,7 +1716,7 @@ typedef struct Symop_ {
 	int arity;
 } Symop;
 
-#define NSYMS 22
+#define NSYMS 23
 Symop Syms[] = {
 	(Symop) {"true?",  10, eval_true,  0},
 	(Symop) {"false?", 10, eval_false, 0},
@@ -1706,6 +1724,7 @@ Symop Syms[] = {
 	(Symop) {"do",     10, eval_do,    1},
 	(Symop) {"list",   10, eval_list, -1},
 	(Symop) {"call",   10, eval_call,  2},
+	(Symop) {"rem:",   10, eval_rem,  -1},
 	(Symop) {"*",    20, eval_mul, 2},
 	(Symop) {"/",    20, eval_div, 2},
 	(Symop) {"+",    30, eval_plu, 2},
