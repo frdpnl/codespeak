@@ -556,7 +556,7 @@ typedef struct List_v_ {
 
 /* Special environment symbols: */
 #define IT "it"
-#define END "end"
+#define ENDF "end"
 
 typedef struct {
 	char name[WSZ];
@@ -637,11 +637,15 @@ print_v(Val *a) {
 			break;
 		case VSYMF:
 			printf("'%s ", a->symf.name);
-			printf("( ");
+			printf("(");
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
 			}
-			printf(") ");
+			printf("): ");
+			for (size_t i=0; i<a->symf.body.n; ++i) {
+				print_v(a->symf.body.v[i]);
+			}
+			printf("; ");
 			break;
 		case VSYM:
 			printf("'%s ", a->sym.v);
@@ -701,11 +705,11 @@ free_v(Val *a) {
 		case VSYMOP: /* symop holds pointer to val in Syms */
 			break;
 		case VSYMF:
-			for (size_t i=0; i<a->sym.param.n; ++i) {
+			for (size_t i=0; i<a->symf.param.n; ++i) {
 				free_v(a->symf.param.v[i]);
 			}
 			free(a->symf.param.v);
-			for (size_t i=0; i<a->sym.body.n; ++i) {
+			for (size_t i=0; i<a->symf.body.n; ++i) {
 				free_v(a->symf.body.v[i]);
 			}
 			free(a->symf.body.v);
@@ -745,8 +749,8 @@ istrue_v(Val *a) {
 		return a->symop.v != NULL;
 	}
 	if (a->hdr.t == VSYMF) {
-		return (a->symf.param != NULL 
-				&& a->symf.body != NULL);
+		return (a->symf.param.n != 0  
+				&& a->symf.body.n != 0);
 	}
 	if (a->hdr.t == VSYM) {
 		return true;
@@ -919,8 +923,10 @@ push_v(vtype t, Val *a, Val *b) {
 		a->seq.v.n = 0;
 		a->seq.v.v = NULL;
 	}
+	printf("- %s >> ",__FUNCTION__); print_v(a); printf("\n");
 	List_v c = push_l(a->seq.v, b);
 	a->seq.v = c;
+	printf("- %s << ",__FUNCTION__); print_v(a); printf("\n");
 	return a;
 }
 static void
@@ -1066,7 +1072,7 @@ stored_sym(Env *a, Symval *b) {
  * 4. cleanup behind you (working copies)
  * */
 
-static State eval(Env *e, Val *a, bool look);
+static State interpret(Env *e, Val *a, bool look);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -1082,21 +1088,21 @@ prefixed2(size_t p, size_t n) {
 }
 
 static bool
-eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
+interpret_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s: symbol not infixed\n", 
 				__FUNCTION__);
 		return false;
 	}
-	State rc = eval(e, s->seq.v.v[p-1], looka); 
+	State rc = interpret(e, s->seq.v.v[p-1], looka); 
 	if (rc.oob != OK) {
 		printf("? %s: 1st argument null\n", 
 				__FUNCTION__);
 		return false;
 	}
 	a = rc.v;
-	rc = eval(e, s->seq.v.v[p+1], lookb);
+	rc = interpret(e, s->seq.v.v[p+1], lookb);
 	if (rc.oob != OK) {
 		printf("? %s: 2nd argument null\n", 
 				__FUNCTION__);
@@ -1109,14 +1115,14 @@ eval_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lo
 	return true;
 }
 static bool
-eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
+interpret_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s: symbol not prefixed to one argument\n", 
 				__FUNCTION__);
 		return false;
 	}
-	State rc = eval(e, s->seq.v.v[p+1], looka);
+	State rc = interpret(e, s->seq.v.v[p+1], looka);
 	if (rc.oob != OK) {
 		printf("? %s: argument is null\n", 
 				__FUNCTION__);
@@ -1127,21 +1133,21 @@ eval_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	return true;
 }
 static bool
-eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
+interpret_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
 	Val *a, *b;
 	if (!prefixed2(p, s->seq.v.n)) {
 		printf("? %s: symbol not prefixed to 2 arguments\n", 
 				__FUNCTION__);
 		return false;
 	}
-	State rc = eval(e, s->seq.v.v[p+1], looka);
+	State rc = interpret(e, s->seq.v.v[p+1], looka);
 	if (rc.oob != OK) {
 		printf("? %s: 1st argument is null\n", 
 				__FUNCTION__);
 		return false;
 	}
 	a = rc.v;
-	rc = eval(e, s->seq.v.v[p+2], lookb);
+	rc = interpret(e, s->seq.v.v[p+2], lookb);
 	if (rc.oob != OK) {
 		printf("? %s: 2nd argument null\n", 
 				__FUNCTION__);
@@ -1154,7 +1160,7 @@ eval_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool 
 	return true;
 }
 static bool
-eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
+interpret_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	Val *a;
 	a = malloc(sizeof(*a));
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
@@ -1162,8 +1168,8 @@ eval_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
 	State rc;
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		//a->seq.v.v[i-p-1] = eval(e, s->seq.v.v[i], looka);
-		rc = eval(e, s->seq.v.v[i], looka);
+		//a->seq.v.v[i-p-1] = interpret(e, s->seq.v.v[i], looka);
+		rc = interpret(e, s->seq.v.v[i], looka);
 		if (rc.oob != OK) {
 			free_v(a);
 			return false;
@@ -1219,10 +1225,10 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 }
 
 static State 
-eval_mul(Env *e, Val *s, size_t p) {
+interpret_mul(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1251,10 +1257,10 @@ eval_mul(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_div(Env *e, Val *s, size_t p) {
+interpret_div(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1291,10 +1297,10 @@ eval_div(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State
-eval_plu(Env *e, Val *s, size_t p) {
+interpret_plu(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1323,10 +1329,10 @@ eval_plu(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_min(Env *e, Val *s, size_t p) {
+interpret_min(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1355,10 +1361,10 @@ eval_min(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State
-eval_les(Env *e, Val *s, size_t p) {
+interpret_les(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1389,10 +1395,10 @@ eval_les(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State
-eval_leq(Env *e, Val *s, size_t p) {
+interpret_leq(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1423,10 +1429,10 @@ eval_leq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_gre(Env *e, Val *s, size_t p) {
+interpret_gre(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1457,10 +1463,10 @@ eval_gre(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_geq(Env *e, Val *s, size_t p) {
+interpret_geq(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1491,10 +1497,10 @@ eval_geq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_eq(Env *e, Val *s, size_t p) {
+interpret_eq(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1510,10 +1516,10 @@ eval_eq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_neq(Env *e, Val *s, size_t p) {
+interpret_neq(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1529,10 +1535,10 @@ eval_neq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_eqv(Env *e, Val *s, size_t p) {
+interpret_eqv(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1548,10 +1554,10 @@ eval_eqv(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_and(Env *e, Val *s, size_t p) {
+interpret_and(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1572,10 +1578,10 @@ eval_and(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_or(Env *e, Val *s, size_t p) {
+interpret_or(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a, *b;
-	if (!eval_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interpret_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1596,10 +1602,10 @@ eval_or(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_not(Env *e, Val *s, size_t p) {
+interpret_not(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+	if (!interpret_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1617,10 +1623,10 @@ eval_not(Env *e, Val *s, size_t p) {
 }
 
 static State 
-eval_print(Env *e, Val *s, size_t p) {
+interpret_print(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, false)) {
+	if (!interpret_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1632,10 +1638,10 @@ eval_print(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_look(Env *e, Val *s, size_t p) {
+interpret_look(Env *e, Val *s, size_t p) {
 	State rc = (State) {FATAL, NULL};
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+	if (!interpret_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1645,9 +1651,9 @@ eval_look(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_do(Env *e, Val *s, size_t p) {
+interpret_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+	if (!interpret_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
@@ -1659,7 +1665,7 @@ eval_do(Env *e, Val *s, size_t p) {
 		return (State) {FATAL, NULL};
 	}
 	a->hdr.t = VSEQ;
-	State rc = eval(e, a, false);
+	State rc = interpret(e, a, false);
 	free_v(a);
 	if (rc.oob != OK) {
 		return rc;
@@ -1668,9 +1674,9 @@ eval_do(Env *e, Val *s, size_t p) {
 	return (State) {OK, s};
 }
 static State 
-eval_list(Env *e, Val *s, size_t p) {
+interpret_list(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!eval_prefixn_arg(e, s, p, &a, false)) {
+	if (!interpret_prefixn_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
@@ -1680,9 +1686,9 @@ eval_list(Env *e, Val *s, size_t p) {
 	return (State) {OK, s};
 }
 static State 
-eval_call(Env *e, Val *s, size_t p) {
+interpret_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!eval_prefix2_arg(e, s, p, &a, true, &b, false)) {
+	if (!interpret_prefix2_arg(e, s, p, &a, true, &b, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
@@ -1709,7 +1715,7 @@ eval_call(Env *e, Val *s, size_t p) {
 	return (State) {OK, s};
 }
 static State 
-eval_true(Env *e, Val *s, size_t p) {
+interpret_true(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, IT);
 	if (a == NULL) {
@@ -1725,7 +1731,7 @@ eval_true(Env *e, Val *s, size_t p) {
 	return (State) {OK, s};
 }
 static State 
-eval_false(Env *e, Val *s, size_t p) {
+interpret_false(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, IT);
 	if (a == NULL) {
@@ -1741,14 +1747,14 @@ eval_false(Env *e, Val *s, size_t p) {
 	return (State) {OK, s};
 }
 static State 
-eval_if(Env *e, Val *s, size_t p) {
+interpret_if(Env *e, Val *s, size_t p) {
 	if (p != s->seq.v.n - 2) {
 		printf("? %s: too many arguments to 'if'\n",
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
 	}
 	Val *a;
-	if (!eval_prefix1_arg(e, s, p, &a, true)) {
+	if (!interpret_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
@@ -1770,7 +1776,7 @@ eval_if(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static State 
-eval_rem(Env *e, Val *s, size_t p) {
+interpret_rem(Env *e, Val *s, size_t p) {
 	State rc;
 	Val *b;
 	Val *a = lookup(e, IT);
@@ -1789,7 +1795,7 @@ eval_rem(Env *e, Val *s, size_t p) {
 
 /* --- eval function definition --- */
 static State
-eval_fun(Env *e, Val *s, size_t p) {
+interpret_fun(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) ; */
 	if (p != s->seq.v.n - 3) {
 		printf("? %s: incorrect number of arguments to 'define'\n",
@@ -1797,68 +1803,72 @@ eval_fun(Env *e, Val *s, size_t p) {
 		return (State) {FATAL, NULL};
 	}
 	Val *fname, *fparam;
-	if (!eval_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
+	if (!interpret_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
 		return (State) {FATAL, NULL};
 	}
 	if (fname->hdr.t != VSYM) {
 		printf("? %s: expecting symbol for function name\n",
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
+		free_v(fname);
+		free_v(fparam);
 		return (State) {FATAL, NULL};
 	}
 	if (fparam->hdr.t != VLST) {
 		printf("? %s: expecting list for function parameters\n",
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
+		free_v(fname);
+		free_v(fparam);
 		return (State) {FATAL, NULL};
 	}
 	for (size_t i=0; i < fparam->lst.v.n; ++i) {
 		if (fparam->lst.v.v[i]->hdr.t != VSYM) {
 			printf("? %s: expecting symbol for function parameter\n",
 					__FUNCTION__);
-			free_v(a);
-			free_v(b);
+			free_v(fname);
+			free_v(fparam);
+			return (State) {FATAL, NULL};
 		}
-		return (State) {FATAL, NULL};
 	}
 	Val *f = malloc(sizeof(*f));
 	assert(f != NULL && "function val NULL");
 	f->hdr.t = VSYMF;
-	f->symf.name = fname;
-	f->symf.params = fparam;
+	strncpy(f->symf.name, fname->sym.v, WSZ*sizeof(char));
+	for (size_t i=0; i<fparam->lst.v.n; ++i) {
+		f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
+	}
 	f->symf.body = (List_v) {0, NULL};
+	printf("- %s << ",__FUNCTION__); print_v(f); printf("\n");
 	upd_prefix2(s, p, f);
 	return (State) {FUN, s};
 }
 static State 
-eval_funend(Env *e, Val *s, size_t p) {
-	/* rem: end ; */
-	if (s->seq.v.n != 1) {
-		printf("? %s: invalid 'end' incorrect number of arguments to 'define'\n",
+interpret_funend(Env *e, Val *s, size_t p) {
+	/* rem: end f; */
+	if (p != s->seq.v.n - 2) {
+		printf("? %s: invalid 'end', expecting function name only\n",
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
 	}
-	Val *a = lookup(e, IT);
-	if (a == NULL) {
-		b = malloc(sizeof(*b));
-		assert(b != NULL);
-		b->hdr.t = VNIL;
-	} else {
-		b = copy_v(a);
+	Val *a;
+	if (!interpret_prefix1_arg(e, s, p, &a, true)) {
+		printf("? %s: prefix expression invalid\n", 
+				__FUNCTION__);
+		return (State) {FATAL, NULL};
 	}
-	if (!stored_sym(e, sv)) {
-		free_symval(sv);
+	if (a->hdr.t != VSYMF) {
+		printf("? %s: argument is not a function name\n", 
+				__FUNCTION__);
 		free_v(a);
 		return (State) {FATAL, NULL};
 	}
-	upd_prefix2(s, p, a);
+	Symval *sv = symval(a->symf.name, a);
+	if (!stored_sym(e, sv)) {
+		free_symval(sv);
+		return (State) {FATAL, NULL};
+	}
+	Val *f = copy_v(a);
+	upd_prefix1(s, p, f);
 	return (State) {OK, s};
-	upd_prefixall(s, p, b);
-	rc.oob = OK;
-	rc.v = s;
-	return rc;
 }
 
 
@@ -1871,34 +1881,34 @@ typedef struct Symop_ {
 	int arity;
 } Symop;
 
-#define NSYMS 24
+#define NSYMS 26
 Symop Syms[] = {
-	(Symop) {"true?",  10, eval_true,  0},
-	(Symop) {"false?", 10, eval_false, 0},
-	(Symop) {"look",   10, eval_look,  1},
-	(Symop) {"do",     10, eval_do,    1},
-	(Symop) {"list",   10, eval_list, -1},
-	(Symop) {"call",   10, eval_call,  2},
-	(Symop) {"rem:",   10, eval_rem,  -1},
-	(Symop) {"define", 10, eval_fun,  2},
-	(Symop) {"def",    10, eval_fun,  2},
-	(Symop) {"end",    10, eval_funend,  0},
-	(Symop) {"*",    20, eval_mul, 2},
-	(Symop) {"/",    20, eval_div, 2},
-	(Symop) {"+",    30, eval_plu, 2},
-	(Symop) {"-",    30, eval_min, 2},
-	(Symop) {"<",    40, eval_les, 2},
-	(Symop) {"<=",   40, eval_leq, 2},
-	(Symop) {">",    40, eval_gre, 2},
-	(Symop) {">=",   40, eval_geq, 2},
-	(Symop) {"=",    40, eval_eq,  2},
-	(Symop) {"/=",   40, eval_neq, 2},
-	(Symop) {"~=",   40, eval_eqv, 2},
-	(Symop) {"not",  50, eval_not, 1},
-	(Symop) {"and",  60, eval_and, 2},
-	(Symop) {"or",   60, eval_or,  2},
-	(Symop) {"print", 80, eval_print, 1},
-	(Symop) {"if",    100, eval_if,  1},
+	(Symop) {"true?",  10, interpret_true,  0},
+	(Symop) {"false?", 10, interpret_false, 0},
+	(Symop) {"look",   10, interpret_look,  1},
+	(Symop) {"do",     10, interpret_do,    1},
+	(Symop) {"list",   10, interpret_list, -1},
+	(Symop) {"call",   10, interpret_call,  2},
+	(Symop) {"rem:",   10, interpret_rem,  -1},
+	(Symop) {"define", 10, interpret_fun,  2},
+	(Symop) {"def",    10, interpret_fun,  2},
+	(Symop) {"end",    10, interpret_funend,  0},
+	(Symop) {"*",    20, interpret_mul, 2},
+	(Symop) {"/",    20, interpret_div, 2},
+	(Symop) {"+",    30, interpret_plu, 2},
+	(Symop) {"-",    30, interpret_min, 2},
+	(Symop) {"<",    40, interpret_les, 2},
+	(Symop) {"<=",   40, interpret_leq, 2},
+	(Symop) {">",    40, interpret_gre, 2},
+	(Symop) {">=",   40, interpret_geq, 2},
+	(Symop) {"=",    40, interpret_eq,  2},
+	(Symop) {"/=",   40, interpret_neq, 2},
+	(Symop) {"~=",   40, interpret_eqv, 2},
+	(Symop) {"not",  50, interpret_not, 1},
+	(Symop) {"and",  60, interpret_and, 2},
+	(Symop) {"or",   60, interpret_or,  2},
+	(Symop) {"print", 80, interpret_print, 1},
+	(Symop) {"if",    100, interpret_if,  1},
 };
 static unsigned int
 minprio() {
@@ -2022,12 +2032,12 @@ val_of_seme(Env *e, Sem *s) {
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
 static State 
-eval_members1(Env *e, Val *a, bool look) {
+interpret_items(Env *e, Val *a, bool look) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		State rc = eval(e, a->seq.v.v[i], look);
+		State rc = interpret(e, a->seq.v.v[i], look);
 		if (rc.oob == FATAL) {
 			printf("? %s: list or seq item unknown\n",
 					__FUNCTION__);
@@ -2048,7 +2058,7 @@ eval_members1(Env *e, Val *a, bool look) {
 }
 
 static State 
-eval_seq(Env *e, Val *b, bool look) {
+interpret_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
 	State rc = (State) {OK, NULL};
 	Val *c;
@@ -2105,7 +2115,7 @@ eval_seq(Env *e, Val *b, bool look) {
 }
 
 static State 
-eval(Env *e, Val *a, bool look) {
+interpret(Env *e, Val *a, bool look) {
 	/* returns a fresh value, 'a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
@@ -2126,15 +2136,15 @@ eval(Env *e, Val *a, bool look) {
 		return rc;
 	}
 	if (a->hdr.t == VLST) {
-		return eval_members1(e, a, look);
+		return interpret_items(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		rc = eval_members1(e, a, look);
+		rc = interpret_items(e, a, look);
 		if (rc.oob != OK) {
 			return rc;
 		}
 		Val *b = rc.v;
-		rc = eval_seq(e, b, look);
+		rc = interpret_seq(e, b, look);
 		free_v(b);
 		return rc;
 	}
@@ -2256,12 +2266,12 @@ phrase_of_str(char *a) {
 /* -------------- Phrase -------------- */
 
 static bool
-eval_ph(Env *e_o, Phrase *a) {
+interpret_ph(Env *e_o, Phrase *a) {
 	assert(e_o != NULL && "environment null");
 	assert(a != NULL && "phrase null");
-	State Rcv = {OK, NULL};
+	State status = {OK, NULL};
 	for (size_t i=0; i<a->n; ++i) {
-		printf("# %3lu %5s: ", i, "eval"); print_rc(rcv); printf("\n"); 
+		printf("# %3lu %5s: ", i, __FUNCTION__); print_rc(status); printf("\n"); 
 		printf("# %3lu %5s: %s\n", i, "expr", a->x[i]);
 		Expr *ex = exp_of_words(a->x[i]);
 		/* a is freed where allocated, not here but by caller */
@@ -2281,35 +2291,37 @@ eval_ph(Env *e_o, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
-		if (rcv.oob == FUN 
+		if (status.oob == FUN 
 				&& (!(v->hdr.t == VSEQ 
 					&& v->seq.v.n == 1 
 					&& v->seq.v.v[0]->hdr.t == VSYM
-					&& strncmp(v->seq.v.v[0]->sym.v, END, 4) == 0))) {
+					&& strncmp(v->seq.v.v[0]->sym.v, ENDF, 4) == 0))) {
 			/* we're in a function body */
 			/* && current value is not an end operator:
 			 * add current value to existing body */
 			Val *fun = lookup(e_o, IT);
 			if (fun == NULL) {
+				printf("? %s: 'it undefined\n", __FUNCTION__);
 				free_v(v);
 				return false;
 			}
 			if (fun->hdr.t != VSYMF) {
+				printf("? %s: 'it is not a function\n", __FUNCTION__);
 				free_v(fun);
 				free_v(v);
 				return false;
 			}
-			fun->vsymf.body = push_l(fun->vsymf.body, v);
+			fun->symf.body = push_l(fun->symf.body, v);
 			continue;
 		}
-		rcv = eval(e_o, v, false);
+		status = interpret(e_o, v, false);
 		free_v(v);
-		printf("# %3lu %5s: ", i, "eval"); print_rc(rcv); printf("\n"); 
-		if (rcv.oob == FATAL) {
+		printf("# %3lu %5s: ", i, __FUNCTION__); print_rc(status); printf("\n"); 
+		if (status.oob == FATAL) {
 			return false;
 		}
-		Symval *it = symval(IT, rcv.v);
-		free_v(rcv.v);
+		Symval *it = symval(IT, status.v);
+		free_v(status.v);
 		if (it == NULL) {
 			return false;
 		}
@@ -2318,7 +2330,7 @@ eval_ph(Env *e_o, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "env"); print_env(e_o); 
-		if (rcv.oob == SKIP) {
+		if (status.oob == SKIP) {
 			break;
 		}
 	}
@@ -2332,9 +2344,9 @@ usage(const char *exe) {
 	printf("usage: %s\n", exe);
 }
 
-enum Rstatus {LINE, EMPTY, END, ERR};
+typedef enum {LINE, EMPTY, END, ERR} Rstatus;
 
-static enum Rstatus 
+static Rstatus 
 readline(char **s_o) {
 	char *line = NULL;
 	size_t linesz = 0;
@@ -2376,7 +2388,7 @@ main(int argc, char **argv) {
 	e->s = NULL;
 	char *line;
 	while (1) {
-		enum Rstatus lrc = readline(&line);
+		Rstatus lrc = readline(&line);
 		switch (lrc) {
 			case ERR:
 				free_env(e);
@@ -2397,7 +2409,7 @@ main(int argc, char **argv) {
 			return EXIT_FAILURE;
 		}
 		printf("# --phrase: "); print_ph(ph); 
-		bool evrc = eval_ph(e, ph);
+		bool evrc = interpret_ph(e, ph);
 		free_ph(ph);
 		if (!evrc) {
 			free_env(e);
