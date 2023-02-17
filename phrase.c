@@ -1840,7 +1840,6 @@ infer_fun(Env *e, Val *s, size_t p) {
 		f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
 	}
 	f->symf.body = (List_v) {0, NULL};
-	printf("- %s << ",__FUNCTION__); print_v(f); printf("\n");
 	upd_prefix2(s, p, f);
 	return (State) {FUN, s};
 }
@@ -2065,6 +2064,8 @@ infer_items(Env *e, Val *a, bool look) {
 			printf("? %s: list or seq item unknown\n",
 					__FUNCTION__);
 			free_v(b);
+			free_v(rc.v);
+			rc = (State) {FATAL, NULL};
 			return rc;
 		} else if (rc.oob == SKIP) {
 			printf("? %s: list or seq item invalid\n",
@@ -2093,7 +2094,6 @@ infer_seq(Env *e, Val *b, bool look) {
 			/* TODO also exec symf without params */
 			if (!(d->hdr.t == VSYMOP && d->symop.arity == 0)) {
 				rc.v = copy_v(d);
-				/* rc.oob comes from loop body */
 				return rc;
 			}
 		}
@@ -2121,13 +2121,13 @@ infer_seq(Env *e, Val *b, bool look) {
 				__FUNCTION__, b->seq.v.v[symat]->symop.name);
 		print_v(b); printf("\n");
 		rc = b->seq.v.v[symat]->symop.v(e, b, symat);
+		printf("#  %s << ",__FUNCTION__); print_rc(rc); printf("\n");
 		if (rc.oob == FATAL) {
 			assert(rc.v == NULL);
 			printf("? %s: symbol application failed\n",
 					__FUNCTION__);
 			return rc;
 		}
-		printf("#  %s << ",__FUNCTION__); print_rc(rc); printf("\n");
 		b = rc.v;
 	}
 	/* empty seq, means nil value */
@@ -2329,7 +2329,6 @@ infer_ph(Env *e_o, Phrase *a) {
 			}
 			if (fun->hdr.t != VSYMF) {
 				printf("? %s: 'it is not a function\n", __FUNCTION__);
-				free_v(fun);
 				free_v(v);
 				return false;
 			}
@@ -2340,6 +2339,7 @@ infer_ph(Env *e_o, Phrase *a) {
 		free_v(v);
 		printf("# %3lu %5s: ", i, "infer"); print_rc(status); printf("\n"); 
 		if (status.oob == FATAL) {
+			free_v(status.v);
 			return false;
 		}
 		Symval *it = symval(IT, status.v);
