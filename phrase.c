@@ -672,6 +672,7 @@ print_v(Val *a) {
 }
 static void
 print_rc(State a) {
+	printf("[ ");
 	switch (a.oob) {
 		case OK:
 			printf("OK ");
@@ -694,6 +695,7 @@ print_rc(State a) {
 	} else {
 		printf("null");
 	}
+	printf(" ]");
 }
 
 static void 
@@ -876,8 +878,8 @@ isequiv_v(Val *a, Val *b) {
 static Val *
 copy_v(Val *a) {
 	assert(a != NULL);
-	Val *b = malloc(sizeof(Val));
-	memmove(b, a, sizeof(Val));
+	Val *b = malloc(sizeof(*b));
+	memcpy(b, a, sizeof(Val));
 	if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
 		b->seq.v.v = malloc(a->seq.v.n * sizeof(Val*));
 		for (size_t i=0; i<a->seq.v.n; ++i) {
@@ -927,8 +929,7 @@ push_v(vtype t, Val *a, Val *b) {
 		a->seq.v.n = 0;
 		a->seq.v.v = NULL;
 	}
-	List_v c = push_l(a->seq.v, b);
-	a->seq.v = c;
+	a->seq.v = push_l(a->seq.v, b);
 	return a;
 }
 static void
@@ -1823,7 +1824,8 @@ infer_fun(Env *e, Val *s, size_t p) {
 		return (State) {FATAL, NULL};
 	}
 	for (size_t i=0; i < fparam->lst.v.n; ++i) {
-		if (fparam->lst.v.v[i]->hdr.t != VSYM) {
+		if (!(fparam->lst.v.v[i]->hdr.t == VSYM ||
+					fparam->lst.v.v[i]->hdr.t == VNIL)) {
 			printf("? %s: expecting symbol for function parameter\n",
 					__FUNCTION__);
 			free_v(fname);
@@ -1835,11 +1837,16 @@ infer_fun(Env *e, Val *s, size_t p) {
 	assert(f != NULL && "function val NULL");
 	f->hdr.t = VSYMF;
 	strncpy(f->symf.name, fname->sym.v, WSZ*sizeof(char));
-	f->symf.param = (List_v) {0, NULL};
+	f->symf.param.n = 0;
+	f->symf.param.v = NULL;
 	for (size_t i=0; i<fparam->lst.v.n; ++i) {
 		f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
 	}
-	f->symf.body = (List_v) {0, NULL};
+	f->symf.body.n = 0;
+	f->symf.body.v = NULL;
+	free_v(fname);
+	free(fparam->lst.v.v);
+	free(fparam);
 	upd_prefix2(s, p, f);
 	return (State) {FUN, s};
 }
@@ -1963,6 +1970,7 @@ isatom_v(Val *a) {
 			|| a->hdr.t == VNAT 
 			|| a->hdr.t == VREA
 			|| a->hdr.t == VSYM
+			|| a->hdr.t == VSYMF
 			|| a->hdr.t == VSYMOP);
 }
 
@@ -2089,11 +2097,11 @@ infer_seq(Env *e, Val *b, bool look) {
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
-			Val *d = b->seq.v.v[0];
+			c = b->seq.v.v[0];
 			/* except, execute sequence of single unarity function */
 			/* TODO also exec symf without params */
-			if (!(d->hdr.t == VSYMOP && d->symop.arity == 0)) {
-				rc.v = copy_v(d);
+			if (!(c->hdr.t == VSYMOP && c->symop.arity == 0)) {
+				rc.v = copy_v(c);
 				return rc;
 			}
 		}
@@ -2117,11 +2125,7 @@ infer_seq(Env *e, Val *b, bool look) {
 			return (State) {FATAL, NULL};
 		}
 		/* apply the symbol, returns the reduced seq */
-		printf("#  %s >> `%s of ", 
-				__FUNCTION__, b->seq.v.v[symat]->symop.name);
-		print_v(b); printf("\n");
 		rc = b->seq.v.v[symat]->symop.v(e, b, symat);
-		printf("#  %s << ",__FUNCTION__); print_rc(rc); printf("\n");
 		if (rc.oob == FATAL) {
 			assert(rc.v == NULL);
 			printf("? %s: symbol application failed\n",
@@ -2144,7 +2148,8 @@ infer(Env *e, Val *a, bool look) {
 	assert(a != NULL && "value is null");
 	State rc = (State) {FATAL, NULL};
 	if (isatom_v(a)) {
-		if (look && a->hdr.t == VSYM) {
+		if (look 
+				&& (a->hdr.t == VSYM || a->hdr.t == VSYMF)) {
 			Val *b = lookup(e, a->sym.v);
 			if (b == NULL) {
 				printf("? %s: unknown symbol '%s'\n",
@@ -2294,6 +2299,7 @@ infer_ph(Env *e_o, Phrase *a) {
 	assert(a != NULL && "phrase null");
 	State status = {OK, NULL};
 	for (size_t i=0; i<a->n; ++i) {
+		printf("# %3lu %5s: head ", i, "infer"); print_rc(status); printf("\n"); 
 		printf("# %3lu %5s: %s\n", i, "expr", a->x[i]);
 		Expr *ex = exp_of_words(a->x[i]);
 		/* a is freed where allocated, not here but by caller */
@@ -2325,11 +2331,13 @@ infer_ph(Env *e_o, Phrase *a) {
 			if (fun == NULL) {
 				printf("? %s: 'it undefined\n", __FUNCTION__);
 				free_v(v);
+				free_v(status.v);
 				return false;
 			}
 			if (fun->hdr.t != VSYMF) {
 				printf("? %s: 'it is not a function\n", __FUNCTION__);
 				free_v(v);
+				free_v(status.v);
 				return false;
 			}
 			fun->symf.body = push_l(fun->symf.body, v);
@@ -2337,27 +2345,26 @@ infer_ph(Env *e_o, Phrase *a) {
 		}
 		status = infer(e_o, v, false);
 		free_v(v);
-		printf("# %3lu %5s: ", i, "infer"); print_rc(status); printf("\n"); 
+		printf("# %3lu %5s: post ", i, "infer"); print_rc(status); printf("\n"); 
 		if (status.oob == FATAL) {
-			free_v(status.v);
 			return false;
 		}
 		Symval *it = symval(IT, status.v);
-		free_v(status.v);
-		status.v = NULL;
 		if (it == NULL) {
 			return false;
 		}
+		free_v(status.v);
+		status.v = NULL;
 		if (!stored_sym(e_o, it)) {
 			free_symval(it);
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "env"); print_env(e_o); 
-		if (status.oob == ENDFUN) {
-			status.oob = OK;
-		}
 		if (status.oob == SKIP) {
 			break;
+		}
+		if (status.oob == ENDFUN) {
+			status.oob = OK;
 		}
 	}
 	return true;
