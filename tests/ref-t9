@@ -3,50 +3,50 @@
 #   0  expr: * 
 #   0  seme: ( * ) 
 #   0 value: ( `* ) 
-#   0  eval: OK `* 
+#   0 infer: OK `* 
 #   0   env: it=`*  
 #   1  expr: call it op1
 #   1  seme: ( call it op1 ) 
 #   1 value: ( `call `* 'op1 ) 
-#  eval_seq >> `call of ( `call `* 'op1 ) 
-#  eval_seq << OK ( `* ) 
-#   1  eval: OK `* 
+#  infer_seq >> `call of ( `call `* 'op1 ) 
+#  infer_seq << OK ( `* ) 
+#   1 infer: OK `* 
 #   1   env: it=`*  op1=`*  
 #   2  expr: call op1 op2
 #   2  seme: ( call op1 op2 ) 
 #   2 value: ( `call `* 'op2 ) 
-#  eval_seq >> `call of ( `call `* 'op2 ) 
-#  eval_seq << OK ( `* ) 
-#   2  eval: OK `* 
+#  infer_seq >> `call of ( `call `* 'op2 ) 
+#  infer_seq << OK ( `* ) 
+#   2 infer: OK `* 
 #   2   env: it=`*  op1=`*  op2=`*  
 #   3  expr: call op2 op3
 #   3  seme: ( call op2 op3 ) 
 #   3 value: ( `call `* 'op3 ) 
-#  eval_seq >> `call of ( `call `* 'op3 ) 
-#  eval_seq << OK ( `* ) 
-#   3  eval: OK `* 
+#  infer_seq >> `call of ( `call `* 'op3 ) 
+#  infer_seq << OK ( `* ) 
+#   3 infer: OK `* 
 #   3   env: it=`*  op1=`*  op2=`*  op3=`*  
 # ----line: "2, op3, 4. ; do it; print it"
 # --phrase: 2, op3, 4.  ; do it ; print it ; 
 #   0  expr: 2, op3, 4. 
 #   0  seme: { 2N op3 4.00R } 
 #   0 value: { 2 `* 4.00 } 
-#   0  eval: OK { 2 `* 4.00 } 
+#   0 infer: OK { 2 `* 4.00 } 
 #   0   env: it={ 2 `* 4.00 }  op1=`*  op2=`*  op3=`*  
 #   1  expr: do it
 #   1  seme: ( do it ) 
 #   1 value: ( `do { 2 `* 4.00 } ) 
-#  eval_seq >> `do of ( `do { 2 `* 4.00 } ) 
-#  eval_seq >> `* of ( 2 `* 4.00 ) 
-#  eval_seq << OK ( 8.00 ) 
-#  eval_seq << OK ( 8.00 ) 
-#   1  eval: OK 8.00 
+#  infer_seq >> `do of ( `do { 2 `* 4.00 } ) 
+#  infer_seq >> `* of ( 2 `* 4.00 ) 
+#  infer_seq << OK ( 8.00 ) 
+#  infer_seq << OK ( 8.00 ) 
+#   1 infer: OK 8.00 
 #   1   env: it=8.00  op1=`*  op2=`*  op3=`*  
 #   2  expr: print it
 #   2  seme: ( print it ) 
 #   2 value: ( `print 8.00 ) 
-#  eval_seq >> `print of ( `print 8.00 ) 
+#  infer_seq >> `print of ( `print 8.00 ) 
 8.00 
-#  eval_seq << OK ( 8.00 ) 
-#   2  eval: OK 8.00 
+#  infer_seq << OK ( 8.00 ) 
+#   2 infer: OK 8.00 
 #   2   env: it=8.00  op1=`*  op2=`*  op3=`*  

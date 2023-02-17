@@ -21,40 +21,40 @@ free_s	phrase.c	/^free_s(Sem *a) {$/
 free_symval	phrase.c	/^free_symval(Symval *a) {$/
 free_v	phrase.c	/^free_v(Val *a) {$/
 free_x	phrase.c	/^free_x(Expr *a) {$/
+infer	phrase.c	/^infer(Env *e, Val *a, bool look) {$/
+infer_and	phrase.c	/^infer_and(Env *e, Val *s, size_t p) {$/
+infer_call	phrase.c	/^infer_call(Env *e, Val *s, size_t p) {$/
+infer_div	phrase.c	/^infer_div(Env *e, Val *s, size_t p) {$/
+infer_do	phrase.c	/^infer_do(Env *e, Val *s, size_t p) {$/
+infer_eq	phrase.c	/^infer_eq(Env *e, Val *s, size_t p) {$/
+infer_eqv	phrase.c	/^infer_eqv(Env *e, Val *s, size_t p) {$/
+infer_false	phrase.c	/^infer_false(Env *e, Val *s, size_t p) {$/
+infer_fun	phrase.c	/^infer_fun(Env *e, Val *s, size_t p) {$/
+infer_funend	phrase.c	/^infer_funend(Env *e, Val *s, size_t p) {$/
+infer_geq	phrase.c	/^infer_geq(Env *e, Val *s, size_t p) {$/
+infer_gre	phrase.c	/^infer_gre(Env *e, Val *s, size_t p) {$/
+infer_if	phrase.c	/^infer_if(Env *e, Val *s, size_t p) {$/
+infer_infix_arg	phrase.c	/^infer_infix_arg(Env *e, Val *s, size_t p, Val **pa/
+infer_items	phrase.c	/^infer_items(Env *e, Val *a, bool look) {$/
+infer_leq	phrase.c	/^infer_leq(Env *e, Val *s, size_t p) {$/
+infer_les	phrase.c	/^infer_les(Env *e, Val *s, size_t p) {$/
+infer_list	phrase.c	/^infer_list(Env *e, Val *s, size_t p) {$/
+infer_look	phrase.c	/^infer_look(Env *e, Val *s, size_t p) {$/
+infer_min	phrase.c	/^infer_min(Env *e, Val *s, size_t p) {$/
+infer_mul	phrase.c	/^infer_mul(Env *e, Val *s, size_t p) {$/
+infer_neq	phrase.c	/^infer_neq(Env *e, Val *s, size_t p) {$/
+infer_not	phrase.c	/^infer_not(Env *e, Val *s, size_t p) {$/
+infer_or	phrase.c	/^infer_or(Env *e, Val *s, size_t p) {$/
+infer_ph	phrase.c	/^infer_ph(Env *e_o, Phrase *a) {$/
+infer_plu	phrase.c	/^infer_plu(Env *e, Val *s, size_t p) {$/
+infer_prefix1_arg	phrase.c	/^infer_prefix1_arg(Env *e, Val *s, size_t p, Val **/
+infer_prefix2_arg	phrase.c	/^infer_prefix2_arg(Env *e, Val *s, size_t p, Val **/
+infer_prefixn_arg	phrase.c	/^infer_prefixn_arg(Env *e, Val *s, size_t p, Val **/
+infer_print	phrase.c	/^infer_print(Env *e, Val *s, size_t p) {$/
+infer_rem	phrase.c	/^infer_rem(Env *e, Val *s, size_t p) {$/
+infer_seq	phrase.c	/^infer_seq(Env *e, Val *b, bool look) {$/
+infer_true	phrase.c	/^infer_true(Env *e, Val *s, size_t p) {$/
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/
-interpret	phrase.c	/^interpret(Env *e, Val *a, bool look) {$/
-interpret_and	phrase.c	/^interpret_and(Env *e, Val *s, size_t p) {$/
-interpret_call	phrase.c	/^interpret_call(Env *e, Val *s, size_t p) {$/
-interpret_div	phrase.c	/^interpret_div(Env *e, Val *s, size_t p) {$/
-interpret_do	phrase.c	/^interpret_do(Env *e, Val *s, size_t p) {$/
-interpret_eq	phrase.c	/^interpret_eq(Env *e, Val *s, size_t p) {$/
-interpret_eqv	phrase.c	/^interpret_eqv(Env *e, Val *s, size_t p) {$/
-interpret_false	phrase.c	/^interpret_false(Env *e, Val *s, size_t p) {$/
-interpret_fun	phrase.c	/^interpret_fun(Env *e, Val *s, size_t p) {$/
-interpret_funend	phrase.c	/^interpret_funend(Env *e, Val *s, size_t p) {$/
-interpret_geq	phrase.c	/^interpret_geq(Env *e, Val *s, size_t p) {$/
-interpret_gre	phrase.c	/^interpret_gre(Env *e, Val *s, size_t p) {$/
-interpret_if	phrase.c	/^interpret_if(Env *e, Val *s, size_t p) {$/
-interpret_infix_arg	phrase.c	/^interpret_infix_arg(Env *e, Val *s, size_t p, Val /
-interpret_items	phrase.c	/^interpret_items(Env *e, Val *a, bool look) {$/
-interpret_leq	phrase.c	/^interpret_leq(Env *e, Val *s, size_t p) {$/
-interpret_les	phrase.c	/^interpret_les(Env *e, Val *s, size_t p) {$/
-interpret_list	phrase.c	/^interpret_list(Env *e, Val *s, size_t p) {$/
-interpret_look	phrase.c	/^interpret_look(Env *e, Val *s, size_t p) {$/
-interpret_min	phrase.c	/^interpret_min(Env *e, Val *s, size_t p) {$/
-interpret_mul	phrase.c	/^interpret_mul(Env *e, Val *s, size_t p) {$/
-interpret_neq	phrase.c	/^interpret_neq(Env *e, Val *s, size_t p) {$/
-interpret_not	phrase.c	/^interpret_not(Env *e, Val *s, size_t p) {$/
-interpret_or	phrase.c	/^interpret_or(Env *e, Val *s, size_t p) {$/
-interpret_ph	phrase.c	/^interpret_ph(Env *e_o, Phrase *a) {$/
-interpret_plu	phrase.c	/^interpret_plu(Env *e, Val *s, size_t p) {$/
-interpret_prefix1_arg	phrase.c	/^interpret_prefix1_arg(Env *e, Val *s, size_t p, Va/
-interpret_prefix2_arg	phrase.c	/^interpret_prefix2_arg(Env *e, Val *s, size_t p, Va/
-interpret_prefixn_arg	phrase.c	/^interpret_prefixn_arg(Env *e, Val *s, size_t p, Va/
-interpret_print	phrase.c	/^interpret_print(Env *e, Val *s, size_t p) {$/
-interpret_rem	phrase.c	/^interpret_rem(Env *e, Val *s, size_t p) {$/
-interpret_seq	phrase.c	/^interpret_seq(Env *e, Val *b, bool look) {$/
-interpret_true	phrase.c	/^interpret_true(Env *e, Val *s, size_t p) {$/
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/
 isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/

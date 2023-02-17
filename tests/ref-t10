@@ -3,34 +3,34 @@
 #   0  expr: 1 = 0
 #   0  seme: ( 1N = 0N ) 
 #   0 value: ( 1 `= 0 ) 
-#  eval_seq >> `= of ( 1 `= 0 ) 
-#  eval_seq << OK ( 0 ) 
-#   0  eval: OK 0 
+#  infer_seq >> `= of ( 1 `= 0 ) 
+#  infer_seq << OK ( 0 ) 
+#   0 infer: OK 0 
 #   0   env: it=0  
 #   1  expr: true?
 #   1  seme: ( true? ) 
 #   1 value: ( `true? ) 
-#  eval_seq >> `true? of ( `true? ) 
-#  eval_seq << OK ( 0 ) 
-#   1  eval: OK 0 
+#  infer_seq >> `true? of ( `true? ) 
+#  infer_seq << OK ( 0 ) 
+#   1 infer: OK 0 
 #   1   env: it=0  
 # ----line: "-11 > -1. ;  true? > false? ;"
 # --phrase: -11 > -1.  ; true? > false?  ; 
 #   0  expr: -11 > -1. 
 #   0  seme: ( -11N > -1.00R ) 
 #   0 value: ( -11 `> -1.00 ) 
-#  eval_seq >> `> of ( -11 `> -1.00 ) 
-#  eval_seq << OK ( 0 ) 
-#   0  eval: OK 0 
+#  infer_seq >> `> of ( -11 `> -1.00 ) 
+#  infer_seq << OK ( 0 ) 
+#   0 infer: OK 0 
 #   0   env: it=0  
 #   1  expr: true? > false? 
 #   1  seme: ( true? > false? ) 
 #   1 value: ( `true? `> `false? ) 
-#  eval_seq >> `true? of ( `true? `> `false? ) 
-#  eval_seq << OK ( 0 `> `false? ) 
-#  eval_seq >> `false? of ( 0 `> `false? ) 
-#  eval_seq << OK ( 0 `> 1 ) 
-#  eval_seq >> `> of ( 0 `> 1 ) 
-#  eval_seq << OK ( 0 ) 
-#   1  eval: OK 0 
+#  infer_seq >> `true? of ( `true? `> `false? ) 
+#  infer_seq << OK ( 0 `> `false? ) 
+#  infer_seq >> `false? of ( 0 `> `false? ) 
+#  infer_seq << OK ( 0 `> 1 ) 
+#  infer_seq >> `> of ( 0 `> 1 ) 
+#  infer_seq << OK ( 0 ) 
+#   1 infer: OK 0 
 #   1   env: it=0  

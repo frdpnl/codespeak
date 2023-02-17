@@ -3,36 +3,36 @@
 #   0  expr: 1, +, 2 
 #   0  seme: { 1N + 2N } 
 #   0 value: { 1 `+ 2 } 
-#   0  eval: OK { 1 `+ 2 } 
+#   0 infer: OK { 1 `+ 2 } 
 #   0   env: it={ 1 `+ 2 }  
 #   1  expr: list it
 #   1  seme: ( list it ) 
 #   1 value: ( `list { 1 `+ 2 } ) 
-#  eval_seq >> `list of ( `list { 1 `+ 2 } ) 
-#  eval_seq << OK ( { { 1 `+ 2 } } ) 
-#   1  eval: OK { { 1 `+ 2 } } 
+#  infer_seq >> `list of ( `list { 1 `+ 2 } ) 
+#  infer_seq << OK ( { { 1 `+ 2 } } ) 
+#   1 infer: OK { { 1 `+ 2 } } 
 #   1   env: it={ { 1 `+ 2 } }  
 #   2  expr: do it
 #   2  seme: ( do it ) 
 #   2 value: ( `do { { 1 `+ 2 } } ) 
-#  eval_seq >> `do of ( `do { { 1 `+ 2 } } ) 
-#  eval_seq << OK ( { 1 `+ 2 } ) 
-#   2  eval: OK { 1 `+ 2 } 
+#  infer_seq >> `do of ( `do { { 1 `+ 2 } } ) 
+#  infer_seq << OK ( { 1 `+ 2 } ) 
+#   2 infer: OK { 1 `+ 2 } 
 #   2   env: it={ 1 `+ 2 }  
 #   3  expr: do it
 #   3  seme: ( do it ) 
 #   3 value: ( `do { 1 `+ 2 } ) 
-#  eval_seq >> `do of ( `do { 1 `+ 2 } ) 
-#  eval_seq >> `+ of ( 1 `+ 2 ) 
-#  eval_seq << OK ( 3 ) 
-#  eval_seq << OK ( 3 ) 
-#   3  eval: OK 3 
+#  infer_seq >> `do of ( `do { 1 `+ 2 } ) 
+#  infer_seq >> `+ of ( 1 `+ 2 ) 
+#  infer_seq << OK ( 3 ) 
+#  infer_seq << OK ( 3 ) 
+#   3 infer: OK 3 
 #   3   env: it=3  
 #   4  expr: print it
 #   4  seme: ( print it ) 
 #   4 value: ( `print 3 ) 
-#  eval_seq >> `print of ( `print 3 ) 
+#  infer_seq >> `print of ( `print 3 ) 
 3 
-#  eval_seq << OK ( 3 ) 
-#   4  eval: OK 3 
+#  infer_seq << OK ( 3 ) 
+#   4 infer: OK 3 
 #   4   env: it=3  

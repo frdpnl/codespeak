@@ -3,14 +3,14 @@
 #   0  expr: call + op+ 
 #   0  seme: ( call + op+ ) 
 #   0 value: ( `call `+ 'op+ ) 
-#  eval_seq >> `call of ( `call `+ 'op+ ) 
-#  eval_seq << OK ( `+ ) 
-#   0  eval: OK `+ 
+#  infer_seq >> `call of ( `call `+ 'op+ ) 
+#  infer_seq << OK ( `+ ) 
+#   0 infer: OK `+ 
 #   0   env: op+=`+  it=`+  
 #   1  expr: 1 op+ 3
 #   1  seme: ( 1N op+ 3N ) 
 #   1 value: ( 1 `+ 3 ) 
-#  eval_seq >> `+ of ( 1 `+ 3 ) 
-#  eval_seq << OK ( 4 ) 
-#   1  eval: OK 4 
+#  infer_seq >> `+ of ( 1 `+ 3 ) 
+#  infer_seq << OK ( 4 ) 
+#   1 infer: OK 4 
 #   1   env: op+=`+  it=4  
