@@ -1843,30 +1843,50 @@ interpret_fun(Env *e, Val *s, size_t p) {
 }
 static State 
 interpret_funend(Env *e, Val *s, size_t p) {
-	/* rem: end f; */
+	/* rem: end somefun; */
 	if (p != s->seq.v.n - 2) {
 		printf("? %s: invalid 'end', expecting function name only\n",
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
 	}
 	Val *a;
-	if (!interpret_prefix1_arg(e, s, p, &a, true)) {
+	if (!interpret_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return (State) {FATAL, NULL};
 	}
-	if (a->hdr.t != VSYMF) {
+	if (a->hdr.t != VSYM) {
+		printf("? %s: 'end argument not a symbol\n", 
+				__FUNCTION__);
+		free_v(a);
+		return (State) {FATAL, NULL};
+	}
+	Val *b = lookup(e, IT);
+	if (b == NULL) {
+		printf("? %s: 'it does not point to function\n", 
+				__FUNCTION__);
+		free_v(a);
+		return (State) {FATAL, NULL};
+	}
+	if (b->hdr.t != VSYMF) {
 		printf("? %s: argument is not a function name\n", 
 				__FUNCTION__);
 		free_v(a);
 		return (State) {FATAL, NULL};
 	}
-	Symval *sv = symval(a->symf.name, a);
+	if (strncmp(a->sym.v, b->symf.name, sizeof(a->sym.v)) != 0) {
+		printf("? %s: 'end argument does not match defintion's\n", 
+				__FUNCTION__);
+		free_v(a);
+		return (State) {FATAL, NULL};
+	}
+	free_v(a);
+	Symval *sv = symval(b->symf.name, b);
 	if (!stored_sym(e, sv)) {
 		free_symval(sv);
 		return (State) {FATAL, NULL};
 	}
-	Val *f = copy_v(a);
+	Val *f = copy_v(b);
 	upd_prefix1(s, p, f);
 	return (State) {OK, s};
 }
@@ -2293,12 +2313,12 @@ interpret_ph(Env *e_o, Phrase *a) {
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
 		if (status.oob == FUN 
 				&& (!(v->hdr.t == VSEQ 
-					&& v->seq.v.n == 1 
-					&& v->seq.v.v[0]->hdr.t == VSYM
-					&& strncmp(v->seq.v.v[0]->sym.v, ENDF, 4) == 0))) {
+					&& v->seq.v.v[0]->hdr.t == VSYMOP
+					&& strncmp(v->seq.v.v[0]->symop.name, ENDF, 4) == 0))) {
 			/* we're in a function body */
 			/* && current value is not an end operator:
 			 * add current value to existing body */
+			/* TODO add Val as list, and proceed in normal flow? */
 			Val *fun = lookup(e_o, IT);
 			if (fun == NULL) {
 				printf("? %s: 'it undefined\n", __FUNCTION__);
@@ -2316,7 +2336,7 @@ interpret_ph(Env *e_o, Phrase *a) {
 		}
 		status = interpret(e_o, v, false);
 		free_v(v);
-		printf("# %3lu %5s: ", i, __FUNCTION__); print_rc(status); printf("\n"); 
+		printf("# %3lu %5s: ", i, "interpret"); print_rc(status); printf("\n"); 
 		if (status.oob == FATAL) {
 			return false;
 		}
