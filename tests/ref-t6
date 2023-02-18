@@ -3,5 +3,6 @@
 #   0  expr: 2
 #   0  seme: ( 2N ) 
 #   0 value: ( 2 ) 
-#   0 infer: OK 2 
-#   0   env: it=2  
+#   0 infer: [Ok , 2  ]
+Ok 
+it = 2 

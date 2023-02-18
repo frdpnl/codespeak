@@ -3,74 +3,48 @@
 #   0  expr: if 2 > 1. 
 #   0  seme: ( if 2N > 1.00R ) 
 #   0 value: ( `if 2 `> 1.00 ) 
-#  infer_seq >> `> of ( `if 2 `> 1.00 ) 
-#  infer_seq << OK ( `if 1 ) 
-#  infer_seq >> `if of ( `if 1 ) 
-#  infer_seq << OK ( 1 ) 
-#   0 infer: OK 1 
-#   0   env: it=1  
+#   0 infer: [Ok , 1  ]
 #   1  expr: print correct
 #   1  seme: ( print correct ) 
 #   1 value: ( `print 'correct ) 
-#  infer_seq >> `print of ( `print 'correct ) 
 'correct 
-#  infer_seq << OK ( 'correct ) 
-#   1 infer: OK 'correct 
-#   1   env: it='correct  
+#   1 infer: [Ok , 'correct  ]
+Ok 
+it = 'correct 
 # ----line: "if not 2 > 1. ; print incorrect"
 # --phrase: if not 2 > 1.  ; print incorrect ; 
 #   0  expr: if not 2 > 1. 
 #   0  seme: ( if not 2N > 1.00R ) 
 #   0 value: ( `if `not 2 `> 1.00 ) 
-#  infer_seq >> `> of ( `if `not 2 `> 1.00 ) 
-#  infer_seq << OK ( `if `not 1 ) 
-#  infer_seq >> `not of ( `if `not 1 ) 
-#  infer_seq << OK ( `if 0 ) 
-#  infer_seq >> `if of ( `if 0 ) 
-#  infer_seq << SKIP ( 0 ) 
-#   0 infer: SKIP 0 
-#   0   env: it=0  
+#   0 infer: [Skip , 0  ]
+Ok 
+it = 0 
 # ----line: "4. > 2 ; if true? ; print true"
 # --phrase: 4. > 2  ; if true?  ; print true ; 
 #   0  expr: 4. > 2 
 #   0  seme: ( 4.00R > 2N ) 
 #   0 value: ( 4.00 `> 2 ) 
-#  infer_seq >> `> of ( 4.00 `> 2 ) 
-#  infer_seq << OK ( 1 ) 
-#   0 infer: OK 1 
-#   0   env: it=1  
+#   0 infer: [Ok , 1  ]
 #   1  expr: if true? 
 #   1  seme: ( if true? ) 
 #   1 value: ( `if `true? ) 
-#  infer_seq >> `true? of ( `if `true? ) 
-#  infer_seq << OK ( `if 1 ) 
-#  infer_seq >> `if of ( `if 1 ) 
-#  infer_seq << OK ( 1 ) 
-#   1 infer: OK 1 
-#   1   env: it=1  
+#   1 infer: [Ok , 1  ]
 #   2  expr: print true
 #   2  seme: ( print true ) 
 #   2 value: ( `print 'true ) 
-#  infer_seq >> `print of ( `print 'true ) 
 'true 
-#  infer_seq << OK ( 'true ) 
-#   2 infer: OK 'true 
-#   2   env: it='true  
+#   2 infer: [Ok , 'true  ]
+Ok 
+it = 'true 
 # ----line: "4. > 2 ; if false? ; print false"
 # --phrase: 4. > 2  ; if false?  ; print false ; 
 #   0  expr: 4. > 2 
 #   0  seme: ( 4.00R > 2N ) 
 #   0 value: ( 4.00 `> 2 ) 
-#  infer_seq >> `> of ( 4.00 `> 2 ) 
-#  infer_seq << OK ( 1 ) 
-#   0 infer: OK 1 
-#   0   env: it=1  
+#   0 infer: [Ok , 1  ]
 #   1  expr: if false? 
 #   1  seme: ( if false? ) 
 #   1 value: ( `if `false? ) 
-#  infer_seq >> `false? of ( `if `false? ) 
-#  infer_seq << OK ( `if 0 ) 
-#  infer_seq >> `if of ( `if 0 ) 
-#  infer_seq << SKIP ( 0 ) 
-#   1 infer: SKIP 0 
-#   1   env: it=0  
+#   1 infer: [Skip , 0  ]
+Ok 
+it = 0 

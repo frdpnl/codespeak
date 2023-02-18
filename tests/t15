@@ -1,0 +1,11 @@
+
+define dec (b,) ; b - 1 ; end dec
+
+print (look dec)
+
+define inc (a,) 
+1 + a 
+end inc
+
+1 * 2; print it
+

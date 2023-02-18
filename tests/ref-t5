@@ -3,58 +3,50 @@
 #   0  expr: 2 * 2. - 1 
 #   0  seme: ( 2N * 2.00R - 1N ) 
 #   0 value: ( 2 `* 2.00 `- 1 ) 
-#  infer_seq >> `* of ( 2 `* 2.00 `- 1 ) 
-#  infer_seq << OK ( 4.00 `- 1 ) 
-#  infer_seq >> `- of ( 4.00 `- 1 ) 
-#  infer_seq << OK ( 3.00 ) 
-#   0 infer: OK 3.00 
-#   0   env: it=3.00  
+#   0 infer: [Ok , 3.00  ]
 #   1  expr: call it n
 #   1  seme: ( call it n ) 
 #   1 value: ( `call 3.00 'n ) 
-#  infer_seq >> `call of ( `call 3.00 'n ) 
-#  infer_seq << OK ( 3.00 ) 
-#   1 infer: OK 3.00 
-#   1   env: it=3.00  n=3.00  
+#   1 infer: [Ok , 3.00  ]
+Ok 
+it = 3.00 
+n = 3.00 
 # ----line: "1., +, 2 ; call it A"
 # --phrase: 1., +, 2  ; call it A ; 
 #   0  expr: 1., +, 2 
 #   0  seme: { 1.00R + 2N } 
 #   0 value: { 1.00 `+ 2 } 
-#   0 infer: OK { 1.00 `+ 2 } 
-#   0   env: it={ 1.00 `+ 2 }  n=3.00  
+#   0 infer: [Ok , { 1.00 `+ 2 }  ]
 #   1  expr: call it A
 #   1  seme: ( call it A ) 
 #   1 value: ( `call { 1.00 `+ 2 } 'A ) 
-#  infer_seq >> `call of ( `call { 1.00 `+ 2 } 'A ) 
-#  infer_seq << OK ( { 1.00 `+ 2 } ) 
-#   1 infer: OK { 1.00 `+ 2 } 
-#   1   env: it={ 1.00 `+ 2 }  n=3.00  A={ 1.00 `+ 2 }  
+#   1 infer: [Ok , { 1.00 `+ 2 }  ]
+Ok 
+it = { 1.00 `+ 2 } 
+n = 3.00 
+A = { 1.00 `+ 2 } 
 # ----line: "do A ; "
 # --phrase: do A  ; 
 #   0  expr: do A 
 #   0  seme: ( do A ) 
 #   0 value: ( `do 'A ) 
-#  infer_seq >> `do of ( `do 'A ) 
-#  infer_seq >> `+ of ( 1.00 `+ 2 ) 
-#  infer_seq << OK ( 3.00 ) 
-#  infer_seq << OK ( 3.00 ) 
-#   0 infer: OK 3.00 
-#   0   env: it=3.00  n=3.00  A={ 1.00 `+ 2 }  
+#   0 infer: [Ok , 3.00  ]
+Ok 
+it = 3.00 
+n = 3.00 
+A = { 1.00 `+ 2 } 
 # ----line: "it = n ; print it"
 # --phrase: it = n  ; print it ; 
 #   0  expr: it = n 
 #   0  seme: ( it = n ) 
 #   0 value: ( 3.00 `= 'n ) 
-#  infer_seq >> `= of ( 3.00 `= 'n ) 
-#  infer_seq << OK ( 1 ) 
-#   0 infer: OK 1 
-#   0   env: it=1  n=3.00  A={ 1.00 `+ 2 }  
+#   0 infer: [Ok , 1  ]
 #   1  expr: print it
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
-#  infer_seq >> `print of ( `print 1 ) 
 1 
-#  infer_seq << OK ( 1 ) 
-#   1 infer: OK 1 
-#   1   env: it=1  n=3.00  A={ 1.00 `+ 2 }  
+#   1 infer: [Ok , 1  ]
+Ok 
+it = 1 
+n = 3.00 
+A = { 1.00 `+ 2 } 

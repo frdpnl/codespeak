@@ -3,37 +3,26 @@
 #   0  expr: 3
 #   0  seme: ( 3N ) 
 #   0 value: ( 3 ) 
-#   0 infer: OK 3 
-#   0   env: it=3  
+#   0 infer: [Ok , 3  ]
 #   1  expr: call it p
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 3 'p ) 
-#  infer_seq >> `call of ( `call 3 'p ) 
-#  infer_seq << OK ( 3 ) 
-#   1 infer: OK 3 
-#   1   env: it=3  p=3  
+#   1 infer: [Ok , 3  ]
 #   2  expr: call 4 p
 #   2  seme: ( call 4N p ) 
 #   2 value: ( `call 4 'p ) 
-#  infer_seq >> `call of ( `call 4 'p ) 
-#  infer_seq << OK ( 4 ) 
-#   2 infer: OK 4 
-#   2   env: it=4  p=4  
+#   2 infer: [Ok , 4  ]
 #   3  expr: p
 #   3  seme: ( p ) 
 #   3 value: ( 'p ) 
-#   3 infer: OK 'p 
-#   3   env: it='p  p=4  
+#   3 infer: [Ok , 'p  ]
 #   4  expr: print it
 #   4  seme: ( print it ) 
 #   4 value: ( `print 'p ) 
-#  infer_seq >> `print of ( `print 'p ) 
 'p 
-#  infer_seq << OK ( 'p ) 
-#   4 infer: OK 'p 
-#   4   env: it='p  p=4  
+#   4 infer: [Ok , 'p  ]
 #   5  expr: solve it
 #   5  seme: ( solve it ) 
 #   5 value: ( 'solve 'p ) 
 ? infer_seq: sequence without function symbol
-#   5 infer: FATAL null
+#   5 infer: [Fatal , null ]

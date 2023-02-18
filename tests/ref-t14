@@ -3,59 +3,40 @@
 #   0  expr: rem: testing comments
 #   0  seme: ( rem: testing comments ) 
 #   0 value: ( `rem: 'testing 'comments ) 
-#  infer_seq >> `rem: of ( `rem: 'testing 'comments ) 
-#  infer_seq << OK ( Nil ) 
-#   0 infer: OK Nil 
-#   0   env: it=Nil  
+#   0 infer: [Ok , Nil  ]
+Ok 
+it = Nil 
 # ----line: "if 5 > 4 ; rem: a simple test ; print it "
 # --phrase: if 5 > 4  ; rem: a simple test  ; print it  ; 
 #   0  expr: if 5 > 4 
 #   0  seme: ( if 5N > 4N ) 
 #   0 value: ( `if 5 `> 4 ) 
-#  infer_seq >> `> of ( `if 5 `> 4 ) 
-#  infer_seq << OK ( `if 1 ) 
-#  infer_seq >> `if of ( `if 1 ) 
-#  infer_seq << OK ( 1 ) 
-#   0 infer: OK 1 
-#   0   env: it=1  
+#   0 infer: [Ok , 1  ]
 #   1  expr: rem: a simple test 
 #   1  seme: ( rem: a simple test ) 
 #   1 value: ( `rem: 'a 'simple 'test ) 
-#  infer_seq >> `rem: of ( `rem: 'a 'simple 'test ) 
-#  infer_seq << OK ( 1 ) 
-#   1 infer: OK 1 
-#   1   env: it=1  
+#   1 infer: [Ok , 1  ]
 #   2  expr: print it 
 #   2  seme: ( print it ) 
 #   2 value: ( `print 1 ) 
-#  infer_seq >> `print of ( `print 1 ) 
 1 
-#  infer_seq << OK ( 1 ) 
-#   2 infer: OK 1 
-#   2   env: it=1  
+#   2 infer: [Ok , 1  ]
+Ok 
+it = 1 
 # ----line: "if true? ; print it ; rem: again"
 # --phrase: if true?  ; print it  ; rem: again ; 
 #   0  expr: if true? 
 #   0  seme: ( if true? ) 
 #   0 value: ( `if `true? ) 
-#  infer_seq >> `true? of ( `if `true? ) 
-#  infer_seq << OK ( `if 1 ) 
-#  infer_seq >> `if of ( `if 1 ) 
-#  infer_seq << OK ( 1 ) 
-#   0 infer: OK 1 
-#   0   env: it=1  
+#   0 infer: [Ok , 1  ]
 #   1  expr: print it 
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
-#  infer_seq >> `print of ( `print 1 ) 
 1 
-#  infer_seq << OK ( 1 ) 
-#   1 infer: OK 1 
-#   1   env: it=1  
+#   1 infer: [Ok , 1  ]
 #   2  expr: rem: again
 #   2  seme: ( rem: again ) 
 #   2 value: ( `rem: 'again ) 
-#  infer_seq >> `rem: of ( `rem: 'again ) 
-#  infer_seq << OK ( 1 ) 
-#   2 infer: OK 1 
-#   2   env: it=1  
+#   2 infer: [Ok , 1  ]
+Ok 
+it = 1 

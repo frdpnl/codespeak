@@ -3,34 +3,24 @@
 #   0  expr: * 
 #   0  seme: ( * ) 
 #   0 value: ( `* ) 
-#   0 infer: OK `* 
-#   0   env: it=`*  
+#   0 infer: [Ok , `*  ]
 #   1  expr: call it op
 #   1  seme: ( call it op ) 
 #   1 value: ( `call `* 'op ) 
-#  infer_seq >> `call of ( `call `* 'op ) 
-#  infer_seq << OK ( `* ) 
-#   1 infer: OK `* 
-#   1   env: it=`*  op=`*  
+#   1 infer: [Ok , `*  ]
 #   2  expr: 1, op, 3
 #   2  seme: { 1N op 3N } 
 #   2 value: { 1 `* 3 } 
-#   2 infer: OK { 1 `* 3 } 
-#   2   env: it={ 1 `* 3 }  op=`*  
+#   2 infer: [Ok , { 1 `* 3 }  ]
 #   3  expr: do it
 #   3  seme: ( do it ) 
 #   3 value: ( `do { 1 `* 3 } ) 
-#  infer_seq >> `do of ( `do { 1 `* 3 } ) 
-#  infer_seq >> `* of ( 1 `* 3 ) 
-#  infer_seq << OK ( 3 ) 
-#  infer_seq << OK ( 3 ) 
-#   3 infer: OK 3 
-#   3   env: it=3  op=`*  
+#   3 infer: [Ok , 3  ]
 #   4  expr: print it
 #   4  seme: ( print it ) 
 #   4 value: ( `print 3 ) 
-#  infer_seq >> `print of ( `print 3 ) 
 3 
-#  infer_seq << OK ( 3 ) 
-#   4 infer: OK 3 
-#   4   env: it=3  op=`*  
+#   4 infer: [Ok , 3  ]
+Ok 
+it = 3 
+op = `* 
