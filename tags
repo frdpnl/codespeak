@@ -1,12 +1,12 @@
 Env	phrase.c	/^} Env;$/
 Expr	phrase.c	/^} Expr;$/
+Ires	phrase.c	/^} Ires;		\/* return type for inference *\/$/
 List	phrase.c	/^} List;$/
 List_v	phrase.c	/^} List_v;$/
+Lrc	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/
 Mphrase	phrase.c	/^main(int argc, char **argv) {$/
 Phrase	phrase.c	/^} Phrase;$/
-Rstatus	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Rstatus;$/
 Sem	phrase.c	/^typedef union Sem_ Sem;$/
-State	phrase.c	/^} State;		\/* return type for evaluation *\/$/
 Symop	phrase.c	/^} Symop;$/
 Symval	phrase.c	/^} Symval;$/
 Val	phrase.c	/^typedef union Val_ Val;$/
@@ -45,7 +45,7 @@ infer_mul	phrase.c	/^infer_mul(Env *e, Val *s, size_t p) {$/
 infer_neq	phrase.c	/^infer_neq(Env *e, Val *s, size_t p) {$/
 infer_not	phrase.c	/^infer_not(Env *e, Val *s, size_t p) {$/
 infer_or	phrase.c	/^infer_or(Env *e, Val *s, size_t p) {$/
-infer_ph	phrase.c	/^infer_ph(Env *e_o, Phrase *a) {$/
+infer_ph	phrase.c	/^infer_ph(Env *E, Phrase *a) {$/
 infer_plu	phrase.c	/^infer_plu(Env *e, Val *s, size_t p) {$/
 infer_prefix1_arg	phrase.c	/^infer_prefix1_arg(Env *e, Val *s, size_t p, Val **/
 infer_prefix2_arg	phrase.c	/^infer_prefix2_arg(Env *e, Val *s, size_t p, Val **/
@@ -55,6 +55,7 @@ infer_rem	phrase.c	/^infer_rem(Env *e, Val *s, size_t p) {$/
 infer_seq	phrase.c	/^infer_seq(Env *e, Val *b, bool look) {$/
 infer_true	phrase.c	/^infer_true(Env *e, Val *s, size_t p) {$/
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/
+inxs	phrase.c	/^} inxs;  	\/* OOB for out of band *\/$/
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/
 isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/
@@ -72,17 +73,18 @@ phrase_of_str	phrase.c	/^phrase_of_str(char *a) {$/
 prefixed1	phrase.c	/^prefixed1(size_t p, size_t n) {$/
 prefixed2	phrase.c	/^prefixed2(size_t p, size_t n) {$/
 print_env	phrase.c	/^print_env(Env *a) {$/
+print_inxs	phrase.c	/^print_inxs(inxs s) {$/
 print_ph	phrase.c	/^print_ph(Phrase *a) {$/
-print_rc	phrase.c	/^print_rc(State a) {$/
+print_rc	phrase.c	/^print_rc(Ires a) {$/
 print_s	phrase.c	/^print_s(Sem *a) {$/
 print_symval	phrase.c	/^print_symval(Symval *a) {$/
 print_v	phrase.c	/^print_v(Val *a) {$/
 push_l	phrase.c	/^push_l(List_v a, Val *b) {$/
-push_ph	phrase.c	/^push_ph(Phrase *a, char *b) {$/
+push_ph	phrase.c	/^push_ph(Phrase *A, char *b) {$/
 push_s	phrase.c	/^push_s(Sem *a, Sem *b) {$/
 push_v	phrase.c	/^push_v(vtype t, Val *a, Val *b) {$/
 push_xz	phrase.c	/^push_xz(Expr *a, Word *b) {$/
-readline	phrase.c	/^readline(char **s_o) {$/
+readline	phrase.c	/^readline(char **S) {$/
 sem_nat	phrase.c	/^sem_nat(long long a) {$/
 sem_nil	phrase.c	/^sem_nil() {$/
 sem_rea	phrase.c	/^sem_rea(double a) {$/
@@ -102,7 +104,6 @@ upd_prefixk	phrase.c	/^upd_prefixk(Val *s, size_t p, Val *a, size_t k) {$/
 upded_sym	phrase.c	/^upded_sym(Env *a, Symval *b, bool err) {$/
 usage	phrase.c	/^usage(const char *exe) {$/
 val_of_seme	phrase.c	/^val_of_seme(Env *e, Sem *s) {$/
-voob	phrase.c	/^} voob;  	\/* OOB for out of band *\/$/
 vtype	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSY/
 word	phrase.c	/^word(wtype a) {$/
 word_str	phrase.c	/^word_str(char *a, size_t n) {$/
