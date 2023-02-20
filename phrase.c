@@ -2167,28 +2167,42 @@ infer(Env *e, Val *a, bool look) {
 	/* returns a fresh value, 'a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
-	Ires rc = (Ires) {FATAL, NULL};
 	if (isatom_v(a)) {
-		if (look 
-				&& (a->hdr.t == VSYM || a->hdr.t == VSYMF)) {
+		if (look && (a->hdr.t == VSYM || a->hdr.t == VSYMF)) {
 			Val *b = lookup(e, a->sym.v);
 			if (b == NULL) {
 				printf("? %s: unknown symbol '%s'\n",
 					__FUNCTION__, a->sym.v);
 				return (Ires) {FATAL, NULL};
 			} 
-			rc = (Ires) {OK, copy_v(b)};
-			return rc;
+			return (Ires) {OK, copy_v(b)};
 		} 
 		/* default: let the function handle it */
-		rc = (Ires) {OK, copy_v(a)};
-		return rc;
+		return (Ires) {OK, copy_v(a)};
 	}
 	if (a->hdr.t == VLST) {
 		return infer_items(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		rc = infer_items(e, a, look);
+		/* if we're in a function body definition */
+		/* && current value is not an end operator:
+		 * just add current value to existing body */
+		if (e->state == FUN 
+				&& (!(a->seq.v.v[0]->hdr.t == VSYMOP
+					&& strncmp(a->seq.v.v[0]->symop.name, ENDF, 4) == 0))) {
+			Val *fun = lookup(e, IT);
+			if (fun == NULL) {
+				printf("? %s: 'it' undefined\n", __FUNCTION__);
+				return (Ires) {FATAL, NULL};
+			}
+			if (fun->hdr.t != VSYMF) {
+				printf("? %s: 'it' is not a function\n", __FUNCTION__);
+				return (Ires) {FATAL, NULL};
+			}
+			fun->symf.body = push_l(fun->symf.body, a);
+			return (Ires) {FUN, copy_v(fun)};
+		}
+		Ires rc = infer_items(e, a, look);
 		if (rc.state != OK) {
 			return rc;
 		}
@@ -2338,29 +2352,6 @@ infer_ph(Env *env, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
-		if (env->state == FUN 
-				&& (!(v->hdr.t == VSEQ 
-					&& v->seq.v.v[0]->hdr.t == VSYMOP
-					&& strncmp(v->seq.v.v[0]->symop.name, ENDF, 4) == 0))) {
-			/* we're in a function body */
-			/* && current value is not an end operator:
-			 * add current value to existing body */
-			/* TODO add Val as list, and proceed in normal flow? */
-			Val *fun = lookup(env, IT);
-			if (fun == NULL) {
-				printf("? %s: 'it undefined\n", __FUNCTION__);
-				free_v(v);
-				return false;
-			}
-			if (fun->hdr.t != VSYMF) {
-				printf("? %s: 'it is not a function\n", __FUNCTION__);
-				free_v(v);
-				return false;
-			}
-			fun->symf.body = push_l(fun->symf.body, v);
-			free_v(v);
-			continue;
-		}
 		Ires xs = infer(env, v, false);
 		free_v(v);
 		printf("# %3lu %5s: ", i, "infer"); print_rc(xs); printf("\n"); 

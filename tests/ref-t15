@@ -7,6 +7,7 @@
 #   1  expr: b - 1 
 #   1  seme: ( b - 1N ) 
 #   1 value: ( 'b `- 1 ) 
+#   1 infer: [Fun , 'dec ('b ): ( 'b `- 1 ) ;  ]
 #   2  expr: end dec
 #   2  seme: ( end dec ) 
 #   2 value: ( `end 'dec ) 
@@ -38,6 +39,7 @@ dec = 'dec ('b ): ( 'b `- 1 ) ;
 #   0  expr: 1 + a 
 #   0  seme: ( 1N + a ) 
 #   0 value: ( 1 `+ 'a ) 
+#   0 infer: [Fun , 'inc ('a ): ( 1 `+ 'a ) ;  ]
 Fun 
 it = 'inc ('a ): ( 1 `+ 'a ) ; 
 dec = 'dec ('b ): ( 'b `- 1 ) ; 

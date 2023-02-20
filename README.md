@@ -75,6 +75,8 @@ Whitespace separates words.
 
 `if false? ; print better` displays better, because `it` is false (from previous `if`)
 
+`2 > 1 ; if true? ; print true` displays 'true
+
 ### Invalid expressions
 
 `2 3 4` symbolic application (implicit ()), but no symbols present
