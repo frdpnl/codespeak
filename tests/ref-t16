@@ -1,0 +1,8 @@
+# ----line: "define inc ()  ; 1 ; end inc"
+# --phrase: define inc ()  ; 1  ; end inc ; 
+#   0  expr: define inc () 
+#   0  seme: ( define inc Nil ) 
+#   0 value: ( `define 'inc Nil ) 
+? infer_fun: expecting list for function parameters
+? infer_seq: symbol application failed
+#   0 infer: [Fatal , null ]

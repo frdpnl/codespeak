@@ -1,0 +1,16 @@
+# ----line: "define inc (a,) "
+# --phrase: define inc (a,)  ; 
+#   0  expr: define inc (a,) 
+#   0  seme: ( define inc { a } ) 
+#   0 value: ( `define 'inc { 'a } ) 
+#   0 infer: [Fun , 'inc ('a ): ;  ]
+Fun 
+it = 'inc ('a ): ; 
+# ----line: "end "
+# --phrase: end  ; 
+#   0  expr: end 
+#   0  seme: ( end ) 
+#   0 value: ( `end ) 
+? infer_funend: invalid 'end', expecting function name only
+? infer_seq: symbol application failed
+#   0 infer: [Fatal , null ]
