@@ -1815,7 +1815,7 @@ infer_rem(Env *e, Val *s, size_t p) {
 	return rc;
 }
 
-/* --- eval function definition --- */
+/* --- infer function definition --- */
 static Ires
 infer_fun(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) ; */
@@ -1918,8 +1918,74 @@ infer_funend(Env *e, Val *s, size_t p) {
 	return (Ires) {ENDFUN, s};
 }
 
+/* --- infer function application --- */
+static Ires 
+infer_fun(Env *e, Val *s, size_t p) {
+	/* rem: ... myfun (1, 2) ... */
+	Val *al;
+	Val *f = s->seq.v.v[p];
+	if (!infer_prefix1_arg(e, s, p, &al, true)) {
+		printf("? %s: %s argument list invalid\n", 
+				__FUNCTION__, f->name);
+		return (Ires) {FATAL, NULL};
+	}
+	if (al->hdr.t != VLST) {
+		printf("? %s: %s argument not a list\n", 
+				__FUNCTION__, f->name);
+		return (Ires) {FATAL, NULL};
+	}
+	if (al->lst.v.n != f->symf.param.n) {
+		printf("? %s: %s argument mismatch\n", 
+				__FUNCTION__, f->name);
+		return (Ires) {FATAL, NULL};
+	}
+	/* setup local env
+	 * add symval for each param, value is al's
+	 * list of env, head is local, rest are parents (shadow parent syms)
+	 * free al
+	 * infer each expression in body, like infer_ph: */
+	Val *v;
+	for (size_t i=0; i<f->symf.body.n; ++i) {
+		v = copy_v(f->symf.body.v[i]);
+		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
+		Ires xs = infer(env, v, false);
+		free_v(v);
+		printf("# %3lu %5s: ", i, "infer"); print_rc(xs); printf("\n"); 
+		env->state = xs.state;
+		if (env->state == FATAL) {
+			// free local env
+			return false;
+		}
+		Symval *it = symval(IT, xs.v);
+		free_v(xs.v);
+		if (it == NULL) {
+			return false;
+		}
+		xs.v = NULL;
+		if (!stored_sym(env, it)) {
+			free_symval(it);
+			return false;
+		}
+		if (env->state == SKIP) {
+			env->state = OK;
+			break;
+		}
+		if (env->state == ENDFUN) {
+			env->state = OK;
+		}
+	}
+	print_env(env); 
+	/* return it from local env */
+	/* delete local env */
+	upd_prefix1(s, p, a);
+	rc = (Ires) {OK, s};
+	return rc;
+}
 
 /* --------------- builtin or base function symbols -------------------- */
+
+/* user defined fun priority */
+#define FUNPRIO 0
 
 typedef struct Symop_ {
 	char name[WSZ];
@@ -2035,7 +2101,7 @@ val_of_seme(Env *e, Sem *s) {
 			}
 			return copy_v(a);
 		}
-		if (a != NULL && a->hdr.t == VSYMOP) {
+		if (a != NULL && (a->hdr.t == VSYMOP || a->hdr.t == VSYMF)) {
 			return copy_v(a);
 		}
 		a = malloc(sizeof(*a));
@@ -2120,8 +2186,9 @@ infer_seq(Env *e, Val *b, bool look) {
 		if (b->seq.v.n == 1) {
 			c = b->seq.v.v[0];
 			/* except, execute sequence of single unarity function */
-			/* TODO also exec symf without params */
-			if (!(c->hdr.t == VSYMOP && c->symop.arity == 0)) {
+			if (!((c->hdr.t == VSYMOP && c->symop.arity == 0)
+					|| (c->hdr.t == VSYMF && c->symf.param.n == 1 
+					&& c->symf.param.v[0]->hdr.t == VNIL))) {
 				rc.v = copy_v(c);
 				return rc;
 			}
@@ -2129,24 +2196,38 @@ infer_seq(Env *e, Val *b, bool look) {
 		unsigned int hiprio = minprio()+1;
 		size_t symat = 0;
 		bool symfound = false;
+		vtype symtype = 0;
 		/* apply symops from left to right (for same priority symbols) */
 		for (size_t i=0; i < b->seq.v.n; ++i) {
 			c = b->seq.v.v[i];
-			if (c->hdr.t == VSYMOP) {
+			if (c->hdr.t == VSYMF) {
+				if (FUNPRIO < hiprio) {
+					hiprio = FUNPRIO;
+					symat = i;
+					symfound = true;
+					symtype = VSYMF;
+				}
+			} else if (c->hdr.t == VSYMOP) {
 				if (c->symop.prio < hiprio) {
 					hiprio = c->symop.prio;
 					symat = i;
 					symfound = true;
+					symtype = VSYMOP;
 				}
 			} 
 		}
 		if (!symfound) { 
-			printf("? %s: sequence without function symbol\n",
+			printf("? %s: sequence without function\n",
 					__FUNCTION__);
 			return (Ires) {FATAL, NULL};
 		}
+		assert(symtype == VSYMF || symtype == VSYMOP);
 		/* apply the symbol, returns the reduced seq */
-		rc = b->seq.v.v[symat]->symop.v(e, b, symat);
+		if (symtype == VSYMF) {
+			rc = infer_fun(e, b, symat);
+		} else if (symtype == VSYMOP) {
+			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
+		}
 		if (rc.state == FATAL) {
 			assert(rc.v == NULL);
 			printf("? %s: symbol application failed\n",
@@ -2216,7 +2297,7 @@ infer(Env *e, Val *a, bool look) {
 	return (Ires) {FATAL, NULL};
 }
 
-/* ------------ Phrase, ~ a line, a list of expressions --------- */
+/* ------------ Phrase, a line, a list of expressions --------- */
 
 typedef struct {
 	size_t n;
