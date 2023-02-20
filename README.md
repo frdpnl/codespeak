@@ -1,11 +1,11 @@
 # codespeak
 A personal programming language.
 
-This is a prototype, meant to explore language design ideas, interpreters and one day compilers.
+This is a prototype, meant to explore language design ideas, interpreters and maybe compilers.
 
-## Phrase
+## Structure
 
-A phrase is a sequence of expressions, separated by `;`.
+Lines are made of sequences of expressions, each separated by `;`
 
 For example:
 
@@ -15,13 +15,13 @@ For example:
 
 `2, +, n ; print it` displays the list 2, +, n 
 
-### Symbolic reduction
+## Symbolic reduction
 
-Note: `()` expresses symbol application or a single value.
+Note: `()` expresses symbol application (or its single value).
 The parenthesized expression ends up reduced to a single value.
 After evaluation, no `()` are left.
 
-Whitespace expected to separate words.
+Whitespace separates words.
 
 `2 = 2.` 0 (false), strict equality
 
@@ -33,9 +33,17 @@ Whitespace expected to separate words.
 
 `(2,3,+) = (2, (2 + 1), +)` 1 (true)
 
-### Builtin symbols
+### Special symbols
 
-`3 ; call it p` defines the symbol p, worth 3, equivalent to `call 3 p`
+`3 ; rem: rest of this expression is ignored ; print it` displays 3
+
+`3 ; call it p` defines the symbol p, worth 3, same as `call 3 p`
+
+`look` evaluates its argument
+
+`call 3 p ; print p` displays p, but `call 3 p ; look p; print it` displays 3
+
+`true?` and `false?` test the special symbol `it`
 
 ### List and Do
 
@@ -57,7 +65,13 @@ Whitespace expected to separate words.
 
 `1, +, 3; list it; do it; do it` 4, or `do (do (list (list 1 + 3)))`
 
-`solve` evaluates its argument (strictly evaluated)
+### Conditional
+
+`if 2 > 1 ; print correct` displays correct
+
+`if -3 > 3 ; print weird` doesn't display anything, rest of line is ignored, `it` is false
+
+`if false? ; print better` displays better, because `it` is false (from previous `if`)
 
 ### Invalid expressions
 
@@ -80,13 +94,9 @@ according to my findings from the study of natural languages
 (such as the Classic style, Chomsky's Minimal Program. More details to come),
 and to my taste and limitations :)
 
-*Language does not need grammar, but grammar needs language.* (Sylvain Auroux interview)
+*Language does not need grammar, but grammar needs language.* (Sylvain Auroux)
 
-A program is a sequence of paragraphs (not here yet).
-
-A paragraph is a sequence of phrases (not here yet).
-
-A phrase is a sequence of expressions.
+A line (aka phrase) is a sequence of expressions.
 
 An expression can include symbols, that trigger computation (totally symbol dependent, see Minimal Program).
 
@@ -94,6 +104,4 @@ Single dependency is suckless.org's libgrapheme, for unicode support in source c
 (like other suckless.org programs - `st`, `dwm` - it is excellent).
 Also, relies on one of FreeBSD's specific libc function (so, probably does not compile on GNU/Linux).
 Inspired by nanopass; several small steps to evaluation (inefficient most of the time).
-
-Long-term objective is to compile to WASM (yes, not here yet).
 
