@@ -45,7 +45,7 @@ infer_mul	phrase.c	/^infer_mul(Env *e, Val *s, size_t p) {$/
 infer_neq	phrase.c	/^infer_neq(Env *e, Val *s, size_t p) {$/
 infer_not	phrase.c	/^infer_not(Env *e, Val *s, size_t p) {$/
 infer_or	phrase.c	/^infer_or(Env *e, Val *s, size_t p) {$/
-infer_ph	phrase.c	/^infer_ph(Env *E, Phrase *a) {$/
+infer_ph	phrase.c	/^infer_ph(Env *env, Phrase *a) {$/
 infer_plu	phrase.c	/^infer_plu(Env *e, Val *s, size_t p) {$/
 infer_prefix1_arg	phrase.c	/^infer_prefix1_arg(Env *e, Val *s, size_t p, Val **/
 infer_prefix2_arg	phrase.c	/^infer_prefix2_arg(Env *e, Val *s, size_t p, Val **/

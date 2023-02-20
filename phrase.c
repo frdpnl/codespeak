@@ -887,18 +887,30 @@ copy_v(Val *a) {
 	Val *b = malloc(sizeof(*b));
 	memcpy(b, a, sizeof(Val));
 	if (a->hdr.t == VSEQ || a->hdr.t == VLST) {
-		b->seq.v.v = malloc(a->seq.v.n * sizeof(Val*));
-		for (size_t i=0; i<a->seq.v.n; ++i) {
-			b->seq.v.v[i] = copy_v(a->seq.v.v[i]);
+		if (a->seq.v.n > 0) {
+			b->seq.v.v = malloc(a->seq.v.n * sizeof(Val*));
+			for (size_t i=0; i<a->seq.v.n; ++i) {
+				b->seq.v.v[i] = copy_v(a->seq.v.v[i]);
+			}
+		} else {
+			b->seq.v.v = NULL;
 		}
 	} else if (a->hdr.t == VSYMF) {
-		b->symf.param.v = malloc(a->symf.param.n * sizeof(Val*));
-		for (size_t i=0; i<a->symf.param.n; ++i) {
-			b->symf.param.v[i] = copy_v(a->symf.param.v[i]);
+		if (a->symf.param.n > 0) {
+			b->symf.param.v = malloc(a->symf.param.n * sizeof(Val*));
+			for (size_t i=0; i<a->symf.param.n; ++i) {
+				b->symf.param.v[i] = copy_v(a->symf.param.v[i]);
+			}
+		} else {
+			b->symf.param.v = NULL;
 		}
-		b->symf.body.v = malloc(a->symf.body.n * sizeof(Val*));
-		for (size_t i=0; i<a->symf.body.n; ++i) {
-			b->symf.body.v[i] = copy_v(a->symf.body.v[i]);
+		if (a->symf.body.n > 0) {
+			b->symf.body.v = malloc(a->symf.body.n * sizeof(Val*));
+			for (size_t i=0; i<a->symf.body.n; ++i) {
+				b->symf.body.v[i] = copy_v(a->symf.body.v[i]);
+			}
+		} else {
+			b->symf.body.v = NULL;
 		}
 	}
 	return b;
@@ -912,7 +924,7 @@ push_l(List_v a, Val *b) {
 	if (a.n > 0) {
 		memmove(c, a.v, a.n * sizeof(Val*));
 	}
-	c[a.n] = b;
+	c[a.n] = copy_v(b);
 	if (a.n > 0) {
 		free(a.v);
 	}
@@ -1852,8 +1864,7 @@ infer_fun(Env *e, Val *s, size_t p) {
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
 	free_v(fname);
-	free(fparam->lst.v.v);
-	free(fparam);
+	free_v(fparam);
 	upd_prefix2(s, p, f);
 	return (Ires) {FUN, s};
 }
@@ -2044,6 +2055,7 @@ val_of_seme(Env *e, Sem *s) {
 				return NULL;
 			}
 			a = push_v(VLST, a, d);
+			free_v(d);
 		}
 		return a;
 	}
@@ -2058,6 +2070,7 @@ val_of_seme(Env *e, Sem *s) {
 				return NULL;
 			}
 			a = push_v(VSEQ, a, d);
+			free_v(d);
 		}
 		return a;
 	}
@@ -2091,6 +2104,7 @@ infer_items(Env *e, Val *a, bool look) {
 			return rc;
 		}
 		b = push_v(a->hdr.t, b, rc.v);
+		free_v(rc.v);
 	}
 	Ires rc = (Ires) {OK, b};
 	return rc;
@@ -2301,8 +2315,8 @@ phrase_of_str(char *a) {
 /* -------------- Phrase -------------- */
 
 static bool
-infer_ph(Env *E, Phrase *a) {
-	assert(E != NULL && "environment null");
+infer_ph(Env *env, Phrase *a) {
+	assert(env != NULL && "environment null");
 	assert(a != NULL && "phrase null");
 	for (size_t i=0; i<a->n; ++i) {
 		printf("# %3lu %5s: %s\n", i, "expr", a->x[i]);
@@ -2317,14 +2331,14 @@ infer_ph(Env *E, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "seme"); print_s(sm); printf("\n");
-		Val *v = val_of_seme(E, sm);
+		Val *v = val_of_seme(env, sm);
 		free_s(sm);
 		free(sm);
 		if (v == NULL) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
-		if (E->state == FUN 
+		if (env->state == FUN 
 				&& (!(v->hdr.t == VSEQ 
 					&& v->seq.v.v[0]->hdr.t == VSYMOP
 					&& strncmp(v->seq.v.v[0]->symop.name, ENDF, 4) == 0))) {
@@ -2332,7 +2346,7 @@ infer_ph(Env *E, Phrase *a) {
 			/* && current value is not an end operator:
 			 * add current value to existing body */
 			/* TODO add Val as list, and proceed in normal flow? */
-			Val *fun = lookup(E, IT);
+			Val *fun = lookup(env, IT);
 			if (fun == NULL) {
 				printf("? %s: 'it undefined\n", __FUNCTION__);
 				free_v(v);
@@ -2344,34 +2358,35 @@ infer_ph(Env *E, Phrase *a) {
 				return false;
 			}
 			fun->symf.body = push_l(fun->symf.body, v);
+			free_v(v);
 			continue;
 		}
-		Ires xs = infer(E, v, false);
-		printf("# %3lu %5s: ", i, "infer"); print_rc(xs); printf("\n"); 
-		E->state = xs.state;
+		Ires xs = infer(env, v, false);
 		free_v(v);
-		if (E->state == FATAL) {
+		printf("# %3lu %5s: ", i, "infer"); print_rc(xs); printf("\n"); 
+		env->state = xs.state;
+		if (env->state == FATAL) {
 			return false;
 		}
 		Symval *it = symval(IT, xs.v);
+		free_v(xs.v);
 		if (it == NULL) {
 			return false;
 		}
-		free_v(xs.v);
 		xs.v = NULL;
-		if (!stored_sym(E, it)) {
+		if (!stored_sym(env, it)) {
 			free_symval(it);
 			return false;
 		}
-		if (E->state == SKIP) {
-			E->state = OK;
+		if (env->state == SKIP) {
+			env->state = OK;
 			break;
 		}
-		if (E->state == ENDFUN) {
-			E->state = OK;
+		if (env->state == ENDFUN) {
+			env->state = OK;
 		}
 	}
-	print_env(E); 
+	print_env(env); 
 	return true;
 }
 
