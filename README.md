@@ -39,6 +39,8 @@ Whitespace separates words.
 
 `3 ; call it p` defines the symbol p, worth 3, same as `call 3 p`
 
+`call + plus; 1 plus 3; print it` displays 4
+
 `look` evaluates its argument
 
 `call 3 p ; print p` displays p, but `call 3 p ; look p; print it` displays 3
