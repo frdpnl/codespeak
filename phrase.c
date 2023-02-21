@@ -597,7 +597,7 @@ typedef union Val_ {
 	} rea;
 	struct {
 		vtype t;
-		unsigned int prio;
+		int prio;
 		Ires (*v)(Env *e, Val *s, size_t p);
 		int arity;
 		char name[WSZ];
@@ -639,12 +639,12 @@ print_v(Val *a) {
 			printf("`%s ", a->symop.name);
 			break;
 		case VSYMF:
-			printf("`%s", a->symf.name);
+			printf("`(%s ", a->symf.name);
 			printf("(");
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
 			}
-			printf(")x%lu ", a->symf.body.n);
+			printf(") %lu val) ", a->symf.body.n);
 			break;
 		case VSYM:
 			printf("'%s ", a->sym.v);
@@ -2053,9 +2053,9 @@ Symop Syms[] = {
 	(Symop) {"or",   60, infer_or,  2},
 	(Symop) {"if",  100, infer_if,  1},
 };
-static unsigned int
+static int
 minprio() {
-	unsigned int m = 0;
+	int m = 0;
 	for (int i=0; i<NSYMS; ++i) {
 		if (Syms[i].prio > m) {
 			m = Syms[i].prio;
@@ -2281,7 +2281,7 @@ infer(Env *e, Val *a, bool look) {
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
-		if (look && (a->hdr.t == VSYM || a->hdr.t == VSYMF)) {
+		if (look && a->hdr.t == VSYM) {
 			Val *b = lookup(e, a->sym.v, true);
 			if (b == NULL) {
 				printf("? %s: unknown symbol '%s'\n",

@@ -3,14 +3,14 @@
 #   0  expr: define inc (a,) 
 #   0  seme: ( define inc { a } ) 
 #   0 value: ( `define 'inc { 'a } ) 
-#   0 infer: [Fun , 'inc ('a ): ;  ]
+#   0 infer: [Fun , `(inc ('a ) 0 val)  ]
 Fun 
-it = 'inc ('a ): ; 
+it = `(inc ('a ) 0 val) 
 # ----line: "end define"
 # --phrase: end define ; 
 #   0  expr: end define
 #   0  seme: ( end define ) 
 #   0 value: ( `end `define ) 
-? infer_funend: 'end argument not a symbol
+? infer_end: 'end argument not a symbol
 ? infer_seq: symbol application failed
 #   0 infer: [Fatal , null ]

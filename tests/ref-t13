@@ -24,7 +24,7 @@ n = 4
 #   1  expr: print n * 2
 #   1  seme: ( print n * 2N ) 
 #   1 value: ( `print 'n `* 2 ) 
-8 
+'n 
 #   1 infer: [Ok , 8  ]
 Ok 
 it = 8 

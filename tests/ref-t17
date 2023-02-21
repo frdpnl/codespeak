@@ -3,15 +3,15 @@
 #   0  expr: define inc (a,) 
 #   0  seme: ( define inc { a } ) 
 #   0 value: ( `define 'inc { 'a } ) 
-#   0 infer: [Fun , 'inc ('a ): ;  ]
+#   0 infer: [Fun , `(inc ('a ) 0 val)  ]
 Fun 
-it = 'inc ('a ): ; 
+it = `(inc ('a ) 0 val) 
 # ----line: "end inc"
 # --phrase: end inc ; 
 #   0  expr: end inc
 #   0  seme: ( end inc ) 
 #   0 value: ( `end 'inc ) 
-#   0 infer: [EndFun , 'inc ('a ): ;  ]
+#   0 infer: [EndFun , `(inc ('a ) 0 val)  ]
 Ok 
-it = 'inc ('a ): ; 
-inc = 'inc ('a ): ; 
+it = `(inc ('a ) 0 val) 
+inc = `(inc ('a ) 0 val) 
