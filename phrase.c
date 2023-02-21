@@ -1939,11 +1939,13 @@ infer_fun(Env *e, Val *s, size_t p) {
 	if (al->hdr.t != VLST) {
 		printf("? %s: `%s argument not a list\n", 
 				__FUNCTION__, f->symf.name);
+		free_v(al);
 		return (Ires) {FATAL, NULL};
 	}
 	if (al->lst.v.n != f->symf.param.n) {
 		printf("? %s: `%s argument mismatch\n", 
 				__FUNCTION__, f->symf.name);
+		free_v(al);
 		return (Ires) {FATAL, NULL};
 	}
 	/* setup local env */

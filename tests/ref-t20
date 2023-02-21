@@ -1,0 +1,35 @@
+# ----line: "define dec (a,) ; a - 1 ; end dec"
+# --phrase: define dec (a,)  ; a - 1  ; end dec ; 
+#   0  expr: define dec (a,) 
+#   0  seme: ( define dec { a } ) 
+#   0 value: ( `define 'dec { 'a } ) 
+#   0 infer: [Fun , `(dec ('a ) 0 val)  ]
+#   1  expr: a - 1 
+#   1  seme: ( a - 1N ) 
+#   1 value: ( 'a `- 1 ) 
+#   1 infer: [Fun , `(dec ('a ) 1 val)  ]
+#   2  expr: end dec
+#   2  seme: ( end dec ) 
+#   2 value: ( `end 'dec ) 
+#   2 infer: [EndFun , `(dec ('a ) 1 val)  ]
+Ok 
+it = `(dec ('a ) 1 val) 
+dec = `(dec ('a ) 1 val) 
+# ----line: "dec (1,)"
+# --phrase: dec (1,) ; 
+#   0  expr: dec (1,)
+#   0  seme: ( dec { 1N } ) 
+#   0 value: ( `(dec ('a ) 1 val) { 1 } ) 
+- infer_fun value: ( 'a `- 1 ) 
+- infer_fun infer: [Ok , 0  ]
+Ok 
+a = 1 
+it = 0 
+parent:
+Ok 
+it = `(dec ('a ) 1 val) 
+dec = `(dec ('a ) 1 val) 
+#   0 infer: [Ok , 0  ]
+Ok 
+it = 0 
+dec = `(dec ('a ) 1 val) 
