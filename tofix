@@ -1,7 +1,10 @@
 
-TODO 
-- distinguish between no parameters, single argument 'nil.
-Currently: define with no parameter is represented as single element, Nil, list.
+rem: TODO 
+
+rem: review the return value from function, now, not as expected.
+
+rem: Distinguish between no parameters, single argument 'nil.
+rem: Currently: define with no parameter is represented as single element, Nil, list.
 
 define inc (a,) ; a + 1 ; end inc
 
@@ -16,20 +19,19 @@ rem: needs to be stored in env
 rem: needs an internal env
 rem: leave infix support for later?
 
-max (2, 3) ; call it m
+def max (2, 3) ; call it m
 
-define max (a, b) ; rem: until end, build fun
+define max (a, b)
 if a >= b ; call a r
 if false? ; call b r
 r
 end max
 
 define adder (a,)
-define f(x)
-call (a + x) f
-end
-call f adder
-end
+define f (x,)
+a + x
+end f
+end adder
 
 rem: returns a function
 
