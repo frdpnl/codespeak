@@ -571,10 +571,11 @@ typedef struct {
 	Val *v;
 } Symval;
 
-typedef struct {
+typedef struct Env_ {
 	inxs state;
 	size_t n;
 	Symval **s;
+	struct Env_ *parent;
 } Env;
 
 typedef struct {
@@ -638,16 +639,12 @@ print_v(Val *a) {
 			printf("`%s ", a->symop.name);
 			break;
 		case VSYMF:
-			printf("'%s ", a->symf.name);
+			printf("`%s", a->symf.name);
 			printf("(");
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
 			}
-			printf("): ");
-			for (size_t i=0; i<a->symf.body.n; ++i) {
-				print_v(a->symf.body.v[i]);
-			}
-			printf("; ");
+			printf(")x%lu ", a->symf.body.n);
 			break;
 		case VSYM:
 			printf("'%s ", a->sym.v);
@@ -965,6 +962,10 @@ print_env(Env *a) {
 		print_symval(a->s[i]);
 		printf("\n");
 	}
+	if (a->parent) {
+		printf("parent:\n");
+		print_env(a->parent);
+	}
 }
 static Symval *
 symval(char *a, Val *b) {
@@ -992,7 +993,7 @@ free_symval(Symval *a) {
 	free(a);
 }
 static void 
-free_env(Env *a) {
+free_env(Env *a, bool global) {
 	if (a == NULL) {
 		return;
 	}
@@ -1000,10 +1001,13 @@ free_env(Env *a) {
 		free_symval(a->s[i]);
 	}
 	free(a->s);
+	if (global && a->parent) {
+		free_env(a->parent, global);
+	}
 	free(a);
 }
 static Symval *
-lookup_id(Env *a, char *b, size_t *id) {
+lookup_id(Env *a, char *b, bool global, size_t *id) {
 	assert(a != NULL && "env is null");
 	assert(b != NULL && "name is null");
 	if (strlen(b) == 0) {
@@ -1020,13 +1024,16 @@ lookup_id(Env *a, char *b, size_t *id) {
 			return c;
 		}
 	}
+	if (global && a->parent) {
+		return lookup_id(a->parent, b, global, id);
+	}
 	return NULL;
 }
 static Val *
-lookup(Env *a, char *b) {
+lookup(Env *a, char *b, bool global) {
 	assert(a != NULL && "env null");
 	assert((b != NULL && strlen(b) != 0) && "symbol name null");
-	Symval *sv = lookup_id(a, b, NULL);
+	Symval *sv = lookup_id(a, b, global, NULL);
 	if (sv == NULL) {
 		return NULL;
 	}
@@ -1037,7 +1044,7 @@ static bool
 added_sym(Env *a, Symval *b, bool err) {
 	assert(a != NULL && "environment null");
 	assert(b != NULL && "symbol null");
-	if (lookup(a, b->name) != NULL) {
+	if (lookup(a, b->name, false) != NULL) {
 		if (err) {
 			printf("? %s: symbol already defined (%s)\n",
 					__FUNCTION__, b->name);
@@ -1062,7 +1069,7 @@ upded_sym(Env *a, Symval *b, bool err) {
 	assert(b != NULL && "symbol null");
 	assert(strlen(b->name) != 0);
 	size_t id;
-	Symval *c = lookup_id(a, b->name, &id);
+	Symval *c = lookup_id(a, b->name, false, &id);
 	if (c == NULL) {
 		if (err) {
 			printf("? %s: symbol not found (%s)\n",
@@ -1739,7 +1746,7 @@ infer_call(Env *e, Val *s, size_t p) {
 static Ires 
 infer_true(Env *e, Val *s, size_t p) {
 	Val *a;
-	a = lookup(e, IT);
+	a = lookup(e, IT, false);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
@@ -1755,7 +1762,7 @@ infer_true(Env *e, Val *s, size_t p) {
 static Ires 
 infer_false(Env *e, Val *s, size_t p) {
 	Val *a;
-	a = lookup(e, IT);
+	a = lookup(e, IT, false);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
@@ -1801,7 +1808,7 @@ static Ires
 infer_rem(Env *e, Val *s, size_t p) {
 	Ires rc;
 	Val *b;
-	Val *a = lookup(e, IT);
+	Val *a = lookup(e, IT, false);
 	if (a == NULL) {
 		b = malloc(sizeof(*b));
 		assert(b != NULL);
@@ -1817,7 +1824,7 @@ infer_rem(Env *e, Val *s, size_t p) {
 
 /* --- infer function definition --- */
 static Ires
-infer_fun(Env *e, Val *s, size_t p) {
+infer_def(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) ; */
 	if (p != s->seq.v.n - 3) {
 		printf("? %s: incorrect number of arguments to 'define'\n",
@@ -1869,7 +1876,7 @@ infer_fun(Env *e, Val *s, size_t p) {
 	return (Ires) {FUN, s};
 }
 static Ires 
-infer_funend(Env *e, Val *s, size_t p) {
+infer_end(Env *e, Val *s, size_t p) {
 	/* rem: end somefun; */
 	if (p != s->seq.v.n - 2) {
 		printf("? %s: invalid 'end', expecting function name only\n",
@@ -1888,7 +1895,7 @@ infer_funend(Env *e, Val *s, size_t p) {
 		free_v(a);
 		return (Ires) {FATAL, NULL};
 	}
-	Val *b = lookup(e, IT);
+	Val *b = lookup(e, IT, false);
 	if (b == NULL) {
 		printf("? %s: 'it does not point to function\n", 
 				__FUNCTION__);
@@ -1925,61 +1932,83 @@ infer_fun(Env *e, Val *s, size_t p) {
 	Val *al;
 	Val *f = s->seq.v.v[p];
 	if (!infer_prefix1_arg(e, s, p, &al, true)) {
-		printf("? %s: %s argument list invalid\n", 
-				__FUNCTION__, f->name);
+		printf("? %s: `%s argument list invalid\n", 
+				__FUNCTION__, f->symf.name);
 		return (Ires) {FATAL, NULL};
 	}
 	if (al->hdr.t != VLST) {
-		printf("? %s: %s argument not a list\n", 
-				__FUNCTION__, f->name);
+		printf("? %s: `%s argument not a list\n", 
+				__FUNCTION__, f->symf.name);
 		return (Ires) {FATAL, NULL};
 	}
 	if (al->lst.v.n != f->symf.param.n) {
-		printf("? %s: %s argument mismatch\n", 
-				__FUNCTION__, f->name);
+		printf("? %s: `%s argument mismatch\n", 
+				__FUNCTION__, f->symf.name);
 		return (Ires) {FATAL, NULL};
 	}
-	/* setup local env
-	 * add symval for each param, value is al's
-	 * list of env, head is local, rest are parents (shadow parent syms)
-	 * free al
-	 * infer each expression in body, like infer_ph: */
+	/* setup local env */
+	Env *le = malloc(sizeof(*le));
+	assert(le != NULL);
+	le->state = OK;
+	le->n = 0;
+	le->s = NULL;
+	le->parent = e;
+	/* add symval for each param, value is al's */
+	for (size_t i=0; i<f->symf.param.n; ++i) {
+		Symval *sv = symval(f->symf.param.v[i]->sym.v, al->lst.v.v[i]);
+		if (!stored_sym(le, sv)) {
+			free_symval(sv);
+			free_v(al);
+			free_env(le, false);
+			return (Ires) {FATAL, NULL};
+		}
+	}
+	free_v(al);
+	/* infer each expression in body, like infer_ph: */
 	Val *v;
 	for (size_t i=0; i<f->symf.body.n; ++i) {
 		v = copy_v(f->symf.body.v[i]);
-		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
-		Ires xs = infer(env, v, false);
+		printf("- %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n");
+		Ires xs = infer(le, v, false);
 		free_v(v);
-		printf("# %3lu %5s: ", i, "infer"); print_rc(xs); printf("\n"); 
-		env->state = xs.state;
-		if (env->state == FATAL) {
-			// free local env
-			return false;
+		printf("- %s %5s: ", __FUNCTION__, "infer"); print_rc(xs); printf("\n"); 
+		le->state = xs.state;
+		if (le->state == FATAL) {
+			free_env(le, false);
+			return (Ires) {FATAL, NULL};
 		}
 		Symval *it = symval(IT, xs.v);
 		free_v(xs.v);
 		if (it == NULL) {
-			return false;
+			free_env(le, false);
+			return (Ires) {FATAL, NULL};
 		}
 		xs.v = NULL;
-		if (!stored_sym(env, it)) {
+		if (!stored_sym(le, it)) {
 			free_symval(it);
-			return false;
+			free_env(le, false);
+			return (Ires) {FATAL, NULL};
 		}
-		if (env->state == SKIP) {
-			env->state = OK;
+		if (le->state == SKIP) {
+			le->state = OK;
 			break;
 		}
-		if (env->state == ENDFUN) {
-			env->state = OK;
+		if (le->state == ENDFUN) {
+			le->state = OK;
 		}
 	}
-	print_env(env); 
-	/* return it from local env */
-	/* delete local env */
-	upd_prefix1(s, p, a);
-	rc = (Ires) {OK, s};
-	return rc;
+	print_env(le); 
+	/* return function's 'it to caller */
+	Val *eit = lookup(le, IT, false);
+	if (eit == NULL) {
+		printf("? %s: 'it' from %s undefined\n",
+				__FUNCTION__, f->symf.name);
+		free_env(le, false);
+		return (Ires) {FATAL, NULL};
+	}
+	upd_prefix1(s, p, copy_v(eit));
+	free_env(le, false);
+	return (Ires) {OK, s};
 }
 
 /* --------------- builtin or base function symbols -------------------- */
@@ -1989,23 +2018,25 @@ infer_fun(Env *e, Val *s, size_t p) {
 
 typedef struct Symop_ {
 	char name[WSZ];
-	unsigned int prio;
+	int prio;
 	Ires (*f)(Env *e, Val *s, size_t p);
 	int arity;
 } Symop;
 
 #define NSYMS 26
 Symop Syms[] = {
-	(Symop) {"true?",  10, infer_true,  0},
-	(Symop) {"false?", 10, infer_false, 0},
-	(Symop) {"look",   10, infer_look,  1},
-	(Symop) {"do",     10, infer_do,    1},
-	(Symop) {"list",   10, infer_list, -1},
-	(Symop) {"call",   10, infer_call,  2},
-	(Symop) {"rem:",   10, infer_rem,  -1},
-	(Symop) {"define", 10, infer_fun,  2},
-	(Symop) {"def",    10, infer_fun,  2},
-	(Symop) {"end",    10, infer_funend,  0},
+	(Symop) {"rem:",  -10, infer_rem,  -1},
+	(Symop) {"true?", -10, infer_true,  0},
+	(Symop) {"false?",-10, infer_false, 0},
+	(Symop) {"print", -10, infer_print, 1},
+	(Symop) {"list",  -10, infer_list, -1},
+	(Symop) {"look",  -10, infer_look,  1},
+	(Symop) {"do",    -10, infer_do,    1},
+	(Symop) {"call",  -10, infer_call,  2},
+	(Symop) {"define",-10, infer_def,  2},
+	(Symop) {"def",   -10, infer_def,  2},
+	(Symop) {"end",   -10, infer_end,  0},
+	/* priority FUNPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, infer_mul, 2},
 	(Symop) {"/",    20, infer_div, 2},
 	(Symop) {"+",    30, infer_plu, 2},
@@ -2020,8 +2051,7 @@ Symop Syms[] = {
 	(Symop) {"not",  50, infer_not, 1},
 	(Symop) {"and",  60, infer_and, 2},
 	(Symop) {"or",   60, infer_or,  2},
-	(Symop) {"print", 80, infer_print, 1},
-	(Symop) {"if",    100, infer_if,  1},
+	(Symop) {"if",  100, infer_if,  1},
 };
 static unsigned int
 minprio() {
@@ -2092,7 +2122,7 @@ val_of_seme(Env *e, Sem *s) {
 			strncpy(a->symop.name, so->name, 1+strlen(so->name));
 			return a;
 		}
-		a = lookup(e, s->sym.v);
+		a = lookup(e, s->sym.v, true);
 		if (strncmp(s->sym.v, IT, 3) == 0) {
 			if (a == NULL) {
 				printf("? %s: 'it' symbol undefined\n",
@@ -2185,15 +2215,17 @@ infer_seq(Env *e, Val *b, bool look) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
 			c = b->seq.v.v[0];
-			/* except, execute sequence of single unarity function */
-			if (!((c->hdr.t == VSYMOP && c->symop.arity == 0)
-					|| (c->hdr.t == VSYMF && c->symf.param.n == 1 
-					&& c->symf.param.v[0]->hdr.t == VNIL))) {
+			/* loop end, return the reduced to value, 
+			 * unless it's an operator of 0 arity,
+			 * then, fall through & execute it below */
+			if (!(c->hdr.t == VSYMOP && c->symop.arity == 0)) {
 				rc.v = copy_v(c);
 				return rc;
 			}
+			/* functions all have one parameter (list of). */
+			/* by now, function applications are already processed. */
 		}
-		unsigned int hiprio = minprio()+1;
+		int hiprio = minprio()+1;
 		size_t symat = 0;
 		bool symfound = false;
 		vtype symtype = 0;
@@ -2250,7 +2282,7 @@ infer(Env *e, Val *a, bool look) {
 	assert(a != NULL && "value is null");
 	if (isatom_v(a)) {
 		if (look && (a->hdr.t == VSYM || a->hdr.t == VSYMF)) {
-			Val *b = lookup(e, a->sym.v);
+			Val *b = lookup(e, a->sym.v, true);
 			if (b == NULL) {
 				printf("? %s: unknown symbol '%s'\n",
 					__FUNCTION__, a->sym.v);
@@ -2271,7 +2303,7 @@ infer(Env *e, Val *a, bool look) {
 		if (e->state == FUN 
 				&& (!(a->seq.v.v[0]->hdr.t == VSYMOP
 					&& strncmp(a->seq.v.v[0]->symop.name, ENDF, 4) == 0))) {
-			Val *fun = lookup(e, IT);
+			Val *fun = lookup(e, IT, false);
 			if (fun == NULL) {
 				printf("? %s: 'it' undefined\n", __FUNCTION__);
 				return (Ires) {FATAL, NULL};
@@ -2512,15 +2544,16 @@ main(int argc, char **argv) {
 	e->state = OK;
 	e->n = 0;
 	e->s = NULL;
+	e->parent = NULL;
 	char *line;
 	while (1) {
 		Lrc rc = readline(&line);
 		switch (rc) {
 			case ERR:
-				free_env(e);
+				free_env(e, true);
 				return EXIT_FAILURE;
 			case END:
-				free_env(e);
+				free_env(e, true);
 				return EXIT_SUCCESS;
 			case EMPTY:
 				continue;
@@ -2531,17 +2564,17 @@ main(int argc, char **argv) {
 		Phrase *ph = phrase_of_str(line);
 		free(line);
 		if (ph == NULL) {
-			free_env(e);
+			free_env(e, true);
 			return EXIT_FAILURE;
 		}
 		printf("# --phrase: "); print_ph(ph); 
 		bool r = infer_ph(e, ph);
 		free_ph(ph);
 		if (!r) {
-			free_env(e);
+			free_env(e, true);
 			return EXIT_FAILURE;
 		}
 	}
-	free_env(e);
+	free_env(e, true);
 	return EXIT_SUCCESS;
 }

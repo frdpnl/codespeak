@@ -15,7 +15,7 @@ added_sym	phrase.c	/^added_sym(Env *a, Symval *b, bool err) {$/
 copy_v	phrase.c	/^copy_v(Val *a) {$/
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/
 expr	phrase.c	/^expr() {$/
-free_env	phrase.c	/^free_env(Env *a) {$/
+free_env	phrase.c	/^free_env(Env *a, bool global) {$/
 free_ph	phrase.c	/^free_ph(Phrase *a) {$/
 free_s	phrase.c	/^free_s(Sem *a) {$/
 free_symval	phrase.c	/^free_symval(Symval *a) {$/
@@ -24,13 +24,14 @@ free_x	phrase.c	/^free_x(Expr *a) {$/
 infer	phrase.c	/^infer(Env *e, Val *a, bool look) {$/
 infer_and	phrase.c	/^infer_and(Env *e, Val *s, size_t p) {$/
 infer_call	phrase.c	/^infer_call(Env *e, Val *s, size_t p) {$/
+infer_def	phrase.c	/^infer_def(Env *e, Val *s, size_t p) {$/
 infer_div	phrase.c	/^infer_div(Env *e, Val *s, size_t p) {$/
 infer_do	phrase.c	/^infer_do(Env *e, Val *s, size_t p) {$/
+infer_end	phrase.c	/^infer_end(Env *e, Val *s, size_t p) {$/
 infer_eq	phrase.c	/^infer_eq(Env *e, Val *s, size_t p) {$/
 infer_eqv	phrase.c	/^infer_eqv(Env *e, Val *s, size_t p) {$/
 infer_false	phrase.c	/^infer_false(Env *e, Val *s, size_t p) {$/
 infer_fun	phrase.c	/^infer_fun(Env *e, Val *s, size_t p) {$/
-infer_funend	phrase.c	/^infer_funend(Env *e, Val *s, size_t p) {$/
 infer_geq	phrase.c	/^infer_geq(Env *e, Val *s, size_t p) {$/
 infer_gre	phrase.c	/^infer_gre(Env *e, Val *s, size_t p) {$/
 infer_if	phrase.c	/^infer_if(Env *e, Val *s, size_t p) {$/
@@ -63,8 +64,8 @@ isnat	phrase.c	/^isnat(Word *a) {$/
 isrea	phrase.c	/^isrea(Word *a) {$/
 issym	phrase.c	/^issym(Word *a) {$/
 istrue_v	phrase.c	/^istrue_v(Val *a) {$/
-lookup	phrase.c	/^lookup(Env *a, char *b) {$/
-lookup_id	phrase.c	/^lookup_id(Env *a, char *b, size_t *id) {$/
+lookup	phrase.c	/^lookup(Env *a, char *b, bool global) {$/
+lookup_id	phrase.c	/^lookup_id(Env *a, char *b, bool global, size_t *id/
 lookup_op	phrase.c	/^lookup_op(char *a) {$/
 lst_of	phrase.c	/^lst_of(Sem *a) {$/
 minprio	phrase.c	/^minprio() {$/
