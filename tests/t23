@@ -1,0 +1,5 @@
+
+define dec (a,) ; a - 1 ; end dec
+
+dec (1 ,2)
+

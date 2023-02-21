@@ -1,4 +1,8 @@
 
+TODO 
+- distinguish between no parameters, single argument 'nil.
+Currently: define with no parameter is represented as single element, Nil, list.
+
 define inc (a,) ; a + 1 ; end inc
 
 rem: eval_fun: name, list of parameters (sym), list of Val (unevaluated)
