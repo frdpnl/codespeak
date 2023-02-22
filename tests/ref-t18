@@ -3,7 +3,7 @@
 #   0  expr: define inc (a,) 
 #   0  seme: ( define inc { a } ) 
 #   0 value: ( `define 'inc { 'a } ) 
-#   0 infer: [Fun , `(inc ('a ) 0 val)  ]
+#   0 interp: [Fun , `(inc ('a ) 0 val)  ]
 Fun 
 it = `(inc ('a ) 0 val) 
 # ----line: "end "
@@ -11,6 +11,6 @@ it = `(inc ('a ) 0 val)
 #   0  expr: end 
 #   0  seme: ( end ) 
 #   0 value: ( `end ) 
-#   0 infer: [Ok , `end  ]
+#   0 interp: [Ok , `end  ]
 Ok 
 it = `end 

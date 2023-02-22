@@ -3,23 +3,23 @@
 #   0  expr: 1, +, 2 
 #   0  seme: { 1N + 2N } 
 #   0 value: { 1 `+ 2 } 
-#   0 infer: [Ok , { 1 `+ 2 }  ]
+#   0 interp: [Ok , { 1 `+ 2 }  ]
 #   1  expr: list it
 #   1  seme: ( list it ) 
 #   1 value: ( `list { 1 `+ 2 } ) 
-#   1 infer: [Ok , { { 1 `+ 2 } }  ]
+#   1 interp: [Ok , { { 1 `+ 2 } }  ]
 #   2  expr: do it
 #   2  seme: ( do it ) 
 #   2 value: ( `do { { 1 `+ 2 } } ) 
-#   2 infer: [Ok , { 1 `+ 2 }  ]
+#   2 interp: [Ok , { 1 `+ 2 }  ]
 #   3  expr: do it
 #   3  seme: ( do it ) 
 #   3 value: ( `do { 1 `+ 2 } ) 
-#   3 infer: [Ok , 3  ]
+#   3 interp: [Ok , 3  ]
 #   4  expr: print it
 #   4  seme: ( print it ) 
 #   4 value: ( `print 3 ) 
 3 
-#   4 infer: [Ok , 3  ]
+#   4 interp: [Ok , 3  ]
 Ok 
 it = 3 

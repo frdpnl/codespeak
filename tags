@@ -1,6 +1,6 @@
 Env	phrase.c	/^} Env;$/
 Expr	phrase.c	/^} Expr;$/
-Ires	phrase.c	/^} Ires;		\/* return type for inference *\/$/
+Ir	phrase.c	/^} Ir;		\/* return type for interp *\/$/
 List	phrase.c	/^} List;$/
 List_v	phrase.c	/^} List_v;$/
 Lrc	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/
@@ -21,42 +21,44 @@ free_s	phrase.c	/^free_s(Sem *a) {$/
 free_symval	phrase.c	/^free_symval(Symval *a) {$/
 free_v	phrase.c	/^free_v(Val *a) {$/
 free_x	phrase.c	/^free_x(Expr *a) {$/
-infer	phrase.c	/^infer(Env *e, Val *a, bool look) {$/
-infer_and	phrase.c	/^infer_and(Env *e, Val *s, size_t p) {$/
-infer_call	phrase.c	/^infer_call(Env *e, Val *s, size_t p) {$/
-infer_def	phrase.c	/^infer_def(Env *e, Val *s, size_t p) {$/
-infer_div	phrase.c	/^infer_div(Env *e, Val *s, size_t p) {$/
-infer_do	phrase.c	/^infer_do(Env *e, Val *s, size_t p) {$/
-infer_end	phrase.c	/^infer_end(Env *e, Val *s, size_t p) {$/
-infer_endif	phrase.c	/^infer_endif(Env *e, Val *s, size_t p) {$/
-infer_eq	phrase.c	/^infer_eq(Env *e, Val *s, size_t p) {$/
-infer_eqv	phrase.c	/^infer_eqv(Env *e, Val *s, size_t p) {$/
-infer_false	phrase.c	/^infer_false(Env *e, Val *s, size_t p) {$/
-infer_fun	phrase.c	/^infer_fun(Env *e, Val *s, size_t p) {$/
-infer_geq	phrase.c	/^infer_geq(Env *e, Val *s, size_t p) {$/
-infer_gre	phrase.c	/^infer_gre(Env *e, Val *s, size_t p) {$/
-infer_if	phrase.c	/^infer_if(Env *e, Val *s, size_t p) {$/
-infer_infix_arg	phrase.c	/^infer_infix_arg(Env *e, Val *s, size_t p, Val **pa/
-infer_items	phrase.c	/^infer_items(Env *e, Val *a, bool look) {$/
-infer_leq	phrase.c	/^infer_leq(Env *e, Val *s, size_t p) {$/
-infer_les	phrase.c	/^infer_les(Env *e, Val *s, size_t p) {$/
-infer_list	phrase.c	/^infer_list(Env *e, Val *s, size_t p) {$/
-infer_min	phrase.c	/^infer_min(Env *e, Val *s, size_t p) {$/
-infer_mul	phrase.c	/^infer_mul(Env *e, Val *s, size_t p) {$/
-infer_neq	phrase.c	/^infer_neq(Env *e, Val *s, size_t p) {$/
-infer_not	phrase.c	/^infer_not(Env *e, Val *s, size_t p) {$/
-infer_or	phrase.c	/^infer_or(Env *e, Val *s, size_t p) {$/
-infer_ph	phrase.c	/^infer_ph(Env *env, Phrase *a) {$/
-infer_plu	phrase.c	/^infer_plu(Env *e, Val *s, size_t p) {$/
-infer_prefix1_arg	phrase.c	/^infer_prefix1_arg(Env *e, Val *s, size_t p, Val **/
-infer_prefix2_arg	phrase.c	/^infer_prefix2_arg(Env *e, Val *s, size_t p, Val **/
-infer_prefixn_arg	phrase.c	/^infer_prefixn_arg(Env *e, Val *s, size_t p, Val **/
-infer_print	phrase.c	/^infer_print(Env *e, Val *s, size_t p) {$/
-infer_rem	phrase.c	/^infer_rem(Env *e, Val *s, size_t p) {$/
-infer_seq	phrase.c	/^infer_seq(Env *e, Val *b, bool look) {$/
-infer_show	phrase.c	/^infer_show(Env *e, Val *s, size_t p) {$/
-infer_true	phrase.c	/^infer_true(Env *e, Val *s, size_t p) {$/
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/
+interp	phrase.c	/^interp(Env *e, Val *a, bool look) {$/
+interp_and	phrase.c	/^interp_and(Env *e, Val *s, size_t p) {$/
+interp_body	phrase.c	/^interp_body(Env *e, Val *s, size_t p) {$/
+interp_call	phrase.c	/^interp_call(Env *e, Val *s, size_t p) {$/
+interp_def	phrase.c	/^interp_def(Env *e, Val *s, size_t p) {$/
+interp_div	phrase.c	/^interp_div(Env *e, Val *s, size_t p) {$/
+interp_do	phrase.c	/^interp_do(Env *e, Val *s, size_t p) {$/
+interp_end	phrase.c	/^interp_end(Env *e, Val *s, size_t p) {$/
+interp_endif	phrase.c	/^interp_endif(Env *e, Val *s, size_t p) {$/
+interp_eq	phrase.c	/^interp_eq(Env *e, Val *s, size_t p) {$/
+interp_eqv	phrase.c	/^interp_eqv(Env *e, Val *s, size_t p) {$/
+interp_false	phrase.c	/^interp_false(Env *e, Val *s, size_t p) {$/
+interp_fun	phrase.c	/^interp_fun(Env *e, Val *s, size_t p) {$/
+interp_geq	phrase.c	/^interp_geq(Env *e, Val *s, size_t p) {$/
+interp_gre	phrase.c	/^interp_gre(Env *e, Val *s, size_t p) {$/
+interp_if	phrase.c	/^interp_if(Env *e, Val *s, size_t p) {$/
+interp_infix_arg	phrase.c	/^interp_infix_arg(Env *e, Val *s, size_t p, Val **p/
+interp_items	phrase.c	/^interp_items(Env *e, Val *a, bool look) {$/
+interp_leq	phrase.c	/^interp_leq(Env *e, Val *s, size_t p) {$/
+interp_les	phrase.c	/^interp_les(Env *e, Val *s, size_t p) {$/
+interp_list	phrase.c	/^interp_list(Env *e, Val *s, size_t p) {$/
+interp_min	phrase.c	/^interp_min(Env *e, Val *s, size_t p) {$/
+interp_mul	phrase.c	/^interp_mul(Env *e, Val *s, size_t p) {$/
+interp_neq	phrase.c	/^interp_neq(Env *e, Val *s, size_t p) {$/
+interp_not	phrase.c	/^interp_not(Env *e, Val *s, size_t p) {$/
+interp_or	phrase.c	/^interp_or(Env *e, Val *s, size_t p) {$/
+interp_ph	phrase.c	/^interp_ph(Env *env, Phrase *a) {$/
+interp_plu	phrase.c	/^interp_plu(Env *e, Val *s, size_t p) {$/
+interp_prefix1_arg	phrase.c	/^interp_prefix1_arg(Env *e, Val *s, size_t p, Val */
+interp_prefix2_arg	phrase.c	/^interp_prefix2_arg(Env *e, Val *s, size_t p, Val */
+interp_prefixn_arg	phrase.c	/^interp_prefixn_arg(Env *e, Val *s, size_t p, Val */
+interp_print	phrase.c	/^interp_print(Env *e, Val *s, size_t p) {$/
+interp_rem	phrase.c	/^interp_rem(Env *e, Val *s, size_t p) {$/
+interp_seq	phrase.c	/^interp_seq(Env *e, Val *b, bool look) {$/
+interp_show	phrase.c	/^interp_show(Env *e, Val *s, size_t p) {$/
+interp_skip	phrase.c	/^interp_skip(Env *e, Val *s, size_t p) {$/
+interp_true	phrase.c	/^interp_true(Env *e, Val *s, size_t p) {$/
 inxs	phrase.c	/^} inxs;  	\/* OOB for out of band *\/$/
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/
@@ -77,7 +79,7 @@ prefixed2	phrase.c	/^prefixed2(size_t p, size_t n) {$/
 print_env	phrase.c	/^print_env(Env *a) {$/
 print_inxs	phrase.c	/^print_inxs(inxs s) {$/
 print_ph	phrase.c	/^print_ph(Phrase *a) {$/
-print_rc	phrase.c	/^print_rc(Ires a) {$/
+print_rc	phrase.c	/^print_rc(Ir a) {$/
 print_s	phrase.c	/^print_s(Sem *a) {$/
 print_symval	phrase.c	/^print_symval(Symval *a) {$/
 print_v	phrase.c	/^print_v(Val *a) {$/
@@ -96,6 +98,7 @@ seme_of_exp	phrase.c	/^seme_of_exp(Expr *a) {$/
 seme_of_exp_part	phrase.c	/^seme_of_exp_part(Expr *a, size_t from, size_t tox)/
 stored_sym	phrase.c	/^stored_sym(Env *a, Symval *b) {$/
 stype	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} /
+symop_is	phrase.c	/^symop_is(Val *a, const char *s) {$/
 symval	phrase.c	/^symval(char *a, Val *b) {$/
 upd_infix	phrase.c	/^upd_infix(Val *s, size_t p, Val *a) {$/
 upd_prefix0	phrase.c	/^upd_prefix0(Val *s, size_t p, Val *a) {$/

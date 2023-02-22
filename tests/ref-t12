@@ -3,13 +3,13 @@
 #   0  expr: call, 23, n
 #   0  seme: { call 23N n } 
 #   0 value: { `call 23 'n } 
-#   0 infer: [Ok , { `call 23 'n }  ]
+#   0 interp: [Ok , { `call 23 'n }  ]
 #   1  expr: do it
 #   1  seme: ( do it ) 
 #   1 value: ( `do { `call 23 'n } ) 
-? infer: unknown symbol 'n'
-? infer_items: list or seq item unknown
-? infer_prefix1_arg: argument is null
-? infer_do: prefix expression invalid
-? infer_seq: symbol application failed
-#   1 infer: [Fatal , null ]
+? interp: unknown symbol 'n'
+? interp_items: list or seq item unknown
+? interp_prefix1_arg: argument is null
+? interp_do: prefix expression invalid
+? interp_seq: symbol application failed
+#   1 interp: [Fatal , null ]

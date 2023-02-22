@@ -3,12 +3,12 @@
 #   0  expr: n
 #   0  seme: ( n ) 
 #   0 value: ( 'n ) 
-#   0 infer: [Ok , 'n  ]
+#   0 interp: [Ok , 'n  ]
 #   1  expr: call it p 
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 'n 'p ) 
-? infer: unknown symbol 'n'
-? infer_prefix2_arg: 1st argument is null
-? infer_call: prefix expression invalid
-? infer_seq: symbol application failed
-#   1 infer: [Fatal , null ]
+? interp: unknown symbol 'n'
+? interp_prefix2_arg: 1st argument is null
+? interp_call: prefix expression invalid
+? interp_seq: symbol application failed
+#   1 interp: [Fatal , null ]

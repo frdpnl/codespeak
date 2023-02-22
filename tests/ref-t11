@@ -3,16 +3,16 @@
 #   0  expr: if 2 > 1. 
 #   0  seme: ( if 2N > 1.00R ) 
 #   0 value: ( `if 2 `> 1.00 ) 
-#   0 infer: [Ok , 1  ]
+#   0 interp: [Ok , 1  ]
 #   1  expr: print correct 
 #   1  seme: ( print correct ) 
 #   1 value: ( `print 'correct ) 
 'correct 
-#   1 infer: [Ok , 'correct  ]
+#   1 interp: [Ok , 'correct  ]
 #   2  expr: endif
 #   2  seme: ( endif ) 
 #   2 value: ( `endif ) 
-#   2 infer: [Ok , 'correct  ]
+#   2 interp: [Ok , 'correct  ]
 Ok 
 it = 'correct 
 # ----line: "if not 2 > 1. ; print it"
@@ -20,11 +20,11 @@ it = 'correct
 #   0  expr: if not 2 > 1. 
 #   0  seme: ( if not 2N > 1.00R ) 
 #   0 value: ( `if `not 2 `> 1.00 ) 
-#   0 infer: [Skip , 0  ]
+#   0 interp: [Skip , 0  ]
 #   1  expr: print it
 #   1  seme: ( print it ) 
 #   1 value: ( `print 0 ) 
-#   1 infer: [Skip , 0  ]
+#   1 interp: [Skip , 0  ]
 Skip 
 it = 0 
 # ----line: "endif"
@@ -32,7 +32,7 @@ it = 0
 #   0  expr: endif
 #   0  seme: ( endif ) 
 #   0 value: ( `endif ) 
-#   0 infer: [Ok , 0  ]
+#   0 interp: [Ok , 0  ]
 Ok 
 it = 0 
 # ----line: "4. > 2 ; if true? ; print true ; endif"
@@ -40,20 +40,20 @@ it = 0
 #   0  expr: 4. > 2 
 #   0  seme: ( 4.00R > 2N ) 
 #   0 value: ( 4.00 `> 2 ) 
-#   0 infer: [Ok , 1  ]
+#   0 interp: [Ok , 1  ]
 #   1  expr: if true? 
 #   1  seme: ( if true? ) 
 #   1 value: ( `if `true? ) 
-#   1 infer: [Ok , 1  ]
+#   1 interp: [Ok , 1  ]
 #   2  expr: print true 
 #   2  seme: ( print true ) 
 #   2 value: ( `print 'true ) 
 'true 
-#   2 infer: [Ok , 'true  ]
+#   2 interp: [Ok , 'true  ]
 #   3  expr: endif
 #   3  seme: ( endif ) 
 #   3 value: ( `endif ) 
-#   3 infer: [Ok , 'true  ]
+#   3 interp: [Ok , 'true  ]
 Ok 
 it = 'true 
 # ----line: "4. > 2 ; if false? ; print false ; endif"
@@ -61,18 +61,18 @@ it = 'true
 #   0  expr: 4. > 2 
 #   0  seme: ( 4.00R > 2N ) 
 #   0 value: ( 4.00 `> 2 ) 
-#   0 infer: [Ok , 1  ]
+#   0 interp: [Ok , 1  ]
 #   1  expr: if false? 
 #   1  seme: ( if false? ) 
 #   1 value: ( `if `false? ) 
-#   1 infer: [Skip , 0  ]
+#   1 interp: [Skip , 0  ]
 #   2  expr: print false 
 #   2  seme: ( print false ) 
 #   2 value: ( `print 'false ) 
-#   2 infer: [Skip , 0  ]
+#   2 interp: [Skip , 0  ]
 #   3  expr: endif
 #   3  seme: ( endif ) 
 #   3 value: ( `endif ) 
-#   3 infer: [Ok , 0  ]
+#   3 interp: [Ok , 0  ]
 Ok 
 it = 0 

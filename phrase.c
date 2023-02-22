@@ -582,7 +582,7 @@ typedef struct Env_ {
 typedef struct {
 	inxs state;
 	Val *v;
-} Ires;		/* return type for inference */
+} Ir;		/* return type for interp */
 
 typedef union Val_ {
 	struct {
@@ -599,7 +599,7 @@ typedef union Val_ {
 	struct {
 		vtype t;
 		int prio;
-		Ires (*v)(Env *e, Val *s, size_t p);
+		Ir (*v)(Env *e, Val *s, size_t p);
 		int arity;
 		char name[WSZ];
 	} symop;
@@ -690,7 +690,7 @@ print_inxs(inxs s) {
 	}
 }
 static void
-print_rc(Ires a) {
+print_rc(Ir a) {
 	printf("[");
 	print_inxs(a.state);
 	printf(", ");
@@ -1102,7 +1102,7 @@ stored_sym(Env *a, Symval *b) {
  * 4. cleanup behind you (working copies)
  * */
 
-static Ires infer(Env *e, Val *a, bool look);
+static Ir interp(Env *e, Val *a, bool look);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -1118,21 +1118,21 @@ prefixed2(size_t p, size_t n) {
 }
 
 static bool
-infer_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
+interp_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s: symbol not infixed\n", 
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = infer(e, s->seq.v.v[p-1], looka); 
+	Ir rc = interp(e, s->seq.v.v[p-1], looka); 
 	if (rc.state != OK) {
 		printf("? %s: 1st argument null\n", 
 				__FUNCTION__);
 		return false;
 	}
 	a = rc.v;
-	rc = infer(e, s->seq.v.v[p+1], lookb);
+	rc = interp(e, s->seq.v.v[p+1], lookb);
 	if (rc.state != OK) {
 		printf("? %s: 2nd argument null\n", 
 				__FUNCTION__);
@@ -1145,14 +1145,14 @@ infer_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool l
 	return true;
 }
 static bool
-infer_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
+interp_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s: symbol not prefixed to one argument\n", 
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = infer(e, s->seq.v.v[p+1], looka);
+	Ir rc = interp(e, s->seq.v.v[p+1], looka);
 	if (rc.state != OK) {
 		printf("? %s: argument is null\n", 
 				__FUNCTION__);
@@ -1163,21 +1163,21 @@ infer_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	return true;
 }
 static bool
-infer_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
+interp_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
 	Val *a, *b;
 	if (!prefixed2(p, s->seq.v.n)) {
 		printf("? %s: symbol not prefixed to 2 arguments\n", 
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = infer(e, s->seq.v.v[p+1], looka);
+	Ir rc = interp(e, s->seq.v.v[p+1], looka);
 	if (rc.state != OK) {
 		printf("? %s: 1st argument is null\n", 
 				__FUNCTION__);
 		return false;
 	}
 	a = rc.v;
-	rc = infer(e, s->seq.v.v[p+2], lookb);
+	rc = interp(e, s->seq.v.v[p+2], lookb);
 	if (rc.state != OK) {
 		printf("? %s: 2nd argument null\n", 
 				__FUNCTION__);
@@ -1190,16 +1190,16 @@ infer_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool
 	return true;
 }
 static bool
-infer_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
+interp_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	Val *a;
 	a = malloc(sizeof(*a));
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
 	a->seq.v.n = s->seq.v.n -p-1; 
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
-	Ires rc;
+	Ir rc;
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		//a->seq.v.v[i-p-1] = infer(e, s->seq.v.v[i], looka);
-		rc = infer(e, s->seq.v.v[i], looka);
+		//a->seq.v.v[i-p-1] = interp(e, s->seq.v.v[i], looka);
+		rc = interp(e, s->seq.v.v[i], looka);
 		if (rc.state != OK) {
 			free_v(a);
 			return false;
@@ -1254,11 +1254,11 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 	upd_prefixk(s, p, a, s->seq.v.n - p - 1);
 }
 
-static Ires 
-infer_mul(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_mul(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1283,14 +1283,14 @@ infer_mul(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_div(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_div(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1323,14 +1323,14 @@ infer_div(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires
-infer_plu(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir
+interp_plu(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1355,14 +1355,14 @@ infer_plu(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_min(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_min(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1387,14 +1387,14 @@ infer_min(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires
-infer_les(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir
+interp_les(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1421,14 +1421,14 @@ infer_les(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires
-infer_leq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir
+interp_leq(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1455,14 +1455,14 @@ infer_leq(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_gre(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_gre(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1489,14 +1489,14 @@ infer_gre(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_geq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_geq(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1523,14 +1523,14 @@ infer_geq(Env *e, Val *s, size_t p) {
 	}
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_eq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_eq(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1542,14 +1542,14 @@ infer_eq(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 1 : 0;
 	upd_infix(s, p, d);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_neq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_neq(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1561,14 +1561,14 @@ infer_neq(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 0 : 1;
 	upd_infix(s, p, d);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_eqv(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_eqv(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1580,14 +1580,14 @@ infer_eqv(Env *e, Val *s, size_t p) {
 	d->hdr.t = VNAT;
 	d->nat.v = c ? 1 : 0;
 	upd_infix(s, p, d);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_and(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_and(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1604,14 +1604,14 @@ infer_and(Env *e, Val *s, size_t p) {
 	a->nat.v = a->nat.v && b->nat.v;
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_or(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_or(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!infer_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
 		printf("? %s: infix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1628,14 +1628,14 @@ infer_or(Env *e, Val *s, size_t p) {
 	a->nat.v = a->nat.v || b->nat.v;
 	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_not(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_not(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
-	if (!infer_prefix1_arg(e, s, p, &a, true)) {
+	if (!interp_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1648,15 +1648,15 @@ infer_not(Env *e, Val *s, size_t p) {
 	}
 	a->nat.v = (a->nat.v == 0 ? 1 : 0);
 	upd_prefix1(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
 
-static Ires 
-infer_print(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_print(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
-	if (!infer_prefix1_arg(e, s, p, &a, false)) {
+	if (!interp_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
@@ -1664,135 +1664,135 @@ infer_print(Env *e, Val *s, size_t p) {
 	print_v(a);
 	printf("\n");
 	upd_prefix1(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_show(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+static Ir 
+interp_show(Env *e, Val *s, size_t p) {
+	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
-	if (!infer_prefix1_arg(e, s, p, &a, true)) {
+	if (!interp_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
 		return rc;
 	}
 	upd_prefix1(s, p, a);
-	rc = (Ires) {OK, s};
+	rc = (Ir) {OK, s};
 	return rc;
 }
-static Ires 
-infer_do(Env *e, Val *s, size_t p) {
+static Ir 
+interp_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!infer_prefix1_arg(e, s, p, &a, true)) {
+	if (!interp_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (a->hdr.t != VLST) {
 		printf("? %s: argument not a list\n", 
 				__FUNCTION__);
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	a->hdr.t = VSEQ;
-	Ires rc = infer(e, a, false);
+	Ir rc = interp(e, a, false);
 	free_v(a);
 	if (rc.state != OK) {
 		return rc;
 	}
 	upd_prefix1(s, p, rc.v);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
-static Ires 
-infer_list(Env *e, Val *s, size_t p) {
+static Ir 
+interp_list(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!infer_prefixn_arg(e, s, p, &a, false)) {
+	if (!interp_prefixn_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	a->hdr.t = VLST;
 	upd_prefixall(s, p, a);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
-static Ires 
-infer_call(Env *e, Val *s, size_t p) {
+static Ir 
+interp_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!infer_prefix2_arg(e, s, p, &a, true, &b, false)) {
+	if (!interp_prefix2_arg(e, s, p, &a, true, &b, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (b->hdr.t != VSYM) {
 		printf("? %s: 2nd argument is not a symbol\n", 
 				__FUNCTION__);
 		free_v(a);
 		free_v(b);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Symval *sv = symval(b->sym.v, a);
 	free_v(b);
 	if (sv == NULL) {
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (!stored_sym(e, sv)) {
 		free_symval(sv);
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	upd_prefix2(s, p, a);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
-static Ires 
-infer_true(Env *e, Val *s, size_t p) {
+static Ir 
+interp_true(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, IT, false);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
 	b->nat.v = istrue_v(a);
 	upd_prefix0(s, p, b);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
-static Ires 
-infer_false(Env *e, Val *s, size_t p) {
+static Ir 
+interp_false(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, IT, false);
 	if (a == NULL) {
 		printf("? %s: 'it' undefined\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
 	b->nat.v = !istrue_v(a);
 	upd_prefix0(s, p, b);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
-static Ires 
-infer_if(Env *e, Val *s, size_t p) {
+static Ir 
+interp_if(Env *e, Val *s, size_t p) {
 	if (p != s->seq.v.n - 2) {
 		printf("? %s: too many arguments to 'if'\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *a;
-	if (!infer_prefix1_arg(e, s, p, &a, true)) {
+	if (!interp_prefix1_arg(e, s, p, &a, true)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *b = malloc(sizeof(*b));
 	assert(b != NULL);
 	b->hdr.t = VNAT;
-	Ires rc;
+	Ir rc;
 	if (istrue_v(a)) {
 		b->nat.v = 1;
 		rc.state = OK;
@@ -1805,12 +1805,12 @@ infer_if(Env *e, Val *s, size_t p) {
 	rc.v = s;
 	return rc;
 }
-static Ires 
-infer_endif(Env *e, Val *s, size_t p) {
+static Ir 
+interp_endif(Env *e, Val *s, size_t p) {
 	if (p != s->seq.v.n -1) {
 		printf("? %s: 'endif' expected alone\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *b = NULL;
 	Val *a = lookup(e, IT, false);
@@ -1822,11 +1822,11 @@ infer_endif(Env *e, Val *s, size_t p) {
 		b = copy_v(a);
 	}
 	upd_prefixall(s, p, b);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
-static Ires 
-infer_rem(Env *e, Val *s, size_t p) {
-	Ires rc;
+static Ir 
+interp_rem(Env *e, Val *s, size_t p) {
+	Ir rc;
 	Val *b;
 	Val *a = lookup(e, IT, false);
 	if (a == NULL) {
@@ -1842,32 +1842,32 @@ infer_rem(Env *e, Val *s, size_t p) {
 	return rc;
 }
 
-/* --- infer function definition --- */
-static Ires
-infer_def(Env *e, Val *s, size_t p) {
+/* --- interp function definition --- */
+static Ir
+interp_def(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) ; */
 	if (p != s->seq.v.n - 3) {
 		printf("? %s: incorrect number of arguments to 'define'\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *fname, *fparam;
-	if (!infer_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
-		return (Ires) {FATAL, NULL};
+	if (!interp_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
+		return (Ir) {FATAL, NULL};
 	}
 	if (fname->hdr.t != VSYM) {
 		printf("? %s: expecting symbol for function name\n",
 				__FUNCTION__);
 		free_v(fname);
 		free_v(fparam);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (fparam->hdr.t != VLST) {
 		printf("? %s: expecting list for function parameters\n",
 				__FUNCTION__);
 		free_v(fname);
 		free_v(fparam);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	for (size_t i=0; i < fparam->lst.v.n; ++i) {
 		if (!(fparam->lst.v.v[i]->hdr.t == VSYM ||
@@ -1876,7 +1876,7 @@ infer_def(Env *e, Val *s, size_t p) {
 					__FUNCTION__);
 			free_v(fname);
 			free_v(fparam);
-			return (Ires) {FATAL, NULL};
+			return (Ir) {FATAL, NULL};
 		}
 	}
 	Val *f = malloc(sizeof(*f));
@@ -1893,80 +1893,80 @@ infer_def(Env *e, Val *s, size_t p) {
 	free_v(fname);
 	free_v(fparam);
 	upd_prefix2(s, p, f);
-	return (Ires) {FUN, s};
+	return (Ir) {FUN, s};
 }
-static Ires 
-infer_end(Env *e, Val *s, size_t p) {
+static Ir 
+interp_end(Env *e, Val *s, size_t p) {
 	/* rem: end somefun; */
 	if (p != s->seq.v.n - 2) {
 		printf("? %s: invalid 'end', expecting function name only\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *a;
-	if (!infer_prefix1_arg(e, s, p, &a, false)) {
+	if (!interp_prefix1_arg(e, s, p, &a, false)) {
 		printf("? %s: prefix expression invalid\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (a->hdr.t != VSYM) {
 		printf("? %s: 'end argument not a symbol\n", 
 				__FUNCTION__);
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *b = lookup(e, IT, false);
 	if (b == NULL) {
 		printf("? %s: 'it does not point to function\n", 
 				__FUNCTION__);
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (b->hdr.t != VSYMF) {
 		printf("? %s: argument is not a function name\n", 
 				__FUNCTION__);
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (strncmp(a->sym.v, b->symf.name, sizeof(a->sym.v)) != 0) {
 		printf("? %s: 'end argument does not match defintion's\n", 
 				__FUNCTION__);
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	free_v(a);
 	Symval *sv = symval(b->symf.name, b);
 	if (!stored_sym(e, sv)) {
 		free_symval(sv);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	Val *f = copy_v(b);
 	upd_prefix1(s, p, f);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
 
-/* --- infer function application --- */
-static Ires 
-infer_fun(Env *e, Val *s, size_t p) {
+/* --- interp function application --- */
+static Ir 
+interp_fun(Env *e, Val *s, size_t p) {
 	/* rem: ... myfun (1, 2) ... */
 	Val *al;
 	Val *f = s->seq.v.v[p];
-	if (!infer_prefix1_arg(e, s, p, &al, true)) {
+	if (!interp_prefix1_arg(e, s, p, &al, true)) {
 		printf("? %s: `%s argument list invalid\n", 
 				__FUNCTION__, f->symf.name);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (al->hdr.t != VLST) {
 		printf("? %s: `%s argument not a list\n", 
 				__FUNCTION__, f->symf.name);
 		free_v(al);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	if (al->lst.v.n != f->symf.param.n) {
 		printf("? %s: `%s argument mismatch\n", 
 				__FUNCTION__, f->symf.name);
 		free_v(al);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	/* setup local env */
 	Env *le = malloc(sizeof(*le));
@@ -1982,34 +1982,34 @@ infer_fun(Env *e, Val *s, size_t p) {
 			free_symval(sv);
 			free_v(al);
 			free_env(le, false);
-			return (Ires) {FATAL, NULL};
+			return (Ir) {FATAL, NULL};
 		}
 	}
 	free_v(al);
-	/* infer each expression in body, like infer_ph: */
+	/* interp each expression in body, like interp_ph: */
 	Val *v;
 	for (size_t i=0; i<f->symf.body.n; ++i) {
 		v = copy_v(f->symf.body.v[i]);
 		printf("- %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n");
-		Ires xs = infer(le, v, false);
+		Ir xs = interp(le, v, false);
 		free_v(v);
-		printf("- %s %5s: ", __FUNCTION__, "infer"); print_rc(xs); printf("\n"); 
+		printf("- %s %5s: ", __FUNCTION__, "interp"); print_rc(xs); printf("\n"); 
 		le->state = xs.state;
 		if (le->state == FATAL) {
 			free_env(le, false);
-			return (Ires) {FATAL, NULL};
+			return (Ir) {FATAL, NULL};
 		}
 		Symval *it = symval(IT, xs.v);
 		free_v(xs.v);
 		if (it == NULL) {
 			free_env(le, false);
-			return (Ires) {FATAL, NULL};
+			return (Ir) {FATAL, NULL};
 		}
 		xs.v = NULL;
 		if (!stored_sym(le, it)) {
 			free_symval(it);
 			free_env(le, false);
-			return (Ires) {FATAL, NULL};
+			return (Ir) {FATAL, NULL};
 		}
 	}
 	print_env(le); 
@@ -2019,11 +2019,11 @@ infer_fun(Env *e, Val *s, size_t p) {
 		printf("? %s: 'it' from %s undefined\n",
 				__FUNCTION__, f->symf.name);
 		free_env(le, false);
-		return (Ires) {FATAL, NULL};
+		return (Ir) {FATAL, NULL};
 	}
 	upd_prefix1(s, p, copy_v(eit));
 	free_env(le, false);
-	return (Ires) {OK, s};
+	return (Ir) {OK, s};
 }
 
 /* --------------- builtin or base function symbols -------------------- */
@@ -2034,40 +2034,40 @@ infer_fun(Env *e, Val *s, size_t p) {
 typedef struct Symop_ {
 	char name[WSZ];
 	int prio;
-	Ires (*f)(Env *e, Val *s, size_t p);
+	Ir (*f)(Env *e, Val *s, size_t p);
 	int arity;
 } Symop;
 
 #define NSYMS 27
 Symop Syms[] = {
-	(Symop) {"rem:",  -10, infer_rem,  -1},
-	(Symop) {"true?", -10, infer_true,  0},
-	(Symop) {"false?",-10, infer_false, 0},
-	(Symop) {"list",  -10, infer_list, -1},
-	(Symop) {"show",  -10, infer_show,  1},
-	(Symop) {"do",    -10, infer_do,    1},
-	(Symop) {"call",  -10, infer_call,  2},
-	(Symop) {"define",-10, infer_def,  2},
-	(Symop) {"def",   -10, infer_def,  2},
-	(Symop) {"end",   -10, infer_end,  1},
-	(Symop) {"endif", -10, infer_endif, 0},
-	(Symop) {"print", -10, infer_print, 1},
+	(Symop) {"rem:",  -10, interp_rem,  -1},
+	(Symop) {"true?", -10, interp_true,  0},
+	(Symop) {"false?",-10, interp_false, 0},
+	(Symop) {"list",  -10, interp_list, -1},
+	(Symop) {"show",  -10, interp_show,  1},
+	(Symop) {"do",    -10, interp_do,    1},
+	(Symop) {"call",  -10, interp_call,  2},
+	(Symop) {"define",-10, interp_def,  2},
+	(Symop) {"def",   -10, interp_def,  2},
+	(Symop) {"end",   -10, interp_end,  1},
+	(Symop) {"endif", -10, interp_endif, 0},
+	(Symop) {"print", -10, interp_print, 1},
 	/* priority FUNPRIO (0) is for function (user defined) */
-	(Symop) {"*",    20, infer_mul, 2},
-	(Symop) {"/",    20, infer_div, 2},
-	(Symop) {"+",    30, infer_plu, 2},
-	(Symop) {"-",    30, infer_min, 2},
-	(Symop) {"<",    40, infer_les, 2},
-	(Symop) {"<=",   40, infer_leq, 2},
-	(Symop) {">",    40, infer_gre, 2},
-	(Symop) {">=",   40, infer_geq, 2},
-	(Symop) {"=",    40, infer_eq,  2},
-	(Symop) {"/=",   40, infer_neq, 2},
-	(Symop) {"~=",   40, infer_eqv, 2},
-	(Symop) {"not",  50, infer_not, 1},
-	(Symop) {"and",  60, infer_and, 2},
-	(Symop) {"or",   60, infer_or,  2},
-	(Symop) {"if",  100, infer_if,  1},
+	(Symop) {"*",    20, interp_mul, 2},
+	(Symop) {"/",    20, interp_div, 2},
+	(Symop) {"+",    30, interp_plu, 2},
+	(Symop) {"-",    30, interp_min, 2},
+	(Symop) {"<",    40, interp_les, 2},
+	(Symop) {"<=",   40, interp_leq, 2},
+	(Symop) {">",    40, interp_gre, 2},
+	(Symop) {">=",   40, interp_geq, 2},
+	(Symop) {"=",    40, interp_eq,  2},
+	(Symop) {"/=",   40, interp_neq, 2},
+	(Symop) {"~=",   40, interp_eqv, 2},
+	(Symop) {"not",  50, interp_not, 1},
+	(Symop) {"and",  60, interp_and, 2},
+	(Symop) {"or",   60, interp_or,  2},
+	(Symop) {"if",  100, interp_if,  1},
 };
 static int
 minprio() {
@@ -2193,40 +2193,83 @@ val_of_seme(Env *e, Sem *s) {
 
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
-static Ires 
-infer_items(Env *e, Val *a, bool look) {
+static Ir 
+interp_items(Env *e, Val *a, bool look) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		Ires rc = infer(e, a->seq.v.v[i], look);
+		Ir rc = interp(e, a->seq.v.v[i], look);
 		if (rc.state == FATAL) {
 			printf("? %s: list or seq item unknown\n",
 					__FUNCTION__);
 			free_v(b);
 			free_v(rc.v);
-			rc = (Ires) {FATAL, NULL};
+			rc = (Ir) {FATAL, NULL};
 			return rc;
 		} else if (rc.state == SKIP) {
 			printf("? %s: list or seq item invalid\n",
 					__FUNCTION__);
 			free_v(b);
 			free_v(rc.v);
-			rc = (Ires) {FATAL, NULL};
+			rc = (Ir) {FATAL, NULL};
 			return rc;
 		}
 		b = push_v(a->hdr.t, b, rc.v);
 		free_v(rc.v);
 	}
-	Ires rc = (Ires) {OK, b};
+	Ir rc = (Ir) {OK, b};
 	return rc;
 }
 
-static Ires 
-infer_seq(Env *e, Val *b, bool look) {
-	/* symbol application: consumes the seq, until 1 item left */
-	Ires rc = (Ires) {OK, NULL};
+static bool
+symop_is(Val *a, const char *s) {
+	return (a->hdr.t == VSYMOP 
+			&& strncmp(a->symop.name, s, WSZ*sizeof(char)) == 0);
+}
+static Ir
+interp_body(Env *e, Val *s, size_t p) {
+	Val *fun = lookup(e, IT, false);
+	if (fun == NULL) {
+		printf("? %s: 'it' undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	if (fun->hdr.t != VSYMF) {
+		printf("? %s: 'it' is not a function\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	fun->symf.body = push_l(fun->symf.body, s);
+	return (Ir) {FUN, copy_v(fun)};
+}
+static Ir
+interp_skip(Env *e, Val *s, size_t p) {
+	Val *it = lookup(e, IT, false);
+	if (it == NULL) {
+		printf("? %s: 'it' undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	return (Ir) {SKIP, copy_v(it)};
+}
+
+static Ir 
+interp_seq(Env *e, Val *b, bool look) {
 	Val *c;
+	if (b->seq.v.n == 0) {
+		/* empty seq, means nil value */
+		c = malloc(sizeof(*c));
+		c->hdr.t = VNIL;
+		return (Ir) {OK, c};
+	}
+	if (e->state == FUN && !symop_is(b->seq.v.v[0], ENDF)) {
+		/* we're in a function definition, add to function body */
+		return interp_body(e, b, 0);
+	}
+	if (e->state == SKIP && !symop_is(b->seq.v.v[0], ENDIF)) {
+		/* we're in a false if, skip unless 'endif has arrived */
+		return interp_skip(e, b, 0);
+	}
+	/* symbol application: consumes the seq, until 1 item left */
+	Ir rc = (Ir) {OK, NULL};
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
@@ -2234,12 +2277,11 @@ infer_seq(Env *e, Val *b, bool look) {
 			/* loop end, return the reduced to value, 
 			 * unless it's an operator of 0 arity,
 			 * then, fall through & execute it below */
+			/* also, functions all have one parameter */
 			if (!(c->hdr.t == VSYMOP && c->symop.arity == 0)) {
 				rc.v = copy_v(c);
 				return rc;
 			}
-			/* functions all have one parameter (list of). */
-			/* by now, function applications are already processed. */
 		}
 		int hiprio = minprio()+1;
 		size_t symat = 0;
@@ -2267,12 +2309,12 @@ infer_seq(Env *e, Val *b, bool look) {
 		if (!symfound) { 
 			printf("? %s: sequence without function\n",
 					__FUNCTION__);
-			return (Ires) {FATAL, NULL};
+			return (Ir) {FATAL, NULL};
 		}
 		assert(symtype == VSYMF || symtype == VSYMOP);
 		/* apply the symbol, returns the reduced seq */
 		if (symtype == VSYMF) {
-			rc = infer_fun(e, b, symat);
+			rc = interp_fun(e, b, symat);
 		} else if (symtype == VSYMOP) {
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
@@ -2287,12 +2329,12 @@ infer_seq(Env *e, Val *b, bool look) {
 	/* empty seq, means nil value */
 	c = malloc(sizeof(*c));
 	c->hdr.t = VNIL;
-	rc = (Ires) {OK, c};
+	rc = (Ir) {OK, c};
 	return rc;
 }
 
-static Ires 
-infer(Env *e, Val *a, bool look) {
+static Ir 
+interp(Env *e, Val *a, bool look) {
 	/* returns a fresh value, 'a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
@@ -2302,58 +2344,29 @@ infer(Env *e, Val *a, bool look) {
 			if (b == NULL) {
 				printf("? %s: unknown symbol '%s'\n",
 					__FUNCTION__, a->sym.v);
-				return (Ires) {FATAL, NULL};
+				return (Ir) {FATAL, NULL};
 			} 
-			return (Ires) {OK, copy_v(b)};
+			return (Ir) {OK, copy_v(b)};
 		} 
 		/* default: let the function handle it */
-		return (Ires) {OK, copy_v(a)};
+		return (Ir) {OK, copy_v(a)};
 	}
 	if (a->hdr.t == VLST) {
-		return infer_items(e, a, look);
+		return interp_items(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		/* if we're in a function body definition */
-		/* && current value is not an end operator:
-		 * just add current value to existing body */
-		if (e->state == FUN 
-				&& (!(a->seq.v.v[0]->hdr.t == VSYMOP
-					&& strncmp(a->seq.v.v[0]->symop.name, ENDF, WSZ*sizeof(char)) == 0))) {
-			Val *fun = lookup(e, IT, false);
-			if (fun == NULL) {
-				printf("? %s: 'it' undefined\n", __FUNCTION__);
-				return (Ires) {FATAL, NULL};
-			}
-			if (fun->hdr.t != VSYMF) {
-				printf("? %s: 'it' is not a function\n", __FUNCTION__);
-				return (Ires) {FATAL, NULL};
-			}
-			fun->symf.body = push_l(fun->symf.body, a);
-			return (Ires) {FUN, copy_v(fun)};
-		}
-		/* we're inside a false if, skip, unless 'endif has arrived */
-		if (e->state == SKIP
-				&& (!(a->seq.v.v[0]->hdr.t == VSYMOP
-					&& strncmp(a->seq.v.v[0]->symop.name, ENDIF, WSZ*sizeof(char)) == 0))) {
-			Val *it = lookup(e, IT, false);
-			if (it == NULL) {
-				printf("? %s: 'it' undefined\n", __FUNCTION__);
-				return (Ires) {FATAL, NULL};
-			}
-			return (Ires) {SKIP, copy_v(it)};
-		}
-		Ires rc = infer_items(e, a, look);
+		Ir rc = interp_items(e, a, look);
 		if (rc.state != OK) {
 			return rc;
 		}
 		Val *b = rc.v;
-		rc = infer_seq(e, b, look);
+		rc = interp_seq(e, b, look);
 		free_v(b);
 		return rc;
 	}
 	printf("? %s: unknown value type\n",
 			__FUNCTION__);
-	return (Ires) {FATAL, NULL};
+	return (Ir) {FATAL, NULL};
 }
 
 /* ------------ Phrase, a line, a list of expressions --------- */
@@ -2469,7 +2482,7 @@ phrase_of_str(char *a) {
 /* -------------- Phrase -------------- */
 
 static bool
-infer_ph(Env *env, Phrase *a) {
+interp_ph(Env *env, Phrase *a) {
 	assert(env != NULL && "environment null");
 	assert(a != NULL && "phrase null");
 	for (size_t i=0; i<a->n; ++i) {
@@ -2492,9 +2505,9 @@ infer_ph(Env *env, Phrase *a) {
 			return false;
 		}
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
-		Ires xs = infer(env, v, false);
+		Ir xs = interp(env, v, false);
 		free_v(v);
-		printf("# %3lu %5s: ", i, "infer"); print_rc(xs); printf("\n"); 
+		printf("# %3lu %5s: ", i, "interp"); print_rc(xs); printf("\n"); 
 		env->state = xs.state;
 		if (env->state == FATAL) {
 			return false;
@@ -2592,7 +2605,7 @@ main(int argc, char **argv) {
 			return EXIT_FAILURE;
 		}
 		printf("# --phrase: "); print_ph(ph); 
-		bool r = infer_ph(e, ph);
+		bool r = interp_ph(e, ph);
 		free_ph(ph);
 		if (!r) {
 			free_env(e, true);

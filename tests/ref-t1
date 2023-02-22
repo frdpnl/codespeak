@@ -3,29 +3,29 @@
 #   0  expr: 2 * 3.
 #   0  seme: ( 2N * 3.00R ) 
 #   0 value: ( 2 `* 3.00 ) 
-#   0 infer: [Ok , 6.00  ]
+#   0 interp: [Ok , 6.00  ]
 #   1  expr: call it p 
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 6.00 'p ) 
-#   1 infer: [Ok , 6.00  ]
+#   1 interp: [Ok , 6.00  ]
 #   2  expr: p, ~=,6
 #   2  seme: { p ~= 6N } 
 #   2 value: { 'p `~= 6 } 
-#   2 infer: [Ok , { 'p `~= 6 }  ]
+#   2 interp: [Ok , { 'p `~= 6 }  ]
 #   3  expr: print it 
 #   3  seme: ( print it ) 
 #   3 value: ( `print { 'p `~= 6 } ) 
 { 'p `~= 6 } 
-#   3 infer: [Ok , { 'p `~= 6 }  ]
+#   3 interp: [Ok , { 'p `~= 6 }  ]
 #   4  expr: do it 
 #   4  seme: ( do it ) 
 #   4 value: ( `do { 'p `~= 6 } ) 
-#   4 infer: [Ok , 1  ]
+#   4 interp: [Ok , 1  ]
 #   5  expr: print it
 #   5  seme: ( print it ) 
 #   5 value: ( `print 1 ) 
 1 
-#   5 infer: [Ok , 1  ]
+#   5 interp: [Ok , 1  ]
 Ok 
 it = 1 
 p = 6.00 

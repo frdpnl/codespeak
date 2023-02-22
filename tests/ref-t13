@@ -3,23 +3,23 @@
 #   0  expr: 2 * 2 
 #   0  seme: ( 2N * 2N ) 
 #   0 value: ( 2 `* 2 ) 
-#   0 infer: [Ok , 4  ]
+#   0 interp: [Ok , 4  ]
 #   1  expr: call it n 
 #   1  seme: ( call it n ) 
 #   1 value: ( `call 4 'n ) 
-#   1 infer: [Ok , 4  ]
+#   1 interp: [Ok , 4  ]
 #   2  expr: if n - 1 > n * 2 
 #   2  seme: ( if n - 1N > n * 2N ) 
 #   2 value: ( `if 'n `- 1 `> 'n `* 2 ) 
-#   2 infer: [Skip , 0  ]
+#   2 interp: [Skip , 0  ]
 #   3  expr: print wrong 
 #   3  seme: ( print wrong ) 
 #   3 value: ( `print 'wrong ) 
-#   3 infer: [Skip , 0  ]
+#   3 interp: [Skip , 0  ]
 #   4  expr: endif
 #   4  seme: ( endif ) 
 #   4 value: ( `endif ) 
-#   4 infer: [Ok , 0  ]
+#   4 interp: [Ok , 0  ]
 Ok 
 it = 0 
 n = 4 
@@ -28,12 +28,12 @@ n = 4
 #   0  expr: if false? 
 #   0  seme: ( if false? ) 
 #   0 value: ( `if `false? ) 
-#   0 infer: [Ok , 1  ]
+#   0 interp: [Ok , 1  ]
 #   1  expr: print n * 2
 #   1  seme: ( print n * 2N ) 
 #   1 value: ( `print 'n `* 2 ) 
 'n 
-#   1 infer: [Ok , 8  ]
+#   1 interp: [Ok , 8  ]
 Ok 
 it = 8 
 n = 4 
