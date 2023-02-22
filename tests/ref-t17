@@ -11,7 +11,7 @@ it = `(inc ('a ) 0 val)
 #   0  expr: end inc
 #   0  seme: ( end inc ) 
 #   0 value: ( `end 'inc ) 
-#   0 infer: [EndFun , `(inc ('a ) 0 val)  ]
+#   0 infer: [Ok , `(inc ('a ) 0 val)  ]
 Ok 
 it = `(inc ('a ) 0 val) 
 inc = `(inc ('a ) 0 val) 

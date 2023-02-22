@@ -1,0 +1,9 @@
+
+3 ; call it a
+4 ; call it b
+if a > b
+	a - b; print it
+endif
+print it
+if false? ; print it ; endif
+

@@ -1,0 +1,91 @@
+# ----line: "3 ; call it a"
+# --phrase: 3  ; call it a ; 
+#   0  expr: 3 
+#   0  seme: ( 3N ) 
+#   0 value: ( 3 ) 
+#   0 infer: [Ok , 3  ]
+#   1  expr: call it a
+#   1  seme: ( call it a ) 
+#   1 value: ( `call 3 'a ) 
+#   1 infer: [Ok , 3  ]
+Ok 
+it = 3 
+a = 3 
+# ----line: "4 ; call it b"
+# --phrase: 4  ; call it b ; 
+#   0  expr: 4 
+#   0  seme: ( 4N ) 
+#   0 value: ( 4 ) 
+#   0 infer: [Ok , 4  ]
+#   1  expr: call it b
+#   1  seme: ( call it b ) 
+#   1 value: ( `call 4 'b ) 
+#   1 infer: [Ok , 4  ]
+Ok 
+it = 4 
+a = 3 
+b = 4 
+# ----line: "if a > b"
+# --phrase: if a > b ; 
+#   0  expr: if a > b
+#   0  seme: ( if a > b ) 
+#   0 value: ( `if 'a `> 'b ) 
+#   0 infer: [Skip , 0  ]
+Skip 
+it = 0 
+a = 3 
+b = 4 
+# ----line: "	a - b; print it"
+# --phrase: a - b ; print it ; 
+#   0  expr: a - b
+#   0  seme: ( a - b ) 
+#   0 value: ( 'a `- 'b ) 
+#   0 infer: [Skip , 0  ]
+#   1  expr: print it
+#   1  seme: ( print it ) 
+#   1 value: ( `print 0 ) 
+#   1 infer: [Skip , 0  ]
+Skip 
+it = 0 
+a = 3 
+b = 4 
+# ----line: "endif"
+# --phrase: endif ; 
+#   0  expr: endif
+#   0  seme: ( endif ) 
+#   0 value: ( `endif ) 
+#   0 infer: [Ok , 0  ]
+Ok 
+it = 0 
+a = 3 
+b = 4 
+# ----line: "print it"
+# --phrase: print it ; 
+#   0  expr: print it
+#   0  seme: ( print it ) 
+#   0 value: ( `print 0 ) 
+0 
+#   0 infer: [Ok , 0  ]
+Ok 
+it = 0 
+a = 3 
+b = 4 
+# ----line: "if false? ; print it ; endif"
+# --phrase: if false?  ; print it  ; endif ; 
+#   0  expr: if false? 
+#   0  seme: ( if false? ) 
+#   0 value: ( `if `false? ) 
+#   0 infer: [Ok , 1  ]
+#   1  expr: print it 
+#   1  seme: ( print it ) 
+#   1 value: ( `print 1 ) 
+1 
+#   1 infer: [Ok , 1  ]
+#   2  expr: endif
+#   2  seme: ( endif ) 
+#   2 value: ( `endif ) 
+#   2 infer: [Ok , 1  ]
+Ok 
+it = 1 
+a = 3 
+b = 4 

@@ -557,10 +557,11 @@ typedef struct List_v_ {
 /* Special environment symbols: */
 #define IT "it"
 #define ENDF "end"
+#define ENDIF "endif"
 
 typedef enum {
 	OK,
-	SKIP,	/* skip the rest of phrase (see `if), not an error */
+	SKIP,	/* for 'if, skip until 'endif */
 	FUN,	/* we're processing a (multiline) function definition */
 	ENDFUN,	/* finished processing function definition */
 	FATAL
@@ -1667,7 +1668,7 @@ infer_print(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-infer_look(Env *e, Val *s, size_t p) {
+infer_show(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a;
 	if (!infer_prefix1_arg(e, s, p, &a, true)) {
@@ -1805,6 +1806,25 @@ infer_if(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
+infer_endif(Env *e, Val *s, size_t p) {
+	if (p != s->seq.v.n -1) {
+		printf("? %s: 'endif' expected alone\n",
+				__FUNCTION__);
+		return (Ires) {FATAL, NULL};
+	}
+	Val *b = NULL;
+	Val *a = lookup(e, IT, false);
+	if (a == NULL) {
+		b = malloc(sizeof(*b));
+		assert(b != NULL);
+		b->hdr.t = VNIL;
+	} else {
+		b = copy_v(a);
+	}
+	upd_prefixall(s, p, b);
+	return (Ires) {OK, s};
+}
+static Ires 
 infer_rem(Env *e, Val *s, size_t p) {
 	Ires rc;
 	Val *b;
@@ -1922,7 +1942,7 @@ infer_end(Env *e, Val *s, size_t p) {
 	}
 	Val *f = copy_v(b);
 	upd_prefix1(s, p, f);
-	return (Ires) {ENDFUN, s};
+	return (Ires) {OK, s};
 }
 
 /* --- infer function application --- */
@@ -1991,13 +2011,6 @@ infer_fun(Env *e, Val *s, size_t p) {
 			free_env(le, false);
 			return (Ires) {FATAL, NULL};
 		}
-		if (le->state == SKIP) {
-			le->state = OK;
-			break;
-		}
-		if (le->state == ENDFUN) {
-			le->state = OK;
-		}
 	}
 	print_env(le); 
 	/* return function's 'it to caller */
@@ -2025,19 +2038,20 @@ typedef struct Symop_ {
 	int arity;
 } Symop;
 
-#define NSYMS 26
+#define NSYMS 27
 Symop Syms[] = {
 	(Symop) {"rem:",  -10, infer_rem,  -1},
 	(Symop) {"true?", -10, infer_true,  0},
 	(Symop) {"false?",-10, infer_false, 0},
-	(Symop) {"print", -10, infer_print, 1},
 	(Symop) {"list",  -10, infer_list, -1},
-	(Symop) {"look",  -10, infer_look,  1},
+	(Symop) {"show",  -10, infer_show,  1},
 	(Symop) {"do",    -10, infer_do,    1},
 	(Symop) {"call",  -10, infer_call,  2},
 	(Symop) {"define",-10, infer_def,  2},
 	(Symop) {"def",   -10, infer_def,  2},
-	(Symop) {"end",   -10, infer_end,  0},
+	(Symop) {"end",   -10, infer_end,  1},
+	(Symop) {"endif", -10, infer_endif, 0},
+	(Symop) {"print", -10, infer_print, 1},
 	/* priority FUNPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, infer_mul, 2},
 	(Symop) {"/",    20, infer_div, 2},
@@ -2304,7 +2318,7 @@ infer(Env *e, Val *a, bool look) {
 		 * just add current value to existing body */
 		if (e->state == FUN 
 				&& (!(a->seq.v.v[0]->hdr.t == VSYMOP
-					&& strncmp(a->seq.v.v[0]->symop.name, ENDF, 4) == 0))) {
+					&& strncmp(a->seq.v.v[0]->symop.name, ENDF, WSZ*sizeof(char)) == 0))) {
 			Val *fun = lookup(e, IT, false);
 			if (fun == NULL) {
 				printf("? %s: 'it' undefined\n", __FUNCTION__);
@@ -2316,6 +2330,17 @@ infer(Env *e, Val *a, bool look) {
 			}
 			fun->symf.body = push_l(fun->symf.body, a);
 			return (Ires) {FUN, copy_v(fun)};
+		}
+		/* we're inside a false if, skip, unless 'endif has arrived */
+		if (e->state == SKIP
+				&& (!(a->seq.v.v[0]->hdr.t == VSYMOP
+					&& strncmp(a->seq.v.v[0]->symop.name, ENDIF, WSZ*sizeof(char)) == 0))) {
+			Val *it = lookup(e, IT, false);
+			if (it == NULL) {
+				printf("? %s: 'it' undefined\n", __FUNCTION__);
+				return (Ires) {FATAL, NULL};
+			}
+			return (Ires) {SKIP, copy_v(it)};
 		}
 		Ires rc = infer_items(e, a, look);
 		if (rc.state != OK) {
@@ -2484,13 +2509,6 @@ infer_ph(Env *env, Phrase *a) {
 			free_symval(it);
 			return false;
 		}
-		if (env->state == SKIP) {
-			env->state = OK;
-			break;
-		}
-		if (env->state == ENDFUN) {
-			env->state = OK;
-		}
 	}
 	print_env(env); 
 	return true;
@@ -2555,6 +2573,10 @@ main(int argc, char **argv) {
 				free_env(e, true);
 				return EXIT_FAILURE;
 			case END:
+				if (e->state != OK) {
+					printf("? %s: unexpected end of program\n",
+							__FUNCTION__);
+				}
 				free_env(e, true);
 				return EXIT_SUCCESS;
 			case EMPTY:

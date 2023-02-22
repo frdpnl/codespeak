@@ -11,15 +11,15 @@
 #   2  expr: end dec
 #   2  seme: ( end dec ) 
 #   2 value: ( `end 'dec ) 
-#   2 infer: [EndFun , `(dec ('b ) 1 val)  ]
+#   2 infer: [Ok , `(dec ('b ) 1 val)  ]
 Ok 
 it = `(dec ('b ) 1 val) 
 dec = `(dec ('b ) 1 val) 
-# ----line: "print (look dec)"
-# --phrase: print (look dec) ; 
-#   0  expr: print (look dec)
-#   0  seme: ( print ( look dec ) ) 
-#   0 value: ( `print ( `look `(dec ('b ) 1 val) ) ) 
+# ----line: "print (show dec)"
+# --phrase: print (show dec) ; 
+#   0  expr: print (show dec)
+#   0  seme: ( print ( show dec ) ) 
+#   0 value: ( `print ( `show `(dec ('b ) 1 val) ) ) 
 `(dec ('b ) 1 val) 
 #   0 infer: [Ok , `(dec ('b ) 1 val)  ]
 Ok 
@@ -48,7 +48,7 @@ dec = `(dec ('b ) 1 val)
 #   0  expr: end inc
 #   0  seme: ( end inc ) 
 #   0 value: ( `end 'inc ) 
-#   0 infer: [EndFun , `(inc ('a ) 1 val)  ]
+#   0 infer: [Ok , `(inc ('a ) 1 val)  ]
 Ok 
 it = `(inc ('a ) 1 val) 
 dec = `(dec ('b ) 1 val) 

@@ -1,0 +1,84 @@
+# ----line: "if 4 >= 2 "
+# --phrase: if 4 >= 2  ; 
+#   0  expr: if 4 >= 2 
+#   0  seme: ( if 4N >= 2N ) 
+#   0 value: ( `if 4 `>= 2 ) 
+#   0 infer: [Ok , 1  ]
+Ok 
+it = 1 
+# ----line: "	print one"
+# --phrase: print one ; 
+#   0  expr: print one
+#   0  seme: ( print one ) 
+#   0 value: ( `print 'one ) 
+'one 
+#   0 infer: [Ok , 'one  ]
+Ok 
+it = 'one 
+# ----line: "	if 2. = 2 "
+# --phrase: if 2. = 2  ; 
+#   0  expr: if 2. = 2 
+#   0  seme: ( if 2.00R = 2N ) 
+#   0 value: ( `if 2.00 `= 2 ) 
+#   0 infer: [Skip , 0  ]
+Skip 
+it = 0 
+# ----line: "		print two"
+# --phrase: print two ; 
+#   0  expr: print two
+#   0  seme: ( print two ) 
+#   0 value: ( `print 'two ) 
+#   0 infer: [Skip , 0  ]
+Skip 
+it = 0 
+# ----line: "	endif"
+# --phrase: endif ; 
+#   0  expr: endif
+#   0  seme: ( endif ) 
+#   0 value: ( `endif ) 
+#   0 infer: [Ok , 0  ]
+Ok 
+it = 0 
+# ----line: "	if 3 > 1 ; print three ; endif"
+# --phrase: if 3 > 1  ; print three  ; endif ; 
+#   0  expr: if 3 > 1 
+#   0  seme: ( if 3N > 1N ) 
+#   0 value: ( `if 3 `> 1 ) 
+#   0 infer: [Ok , 1  ]
+#   1  expr: print three 
+#   1  seme: ( print three ) 
+#   1 value: ( `print 'three ) 
+'three 
+#   1 infer: [Ok , 'three  ]
+#   2  expr: endif
+#   2  seme: ( endif ) 
+#   2 value: ( `endif ) 
+#   2 infer: [Ok , 'three  ]
+Ok 
+it = 'three 
+# ----line: "	print four"
+# --phrase: print four ; 
+#   0  expr: print four
+#   0  seme: ( print four ) 
+#   0 value: ( `print 'four ) 
+'four 
+#   0 infer: [Ok , 'four  ]
+Ok 
+it = 'four 
+# ----line: "endif"
+# --phrase: endif ; 
+#   0  expr: endif
+#   0  seme: ( endif ) 
+#   0 value: ( `endif ) 
+#   0 infer: [Ok , 'four  ]
+Ok 
+it = 'four 
+# ----line: "print done"
+# --phrase: print done ; 
+#   0  expr: print done
+#   0  seme: ( print done ) 
+#   0 value: ( `print 'done ) 
+'done 
+#   0 infer: [Ok , 'done  ]
+Ok 
+it = 'done 

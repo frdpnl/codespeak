@@ -1,7 +1,8 @@
 
-if 2 > 1. ; print correct
-if not 2 > 1. ; print incorrect
+if 2 > 1. ; print correct ; endif
+if not 2 > 1. ; print it
+endif
 
-4. > 2 ; if true? ; print true
-4. > 2 ; if false? ; print false
+4. > 2 ; if true? ; print true ; endif
+4. > 2 ; if false? ; print false ; endif
 

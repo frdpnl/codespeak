@@ -28,6 +28,7 @@ infer_def	phrase.c	/^infer_def(Env *e, Val *s, size_t p) {$/
 infer_div	phrase.c	/^infer_div(Env *e, Val *s, size_t p) {$/
 infer_do	phrase.c	/^infer_do(Env *e, Val *s, size_t p) {$/
 infer_end	phrase.c	/^infer_end(Env *e, Val *s, size_t p) {$/
+infer_endif	phrase.c	/^infer_endif(Env *e, Val *s, size_t p) {$/
 infer_eq	phrase.c	/^infer_eq(Env *e, Val *s, size_t p) {$/
 infer_eqv	phrase.c	/^infer_eqv(Env *e, Val *s, size_t p) {$/
 infer_false	phrase.c	/^infer_false(Env *e, Val *s, size_t p) {$/
@@ -40,7 +41,6 @@ infer_items	phrase.c	/^infer_items(Env *e, Val *a, bool look) {$/
 infer_leq	phrase.c	/^infer_leq(Env *e, Val *s, size_t p) {$/
 infer_les	phrase.c	/^infer_les(Env *e, Val *s, size_t p) {$/
 infer_list	phrase.c	/^infer_list(Env *e, Val *s, size_t p) {$/
-infer_look	phrase.c	/^infer_look(Env *e, Val *s, size_t p) {$/
 infer_min	phrase.c	/^infer_min(Env *e, Val *s, size_t p) {$/
 infer_mul	phrase.c	/^infer_mul(Env *e, Val *s, size_t p) {$/
 infer_neq	phrase.c	/^infer_neq(Env *e, Val *s, size_t p) {$/
@@ -54,6 +54,7 @@ infer_prefixn_arg	phrase.c	/^infer_prefixn_arg(Env *e, Val *s, size_t p, Val **/
 infer_print	phrase.c	/^infer_print(Env *e, Val *s, size_t p) {$/
 infer_rem	phrase.c	/^infer_rem(Env *e, Val *s, size_t p) {$/
 infer_seq	phrase.c	/^infer_seq(Env *e, Val *b, bool look) {$/
+infer_show	phrase.c	/^infer_show(Env *e, Val *s, size_t p) {$/
 infer_true	phrase.c	/^infer_true(Env *e, Val *s, size_t p) {$/
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/
 inxs	phrase.c	/^} inxs;  	\/* OOB for out of band *\/$/

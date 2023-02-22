@@ -11,7 +11,7 @@
 #   2  expr: end dec
 #   2  seme: ( end dec ) 
 #   2 value: ( `end 'dec ) 
-#   2 infer: [EndFun , `(dec ('a ) 1 val)  ]
+#   2 infer: [Ok , `(dec ('a ) 1 val)  ]
 Ok 
 it = `(dec ('a ) 1 val) 
 dec = `(dec ('a ) 1 val) 
