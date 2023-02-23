@@ -1,0 +1,5 @@
+define f () ; () ; end f
+f ()
+
+define g () ; end g
+g ()

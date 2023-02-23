@@ -20,6 +20,5 @@ dec = `(dec ('a ) 1 val)
 #   0  expr: dec (1 ,2)
 #   0  seme: ( dec { 1N 2N } ) 
 #   0 value: ( `(dec ('a ) 1 val) { 1 2 } ) 
-? interp_fun: `dec argument mismatch
-? interp_seq: symbol application failed
+? interp_fun: number of arguments to `dec mismatch
 #   0 interp: [Fatal , null ]

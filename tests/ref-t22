@@ -22,7 +22,5 @@ dec = `(dec ('a ) 1 val)
 #   0 value: ( `(dec ('a ) 1 val) { Nil } ) 
 - interp_fun value: ( 'a `- 1 ) 
 ? interp_min: arguments not numbers
-? interp_seq: symbol application failed
 - interp_fun interp: [Fatal , null ]
-? interp_seq: symbol application failed
 #   0 interp: [Fatal , null ]

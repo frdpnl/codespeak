@@ -20,6 +20,5 @@ dec = `(dec ('a ) 1 val)
 #   0  expr: dec ()
 #   0  seme: ( dec Nil ) 
 #   0 value: ( `(dec ('a ) 1 val) Nil ) 
-? interp_fun: `dec argument not a list
-? interp_seq: symbol application failed
+? interp_fun: expected argument to `dec
 #   0 interp: [Fatal , null ]

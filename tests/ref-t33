@@ -1,0 +1,68 @@
+# ----line: "define f (a,b) "
+# --phrase: define f (a,b)  ; 
+#   0  expr: define f (a,b) 
+#   0  seme: ( define f { a b } ) 
+#   0 value: ( `define 'f { 'a 'b } ) 
+#   0 interp: [Fun , `(f ('a 'b ) 0 val)  ]
+Fun 
+it = `(f ('a 'b ) 0 val) 
+# ----line: "	1"
+# --phrase: 1 ; 
+#   0  expr: 1
+#   0  seme: ( 1N ) 
+#   0 value: ( 1 ) 
+#   0 interp: [Fun , `(f ('a 'b ) 1 val)  ]
+Fun 
+it = `(f ('a 'b ) 1 val) 
+# ----line: "	2"
+# --phrase: 2 ; 
+#   0  expr: 2
+#   0  seme: ( 2N ) 
+#   0 value: ( 2 ) 
+#   0 interp: [Fun , `(f ('a 'b ) 2 val)  ]
+Fun 
+it = `(f ('a 'b ) 2 val) 
+# ----line: "	3"
+# --phrase: 3 ; 
+#   0  expr: 3
+#   0  seme: ( 3N ) 
+#   0 value: ( 3 ) 
+#   0 interp: [Fun , `(f ('a 'b ) 3 val)  ]
+Fun 
+it = `(f ('a 'b ) 3 val) 
+# ----line: "end f"
+# --phrase: end f ; 
+#   0  expr: end f
+#   0  seme: ( end f ) 
+#   0 value: ( `end 'f ) 
+#   0 interp: [Ok , `(f ('a 'b ) 3 val)  ]
+Ok 
+it = `(f ('a 'b ) 3 val) 
+f = `(f ('a 'b ) 3 val) 
+# ----line: "f (1, 2) ; it = 3"
+# --phrase: f (1, 2)  ; it = 3 ; 
+#   0  expr: f (1, 2) 
+#   0  seme: ( f { 1N 2N } ) 
+#   0 value: ( `(f ('a 'b ) 3 val) { 1 2 } ) 
+- interp_fun value: ( 1 ) 
+- interp_fun interp: [Ok , 1  ]
+- interp_fun value: ( 2 ) 
+- interp_fun interp: [Ok , 2  ]
+- interp_fun value: ( 3 ) 
+- interp_fun interp: [Ok , 3  ]
+Ok 
+a = 1 
+b = 2 
+it = 3 
+parent:
+Ok 
+it = `(f ('a 'b ) 3 val) 
+f = `(f ('a 'b ) 3 val) 
+#   0 interp: [Ok , 3  ]
+#   1  expr: it = 3
+#   1  seme: ( it = 3N ) 
+#   1 value: ( 3 `= 3 ) 
+#   1 interp: [Ok , 1  ]
+Ok 
+it = 1 
+f = `(f ('a 'b ) 3 val) 

@@ -11,5 +11,4 @@
 ? interp_items: list or seq item unknown
 ? interp_prefix1_arg: argument is null
 ? interp_do: prefix expression invalid
-? interp_seq: symbol application failed
 #   1 interp: [Fatal , null ]

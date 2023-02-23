@@ -11,6 +11,7 @@ it = `(inc ('a ) 0 val)
 #   0  expr: end 
 #   0  seme: ( end ) 
 #   0 value: ( `end ) 
-#   0 interp: [Ok , `end  ]
-Ok 
-it = `end 
+#   0 interp: [Fun , `(inc ('a ) 1 val)  ]
+Fun 
+it = `(inc ('a ) 1 val) 
+? main: unexpected end of program

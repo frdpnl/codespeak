@@ -3,6 +3,15 @@
 #   0  expr: define inc () 
 #   0  seme: ( define inc Nil ) 
 #   0 value: ( `define 'inc Nil ) 
-? interp_def: expecting list for function parameters
-? interp_seq: symbol application failed
-#   0 interp: [Fatal , null ]
+#   0 interp: [Fun , `(inc () 0 val)  ]
+#   1  expr: 1 
+#   1  seme: ( 1N ) 
+#   1 value: ( 1 ) 
+#   1 interp: [Fun , `(inc () 1 val)  ]
+#   2  expr: end inc
+#   2  seme: ( end inc ) 
+#   2 value: ( `end 'inc ) 
+#   2 interp: [Ok , `(inc () 1 val)  ]
+Ok 
+it = `(inc () 1 val) 
+inc = `(inc () 1 val) 

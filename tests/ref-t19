@@ -12,5 +12,4 @@ it = `(inc ('a ) 0 val)
 #   0  seme: ( end define ) 
 #   0 value: ( `end `define ) 
 ? interp_end: 'end argument not a symbol
-? interp_seq: symbol application failed
 #   0 interp: [Fatal , null ]

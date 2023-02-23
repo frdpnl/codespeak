@@ -1,0 +1,4 @@
+
+define f (a,) ; 1 ; end f
+f (1, 2)
+

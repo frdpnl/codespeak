@@ -1,0 +1,25 @@
+# ----line: "define f () ; 1 ; end"
+# --phrase: define f ()  ; 1  ; end ; 
+#   0  expr: define f () 
+#   0  seme: ( define f Nil ) 
+#   0 value: ( `define 'f Nil ) 
+#   0 interp: [Fun , `(f () 0 val)  ]
+#   1  expr: 1 
+#   1  seme: ( 1N ) 
+#   1 value: ( 1 ) 
+#   1 interp: [Fun , `(f () 1 val)  ]
+#   2  expr: end
+#   2  seme: ( end ) 
+#   2 value: ( `end ) 
+#   2 interp: [Fun , `(f () 2 val)  ]
+Fun 
+it = `(f () 2 val) 
+# ----line: "f ()"
+# --phrase: f () ; 
+#   0  expr: f ()
+#   0  seme: ( f Nil ) 
+#   0 value: ( 'f Nil ) 
+#   0 interp: [Fun , `(f () 3 val)  ]
+Fun 
+it = `(f () 3 val) 
+? main: unexpected end of program

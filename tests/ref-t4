@@ -10,5 +10,4 @@
 ? interp: unknown symbol 'n'
 ? interp_prefix2_arg: 1st argument is null
 ? interp_call: prefix expression invalid
-? interp_seq: symbol application failed
 #   1 interp: [Fatal , null ]

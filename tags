@@ -60,6 +60,7 @@ interp_show	phrase.c	/^interp_show(Env *e, Val *s, size_t p) {$/
 interp_skip	phrase.c	/^interp_skip(Env *e, Val *s, size_t p) {$/
 interp_true	phrase.c	/^interp_true(Env *e, Val *s, size_t p) {$/
 inxs	phrase.c	/^} inxs;  	\/* OOB for out of band *\/$/
+is_symopcall	phrase.c	/^is_symopcall(Val *a, size_t l, const char *s) {$/
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/
 isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/
@@ -98,7 +99,6 @@ seme_of_exp	phrase.c	/^seme_of_exp(Expr *a) {$/
 seme_of_exp_part	phrase.c	/^seme_of_exp_part(Expr *a, size_t from, size_t tox)/
 stored_sym	phrase.c	/^stored_sym(Env *a, Symval *b) {$/
 stype	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} /
-symop_is	phrase.c	/^symop_is(Val *a, const char *s) {$/
 symval	phrase.c	/^symval(char *a, Val *b) {$/
 upd_infix	phrase.c	/^upd_infix(Val *s, size_t p, Val *a) {$/
 upd_prefix0	phrase.c	/^upd_prefix0(Val *s, size_t p, Val *a) {$/
