@@ -1845,8 +1845,8 @@ interp_rem(Env *e, Val *s, size_t p) {
 /* --- interp function definition --- */
 static Ir
 interp_def(Env *e, Val *s, size_t p) {
-	/* rem: define foo (a, b) ; */
-	if (p != s->seq.v.n - 3) {
+	/* rem: define foo (a, b) or define foo () ; */
+	if (s->seq.v.n != 3 || p != s->seq.v.n - 3) {
 		printf("? %s: incorrect number of arguments to 'define'\n",
 				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
@@ -1862,32 +1862,35 @@ interp_def(Env *e, Val *s, size_t p) {
 		free_v(fparam);
 		return (Ir) {FATAL, NULL};
 	}
-	if (fparam->hdr.t != VLST) {
-		printf("? %s: expecting list for function parameters\n",
+	if (!(fparam->hdr.t == VLST || fparam->hdr.t == VNIL)) {
+		printf("? %s: expecting list or '()' for function parameters\n",
 				__FUNCTION__);
 		free_v(fname);
 		free_v(fparam);
 		return (Ir) {FATAL, NULL};
 	}
-	for (size_t i=0; i < fparam->lst.v.n; ++i) {
-		if (!(fparam->lst.v.v[i]->hdr.t == VSYM ||
-					fparam->lst.v.v[i]->hdr.t == VNIL)) {
-			printf("? %s: expecting symbol for function parameter\n",
-					__FUNCTION__);
-			free_v(fname);
-			free_v(fparam);
-			return (Ir) {FATAL, NULL};
+	if (fparam->hdr.t == VLST) {
+		for (size_t i=0; i < fparam->lst.v.n; ++i) {
+			if (fparam->lst.v.v[i]->hdr.t != VSYM) {
+				printf("? %s: expecting symbol for function parameter\n",
+						__FUNCTION__);
+				free_v(fname);
+				free_v(fparam);
+				return (Ir) {FATAL, NULL};
+			}
 		}
 	}
 	Val *f = malloc(sizeof(*f));
 	assert(f != NULL && "function val NULL");
 	f->hdr.t = VSYMF;
-	strncpy(f->symf.name, fname->sym.v, WSZ*sizeof(char));
+	strncpy(f->symf.name, fname->sym.v, sizeof(f->symf.name));
 	f->symf.param.n = 0;
 	f->symf.param.v = NULL;
-	for (size_t i=0; i<fparam->lst.v.n; ++i) {
-		f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
-	}
+	if (fparam->hdr.t == VLST) {
+		for (size_t i=0; i<fparam->lst.v.n; ++i) {
+			f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
+		}
+	} 
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
 	free_v(fname);
@@ -1948,7 +1951,7 @@ interp_end(Env *e, Val *s, size_t p) {
 /* --- interp function application --- */
 static Ir 
 interp_fun(Env *e, Val *s, size_t p) {
-	/* rem: ... myfun (1, 2) ... */
+	/* rem: ... foo (1, 2) or foo () ... */
 	Val *al;
 	Val *f = s->seq.v.v[p];
 	if (!interp_prefix1_arg(e, s, p, &al, true)) {
