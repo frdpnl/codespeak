@@ -1,0 +1,7 @@
+# ----line: "define f ; 2 ; end f"
+# --phrase: define f  ; 2  ; end f ; 
+#   0  expr: define f 
+#   0  seme: ( define f ) 
+#   0 value: ( `define 'f ) 
+? interp_def: incorrect number of arguments to 'define'
+#   0 interp: [Fatal , null ]
