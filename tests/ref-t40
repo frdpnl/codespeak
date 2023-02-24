@@ -1,0 +1,7 @@
+# ----line: "end foo"
+# --phrase: end foo ; 
+#   0  expr: end foo
+#   0  seme: ( end foo ) 
+#   0 value: ( `end 'foo ) 
+? interp_end: 'it' undefined
+#   0 interp: [Fatal , null ]

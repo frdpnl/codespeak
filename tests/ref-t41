@@ -1,0 +1,11 @@
+# ----line: "2 ; end foo"
+# --phrase: 2  ; end foo ; 
+#   0  expr: 2 
+#   0  seme: ( 2N ) 
+#   0 value: ( 2 ) 
+#   0 interp: [Ok , 2  ]
+#   1  expr: end foo
+#   1  seme: ( end foo ) 
+#   1 value: ( `end 'foo ) 
+? interp_end: 'end' argument is not a function name
+#   1 interp: [Fatal , null ]

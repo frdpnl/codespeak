@@ -1,0 +1,7 @@
+# ----line: "end do"
+# --phrase: end do ; 
+#   0  expr: end do
+#   0  seme: ( end do ) 
+#   0 value: ( `end `do ) 
+? interp_end: 'end' with wrong operator
+#   0 interp: [Fatal , null ]

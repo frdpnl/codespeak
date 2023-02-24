@@ -1256,8 +1256,6 @@ interp_mul(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1288,8 +1286,6 @@ interp_div(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1328,8 +1324,6 @@ interp_plu(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1360,8 +1354,6 @@ interp_min(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1392,8 +1384,6 @@ interp_les(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1426,8 +1416,6 @@ interp_leq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1460,8 +1448,6 @@ interp_gre(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1494,8 +1480,6 @@ interp_geq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1528,8 +1512,6 @@ interp_eq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	bool c = isequal_v(a, b);
@@ -1547,8 +1529,6 @@ interp_neq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	bool c = isequal_v(a, b);
@@ -1566,8 +1546,6 @@ interp_eqv(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	bool c = isequiv_v(a, b);
@@ -1585,8 +1563,6 @@ interp_and(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
@@ -1609,8 +1585,6 @@ interp_or(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
 	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
-		printf("? %s: infix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
@@ -1633,8 +1607,6 @@ interp_not(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
 	if (!interp_prefix1_arg(e, s, p, &a, true)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	if ((a->hdr.t != VNAT)) {
@@ -1835,7 +1807,7 @@ interp_rem(Env *e, Val *s, size_t p) {
 static Ir
 interp_def(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) or define foo () ; */
-	if (s->seq.v.n != 3 || p != s->seq.v.n - 3) {
+	if (s->seq.v.n != 3 || p != 0) {
 		printf("? %s: incorrect number of arguments to 'define'\n",
 				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
@@ -1909,9 +1881,10 @@ interp_end(Env *e, Val *s, size_t p) {
 		}
 		Val *c = lookup(e, IT, false);
 		if (c == NULL) {
-			b = malloc(sizeof(*b));
-			assert(b != NULL);
-			b->hdr.t = VNIL;
+			printf("? %s: 'it' undefined\n",
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
 		} else {
 			b = copy_v(c);
 		}
@@ -1919,7 +1892,7 @@ interp_end(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VSYM) {
 		Val *c = lookup(e, IT, false);
 		if (c == NULL) {
-			printf("? %s: 'it' does not point to function\n", 
+			printf("? %s: 'it' undefined\n", 
 					__FUNCTION__);
 			free_v(a);
 			return (Ir) {FATAL, NULL};

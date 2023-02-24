@@ -1,0 +1,7 @@
+# ----line: "end if"
+# --phrase: end if ; 
+#   0  expr: end if
+#   0  seme: ( end if ) 
+#   0 value: ( `end `if ) 
+? interp_end: 'it' undefined
+#   0 interp: [Fatal , null ]
