@@ -1,0 +1,16 @@
+
+
+if, not, 2, >, 1 
+do it
+
+print really?
+
+list end if
+do it
+
+print really?!
+
+end if
+
+finally
+

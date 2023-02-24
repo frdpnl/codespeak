@@ -8,5 +8,4 @@
 #   1  seme: ( do it ) 
 #   1 value: ( `do { `call 23 'n } ) 
 ? interp: unknown symbol 'n'
-? interp_do: prefix expression invalid
 #   1 interp: [Fatal , null ]

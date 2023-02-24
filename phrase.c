@@ -1681,8 +1681,6 @@ static Ir
 interp_do(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!interp_prefix1_arg(e, s, p, &a, true)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	if (a->hdr.t != VLST) {
@@ -1694,11 +1692,11 @@ interp_do(Env *e, Val *s, size_t p) {
 	a->hdr.t = VSEQ;
 	Ir rc = interp(e, a, false);
 	free_v(a);
-	if (rc.state != OK) {
+	if (rc.state == FATAL) {
 		return rc;
 	}
 	upd_prefix1(s, p, rc.v);
-	return (Ir) {OK, s};
+	return (Ir) {rc.state, s};
 }
 static Ir 
 interp_list(Env *e, Val *s, size_t p) {
@@ -1776,7 +1774,7 @@ interp_false(Env *e, Val *s, size_t p) {
 static Ir 
 interp_if(Env *e, Val *s, size_t p) {
 	if (p != s->seq.v.n - 2) {
-		printf("? %s: too many arguments to 'if'\n",
+		printf("? %s: 'if' sequence invalid\n",
 				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
