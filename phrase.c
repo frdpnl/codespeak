@@ -19,8 +19,7 @@
  *
  * 13.10.2022 created.
  *
- * gcc -static -std=gnu99 -Wall -g -I../local/include -L../local/lib this_file.c -lgrapheme 
- * warning, valgrind prefers dynamic libs by default.
+ * gcc -std=gnu99 -Wall -g -I./libgrapheme/include -L./libgrapheme/lib this_file -lgrapheme 
  *
  */
 
