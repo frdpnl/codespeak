@@ -1,0 +1,7 @@
+# ----line: "if t ; nooooo ; end if"
+# --phrase: if t  ; nooooo  ; end if ; 
+#   0  expr: if t 
+#   0  seme: ( if t ) 
+#   0 value: ( `if 't ) 
+? interp: unknown symbol 't'
+#   0 interp: [Fatal , null ]

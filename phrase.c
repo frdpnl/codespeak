@@ -1654,8 +1654,6 @@ interp_print(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
 	if (!interp_prefix1_arg(e, s, p, &a, false)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	print_v(a);
@@ -1669,8 +1667,6 @@ interp_show(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
 	if (!interp_prefix1_arg(e, s, p, &a, true)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return rc;
 	}
 	upd_prefix1(s, p, a);
@@ -1702,8 +1698,6 @@ static Ir
 interp_list(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!interp_prefixn_arg(e, s, p, &a, false)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	a->hdr.t = VLST;
@@ -1714,8 +1708,6 @@ static Ir
 interp_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!interp_prefix2_arg(e, s, p, &a, true, &b, false)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	if (b->hdr.t != VSYM) {
@@ -1773,15 +1765,13 @@ interp_false(Env *e, Val *s, size_t p) {
 }
 static Ir 
 interp_if(Env *e, Val *s, size_t p) {
-	if (p != s->seq.v.n - 2) {
+	if (p != 0 || p != s->seq.v.n - 2) {
 		printf("? %s: 'if' sequence invalid\n",
 				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	Val *a;
 	if (!interp_prefix1_arg(e, s, p, &a, true)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	Val *b = malloc(sizeof(*b));

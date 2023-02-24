@@ -9,5 +9,4 @@
 #   1 value: ( `call 'n 'p ) 
 ? interp: unknown symbol 'n'
 ? interp_prefix2_arg: 1st argument is null
-? interp_call: prefix expression invalid
 #   1 interp: [Fatal , null ]
