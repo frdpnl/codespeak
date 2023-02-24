@@ -1972,7 +1972,7 @@ interp_end(Env *e, Val *s, size_t p) {
 	return (Ir) {OK, s};
 }
 
-/* --- interp function application --- */
+/* --- interp (user) function application --- */
 static Ir 
 interp_fun(Env *e, Val *s, size_t p) {
 	/* rem: ... foo (1, 2) or foo () ... */
