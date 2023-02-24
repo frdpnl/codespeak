@@ -49,11 +49,11 @@ Skip
 it = 0 
 a = 3 
 b = 4 
-# ----line: "endif"
-# --phrase: endif ; 
-#   0  expr: endif
-#   0  seme: ( endif ) 
-#   0 value: ( `endif ) 
+# ----line: "end if"
+# --phrase: end if ; 
+#   0  expr: end if
+#   0  seme: ( end if ) 
+#   0 value: ( `end `if ) 
 #   0 interp: [Ok , 0  ]
 Ok 
 it = 0 
@@ -70,8 +70,8 @@ Ok
 it = 0 
 a = 3 
 b = 4 
-# ----line: "if false? ; print it ; endif"
-# --phrase: if false?  ; print it  ; endif ; 
+# ----line: "if false? ; print it ; end if"
+# --phrase: if false?  ; print it  ; end if ; 
 #   0  expr: if false? 
 #   0  seme: ( if false? ) 
 #   0 value: ( `if `false? ) 
@@ -81,9 +81,9 @@ b = 4
 #   1 value: ( `print 1 ) 
 1 
 #   1 interp: [Ok , 1  ]
-#   2  expr: endif
-#   2  seme: ( endif ) 
-#   2 value: ( `endif ) 
+#   2  expr: end if
+#   2  seme: ( end if ) 
+#   2 value: ( `end `if ) 
 #   2 interp: [Ok , 1  ]
 Ok 
 it = 1 

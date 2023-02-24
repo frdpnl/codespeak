@@ -3,8 +3,8 @@ if 4 >= 2
 	print one
 	if 2. = 2 
 		print two
-	endif
-	if 3 > 1 ; print three ; endif
+	end if
+	if 3 > 1 ; print three ; end if
 	print four
-endif
+end if
 print done

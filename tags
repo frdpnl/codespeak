@@ -30,7 +30,6 @@ interp_def	phrase.c	/^interp_def(Env *e, Val *s, size_t p) {$/
 interp_div	phrase.c	/^interp_div(Env *e, Val *s, size_t p) {$/
 interp_do	phrase.c	/^interp_do(Env *e, Val *s, size_t p) {$/
 interp_end	phrase.c	/^interp_end(Env *e, Val *s, size_t p) {$/
-interp_endif	phrase.c	/^interp_endif(Env *e, Val *s, size_t p) {$/
 interp_eq	phrase.c	/^interp_eq(Env *e, Val *s, size_t p) {$/
 interp_eqv	phrase.c	/^interp_eqv(Env *e, Val *s, size_t p) {$/
 interp_false	phrase.c	/^interp_false(Env *e, Val *s, size_t p) {$/
@@ -60,7 +59,6 @@ interp_show	phrase.c	/^interp_show(Env *e, Val *s, size_t p) {$/
 interp_skip	phrase.c	/^interp_skip(Env *e, Val *s, size_t p) {$/
 interp_true	phrase.c	/^interp_true(Env *e, Val *s, size_t p) {$/
 inxs	phrase.c	/^} inxs;  	\/* OOB for out of band *\/$/
-is_symopcall	phrase.c	/^is_symopcall(Val *a, size_t l, const char *s) {$/
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/
 isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/

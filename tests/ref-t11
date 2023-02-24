@@ -1,5 +1,5 @@
-# ----line: "if 2 > 1. ; print correct ; endif"
-# --phrase: if 2 > 1.  ; print correct  ; endif ; 
+# ----line: "if 2 > 1. ; print correct ; end if"
+# --phrase: if 2 > 1.  ; print correct  ; end if ; 
 #   0  expr: if 2 > 1. 
 #   0  seme: ( if 2N > 1.00R ) 
 #   0 value: ( `if 2 `> 1.00 ) 
@@ -9,9 +9,9 @@
 #   1 value: ( `print 'correct ) 
 'correct 
 #   1 interp: [Ok , 'correct  ]
-#   2  expr: endif
-#   2  seme: ( endif ) 
-#   2 value: ( `endif ) 
+#   2  expr: end if
+#   2  seme: ( end if ) 
+#   2 value: ( `end `if ) 
 #   2 interp: [Ok , 'correct  ]
 Ok 
 it = 'correct 
@@ -27,16 +27,16 @@ it = 'correct
 #   1 interp: [Skip , 0  ]
 Skip 
 it = 0 
-# ----line: "endif"
-# --phrase: endif ; 
-#   0  expr: endif
-#   0  seme: ( endif ) 
-#   0 value: ( `endif ) 
+# ----line: "end if"
+# --phrase: end if ; 
+#   0  expr: end if
+#   0  seme: ( end if ) 
+#   0 value: ( `end `if ) 
 #   0 interp: [Ok , 0  ]
 Ok 
 it = 0 
-# ----line: "4. > 2 ; if true? ; print true ; endif"
-# --phrase: 4. > 2  ; if true?  ; print true  ; endif ; 
+# ----line: "4. > 2 ; if true? ; print true ; end if"
+# --phrase: 4. > 2  ; if true?  ; print true  ; end if ; 
 #   0  expr: 4. > 2 
 #   0  seme: ( 4.00R > 2N ) 
 #   0 value: ( 4.00 `> 2 ) 
@@ -50,14 +50,14 @@ it = 0
 #   2 value: ( `print 'true ) 
 'true 
 #   2 interp: [Ok , 'true  ]
-#   3  expr: endif
-#   3  seme: ( endif ) 
-#   3 value: ( `endif ) 
+#   3  expr: end if
+#   3  seme: ( end if ) 
+#   3 value: ( `end `if ) 
 #   3 interp: [Ok , 'true  ]
 Ok 
 it = 'true 
-# ----line: "4. > 2 ; if false? ; print false ; endif"
-# --phrase: 4. > 2  ; if false?  ; print false  ; endif ; 
+# ----line: "4. > 2 ; if false? ; print false ; end if"
+# --phrase: 4. > 2  ; if false?  ; print false  ; end if ; 
 #   0  expr: 4. > 2 
 #   0  seme: ( 4.00R > 2N ) 
 #   0 value: ( 4.00 `> 2 ) 
@@ -70,9 +70,9 @@ it = 'true
 #   2  seme: ( print false ) 
 #   2 value: ( `print 'false ) 
 #   2 interp: [Skip , 0  ]
-#   3  expr: endif
-#   3  seme: ( endif ) 
-#   3 value: ( `endif ) 
+#   3  expr: end if
+#   3  seme: ( end if ) 
+#   3 value: ( `end `if ) 
 #   3 interp: [Ok , 0  ]
 Ok 
 it = 0 

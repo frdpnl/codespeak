@@ -1,5 +1,5 @@
-# ----line: "2 * 2 ; call it n ; if n - 1 > n * 2 ; print wrong ; endif"
-# --phrase: 2 * 2  ; call it n  ; if n - 1 > n * 2  ; print wrong  ; endif ; 
+# ----line: "2 * 2 ; call it n ; if n - 1 > n * 2 ; print wrong ; end if"
+# --phrase: 2 * 2  ; call it n  ; if n - 1 > n * 2  ; print wrong  ; end if ; 
 #   0  expr: 2 * 2 
 #   0  seme: ( 2N * 2N ) 
 #   0 value: ( 2 `* 2 ) 
@@ -16,9 +16,9 @@
 #   3  seme: ( print wrong ) 
 #   3 value: ( `print 'wrong ) 
 #   3 interp: [Skip , 0  ]
-#   4  expr: endif
-#   4  seme: ( endif ) 
-#   4 value: ( `endif ) 
+#   4  expr: end if
+#   4  seme: ( end if ) 
+#   4 value: ( `end `if ) 
 #   4 interp: [Ok , 0  ]
 Ok 
 it = 0 

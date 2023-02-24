@@ -31,16 +31,16 @@ it = 0
 #   0 interp: [Skip , 0  ]
 Skip 
 it = 0 
-# ----line: "	endif"
-# --phrase: endif ; 
-#   0  expr: endif
-#   0  seme: ( endif ) 
-#   0 value: ( `endif ) 
+# ----line: "	end if"
+# --phrase: end if ; 
+#   0  expr: end if
+#   0  seme: ( end if ) 
+#   0 value: ( `end `if ) 
 #   0 interp: [Ok , 0  ]
 Ok 
 it = 0 
-# ----line: "	if 3 > 1 ; print three ; endif"
-# --phrase: if 3 > 1  ; print three  ; endif ; 
+# ----line: "	if 3 > 1 ; print three ; end if"
+# --phrase: if 3 > 1  ; print three  ; end if ; 
 #   0  expr: if 3 > 1 
 #   0  seme: ( if 3N > 1N ) 
 #   0 value: ( `if 3 `> 1 ) 
@@ -50,9 +50,9 @@ it = 0
 #   1 value: ( `print 'three ) 
 'three 
 #   1 interp: [Ok , 'three  ]
-#   2  expr: endif
-#   2  seme: ( endif ) 
-#   2 value: ( `endif ) 
+#   2  expr: end if
+#   2  seme: ( end if ) 
+#   2 value: ( `end `if ) 
 #   2 interp: [Ok , 'three  ]
 Ok 
 it = 'three 
@@ -65,11 +65,11 @@ it = 'three
 #   0 interp: [Ok , 'four  ]
 Ok 
 it = 'four 
-# ----line: "endif"
-# --phrase: endif ; 
-#   0  expr: endif
-#   0  seme: ( endif ) 
-#   0 value: ( `endif ) 
+# ----line: "end if"
+# --phrase: end if ; 
+#   0  expr: end if
+#   0  seme: ( end if ) 
+#   0 value: ( `end `if ) 
 #   0 interp: [Ok , 'four  ]
 Ok 
 it = 'four 

@@ -1805,24 +1805,28 @@ interp_if(Env *e, Val *s, size_t p) {
 	rc.v = s;
 	return rc;
 }
-static Ir 
-interp_endif(Env *e, Val *s, size_t p) {
-	if (p != s->seq.v.n -1) {
-		printf("? %s: 'endif' expected alone\n",
-				__FUNCTION__);
+static Ir
+interp_body(Env *e, Val *s, size_t p) {
+	Val *fun = lookup(e, IT, false);
+	if (fun == NULL) {
+		printf("? %s: 'it' undefined\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
-	Val *b = NULL;
-	Val *a = lookup(e, IT, false);
-	if (a == NULL) {
-		b = malloc(sizeof(*b));
-		assert(b != NULL);
-		b->hdr.t = VNIL;
-	} else {
-		b = copy_v(a);
+	if (fun->hdr.t != VSYMF) {
+		printf("? %s: 'it' is not a function\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
 	}
-	upd_prefixall(s, p, b);
-	return (Ir) {OK, s};
+	fun->symf.body = push_l(fun->symf.body, s);
+	return (Ir) {FUN, copy_v(fun)};
+}
+static Ir
+interp_skip(Env *e, Val *s, size_t p) {
+	Val *it = lookup(e, IT, false);
+	if (it == NULL) {
+		printf("? %s: 'it' undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	return (Ir) {SKIP, copy_v(it)};
 }
 static Ir 
 interp_rem(Env *e, Val *s, size_t p) {
@@ -1900,51 +1904,74 @@ interp_def(Env *e, Val *s, size_t p) {
 }
 static Ir 
 interp_end(Env *e, Val *s, size_t p) {
-	/* rem: end somefun; */
+	/* rem: end somefun or end if ; */
 	if (p != 0 || s->seq.v.n != 2) {
-		printf("? %s: invalid 'end', expecting function name only\n",
+		printf("? %s: invalid 'end', expecting argument\n",
 				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	Val *a;
 	if (!interp_prefix1_arg(e, s, p, &a, false)) {
-		printf("? %s: prefix expression invalid\n", 
-				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
-	if (a->hdr.t != VSYM) {
-		printf("? %s: 'end argument not a symbol\n", 
+	Val *b = NULL;
+	if (a->hdr.t == VSYMOP) {
+		if (a->symop.v != interp_if) {
+			printf("? %s: 'end' with wrong operator\n",
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
+		Val *c = lookup(e, IT, false);
+		if (c == NULL) {
+			b = malloc(sizeof(*b));
+			assert(b != NULL);
+			b->hdr.t = VNIL;
+		} else {
+			b = copy_v(c);
+		}
+		free_v(a);
+	} else if (a->hdr.t == VSYM) {
+		Val *c = lookup(e, IT, false);
+		if (c == NULL) {
+			printf("? %s: 'it' does not point to function\n", 
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
+		if (c->hdr.t != VSYMF) {
+			printf("? %s: 'end' argument is not a function name\n", 
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
+		if (e->state != FUN) {
+			printf("? %s: 'end' outside function definition\n", 
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
+		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
+			printf("? %s: 'end' argument does not match function name\n", 
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
+		b = copy_v(c);
+		Symval *sv = symval(b->symf.name, b);
+		if (!stored_sym(e, sv)) {
+			free_symval(sv);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
+		free_v(a);
+	} else {
+		printf("? %s: 'end' with wrong argument type\n",
 				__FUNCTION__);
 		free_v(a);
 		return (Ir) {FATAL, NULL};
 	}
-	Val *b = lookup(e, IT, false);
-	if (b == NULL) {
-		printf("? %s: 'it does not point to function\n", 
-				__FUNCTION__);
-		free_v(a);
-		return (Ir) {FATAL, NULL};
-	}
-	if (b->hdr.t != VSYMF) {
-		printf("? %s: argument is not a function name\n", 
-				__FUNCTION__);
-		free_v(a);
-		return (Ir) {FATAL, NULL};
-	}
-	if (strncmp(a->sym.v, b->symf.name, sizeof(a->sym.v)) != 0) {
-		printf("? %s: 'end argument does not match defintion's\n", 
-				__FUNCTION__);
-		free_v(a);
-		return (Ir) {FATAL, NULL};
-	}
-	free_v(a);
-	Symval *sv = symval(b->symf.name, b);
-	if (!stored_sym(e, sv)) {
-		free_symval(sv);
-		return (Ir) {FATAL, NULL};
-	}
-	Val *f = copy_v(b);
-	upd_prefix1(s, p, f);
+	upd_prefix1(s, p, b);
 	return (Ir) {OK, s};
 }
 
@@ -2049,7 +2076,7 @@ typedef struct Symop_ {
 	int arity;
 } Symop;
 
-#define NSYMS 27
+#define NSYMS 26
 Symop Syms[] = {
 	(Symop) {"rem:",  -10, interp_rem,  -1},
 	(Symop) {"true?", -10, interp_true,  0},
@@ -2060,8 +2087,7 @@ Symop Syms[] = {
 	(Symop) {"call",  -10, interp_call,  2},
 	(Symop) {"define",-10, interp_def,  2},
 	(Symop) {"def",   -10, interp_def,  2},
-	(Symop) {"end",   -10, interp_end,  1},
-	(Symop) {"endif", -10, interp_endif, 0},
+	(Symop) {"end",   -10, interp_end,  1},  /* needs to be prior to funs */
 	(Symop) {"print", -10, interp_print, 1},
 	/* priority FUNPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, interp_mul, 2},
@@ -2094,7 +2120,7 @@ static Symop *
 lookup_op(char *a) {
 	for (size_t i=0; i<NSYMS; ++i) {
 		Symop *b = Syms+i;
-		if (strncmp(b->name, a, WSZ) == 0) {
+		if (strncmp(b->name, a, sizeof(b->name)) == 0) {
 			return b;
 		}
 	}
@@ -2209,17 +2235,11 @@ interp_items(Env *e, Val *a, bool look) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
+	Ir rc;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		Ir rc = interp(e, a->seq.v.v[i], look);
+		rc = interp(e, a->seq.v.v[i], look);
 		if (rc.state == FATAL) {
 			printf("? %s: list or seq item unknown\n",
-					__FUNCTION__);
-			free_v(b);
-			free_v(rc.v);
-			rc = (Ir) {FATAL, NULL};
-			return rc;
-		} else if (rc.state == SKIP) {
-			printf("? %s: list or seq item invalid\n",
 					__FUNCTION__);
 			free_v(b);
 			free_v(rc.v);
@@ -2229,42 +2249,13 @@ interp_items(Env *e, Val *a, bool look) {
 		b = push_v(a->hdr.t, b, rc.v);
 		free_v(rc.v);
 	}
-	Ir rc = (Ir) {OK, b};
+	rc.v = b;
 	return rc;
-}
-
-static bool
-is_symopcall(Val *a, size_t l, const char *s) {
-	return (a->hdr.t == VSYMOP 
-			&& strncmp(a->symop.name, s, sizeof(a->symop.name)) == 0
-			&& a->symop.arity == l - 1);
-}
-static Ir
-interp_body(Env *e, Val *s, size_t p) {
-	Val *fun = lookup(e, IT, false);
-	if (fun == NULL) {
-		printf("? %s: 'it' undefined\n", __FUNCTION__);
-		return (Ir) {FATAL, NULL};
-	}
-	if (fun->hdr.t != VSYMF) {
-		printf("? %s: 'it' is not a function\n", __FUNCTION__);
-		return (Ir) {FATAL, NULL};
-	}
-	fun->symf.body = push_l(fun->symf.body, s);
-	return (Ir) {FUN, copy_v(fun)};
-}
-static Ir
-interp_skip(Env *e, Val *s, size_t p) {
-	Val *it = lookup(e, IT, false);
-	if (it == NULL) {
-		printf("? %s: 'it' undefined\n", __FUNCTION__);
-		return (Ir) {FATAL, NULL};
-	}
-	return (Ir) {SKIP, copy_v(it)};
 }
 
 static Ir 
 interp_seq(Env *e, Val *b, bool look) {
+	/* symbol application: consumes the seq, until 1 item left */
 	Val *c;
 	if (b->seq.v.n == 0) {
 		/* empty seq, means nil value */
@@ -2272,16 +2263,18 @@ interp_seq(Env *e, Val *b, bool look) {
 		c->hdr.t = VNIL;
 		return (Ir) {OK, c};
 	}
-	if (e->state == FUN && !is_symopcall(b->seq.v.v[0], b->seq.v.n, ENDF)) {
-		/* we're in a function definition, add to function body */
-		return interp_body(e, b, 0);
+	if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
+			&& b->seq.v.v[0]->symop.v == interp_end
+			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
+		/* this does not look like a valid 'end x call */
+		if (e->state == FUN) {
+			return interp_body(e, b, 0);
+		}
+		if (e->state == SKIP) {
+			return interp_skip(e, b, 0);
+		}
 	}
-	if (e->state == SKIP && !is_symopcall(b->seq.v.v[0], b->seq.v.n, ENDIF)) {
-		/* we're in a false if, skip unless 'endif has arrived */
-		return interp_skip(e, b, 0);
-	}
-	/* symbol application: consumes the seq, until 1 item left */
-	Ir rc = (Ir) {OK, NULL};
+	Ir rc = (Ir) {e->state, NULL};
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
@@ -2366,7 +2359,7 @@ interp(Env *e, Val *a, bool look) {
 	}
 	if (a->hdr.t == VSEQ) {
 		Ir rc = interp_items(e, a, look);
-		if (rc.state != OK) {
+		if (rc.state == FATAL) {
 			return rc;
 		}
 		Val *b = rc.v;
