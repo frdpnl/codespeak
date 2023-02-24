@@ -1,0 +1,3 @@
+[submodule "libgrapheme"]
+	path = libgrapheme
+	url = https://git.suckless.org/libgrapheme
