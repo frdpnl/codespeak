@@ -560,10 +560,10 @@ typedef struct List_v_ {
 #define ENDIF "endif"
 
 typedef enum {
+	UNSET,
 	OK,
 	SKIP,	/* for 'if, skip until 'endif */
 	FUN,	/* we're processing a (multiline) function definition */
-	ENDFUN,	/* finished processing function definition */
 	FATAL
 } inxs;  	/* OOB for out of band */
 
@@ -672,6 +672,9 @@ print_v(Val *a) {
 static void
 print_inxs(inxs s) {
 	switch (s) {
+		case UNSET:
+			printf("Unset ");
+			break;
 		case OK:
 			printf("Ok ");
 			break;
@@ -680,9 +683,6 @@ print_inxs(inxs s) {
 			break;
 		case FUN:
 			printf("Fun ");
-			break;
-		case ENDFUN:
-			printf("EndFun ");
 			break;
 		case FATAL:
 			printf("Fatal ");
@@ -1154,8 +1154,6 @@ interp_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	}
 	Ir rc = interp(e, s->seq.v.v[p+1], looka);
 	if (rc.state != OK) {
-		printf("? %s: argument is null\n", 
-				__FUNCTION__);
 		return false;
 	}
 	a = rc.v;
@@ -2235,12 +2233,10 @@ interp_items(Env *e, Val *a, bool look) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
-	Ir rc;
+	Ir rc = {UNSET, NULL};
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		rc = interp(e, a->seq.v.v[i], look);
 		if (rc.state == FATAL) {
-			printf("? %s: list or seq item unknown\n",
-					__FUNCTION__);
 			free_v(b);
 			free_v(rc.v);
 			rc = (Ir) {FATAL, NULL};
@@ -2266,7 +2262,7 @@ interp_seq(Env *e, Val *b, bool look) {
 	if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
 			&& b->seq.v.v[0]->symop.v == interp_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
-		/* this does not look like a valid 'end x call */
+		/* this does not look like a valid 'end call */
 		if (e->state == FUN) {
 			return interp_body(e, b, 0);
 		}
@@ -2274,7 +2270,7 @@ interp_seq(Env *e, Val *b, bool look) {
 			return interp_skip(e, b, 0);
 		}
 	}
-	Ir rc = (Ir) {e->state, NULL};
+	Ir rc = {UNSET, NULL};
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
@@ -2282,8 +2278,11 @@ interp_seq(Env *e, Val *b, bool look) {
 			/* loop end, return the reduced to value, 
 			 * unless it's an operator of 0 arity,
 			 * then, fall through & execute it below */
-			/* also, functions all have one parameter */
+			/* (functions all have one parameter) */
 			if (!(c->hdr.t == VSYMOP && c->symop.arity == 0)) {
+				if (rc.state == UNSET) {
+					rc.state = e->state;
+				}
 				rc.v = copy_v(c);
 				return rc;
 			}
@@ -2328,6 +2327,7 @@ interp_seq(Env *e, Val *b, bool look) {
 			return rc;
 		}
 		b = rc.v;
+		/* rc.state kept from interp_* */
 	}
 	/* empty seq, means nil value */
 	c = malloc(sizeof(*c));
