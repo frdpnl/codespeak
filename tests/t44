@@ -1,0 +1,8 @@
+
+def f (a,) 
+	def g () ; 2 ; end g
+end f
+
+f (3,) ; call it f3
+f3 ()
+

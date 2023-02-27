@@ -1918,11 +1918,13 @@ interp_end(Env *e, Val *s, size_t p) {
 			return (Ir) {FATAL, NULL};
 		}
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
-			printf("? %s: 'end' argument does not match function name\n", 
-					__FUNCTION__);
+			/* rem: not the function being defined, then part of the body */
 			free_v(a);
-			return (Ir) {FATAL, NULL};
+			Ir rc = interp_body(e, s, p);
+			upd_prefix1(s, p, rc.v);
+			return (Ir) {rc.state, s};
 		}
+		/* rem: end 'fun ; add the fun symbol */
 		b = copy_v(c);
 		Symval *sv = symval(b->symf.name, b);
 		if (!stored_sym(e, sv)) {
