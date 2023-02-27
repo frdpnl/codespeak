@@ -11,5 +11,7 @@ it = `(inc ('a ) 0 val)
 #   0  expr: end define
 #   0  seme: ( end define ) 
 #   0 value: ( `end `define ) 
-? interp_end: 'end' with wrong operator
-#   0 interp: [Fatal , null ]
+#   0 interp: [Fun , `(inc ('a ) 1 val)  ]
+Fun 
+it = `(inc ('a ) 1 val) 
+? main: unexpected end of program

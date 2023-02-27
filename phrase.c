@@ -1873,6 +1873,13 @@ interp_end(Env *e, Val *s, size_t p) {
 	}
 	Val *b = NULL;
 	if (a->hdr.t == VSYMOP) {
+		/* rem: end if */
+		if (e->state == FUN) {
+			free_v(a);
+			Ir rc = interp_body(e, s, p);
+			upd_prefix1(s, p, rc.v);
+			return (Ir) {rc.state, s};
+		}
 		if (a->symop.v != interp_if) {
 			printf("? %s: 'end' with wrong operator\n",
 					__FUNCTION__);
@@ -1890,6 +1897,13 @@ interp_end(Env *e, Val *s, size_t p) {
 		}
 		free_v(a);
 	} else if (a->hdr.t == VSYM) {
+		/* rem: end function */
+		if (e->state != FUN) {
+			printf("? %s: 'end' outside function definition\n", 
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
 		Val *c = lookup(e, IT, false);
 		if (c == NULL) {
 			printf("? %s: 'it' undefined\n", 
@@ -1899,12 +1913,6 @@ interp_end(Env *e, Val *s, size_t p) {
 		}
 		if (c->hdr.t != VSYMF) {
 			printf("? %s: 'end' argument is not a function name\n", 
-					__FUNCTION__);
-			free_v(a);
-			return (Ir) {FATAL, NULL};
-		}
-		if (e->state != FUN) {
-			printf("? %s: 'end' outside function definition\n", 
 					__FUNCTION__);
 			free_v(a);
 			return (Ir) {FATAL, NULL};
@@ -2471,10 +2479,10 @@ interp_ph(Env *env, Phrase *a) {
 		Ir xs = interp(env, v, false);
 		free_v(v);
 		printf("# %3lu %5s: ", i, "interp"); print_rc(xs); printf("\n"); 
-		env->state = xs.state;
-		if (env->state == FATAL) {
+		if (xs.state == FATAL) {
 			return false;
 		}
+		env->state = xs.state;
 		Symval *it = symval(IT, xs.v);
 		free_v(xs.v);
 		if (it == NULL) {

@@ -1,0 +1,5 @@
+
+def f () 
+if 1 ; ok ; end if
+end f
+

@@ -7,5 +7,5 @@
 #   1  expr: end foo
 #   1  seme: ( end foo ) 
 #   1 value: ( `end 'foo ) 
-? interp_end: 'end' argument is not a function name
+? interp_end: 'end' outside function definition
 #   1 interp: [Fatal , null ]
