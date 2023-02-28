@@ -328,17 +328,23 @@ isnat(Word *a) {
 				__FUNCTION__);
 		return NULL;
 	}
-	const char *err;
 	errno = 0;
-	long long n = strtonum(a->v, LLONG_MIN, LLONG_MAX, &err);
-	if (err == NULL) {
-		return sem_nat(n);
+	char *end = NULL;
+	long long n = strtoll(a->v, &end, 10);
+	if (errno == EINVAL) {
+		printf("? %s: natural number invalid %s\n", 
+				__FUNCTION__, a->v);
+		return NULL;
 	}
 	if (errno == ERANGE) {
 		printf("? %s: natural number out of range %s\n", 
 				__FUNCTION__, a->v);
+		return NULL;
 	} 
-	return NULL;
+	if (*end != '\0') {
+		return NULL;
+	} 
+	return sem_nat(n);
 }
 
 static Sem *

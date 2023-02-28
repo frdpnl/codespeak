@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 TDIR="tests"
 for t in $(ls $TDIR/t*); do
