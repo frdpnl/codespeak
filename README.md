@@ -69,13 +69,28 @@ Whitespace separates words.
 
 ### Conditional
 
-`if 2 > 1 ; print correct` displays correct
+`if 2 > 1 ; print correct ; end if` displays correct
 
-`if -3 > 3 ; print weird` doesn't display anything, rest of line is ignored, `it` is false
+`if -3 > 3 ; print weird ; end if` doesn't display anything, rest of line is ignored, `it` is false
 
-`if false? ; print better` displays better, because `it` is false (from previous `if`)
+`if false? ; print better ; end if` displays better, because `it` is false (from previous `if`)
 
-`2 > 1 ; if true? ; print true` displays 'true
+`2 > 1 ; if true? ; print true ; end if` displays 'true
+
+### Functions
+
+```
+define f (a,) ; a * 2 ; end f
+f (3,) ; print it
+```
+
+```
+define newf ()
+	define g () ; 2 ; end g
+end f
+newf () ; call it two
+two ()
+```
 
 ### Invalid expressions
 
