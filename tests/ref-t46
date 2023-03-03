@@ -1,0 +1,86 @@
+# ----line: "def a* (a,) "
+# --phrase: def a* (a,)  ; 
+#   0  expr: def a* (a,) 
+#   0  seme: ( def a* { a } ) 
+#   0 value: ( `def 'a* { 'a } ) 
+#   0 interp: [Fun , `(a* ('a ) 0 val)  ]
+Fun 
+it = `(a* ('a ) 0 val) 
+# ----line: "	def f (x,) ; a * x ; end f"
+# --phrase: def f (x,)  ; a * x  ; end f ; 
+#   0  expr: def f (x,) 
+#   0  seme: ( def f { x } ) 
+#   0 value: ( `def 'f { 'x } ) 
+#   0 interp: [Fun , `(a* ('a ) 1 val)  ]
+#   1  expr: a * x 
+#   1  seme: ( a * x ) 
+#   1 value: ( 'a `* 'x ) 
+#   1 interp: [Fun , `(a* ('a ) 2 val)  ]
+#   2  expr: end f
+#   2  seme: ( end f ) 
+#   2 value: ( `end 'f ) 
+#   2 interp: [Fun , `(a* ('a ) 3 val)  ]
+Fun 
+it = `(a* ('a ) 3 val) 
+# ----line: "end a*"
+# --phrase: end a* ; 
+#   0  expr: end a*
+#   0  seme: ( end a* ) 
+#   0 value: ( `end 'a* ) 
+#   0 interp: [Ok , `(a* ('a ) 3 val)  ]
+Ok 
+it = `(a* ('a ) 3 val) 
+a* = `(a* ('a ) 3 val) 
+# ----line: "a* (-1,) ; call it opposite"
+# --phrase: a* (-1,)  ; call it opposite ; 
+#   0  expr: a* (-1,) 
+#   0  seme: ( a* { -1N } ) 
+#   0 value: ( `(a* ('a ) 3 val) { -1 } ) 
+- interp_fun value: ( `def 'f { 'x } ) 
+- interp_fun interp: [Fun , `(f ('x ) 0 val)  ]
+- interp_fun value: ( 'a `* 'x ) 
+- interp_fun interp: [Fun , `(f ('x ) 1 val)  ]
+- interp_fun value: ( `end 'f ) 
+- interp_fun interp: [Ok , `(f ('x ) 1 val)  ]
+Ok 
+a = -1 
+it = `(f ('x ) 1 val) 
+f = `(f ('x ) 1 val) 
+parent:
+Ok 
+it = `(a* ('a ) 3 val) 
+a* = `(a* ('a ) 3 val) 
+#   0 interp: [Ok , `(f ('x ) 1 val)  ]
+#   1  expr: call it opposite
+#   1  seme: ( call it opposite ) 
+#   1 value: ( `call `(f ('x ) 1 val) 'opposite ) 
+#   1 interp: [Ok , `(f ('x ) 1 val)  ]
+Ok 
+it = `(f ('x ) 1 val) 
+a* = `(a* ('a ) 3 val) 
+opposite = `(f ('x ) 1 val) 
+# ----line: "opposite (2,) ; print it"
+# --phrase: opposite (2,)  ; print it ; 
+#   0  expr: opposite (2,) 
+#   0  seme: ( opposite { 2N } ) 
+#   0 value: ( `(f ('x ) 1 val) { 2 } ) 
+- interp_fun value: ( -1 `* 'x ) 
+- interp_fun interp: [Ok , -2  ]
+Ok 
+x = 2 
+it = -2 
+parent:
+Ok 
+it = `(f ('x ) 1 val) 
+a* = `(a* ('a ) 3 val) 
+opposite = `(f ('x ) 1 val) 
+#   0 interp: [Ok , -2  ]
+#   1  expr: print it
+#   1  seme: ( print it ) 
+#   1 value: ( `print -2 ) 
+-2 
+#   1 interp: [Ok , -2  ]
+Ok 
+it = -2 
+a* = `(a* ('a ) 3 val) 
+opposite = `(f ('x ) 1 val) 

@@ -1,0 +1,5 @@
+
+3 ; call it A
+def f (x,) ; A * x ; end f
+f (-1,) ; print it
+

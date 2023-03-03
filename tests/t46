@@ -1,0 +1,7 @@
+
+def a* (a,) 
+	def f (x,) ; a * x ; end f
+end a*
+
+a* (-1,) ; call it opposite
+opposite (2,) ; print it

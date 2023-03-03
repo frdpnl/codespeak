@@ -172,6 +172,7 @@ param	phrase.c	/^		List_v param;$/;"	m	struct:Val_::__anon2f313ef91308	typeref:t
 parent	phrase.c	/^	struct Env_ *parent;$/;"	m	struct:Env_	typeref:struct:Env_ *	file:
 phrase	phrase.c	/^phrase() {$/;"	f	typeref:typename:Phrase *	file:
 phrase_of_str	phrase.c	/^phrase_of_str(char *a) {$/;"	f	typeref:typename:Phrase *	file:
+position	phrase.c	/^position(Val *a, List_v lv) {$/;"	f	typeref:typename:int	file:
 prefixed1	phrase.c	/^prefixed1(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
 prefixed2	phrase.c	/^prefixed2(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
 print_env	phrase.c	/^print_env(Env *a) {$/;"	f	typeref:typename:void	file:

@@ -1768,6 +1768,17 @@ interp_if(Env *e, Val *s, size_t p) {
 	rc.v = s;
 	return rc;
 }
+
+static int  
+position(Val *a, List_v lv) {
+	for (size_t i=0; i<lv.n; ++i) {
+		if (isequal_v(a, lv.v[i])) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 static Ir
 interp_body(Env *e, Val *s, size_t p) {
 	Val *fun = lookup(e, IT, false);
@@ -1778,6 +1789,26 @@ interp_body(Env *e, Val *s, size_t p) {
 	if (fun->hdr.t != VSYMF) {
 		printf("? %s: 'it' is not a function\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
+	}
+	/* closure: replace free symbols with env value */
+	for (size_t i=0; i<s->seq.v.n; ++i) {
+		Val *c = s->seq.v.v[i];
+		if (c->hdr.t != VSYM) {
+			continue;
+		}
+		int id = position(c, fun->symf.param);
+		/* ignore function parameters */
+		if (id != -1) {
+			continue;
+		}
+		Val *fv = lookup(e, c->sym.v, true);
+		/* unknown sym, can be normal, determined in application */
+		if (fv == NULL) {
+			continue;
+		}
+		/* closure: replace sym with value from env */
+		free_v(c);
+		s->seq.v.v[i] = copy_v(fv);
 	}
 	fun->symf.body = push_l(fun->symf.body, s);
 	return (Ir) {FUN, copy_v(fun)};
@@ -2230,19 +2261,22 @@ interp_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
 	Val *c;
 	if (b->seq.v.n == 0) {
-		/* empty seq, means nil value */
+		/* empty seq, means nil value, cannot happen */
 		c = malloc(sizeof(*c));
 		c->hdr.t = VNIL;
-		return (Ir) {OK, c};
+		return (Ir) {e->state, c};
 	}
-	if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
-			&& b->seq.v.v[0]->symop.v == interp_end
-			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
-		/* this does not look like a valid 'end call */
-		if (e->state == FUN) {
+	if (e->state == FUN) {
+		if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
+				&& b->seq.v.v[0]->symop.v == interp_end
+				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
 			return interp_body(e, b, 0);
 		}
-		if (e->state == SKIP) {
+	}
+	if (e->state == SKIP) {
+		if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
+				&& b->seq.v.v[0]->symop.v == interp_end
+				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
 			return interp_skip(e, b, 0);
 		}
 	}
@@ -2303,12 +2337,12 @@ interp_seq(Env *e, Val *b, bool look) {
 			return rc;
 		}
 		b = rc.v;
-		/* rc.state kept from interp_* */
+		/* rc.state set by interp_* */
 	}
 	/* empty seq, means nil value */
 	c = malloc(sizeof(*c));
 	c->hdr.t = VNIL;
-	rc = (Ir) {OK, c};
+	rc = (Ir) {rc.state, c};
 	return rc;
 }
 
