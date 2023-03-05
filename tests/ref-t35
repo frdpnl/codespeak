@@ -3,5 +3,5 @@
 #   0  expr: def f 
 #   0  seme: ( def f ) 
 #   0 value: ( `def 'f ) 
-? interp_def: incorrect number of arguments to 'define'
-#   0 interp: [Fatal , null ]
+? reduce_def: incorrect number of arguments to 'define'
+#   0 reduce: [Fatal , null ]

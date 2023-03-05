@@ -3,5 +3,5 @@
 #   0  expr: define f (,) 
 #   0  seme: ( define f { Nil } ) 
 #   0 value: ( `define 'f { Nil } ) 
-? interp_def: expecting symbol for function parameter
-#   0 interp: [Fatal , null ]
+? reduce_def: expecting symbol for function parameter
+#   0 reduce: [Fatal , null ]

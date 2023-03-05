@@ -588,7 +588,7 @@ typedef struct Env_ {
 typedef struct {
 	inxs state;
 	Val *v;
-} Ir;		/* return type for interp */
+} Ir;		/* return type for reduce */
 
 typedef union Val_ {
 	struct {
@@ -1103,13 +1103,16 @@ stored_sym(Env *a, Symval *b) {
 }
 
 /* -------- operation symbol definitions ------------
- * recommended stateface (resource management):
+ * Reduce interface:
+ * reduce or modify the input sequence, but do not free seq
  * 1. work off copies of arguments
  * 2. produce a fresh value (can be one of the copies)
- * 3. replace symbol operation expression with that fresh value
+ * 3. replace operation application with that fresh value
  * (delete previous values in the expression, add new one)
- * 4. cleanup behind you (working copies)
- * */
+ * 4. cleanup working copies
+ *
+ * Interpreter returns a single val, not a seq.
+ */
 
 static Ir interp(Env *e, Val *a, bool look);
 
@@ -1127,7 +1130,7 @@ prefixed2(size_t p, size_t n) {
 }
 
 static bool
-interp_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
+reduce_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
 	Val *a, *b;
 	if (!infixed(p, s->seq.v.n)) {
 		printf("? %s: symbol not infixed\n", 
@@ -1154,7 +1157,7 @@ interp_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool 
 	return true;
 }
 static bool
-interp_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
+reduce_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	Val *a;
 	if (!prefixed1(p, s->seq.v.n)) {
 		printf("? %s: symbol not prefixed to one argument\n", 
@@ -1170,7 +1173,7 @@ interp_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	return true;
 }
 static bool
-interp_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
+reduce_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {
 	Val *a, *b;
 	if (!prefixed2(p, s->seq.v.n)) {
 		printf("? %s: symbol not prefixed to 2 arguments\n", 
@@ -1197,7 +1200,7 @@ interp_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, boo
 	return true;
 }
 static bool
-interp_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
+reduce_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	Val *a;
 	a = malloc(sizeof(*a));
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
@@ -1262,10 +1265,10 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 }
 
 static Ir 
-interp_mul(Env *e, Val *s, size_t p) {
+reduce_mul(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1292,10 +1295,10 @@ interp_mul(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_div(Env *e, Val *s, size_t p) {
+reduce_div(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1330,10 +1333,10 @@ interp_div(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir
-interp_plu(Env *e, Val *s, size_t p) {
+reduce_plu(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1360,10 +1363,10 @@ interp_plu(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_min(Env *e, Val *s, size_t p) {
+reduce_min(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
@@ -1390,10 +1393,10 @@ interp_min(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir
-interp_les(Env *e, Val *s, size_t p) {
+reduce_les(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1422,10 +1425,10 @@ interp_les(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir
-interp_leq(Env *e, Val *s, size_t p) {
+reduce_leq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1454,10 +1457,10 @@ interp_leq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_gre(Env *e, Val *s, size_t p) {
+reduce_gre(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1486,10 +1489,10 @@ interp_gre(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_geq(Env *e, Val *s, size_t p) {
+reduce_geq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	/* to be expanded to other types */
@@ -1518,10 +1521,10 @@ interp_geq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_eq(Env *e, Val *s, size_t p) {
+reduce_eq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	bool c = isequal_v(a, b);
@@ -1535,10 +1538,10 @@ interp_eq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_neq(Env *e, Val *s, size_t p) {
+reduce_neq(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	bool c = isequal_v(a, b);
@@ -1552,10 +1555,10 @@ interp_neq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_eqv(Env *e, Val *s, size_t p) {
+reduce_eqv(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	bool c = isequiv_v(a, b);
@@ -1569,10 +1572,10 @@ interp_eqv(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_and(Env *e, Val *s, size_t p) {
+reduce_and(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
@@ -1591,10 +1594,10 @@ interp_and(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_or(Env *e, Val *s, size_t p) {
+reduce_or(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a, *b;
-	if (!interp_infix_arg(e, s, p, &a, true, &b, true)) {
+	if (!reduce_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
@@ -1613,10 +1616,10 @@ interp_or(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_not(Env *e, Val *s, size_t p) {
+reduce_not(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
-	if (!interp_prefix1_arg(e, s, p, &a, true)) {
+	if (!reduce_prefix1_arg(e, s, p, &a, true)) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT)) {
@@ -1632,10 +1635,10 @@ interp_not(Env *e, Val *s, size_t p) {
 }
 
 static Ir 
-interp_print(Env *e, Val *s, size_t p) {
+reduce_print(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
-	if (!interp_prefix1_arg(e, s, p, &a, false)) {
+	if (!reduce_prefix1_arg(e, s, p, &a, false)) {
 		return rc;
 	}
 	print_v(a);
@@ -1645,10 +1648,10 @@ interp_print(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_show(Env *e, Val *s, size_t p) {
+reduce_look(Env *e, Val *s, size_t p) {
 	Ir rc = (Ir) {FATAL, NULL};
 	Val *a;
-	if (!interp_prefix1_arg(e, s, p, &a, true)) {
+	if (!reduce_prefix1_arg(e, s, p, &a, true)) {
 		return rc;
 	}
 	upd_prefix1(s, p, a);
@@ -1656,9 +1659,9 @@ interp_show(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ir 
-interp_do(Env *e, Val *s, size_t p) {
+reduce_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!interp_prefix1_arg(e, s, p, &a, true)) {
+	if (!reduce_prefix1_arg(e, s, p, &a, true)) {
 		return (Ir) {FATAL, NULL};
 	}
 	if (a->hdr.t != VLST) {
@@ -1677,9 +1680,9 @@ interp_do(Env *e, Val *s, size_t p) {
 	return (Ir) {rc.state, s};
 }
 static Ir 
-interp_list(Env *e, Val *s, size_t p) {
+reduce_list(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!interp_prefixn_arg(e, s, p, &a, false)) {
+	if (!reduce_prefixn_arg(e, s, p, &a, false)) {
 		return (Ir) {FATAL, NULL};
 	}
 	a->hdr.t = VLST;
@@ -1687,9 +1690,9 @@ interp_list(Env *e, Val *s, size_t p) {
 	return (Ir) {OK, s};
 }
 static Ir 
-interp_call(Env *e, Val *s, size_t p) {
+reduce_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
-	if (!interp_prefix2_arg(e, s, p, &a, true, &b, false)) {
+	if (!reduce_prefix2_arg(e, s, p, &a, true, &b, false)) {
 		return (Ir) {FATAL, NULL};
 	}
 	if (b->hdr.t != VSYM) {
@@ -1714,7 +1717,7 @@ interp_call(Env *e, Val *s, size_t p) {
 	return (Ir) {OK, s};
 }
 static Ir 
-interp_true(Env *e, Val *s, size_t p) {
+reduce_true(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, IT, false);
 	if (a == NULL) {
@@ -1730,7 +1733,7 @@ interp_true(Env *e, Val *s, size_t p) {
 	return (Ir) {OK, s};
 }
 static Ir 
-interp_false(Env *e, Val *s, size_t p) {
+reduce_false(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, IT, false);
 	if (a == NULL) {
@@ -1746,14 +1749,14 @@ interp_false(Env *e, Val *s, size_t p) {
 	return (Ir) {OK, s};
 }
 static Ir 
-interp_if(Env *e, Val *s, size_t p) {
+reduce_if(Env *e, Val *s, size_t p) {
 	if (p != 0 || p != s->seq.v.n - 2) {
 		printf("? %s: 'if' sequence invalid\n",
 				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	Val *a;
-	if (!interp_prefix1_arg(e, s, p, &a, true)) {
+	if (!reduce_prefix1_arg(e, s, p, &a, true)) {
 		return (Ir) {FATAL, NULL};
 	}
 	Val *b = malloc(sizeof(*b));
@@ -1784,7 +1787,7 @@ position(Val *a, List_v lv) {
 }
 
 static Ir
-interp_body(Env *e, Val *s, size_t p) {
+reduce_body(Env *e, Val *s, size_t p) {
 	Val *fun = lookup(e, IT, false);
 	if (fun == NULL) {
 		printf("? %s: 'it' undefined\n", __FUNCTION__);
@@ -1818,7 +1821,7 @@ interp_body(Env *e, Val *s, size_t p) {
 	return (Ir) {FUN, copy_v(fun)};
 }
 static Ir
-interp_skip(Env *e, Val *s, size_t p) {
+reduce_skip(Env *e, Val *s, size_t p) {
 	Val *it = lookup(e, IT, false);
 	if (it == NULL) {
 		printf("? %s: 'it' undefined\n", __FUNCTION__);
@@ -1827,7 +1830,7 @@ interp_skip(Env *e, Val *s, size_t p) {
 	return (Ir) {SKIP, copy_v(it)};
 }
 static Ir 
-interp_else(Env *e, Val *s, size_t p) {
+reduce_else(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: 'else' syntax incorrect\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
@@ -1849,7 +1852,7 @@ interp_else(Env *e, Val *s, size_t p) {
 	return (Ir) {FATAL, NULL};
 }
 static Ir 
-interp_rem(Env *e, Val *s, size_t p) {
+reduce_rem(Env *e, Val *s, size_t p) {
 	Ir rc;
 	Val *b;
 	Val *a = lookup(e, IT, false);
@@ -1866,9 +1869,9 @@ interp_rem(Env *e, Val *s, size_t p) {
 	return rc;
 }
 
-/* --- interp function definition --- */
+/* --- reduce function definition --- */
 static Ir
-interp_def(Env *e, Val *s, size_t p) {
+reduce_def(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) or define foo () ; */
 	if (s->seq.v.n != 3 || p != 0) {
 		printf("? %s: incorrect number of arguments to 'define'\n",
@@ -1876,7 +1879,7 @@ interp_def(Env *e, Val *s, size_t p) {
 		return (Ir) {FATAL, NULL};
 	}
 	Val *fname, *fparam;
-	if (!interp_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
+	if (!reduce_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
 		return (Ir) {FATAL, NULL};
 	}
 	if (fname->hdr.t != VSYM) {
@@ -1923,7 +1926,7 @@ interp_def(Env *e, Val *s, size_t p) {
 	return (Ir) {FUN, s};
 }
 static Ir 
-interp_end(Env *e, Val *s, size_t p) {
+reduce_end(Env *e, Val *s, size_t p) {
 	/* rem: end somefun or end if ; */
 	if (p != 0 || s->seq.v.n != 2) {
 		printf("? %s: invalid 'end', expecting argument\n",
@@ -1931,7 +1934,7 @@ interp_end(Env *e, Val *s, size_t p) {
 		return (Ir) {FATAL, NULL};
 	}
 	Val *a;
-	if (!interp_prefix1_arg(e, s, p, &a, false)) {
+	if (!reduce_prefix1_arg(e, s, p, &a, false)) {
 		return (Ir) {FATAL, NULL};
 	}
 	Val *b = NULL;
@@ -1939,11 +1942,11 @@ interp_end(Env *e, Val *s, size_t p) {
 		/* rem: end if */
 		if (e->state == FUN) {
 			free_v(a);
-			Ir rc = interp_body(e, s, p);
+			Ir rc = reduce_body(e, s, p);
 			upd_prefix1(s, p, rc.v);
 			return (Ir) {rc.state, s};
 		}
-		if (a->symop.v != interp_if) {
+		if (a->symop.v != reduce_if) {
 			printf("? %s: 'end' with wrong operator\n",
 					__FUNCTION__);
 			free_v(a);
@@ -1983,7 +1986,7 @@ interp_end(Env *e, Val *s, size_t p) {
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
 			/* rem: not the function being defined, then part of the body */
 			free_v(a);
-			Ir rc = interp_body(e, s, p);
+			Ir rc = reduce_body(e, s, p);
 			upd_prefix1(s, p, rc.v);
 			return (Ir) {rc.state, s};
 		}
@@ -2005,13 +2008,13 @@ interp_end(Env *e, Val *s, size_t p) {
 	upd_prefix1(s, p, b);
 	return (Ir) {OK, s};
 }
-/* --- interp (user) function application --- */
+/* --- reduce (user) function application --- */
 static Ir 
-interp_fun(Env *e, Val *s, size_t p) {
+reduce_fun(Env *e, Val *s, size_t p) {
 	/* rem: ... foo (1, 2) or foo () ... */
 	Val *al;
 	Val *f = s->seq.v.v[p];
-	if (!interp_prefix1_arg(e, s, p, &al, true)) {
+	if (!reduce_prefix1_arg(e, s, p, &al, true)) {
 		printf("? %s: invalid argument to `%s\n", 
 				__FUNCTION__, f->symf.name);
 		return (Ir) {FATAL, NULL};
@@ -2054,14 +2057,14 @@ interp_fun(Env *e, Val *s, size_t p) {
 		}
 	}
 	free_v(al);
-	/* interp each expression in body, like interp_ph: */
+	/* reduce each expression in body, like interp_ph: */
 	Val *v;
 	for (size_t i=0; i<f->symf.body.n; ++i) {
 		v = copy_v(f->symf.body.v[i]);
 		printf("- %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n");
 		Ir xs = interp(le, v, false);
 		free_v(v);
-		printf("- %s %5s: ", __FUNCTION__, "interp"); print_rc(xs); printf("\n"); 
+		printf("- %s %5s: ", __FUNCTION__, "reduce"); print_rc(xs); printf("\n"); 
 		le->state = xs.state;
 		if (le->state == FATAL) {
 			free_env(le, false);
@@ -2098,7 +2101,7 @@ interp_fun(Env *e, Val *s, size_t p) {
 	return (Ir) {OK, s};
 }
 static Ir 
-interp_return(Env *e, Val *s, size_t p) {
+reduce_return(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: 'return' syntax incorrect\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
@@ -2128,35 +2131,35 @@ typedef struct Symop_ {
 
 #define NSYMS 28
 Symop Syms[] = {
-	(Symop) {"rem:",  -10, interp_rem,  -1}, /* arity: remainder of seq val */
-	(Symop) {"true?", -10, interp_true,  0},
-	(Symop) {"false?",-10, interp_false, 0},
-	(Symop) {"list",  -10, interp_list, -1},
-	(Symop) {"show",  -10, interp_show,  1},
-	(Symop) {"do",    -10, interp_do,    1},
-	(Symop) {"call",  -10, interp_call,  2},
-	(Symop) {"define",-10, interp_def,  2},
-	(Symop) {"def",   -10, interp_def,  2},
-	(Symop) {"return", -10, interp_return, 0},
-	(Symop) {"end",   -10, interp_end,  1}, /* needs to be prior to funs */
-	(Symop) {"else",  -10, interp_else, 0},
-	(Symop) {"print", -10, interp_print, 1},
+	(Symop) {"rem:",  -10, reduce_rem,  -1}, /* arity: remainder of seq val */
+	(Symop) {"true?", -10, reduce_true,  0},
+	(Symop) {"false?",-10, reduce_false, 0},
+	(Symop) {"list",  -10, reduce_list, -1},
+	(Symop) {"look",  -10, reduce_look,  1},
+	(Symop) {"do",    -10, reduce_do,    1},
+	(Symop) {"call",  -10, reduce_call,  2},
+	(Symop) {"define",-10, reduce_def,  2},
+	(Symop) {"def",   -10, reduce_def,  2},
+	(Symop) {"return", -10, reduce_return, 0},
+	(Symop) {"end",   -10, reduce_end,  1}, /* needs to be prior to funs */
+	(Symop) {"else",  -10, reduce_else, 0},
+	(Symop) {"print", -10, reduce_print, 1},
 	/* priority FUNPRIO (0) is for function (user defined) */
-	(Symop) {"*",    20, interp_mul, 2},
-	(Symop) {"/",    20, interp_div, 2},
-	(Symop) {"+",    30, interp_plu, 2},
-	(Symop) {"-",    30, interp_min, 2},
-	(Symop) {"<",    40, interp_les, 2},
-	(Symop) {"<=",   40, interp_leq, 2},
-	(Symop) {">",    40, interp_gre, 2},
-	(Symop) {">=",   40, interp_geq, 2},
-	(Symop) {"=",    40, interp_eq,  2},
-	(Symop) {"/=",   40, interp_neq, 2},
-	(Symop) {"~=",   40, interp_eqv, 2},
-	(Symop) {"not",  50, interp_not, 1},
-	(Symop) {"and",  60, interp_and, 2},
-	(Symop) {"or",   60, interp_or,  2},
-	(Symop) {"if",  100, interp_if,  1},
+	(Symop) {"*",    20, reduce_mul, 2},
+	(Symop) {"/",    20, reduce_div, 2},
+	(Symop) {"+",    30, reduce_plu, 2},
+	(Symop) {"-",    30, reduce_min, 2},
+	(Symop) {"<",    40, reduce_les, 2},
+	(Symop) {"<=",   40, reduce_leq, 2},
+	(Symop) {">",    40, reduce_gre, 2},
+	(Symop) {">=",   40, reduce_geq, 2},
+	(Symop) {"=",    40, reduce_eq,  2},
+	(Symop) {"/=",   40, reduce_neq, 2},
+	(Symop) {"~=",   40, reduce_eqv, 2},
+	(Symop) {"not",  50, reduce_not, 1},
+	(Symop) {"and",  60, reduce_and, 2},
+	(Symop) {"or",   60, reduce_or,  2},
+	(Symop) {"if",  100, reduce_if,  1},
 };
 static int
 minprio() {
@@ -2283,7 +2286,7 @@ val_of_seme(Env *e, Sem *s) {
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
 static Ir 
-interp_items(Env *e, Val *a, bool look) {
+reduce_items(Env *e, Val *a, bool look) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
@@ -2315,19 +2318,19 @@ interp_seq(Env *e, Val *b, bool look) {
 	}
 	if (e->state == FUN) {
 		if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
-				&& b->seq.v.v[0]->symop.v == interp_end
+				&& b->seq.v.v[0]->symop.v == reduce_end
 				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
-			return interp_body(e, b, 0);
+			return reduce_body(e, b, 0);
 		}
 	}
 	if (e->state == SKIP) {
 		bool is_end = b->seq.v.v[0]->hdr.t == VSYMOP 
-				&& b->seq.v.v[0]->symop.v == interp_end
+				&& b->seq.v.v[0]->symop.v == reduce_end
 				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1 ;
 		bool is_else = b->seq.v.v[0]->hdr.t == VSYMOP 
-				&& b->seq.v.v[0]->symop.v == interp_else ;
+				&& b->seq.v.v[0]->symop.v == reduce_else ;
 		if (!(is_end || is_else)) {
-			return interp_skip(e, b, 0);
+			return reduce_skip(e, b, 0);
 		}
 	}
 	Ir rc = {UNSET, NULL};
@@ -2378,7 +2381,7 @@ interp_seq(Env *e, Val *b, bool look) {
 		assert(symtype == VSYMF || symtype == VSYMOP);
 		/* apply the symbol, returns the reduced seq */
 		if (symtype == VSYMF) {
-			rc = interp_fun(e, b, symat);
+			rc = reduce_fun(e, b, symat);
 		} else if (symtype == VSYMOP) {
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
@@ -2387,7 +2390,7 @@ interp_seq(Env *e, Val *b, bool look) {
 			return rc;
 		}
 		b = rc.v;
-		/* rc.state set by interp_* */
+		/* rc.state set by reduce_* */
 	}
 	/* empty seq after reduction? */
 	return (Ir) {FATAL, NULL};
@@ -2412,10 +2415,10 @@ interp(Env *e, Val *a, bool look) {
 		return (Ir) {OK, copy_v(a)};
 	}
 	if (a->hdr.t == VLST) {
-		return interp_items(e, a, look);
+		return reduce_items(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		Ir rc = interp_items(e, a, look);
+		Ir rc = reduce_items(e, a, look);
 		if (rc.state == FATAL) {
 			return rc;
 		}
@@ -2567,7 +2570,7 @@ interp_ph(Env *env, Phrase *a) {
 		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
 		Ir xs = interp(env, v, false);
 		free_v(v);
-		printf("# %3lu %5s: ", i, "interp"); print_rc(xs); printf("\n"); 
+		printf("# %3lu %5s: ", i, "reduce"); print_rc(xs); printf("\n"); 
 		if (xs.state == FATAL) {
 			return false;
 		}

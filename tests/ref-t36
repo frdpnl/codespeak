@@ -3,7 +3,7 @@
 #   0  expr: if
 #   0  seme: ( if ) 
 #   0 value: ( `if ) 
-#   0 interp: [Ok , `if  ]
+#   0 reduce: [Ok , `if  ]
 Ok 
 it = `if 
 # ----line: "end if"
@@ -11,7 +11,7 @@ it = `if
 #   0  expr: end if
 #   0  seme: ( end if ) 
 #   0 value: ( `end `if ) 
-#   0 interp: [Ok , `if  ]
+#   0 reduce: [Ok , `if  ]
 Ok 
 it = `if 
 # ----line: "if ()"
@@ -19,7 +19,7 @@ it = `if
 #   0  expr: if ()
 #   0  seme: ( if Nil ) 
 #   0 value: ( `if Nil ) 
-#   0 interp: [Skip , 0  ]
+#   0 reduce: [Skip , 0  ]
 Skip 
 it = 0 
 ? main: unexpected end of program

@@ -3,15 +3,15 @@
 #   0  expr: define dec (a,) 
 #   0  seme: ( define dec { a } ) 
 #   0 value: ( `define 'dec { 'a } ) 
-#   0 interp: [Fun , `(dec ('a ) 0 val)  ]
+#   0 reduce: [Fun , `(dec ('a ) 0 val)  ]
 #   1  expr: a - 1 
 #   1  seme: ( a - 1N ) 
 #   1 value: ( 'a `- 1 ) 
-#   1 interp: [Fun , `(dec ('a ) 1 val)  ]
+#   1 reduce: [Fun , `(dec ('a ) 1 val)  ]
 #   2  expr: end dec
 #   2  seme: ( end dec ) 
 #   2 value: ( `end 'dec ) 
-#   2 interp: [Ok , `(dec ('a ) 1 val)  ]
+#   2 reduce: [Ok , `(dec ('a ) 1 val)  ]
 Ok 
 it = `(dec ('a ) 1 val) 
 dec = `(dec ('a ) 1 val) 
@@ -20,5 +20,5 @@ dec = `(dec ('a ) 1 val)
 #   0  expr: dec ()
 #   0  seme: ( dec Nil ) 
 #   0 value: ( `(dec ('a ) 1 val) Nil ) 
-? interp_fun: expected argument to `dec
-#   0 interp: [Fatal , null ]
+? reduce_fun: expected argument to `dec
+#   0 reduce: [Fatal , null ]

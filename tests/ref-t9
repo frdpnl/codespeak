@@ -3,19 +3,19 @@
 #   0  expr: * 
 #   0  seme: ( * ) 
 #   0 value: ( `* ) 
-#   0 interp: [Ok , `*  ]
+#   0 reduce: [Ok , `*  ]
 #   1  expr: call it op1
 #   1  seme: ( call it op1 ) 
 #   1 value: ( `call `* 'op1 ) 
-#   1 interp: [Ok , `*  ]
+#   1 reduce: [Ok , `*  ]
 #   2  expr: call op1 op2
 #   2  seme: ( call op1 op2 ) 
 #   2 value: ( `call `* 'op2 ) 
-#   2 interp: [Ok , `*  ]
+#   2 reduce: [Ok , `*  ]
 #   3  expr: call op2 op3
 #   3  seme: ( call op2 op3 ) 
 #   3 value: ( `call `* 'op3 ) 
-#   3 interp: [Ok , `*  ]
+#   3 reduce: [Ok , `*  ]
 Ok 
 it = `* 
 op1 = `* 
@@ -26,16 +26,16 @@ op3 = `*
 #   0  expr: 2, op3, 4. 
 #   0  seme: { 2N op3 4.00R } 
 #   0 value: { 2 `* 4.00 } 
-#   0 interp: [Ok , { 2 `* 4.00 }  ]
+#   0 reduce: [Ok , { 2 `* 4.00 }  ]
 #   1  expr: do it
 #   1  seme: ( do it ) 
 #   1 value: ( `do { 2 `* 4.00 } ) 
-#   1 interp: [Ok , 8.00  ]
+#   1 reduce: [Ok , 8.00  ]
 #   2  expr: print it
 #   2  seme: ( print it ) 
 #   2 value: ( `print 8.00 ) 
 8.00 
-#   2 interp: [Ok , 8.00  ]
+#   2 reduce: [Ok , 8.00  ]
 Ok 
 it = 8.00 
 op1 = `* 

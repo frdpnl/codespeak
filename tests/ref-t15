@@ -3,15 +3,15 @@
 #   0  expr: define dec (b,) 
 #   0  seme: ( define dec { b } ) 
 #   0 value: ( `define 'dec { 'b } ) 
-#   0 interp: [Fun , `(dec ('b ) 0 val)  ]
+#   0 reduce: [Fun , `(dec ('b ) 0 val)  ]
 #   1  expr: b - 1 
 #   1  seme: ( b - 1N ) 
 #   1 value: ( 'b `- 1 ) 
-#   1 interp: [Fun , `(dec ('b ) 1 val)  ]
+#   1 reduce: [Fun , `(dec ('b ) 1 val)  ]
 #   2  expr: end dec
 #   2  seme: ( end dec ) 
 #   2 value: ( `end 'dec ) 
-#   2 interp: [Ok , `(dec ('b ) 1 val)  ]
+#   2 reduce: [Ok , `(dec ('b ) 1 val)  ]
 Ok 
 it = `(dec ('b ) 1 val) 
 dec = `(dec ('b ) 1 val) 
@@ -19,52 +19,7 @@ dec = `(dec ('b ) 1 val)
 # --phrase: print (show dec) ; 
 #   0  expr: print (show dec)
 #   0  seme: ( print ( show dec ) ) 
-#   0 value: ( `print ( `show `(dec ('b ) 1 val) ) ) 
-`(dec ('b ) 1 val) 
-#   0 interp: [Ok , `(dec ('b ) 1 val)  ]
-Ok 
-it = `(dec ('b ) 1 val) 
-dec = `(dec ('b ) 1 val) 
-# ----line: "define inc (a,) "
-# --phrase: define inc (a,)  ; 
-#   0  expr: define inc (a,) 
-#   0  seme: ( define inc { a } ) 
-#   0 value: ( `define 'inc { 'a } ) 
-#   0 interp: [Fun , `(inc ('a ) 0 val)  ]
-Fun 
-it = `(inc ('a ) 0 val) 
-dec = `(dec ('b ) 1 val) 
-# ----line: "1 + a "
-# --phrase: 1 + a  ; 
-#   0  expr: 1 + a 
-#   0  seme: ( 1N + a ) 
-#   0 value: ( 1 `+ 'a ) 
-#   0 interp: [Fun , `(inc ('a ) 1 val)  ]
-Fun 
-it = `(inc ('a ) 1 val) 
-dec = `(dec ('b ) 1 val) 
-# ----line: "end inc"
-# --phrase: end inc ; 
-#   0  expr: end inc
-#   0  seme: ( end inc ) 
-#   0 value: ( `end 'inc ) 
-#   0 interp: [Ok , `(inc ('a ) 1 val)  ]
-Ok 
-it = `(inc ('a ) 1 val) 
-dec = `(dec ('b ) 1 val) 
-inc = `(inc ('a ) 1 val) 
-# ----line: "1 * 2; print it"
-# --phrase: 1 * 2 ; print it ; 
-#   0  expr: 1 * 2
-#   0  seme: ( 1N * 2N ) 
-#   0 value: ( 1 `* 2 ) 
-#   0 interp: [Ok , 2  ]
-#   1  expr: print it
-#   1  seme: ( print it ) 
-#   1 value: ( `print 2 ) 
-2 
-#   1 interp: [Ok , 2  ]
-Ok 
-it = 2 
-dec = `(dec ('b ) 1 val) 
-inc = `(inc ('a ) 1 val) 
+#   0 value: ( `print ( 'show `(dec ('b ) 1 val) ) ) 
+? reduce_prefix1_arg: symbol not prefixed to one argument
+? reduce_fun: invalid argument to `dec
+#   0 reduce: [Fatal , null ]

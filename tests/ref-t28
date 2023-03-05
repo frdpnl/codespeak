@@ -3,15 +3,15 @@
 #   0  expr: define f () 
 #   0  seme: ( define f Nil ) 
 #   0 value: ( `define 'f Nil ) 
-#   0 interp: [Fun , `(f () 0 val)  ]
+#   0 reduce: [Fun , `(f () 0 val)  ]
 #   1  expr: () 
 #   1  seme: ( Nil ) 
 #   1 value: ( Nil ) 
-#   1 interp: [Fun , `(f () 1 val)  ]
+#   1 reduce: [Fun , `(f () 1 val)  ]
 #   2  expr: end f
 #   2  seme: ( end f ) 
 #   2 value: ( `end 'f ) 
-#   2 interp: [Ok , `(f () 1 val)  ]
+#   2 reduce: [Ok , `(f () 1 val)  ]
 Ok 
 it = `(f () 1 val) 
 f = `(f () 1 val) 
@@ -20,15 +20,15 @@ f = `(f () 1 val)
 #   0  expr: f ()
 #   0  seme: ( f Nil ) 
 #   0 value: ( `(f () 1 val) Nil ) 
-- interp_fun value: ( Nil ) 
-- interp_fun interp: [Ok , Nil  ]
+- reduce_fun value: ( Nil ) 
+- reduce_fun reduce: [Ok , Nil  ]
 Ok 
 it = Nil 
 parent:
 Ok 
 it = `(f () 1 val) 
 f = `(f () 1 val) 
-#   0 interp: [Ok , Nil  ]
+#   0 reduce: [Ok , Nil  ]
 Ok 
 it = Nil 
 f = `(f () 1 val) 
@@ -37,11 +37,11 @@ f = `(f () 1 val)
 #   0  expr: define g () 
 #   0  seme: ( define g Nil ) 
 #   0 value: ( `define 'g Nil ) 
-#   0 interp: [Fun , `(g () 0 val)  ]
+#   0 reduce: [Fun , `(g () 0 val)  ]
 #   1  expr: end g
 #   1  seme: ( end g ) 
 #   1 value: ( `end 'g ) 
-#   1 interp: [Ok , `(g () 0 val)  ]
+#   1 reduce: [Ok , `(g () 0 val)  ]
 Ok 
 it = `(g () 0 val) 
 f = `(f () 1 val) 
@@ -57,5 +57,5 @@ Ok
 it = `(g () 0 val) 
 f = `(f () 1 val) 
 g = `(g () 0 val) 
-? interp_fun: 'it' from 'g' undefined
-#   0 interp: [Fatal , null ]
+? reduce_fun: 'it' from 'g' undefined
+#   0 reduce: [Fatal , null ]

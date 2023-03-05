@@ -3,11 +3,11 @@
 #   0  expr: 2 * 2. - 1 
 #   0  seme: ( 2N * 2.00R - 1N ) 
 #   0 value: ( 2 `* 2.00 `- 1 ) 
-#   0 interp: [Ok , 3.00  ]
+#   0 reduce: [Ok , 3.00  ]
 #   1  expr: call it n
 #   1  seme: ( call it n ) 
 #   1 value: ( `call 3.00 'n ) 
-#   1 interp: [Ok , 3.00  ]
+#   1 reduce: [Ok , 3.00  ]
 Ok 
 it = 3.00 
 n = 3.00 
@@ -16,11 +16,11 @@ n = 3.00
 #   0  expr: 1., +, 2 
 #   0  seme: { 1.00R + 2N } 
 #   0 value: { 1.00 `+ 2 } 
-#   0 interp: [Ok , { 1.00 `+ 2 }  ]
+#   0 reduce: [Ok , { 1.00 `+ 2 }  ]
 #   1  expr: call it A
 #   1  seme: ( call it A ) 
 #   1 value: ( `call { 1.00 `+ 2 } 'A ) 
-#   1 interp: [Ok , { 1.00 `+ 2 }  ]
+#   1 reduce: [Ok , { 1.00 `+ 2 }  ]
 Ok 
 it = { 1.00 `+ 2 } 
 n = 3.00 
@@ -30,7 +30,7 @@ A = { 1.00 `+ 2 }
 #   0  expr: do A 
 #   0  seme: ( do A ) 
 #   0 value: ( `do 'A ) 
-#   0 interp: [Ok , 3.00  ]
+#   0 reduce: [Ok , 3.00  ]
 Ok 
 it = 3.00 
 n = 3.00 
@@ -40,12 +40,12 @@ A = { 1.00 `+ 2 }
 #   0  expr: it = n 
 #   0  seme: ( it = n ) 
 #   0 value: ( 3.00 `= 'n ) 
-#   0 interp: [Ok , 1  ]
+#   0 reduce: [Ok , 1  ]
 #   1  expr: print it
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
 1 
-#   1 interp: [Ok , 1  ]
+#   1 reduce: [Ok , 1  ]
 Ok 
 it = 1 
 n = 3.00 

@@ -3,7 +3,7 @@
 #   0  expr: rem: testing comments
 #   0  seme: ( rem: testing comments ) 
 #   0 value: ( `rem: 'testing 'comments ) 
-#   0 interp: [Ok , Nil  ]
+#   0 reduce: [Ok , Nil  ]
 Ok 
 it = Nil 
 # ----line: "if 5 > 4 ; rem: a simple test ; print it "
@@ -11,16 +11,16 @@ it = Nil
 #   0  expr: if 5 > 4 
 #   0  seme: ( if 5N > 4N ) 
 #   0 value: ( `if 5 `> 4 ) 
-#   0 interp: [Ok , 1  ]
+#   0 reduce: [Ok , 1  ]
 #   1  expr: rem: a simple test 
 #   1  seme: ( rem: a simple test ) 
 #   1 value: ( `rem: 'a 'simple 'test ) 
-#   1 interp: [Ok , 1  ]
+#   1 reduce: [Ok , 1  ]
 #   2  expr: print it 
 #   2  seme: ( print it ) 
 #   2 value: ( `print 1 ) 
 1 
-#   2 interp: [Ok , 1  ]
+#   2 reduce: [Ok , 1  ]
 Ok 
 it = 1 
 # ----line: "if true? ; print it ; rem: again"
@@ -28,15 +28,15 @@ it = 1
 #   0  expr: if true? 
 #   0  seme: ( if true? ) 
 #   0 value: ( `if `true? ) 
-#   0 interp: [Ok , 1  ]
+#   0 reduce: [Ok , 1  ]
 #   1  expr: print it 
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
 1 
-#   1 interp: [Ok , 1  ]
+#   1 reduce: [Ok , 1  ]
 #   2  expr: rem: again
 #   2  seme: ( rem: again ) 
 #   2 value: ( `rem: 'again ) 
-#   2 interp: [Ok , 1  ]
+#   2 reduce: [Ok , 1  ]
 Ok 
 it = 1 

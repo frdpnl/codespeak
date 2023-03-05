@@ -3,11 +3,11 @@
 #   0  expr: 3 
 #   0  seme: ( 3N ) 
 #   0 value: ( 3 ) 
-#   0 interp: [Ok , 3  ]
+#   0 reduce: [Ok , 3  ]
 #   1  expr: call it A
 #   1  seme: ( call it A ) 
 #   1 value: ( `call 3 'A ) 
-#   1 interp: [Ok , 3  ]
+#   1 reduce: [Ok , 3  ]
 Ok 
 it = 3 
 A = 3 
@@ -16,15 +16,15 @@ A = 3
 #   0  expr: def f (x,) 
 #   0  seme: ( def f { x } ) 
 #   0 value: ( `def 'f { 'x } ) 
-#   0 interp: [Fun , `(f ('x ) 0 val)  ]
+#   0 reduce: [Fun , `(f ('x ) 0 val)  ]
 #   1  expr: A * x 
 #   1  seme: ( A * x ) 
 #   1 value: ( 'A `* 'x ) 
-#   1 interp: [Fun , `(f ('x ) 1 val)  ]
+#   1 reduce: [Fun , `(f ('x ) 1 val)  ]
 #   2  expr: end f
 #   2  seme: ( end f ) 
 #   2 value: ( `end 'f ) 
-#   2 interp: [Ok , `(f ('x ) 1 val)  ]
+#   2 reduce: [Ok , `(f ('x ) 1 val)  ]
 Ok 
 it = `(f ('x ) 1 val) 
 A = 3 
@@ -34,8 +34,8 @@ f = `(f ('x ) 1 val)
 #   0  expr: f (-1,) 
 #   0  seme: ( f { -1N } ) 
 #   0 value: ( `(f ('x ) 1 val) { -1 } ) 
-- interp_fun value: ( 3 `* 'x ) 
-- interp_fun interp: [Ok , -3  ]
+- reduce_fun value: ( 3 `* 'x ) 
+- reduce_fun reduce: [Ok , -3  ]
 Ok 
 x = -1 
 it = -3 
@@ -44,12 +44,12 @@ Ok
 it = `(f ('x ) 1 val) 
 A = 3 
 f = `(f ('x ) 1 val) 
-#   0 interp: [Ok , -3  ]
+#   0 reduce: [Ok , -3  ]
 #   1  expr: print it
 #   1  seme: ( print it ) 
 #   1 value: ( `print -3 ) 
 -3 
-#   1 interp: [Ok , -3  ]
+#   1 reduce: [Ok , -3  ]
 Ok 
 it = -3 
 A = 3 

@@ -3,11 +3,11 @@
 #   0  expr: 3 
 #   0  seme: ( 3N ) 
 #   0 value: ( 3 ) 
-#   0 interp: [Ok , 3  ]
+#   0 reduce: [Ok , 3  ]
 #   1  expr: call it a
 #   1  seme: ( call it a ) 
 #   1 value: ( `call 3 'a ) 
-#   1 interp: [Ok , 3  ]
+#   1 reduce: [Ok , 3  ]
 Ok 
 it = 3 
 a = 3 
@@ -16,11 +16,11 @@ a = 3
 #   0  expr: 4 
 #   0  seme: ( 4N ) 
 #   0 value: ( 4 ) 
-#   0 interp: [Ok , 4  ]
+#   0 reduce: [Ok , 4  ]
 #   1  expr: call it b
 #   1  seme: ( call it b ) 
 #   1 value: ( `call 4 'b ) 
-#   1 interp: [Ok , 4  ]
+#   1 reduce: [Ok , 4  ]
 Ok 
 it = 4 
 a = 3 
@@ -30,7 +30,7 @@ b = 4
 #   0  expr: if a > b
 #   0  seme: ( if a > b ) 
 #   0 value: ( `if 'a `> 'b ) 
-#   0 interp: [Skip , 0  ]
+#   0 reduce: [Skip , 0  ]
 Skip 
 it = 0 
 a = 3 
@@ -40,11 +40,11 @@ b = 4
 #   0  expr: a - b
 #   0  seme: ( a - b ) 
 #   0 value: ( 'a `- 'b ) 
-#   0 interp: [Skip , 0  ]
+#   0 reduce: [Skip , 0  ]
 #   1  expr: print it
 #   1  seme: ( print it ) 
 #   1 value: ( `print 0 ) 
-#   1 interp: [Skip , 0  ]
+#   1 reduce: [Skip , 0  ]
 Skip 
 it = 0 
 a = 3 
@@ -54,7 +54,7 @@ b = 4
 #   0  expr: end if
 #   0  seme: ( end if ) 
 #   0 value: ( `end `if ) 
-#   0 interp: [Ok , 0  ]
+#   0 reduce: [Ok , 0  ]
 Ok 
 it = 0 
 a = 3 
@@ -65,7 +65,7 @@ b = 4
 #   0  seme: ( print it ) 
 #   0 value: ( `print 0 ) 
 0 
-#   0 interp: [Ok , 0  ]
+#   0 reduce: [Ok , 0  ]
 Ok 
 it = 0 
 a = 3 
@@ -75,16 +75,16 @@ b = 4
 #   0  expr: if false? 
 #   0  seme: ( if false? ) 
 #   0 value: ( `if `false? ) 
-#   0 interp: [Ok , 1  ]
+#   0 reduce: [Ok , 1  ]
 #   1  expr: print it 
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
 1 
-#   1 interp: [Ok , 1  ]
+#   1 reduce: [Ok , 1  ]
 #   2  expr: end if
 #   2  seme: ( end if ) 
 #   2 value: ( `end `if ) 
-#   2 interp: [Ok , 1  ]
+#   2 reduce: [Ok , 1  ]
 Ok 
 it = 1 
 a = 3 

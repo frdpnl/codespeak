@@ -4,4 +4,4 @@
 #   0  seme: ( if t ) 
 #   0 value: ( `if 't ) 
 ? interp: unknown symbol 't'
-#   0 interp: [Fatal , null ]
+#   0 reduce: [Fatal , null ]

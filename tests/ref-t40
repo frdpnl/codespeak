@@ -3,5 +3,5 @@
 #   0  expr: end foo
 #   0  seme: ( end foo ) 
 #   0 value: ( `end 'foo ) 
-? interp_end: 'end' outside function definition
-#   0 interp: [Fatal , null ]
+? reduce_end: 'end' outside function definition
+#   0 reduce: [Fatal , null ]

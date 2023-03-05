@@ -3,7 +3,7 @@
 #   0  expr: define inc (a,) 
 #   0  seme: ( define inc { a } ) 
 #   0 value: ( `define 'inc { 'a } ) 
-#   0 interp: [Fun , `(inc ('a ) 0 val)  ]
+#   0 reduce: [Fun , `(inc ('a ) 0 val)  ]
 Fun 
 it = `(inc ('a ) 0 val) 
 # ----line: "end "
@@ -11,7 +11,7 @@ it = `(inc ('a ) 0 val)
 #   0  expr: end 
 #   0  seme: ( end ) 
 #   0 value: ( `end ) 
-#   0 interp: [Fun , `(inc ('a ) 1 val)  ]
+#   0 reduce: [Fun , `(inc ('a ) 1 val)  ]
 Fun 
 it = `(inc ('a ) 1 val) 
 ? main: unexpected end of program

@@ -1,0 +1,37 @@
+# ----line: "if 2 > 0 ; print positive"
+# --phrase: if 2 > 0  ; print positive ; 
+#   0  expr: if 2 > 0 
+#   0  seme: ( if 2N > 0N ) 
+#   0 value: ( `if 2 `> 0 ) 
+#   0 reduce: [Ok , 1  ]
+#   1  expr: print positive
+#   1  seme: ( print positive ) 
+#   1 value: ( `print 'positive ) 
+'positive 
+#   1 reduce: [Ok , 'positive  ]
+Ok 
+it = 'positive 
+# ----line: "else"
+# --phrase: else ; 
+#   0  expr: else
+#   0  seme: ( else ) 
+#   0 value: ( `else ) 
+#   0 reduce: [Skip , 0  ]
+Skip 
+it = 0 
+# ----line: "	print negative"
+# --phrase: print negative ; 
+#   0  expr: print negative
+#   0  seme: ( print negative ) 
+#   0 value: ( `print 'negative ) 
+#   0 reduce: [Skip , 0  ]
+Skip 
+it = 0 
+# ----line: "end if"
+# --phrase: end if ; 
+#   0  expr: end if
+#   0  seme: ( end if ) 
+#   0 value: ( `end `if ) 
+#   0 reduce: [Ok , 0  ]
+Ok 
+it = 0 

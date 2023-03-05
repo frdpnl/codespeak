@@ -3,9 +3,9 @@
 #   0  expr: call, 23, n
 #   0  seme: { call 23N n } 
 #   0 value: { `call 23 'n } 
-#   0 interp: [Ok , { `call 23 'n }  ]
+#   0 reduce: [Ok , { `call 23 'n }  ]
 #   1  expr: do it
 #   1  seme: ( do it ) 
 #   1 value: ( `do { `call 23 'n } ) 
 ? interp: unknown symbol 'n'
-#   1 interp: [Fatal , null ]
+#   1 reduce: [Fatal , null ]
