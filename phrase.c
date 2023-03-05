@@ -567,10 +567,11 @@ typedef struct List_v_ {
 typedef enum {
 	UNSET,
 	OK,
-	SKIP,	/* for 'if, skip until 'endif */
+	SKIP,	/* for 'if, skip until 'else or 'endif */
 	FUN,	/* we're processing a (multiline) function definition */
+	RETURN,	/* returning from function (short circuit) */
 	FATAL
-} inxs;  	/* OOB for out of band */
+} inxs;
 
 typedef struct {
 	char name[WSZ];
@@ -688,6 +689,9 @@ print_inxs(inxs s) {
 			break;
 		case FUN:
 			printf("Fun ");
+			break;
+		case RETURN:
+			printf("Return ");
 			break;
 		case FATAL:
 			printf("Fatal ");
@@ -1823,6 +1827,28 @@ interp_skip(Env *e, Val *s, size_t p) {
 	return (Ir) {SKIP, copy_v(it)};
 }
 static Ir 
+interp_else(Env *e, Val *s, size_t p) {
+	if (!(p == 0 && s->seq.v.n == 1)) {
+		printf("? %s: 'else' syntax incorrect\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	Val *a = malloc(sizeof(*a));
+	a->hdr.t = VNAT;
+	if (e->state == SKIP) {
+		a->nat.v = 1;
+		upd_prefix0(s, p, a);
+		return (Ir) {OK, s};
+	}
+	if (e->state == OK) {
+		a->nat.v = 0;
+		upd_prefix0(s, p, a);
+		return (Ir) {SKIP, s};
+	}
+	free_v(a);
+	printf("? %s: 'else' in invalid state (%u)\n", __FUNCTION__, e->state);
+	return (Ir) {FATAL, NULL};
+}
+static Ir 
 interp_rem(Env *e, Val *s, size_t p) {
 	Ir rc;
 	Val *b;
@@ -1979,7 +2005,6 @@ interp_end(Env *e, Val *s, size_t p) {
 	upd_prefix1(s, p, b);
 	return (Ir) {OK, s};
 }
-
 /* --- interp (user) function application --- */
 static Ir 
 interp_fun(Env *e, Val *s, size_t p) {
@@ -2042,6 +2067,10 @@ interp_fun(Env *e, Val *s, size_t p) {
 			free_env(le, false);
 			return (Ir) {FATAL, NULL};
 		}
+		if (le->state == RETURN) {
+			free_v(xs.v);
+			break;
+		}
 		Symval *it = symval(IT, xs.v);
 		free_v(xs.v);
 		if (it == NULL) {
@@ -2056,17 +2085,33 @@ interp_fun(Env *e, Val *s, size_t p) {
 		}
 	}
 	print_env(le); 
-	/* return function's 'it to caller */
-	Val *eit = lookup(le, IT, false);
-	if (eit == NULL) {
-		printf("? %s: 'it' from %s undefined\n",
+	/* return local (function's) 'it to caller */
+	Val *lit = lookup(le, IT, false);
+	if (lit == NULL) {
+		printf("? %s: 'it' from '%s' undefined\n",
 				__FUNCTION__, f->symf.name);
 		free_env(le, false);
 		return (Ir) {FATAL, NULL};
 	}
-	upd_prefix1(s, p, copy_v(eit));
+	upd_prefix1(s, p, copy_v(lit));
 	free_env(le, false);
 	return (Ir) {OK, s};
+}
+static Ir 
+interp_return(Env *e, Val *s, size_t p) {
+	if (!(p == 0 && s->seq.v.n == 1)) {
+		printf("? %s: 'return' syntax incorrect\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	/* return only from a function call */
+	if (e->parent == NULL) {
+		printf("? %s: 'return' outside function\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	Val *a = malloc(sizeof(*a));
+	a->hdr.t = VNIL;
+	upd_prefix0(s, p, a);
+	return (Ir) {RETURN, s};
 }
 
 /* --------------- builtin or base function symbols -------------------- */
@@ -2081,9 +2126,9 @@ typedef struct Symop_ {
 	int arity;
 } Symop;
 
-#define NSYMS 26
+#define NSYMS 28
 Symop Syms[] = {
-	(Symop) {"rem:",  -10, interp_rem,  -1},
+	(Symop) {"rem:",  -10, interp_rem,  -1}, /* arity: remainder of seq val */
 	(Symop) {"true?", -10, interp_true,  0},
 	(Symop) {"false?",-10, interp_false, 0},
 	(Symop) {"list",  -10, interp_list, -1},
@@ -2092,7 +2137,9 @@ Symop Syms[] = {
 	(Symop) {"call",  -10, interp_call,  2},
 	(Symop) {"define",-10, interp_def,  2},
 	(Symop) {"def",   -10, interp_def,  2},
-	(Symop) {"end",   -10, interp_end,  1},  /* needs to be prior to funs */
+	(Symop) {"return", -10, interp_return, 0},
+	(Symop) {"end",   -10, interp_end,  1}, /* needs to be prior to funs */
+	(Symop) {"else",  -10, interp_else, 0},
 	(Symop) {"print", -10, interp_print, 1},
 	/* priority FUNPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, interp_mul, 2},
@@ -2274,9 +2321,12 @@ interp_seq(Env *e, Val *b, bool look) {
 		}
 	}
 	if (e->state == SKIP) {
-		if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
+		bool is_end = b->seq.v.v[0]->hdr.t == VSYMOP 
 				&& b->seq.v.v[0]->symop.v == interp_end
-				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
+				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1 ;
+		bool is_else = b->seq.v.v[0]->hdr.t == VSYMOP 
+				&& b->seq.v.v[0]->symop.v == interp_else ;
+		if (!(is_end || is_else)) {
 			return interp_skip(e, b, 0);
 		}
 	}
@@ -2339,11 +2389,8 @@ interp_seq(Env *e, Val *b, bool look) {
 		b = rc.v;
 		/* rc.state set by interp_* */
 	}
-	/* empty seq, means nil value */
-	c = malloc(sizeof(*c));
-	c->hdr.t = VNIL;
-	rc = (Ir) {rc.state, c};
-	return rc;
+	/* empty seq after reduction? */
+	return (Ir) {FATAL, NULL};
 }
 
 static Ir 

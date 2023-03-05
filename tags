@@ -32,9 +32,10 @@ Lrc	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	t	typeref:enum:__an
 NSYMS	phrase.c	/^#define NSYMS /;"	d	file:
 OK	phrase.c	/^	OK,$/;"	e	enum:__anon2f313ef90c03	file:
 Phrase	phrase.c	/^} Phrase;$/;"	t	typeref:struct:__anon2f313ef91708	file:
+RETURN	phrase.c	/^	RETURN,	\/* returning from function (short circuit) *\/$/;"	e	enum:__anon2f313ef90c03	file:
 RIGHT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 SEP	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
-SKIP	phrase.c	/^	SKIP,	\/* for 'if, skip until 'endif *\/$/;"	e	enum:__anon2f313ef90c03	file:
+SKIP	phrase.c	/^	SKIP,	\/* for 'if, skip until 'else or 'endif *\/$/;"	e	enum:__anon2f313ef90c03	file:
 SLST	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SNAT	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SNIL	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
@@ -112,6 +113,7 @@ interp_call	phrase.c	/^interp_call(Env *e, Val *s, size_t p) {$/;"	f	typeref:typ
 interp_def	phrase.c	/^interp_def(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_div	phrase.c	/^interp_div(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_do	phrase.c	/^interp_do(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
+interp_else	phrase.c	/^interp_else(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_end	phrase.c	/^interp_end(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_eq	phrase.c	/^interp_eq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_eqv	phrase.c	/^interp_eqv(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
@@ -137,11 +139,12 @@ interp_prefix2_arg	phrase.c	/^interp_prefix2_arg(Env *e, Val *s, size_t p, Val *
 interp_prefixn_arg	phrase.c	/^interp_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {$/;"	f	typeref:typename:bool	file:
 interp_print	phrase.c	/^interp_print(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_rem	phrase.c	/^interp_rem(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
+interp_return	phrase.c	/^interp_return(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_seq	phrase.c	/^interp_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_show	phrase.c	/^interp_show(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_skip	phrase.c	/^interp_skip(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_true	phrase.c	/^interp_true(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
-inxs	phrase.c	/^} inxs;  	\/* OOB for out of band *\/$/;"	t	typeref:enum:__anon2f313ef90c03	file:
+inxs	phrase.c	/^} inxs;$/;"	t	typeref:enum:__anon2f313ef90c03	file:
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/;"	f	typeref:typename:bool	file:
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/;"	f	typeref:typename:bool	file:
 isequiv_v	phrase.c	/^isequiv_v(Val *a, Val *b) {$/;"	f	typeref:typename:bool	file:

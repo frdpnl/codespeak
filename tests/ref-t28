@@ -57,5 +57,5 @@ Ok
 it = `(g () 0 val) 
 f = `(f () 1 val) 
 g = `(g () 0 val) 
-? interp_fun: 'it' from g undefined
+? interp_fun: 'it' from 'g' undefined
 #   0 interp: [Fatal , null ]
