@@ -1,0 +1,16 @@
+# ----line: "call 3 n "
+# --phrase: call 3 n  ; 
+#   0  expr: call 3 n 
+#   0  seme: ( call 3N n ) 
+#   0 value: ( `call 3 'n ) 
+#   0 reduce: [Ok , 3  ]
+Ok 
+n = 3 
+it = 3 
+# ----line: "else print 1"
+# --phrase: else print 1 ; 
+#   0  expr: else print 1
+#   0  seme: ( else print 1N ) 
+#   0 value: ( `else `print 1 ) 
+? reduce_else: 'else' syntax incorrect
+#   0 reduce: [Fatal , null ]

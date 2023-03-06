@@ -1,0 +1,6 @@
+
+call 3 n
+def f (a,) ; if a > 1 ; print n ; end if ; end f
+call 4 n
+f (2,)
+

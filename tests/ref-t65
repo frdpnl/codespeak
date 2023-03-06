@@ -1,0 +1,7 @@
+# ----line: "((((return))))"
+# --phrase: ((((return)))) ; 
+#   0  expr: ((((return))))
+#   0  seme: ( ( ( ( ( return ) ) ) ) ) 
+#   0 value: ( ( ( ( ( `return ) ) ) ) ) 
+? reduce_return: 'return' outside function
+#   0 reduce: [Fatal , null ]

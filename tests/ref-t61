@@ -1,0 +1,11 @@
+# ----line: "def f (a,b) ; end 3"
+# --phrase: def f (a,b)  ; end 3 ; 
+#   0  expr: def f (a,b) 
+#   0  seme: ( def f { a b } ) 
+#   0 value: ( `def 'f { 'a 'b } ) 
+#   0 reduce: [Fun , `(f ('a 'b ) 0 val)  ]
+#   1  expr: end 3
+#   1  seme: ( end 3N ) 
+#   1 value: ( `end 3 ) 
+? reduce_end: 'end' with wrong argument type
+#   1 reduce: [Fatal , null ]

@@ -1,0 +1,40 @@
+# ----line: "list a b ; def f it ; a + b ; end f "
+# --phrase: list a b  ; def f it  ; a + b  ; end f  ; 
+#   0  expr: list a b 
+#   0  seme: ( list a b ) 
+#   0 value: ( `list 'a 'b ) 
+#   0 reduce: [Ok , { 'a 'b }  ]
+#   1  expr: def f it 
+#   1  seme: ( def f it ) 
+#   1 value: ( `def 'f { 'a 'b } ) 
+#   1 reduce: [Fun , `(f ('a 'b ) 0 val)  ]
+#   2  expr: a + b 
+#   2  seme: ( a + b ) 
+#   2 value: ( 'a `+ 'b ) 
+#   2 reduce: [Fun , `(f ('a 'b ) 1 val)  ]
+#   3  expr: end f 
+#   3  seme: ( end f ) 
+#   3 value: ( `end 'f ) 
+#   3 reduce: [Ok , `(f ('a 'b ) 1 val)  ]
+Ok 
+it = `(f ('a 'b ) 1 val) 
+f = `(f ('a 'b ) 1 val) 
+# ----line: "f (1, 2)"
+# --phrase: f (1, 2) ; 
+#   0  expr: f (1, 2)
+#   0  seme: ( f { 1N 2N } ) 
+#   0 value: ( `(f ('a 'b ) 1 val) { 1 2 } ) 
+- reduce_fun value: ( 'a `+ 'b ) 
+- reduce_fun reduce: [Ok , 3  ]
+Ok 
+a = 1 
+b = 2 
+it = 3 
+parent:
+Ok 
+it = `(f ('a 'b ) 1 val) 
+f = `(f ('a 'b ) 1 val) 
+#   0 reduce: [Ok , 3  ]
+Ok 
+it = 3 
+f = `(f ('a 'b ) 1 val) 

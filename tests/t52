@@ -1,0 +1,6 @@
+
+def f (a,) ; a + 2 ; a return a ;  end f
+
+f (1,)
+
+

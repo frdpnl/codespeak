@@ -2070,10 +2070,6 @@ reduce_fun(Env *e, Val *s, size_t p) {
 			free_env(le, false);
 			return (Ir) {FATAL, NULL};
 		}
-		if (le->state == RETURN) {
-			free_v(xs.v);
-			break;
-		}
 		Symval *it = symval(IT, xs.v);
 		free_v(xs.v);
 		if (it == NULL) {
@@ -2086,10 +2082,21 @@ reduce_fun(Env *e, Val *s, size_t p) {
 			free_env(le, false);
 			return (Ir) {FATAL, NULL};
 		}
+		if (le->state == RETURN) {
+			break;
+		}
 	}
 	print_env(le); 
 	/* return local (function's) 'it to caller */
-	Val *lit = lookup(le, IT, false);
+	char *sym = IT;
+	Val *lit = NULL;
+	while ((lit = lookup(le, sym, false)) != NULL) {
+		if (lit->hdr.t == VSYM) {
+			sym = lit->sym.v;
+			continue;
+		}
+		break;
+	}
 	if (lit == NULL) {
 		printf("? %s: 'it' from '%s' undefined\n",
 				__FUNCTION__, f->symf.name);
@@ -2111,9 +2118,12 @@ reduce_return(Env *e, Val *s, size_t p) {
 		printf("? %s: 'return' outside function\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
-	Val *a = malloc(sizeof(*a));
-	a->hdr.t = VNIL;
-	upd_prefix0(s, p, a);
+	Val *it = lookup(e, IT, false);
+	if (it == NULL) {
+		printf("? %s: 'it' undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	upd_prefix0(s, p, copy_v(it));
 	return (Ir) {RETURN, s};
 }
 
@@ -2324,12 +2334,14 @@ interp_seq(Env *e, Val *b, bool look) {
 		}
 	}
 	if (e->state == SKIP) {
-		bool is_end = b->seq.v.v[0]->hdr.t == VSYMOP 
+		bool is_endif = b->seq.v.v[0]->hdr.t == VSYMOP 
 				&& b->seq.v.v[0]->symop.v == reduce_end
-				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1 ;
+				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
+				&& b->seq.v.v[1]->hdr.t == VSYMOP 
+				&& b->seq.v.v[1]->symop.v == reduce_if ;
 		bool is_else = b->seq.v.v[0]->hdr.t == VSYMOP 
 				&& b->seq.v.v[0]->symop.v == reduce_else ;
-		if (!(is_end || is_else)) {
+		if (!(is_endif || is_else)) {
 			return reduce_skip(e, b, 0);
 		}
 	}

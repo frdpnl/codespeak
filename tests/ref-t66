@@ -1,0 +1,171 @@
+# ----line: "def f (a,)"
+# --phrase: def f (a,) ; 
+#   0  expr: def f (a,)
+#   0  seme: ( def f { a } ) 
+#   0 value: ( `def 'f { 'a } ) 
+#   0 reduce: [Fun , `(f ('a ) 0 val)  ]
+Fun 
+it = `(f ('a ) 0 val) 
+# ----line: "	if a > 0 ; def g () ; a ; end g ; return"
+# --phrase: if a > 0  ; def g ()  ; a  ; end g  ; return ; 
+#   0  expr: if a > 0 
+#   0  seme: ( if a > 0N ) 
+#   0 value: ( `if 'a `> 0 ) 
+#   0 reduce: [Fun , `(f ('a ) 1 val)  ]
+#   1  expr: def g () 
+#   1  seme: ( def g Nil ) 
+#   1 value: ( `def 'g Nil ) 
+#   1 reduce: [Fun , `(f ('a ) 2 val)  ]
+#   2  expr: a 
+#   2  seme: ( a ) 
+#   2 value: ( 'a ) 
+#   2 reduce: [Fun , `(f ('a ) 3 val)  ]
+#   3  expr: end g 
+#   3  seme: ( end g ) 
+#   3 value: ( `end 'g ) 
+#   3 reduce: [Fun , `(f ('a ) 4 val)  ]
+#   4  expr: return
+#   4  seme: ( return ) 
+#   4 value: ( `return ) 
+#   4 reduce: [Fun , `(f ('a ) 5 val)  ]
+Fun 
+it = `(f ('a ) 5 val) 
+# ----line: "	else ; def g () ; -1 * a ; end g ; "
+# --phrase: else  ; def g ()  ; -1 * a  ; end g  ; 
+#   0  expr: else 
+#   0  seme: ( else ) 
+#   0 value: ( `else ) 
+#   0 reduce: [Fun , `(f ('a ) 6 val)  ]
+#   1  expr: def g () 
+#   1  seme: ( def g Nil ) 
+#   1 value: ( `def 'g Nil ) 
+#   1 reduce: [Fun , `(f ('a ) 7 val)  ]
+#   2  expr: -1 * a 
+#   2  seme: ( -1N * a ) 
+#   2 value: ( -1 `* 'a ) 
+#   2 reduce: [Fun , `(f ('a ) 8 val)  ]
+#   3  expr: end g 
+#   3  seme: ( end g ) 
+#   3 value: ( `end 'g ) 
+#   3 reduce: [Fun , `(f ('a ) 9 val)  ]
+Fun 
+it = `(f ('a ) 9 val) 
+# ----line: "	end if"
+# --phrase: end if ; 
+#   0  expr: end if
+#   0  seme: ( end if ) 
+#   0 value: ( `end `if ) 
+#   0 reduce: [Fun , `(f ('a ) 10 val)  ]
+Fun 
+it = `(f ('a ) 10 val) 
+# ----line: "	g"
+# --phrase: g ; 
+#   0  expr: g
+#   0  seme: ( g ) 
+#   0 value: ( 'g ) 
+#   0 reduce: [Fun , `(f ('a ) 11 val)  ]
+Fun 
+it = `(f ('a ) 11 val) 
+# ----line: "end f"
+# --phrase: end f ; 
+#   0  expr: end f
+#   0  seme: ( end f ) 
+#   0 value: ( `end 'f ) 
+#   0 reduce: [Ok , `(f ('a ) 11 val)  ]
+Ok 
+it = `(f ('a ) 11 val) 
+f = `(f ('a ) 11 val) 
+# ----line: "f (-2,) ; it ; it ()"
+# --phrase: f (-2,)  ; it  ; it () ; 
+#   0  expr: f (-2,) 
+#   0  seme: ( f { -2N } ) 
+#   0 value: ( `(f ('a ) 11 val) { -2 } ) 
+- reduce_fun value: ( `if 'a `> 0 ) 
+- reduce_fun reduce: [Skip , 0  ]
+- reduce_fun value: ( `def 'g Nil ) 
+- reduce_fun reduce: [Skip , 0  ]
+- reduce_fun value: ( 'a ) 
+- reduce_fun reduce: [Skip , 0  ]
+- reduce_fun value: ( `end 'g ) 
+- reduce_fun reduce: [Skip , 0  ]
+- reduce_fun value: ( `return ) 
+- reduce_fun reduce: [Skip , 0  ]
+- reduce_fun value: ( `else ) 
+- reduce_fun reduce: [Ok , 1  ]
+- reduce_fun value: ( `def 'g Nil ) 
+- reduce_fun reduce: [Fun , `(g () 0 val)  ]
+- reduce_fun value: ( -1 `* 'a ) 
+- reduce_fun reduce: [Fun , `(g () 1 val)  ]
+- reduce_fun value: ( `end 'g ) 
+- reduce_fun reduce: [Ok , `(g () 1 val)  ]
+- reduce_fun value: ( `end `if ) 
+- reduce_fun reduce: [Ok , `(g () 1 val)  ]
+- reduce_fun value: ( 'g ) 
+- reduce_fun reduce: [Ok , 'g  ]
+Ok 
+a = -2 
+it = 'g 
+g = `(g () 1 val) 
+parent:
+Ok 
+it = `(f ('a ) 11 val) 
+f = `(f ('a ) 11 val) 
+#   0 reduce: [Ok , `(g () 1 val)  ]
+#   1  expr: it 
+#   1  seme: ( it ) 
+#   1 value: ( `(g () 1 val) ) 
+#   1 reduce: [Ok , `(g () 1 val)  ]
+#   2  expr: it ()
+#   2  seme: ( it Nil ) 
+#   2 value: ( `(g () 1 val) Nil ) 
+- reduce_fun value: ( -1 `* -2 ) 
+- reduce_fun reduce: [Ok , 2  ]
+Ok 
+it = 2 
+parent:
+Ok 
+it = `(g () 1 val) 
+f = `(f ('a ) 11 val) 
+#   2 reduce: [Ok , 2  ]
+Ok 
+it = 2 
+f = `(f ('a ) 11 val) 
+# ----line: "f (3,) ; it ()"
+# --phrase: f (3,)  ; it () ; 
+#   0  expr: f (3,) 
+#   0  seme: ( f { 3N } ) 
+#   0 value: ( `(f ('a ) 11 val) { 3 } ) 
+- reduce_fun value: ( `if 'a `> 0 ) 
+- reduce_fun reduce: [Ok , 1  ]
+- reduce_fun value: ( `def 'g Nil ) 
+- reduce_fun reduce: [Fun , `(g () 0 val)  ]
+- reduce_fun value: ( 'a ) 
+- reduce_fun reduce: [Fun , `(g () 1 val)  ]
+- reduce_fun value: ( `end 'g ) 
+- reduce_fun reduce: [Ok , `(g () 1 val)  ]
+- reduce_fun value: ( `return ) 
+- reduce_fun reduce: [Return , `(g () 1 val)  ]
+Return 
+a = 3 
+it = `(g () 1 val) 
+g = `(g () 1 val) 
+parent:
+Ok 
+it = 2 
+f = `(f ('a ) 11 val) 
+#   0 reduce: [Ok , `(g () 1 val)  ]
+#   1  expr: it ()
+#   1  seme: ( it Nil ) 
+#   1 value: ( `(g () 1 val) Nil ) 
+- reduce_fun value: ( 3 ) 
+- reduce_fun reduce: [Ok , 3  ]
+Ok 
+it = 3 
+parent:
+Ok 
+it = `(g () 1 val) 
+f = `(f ('a ) 11 val) 
+#   1 reduce: [Ok , 3  ]
+Ok 
+it = 3 
+f = `(f ('a ) 11 val) 

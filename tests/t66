@@ -1,0 +1,10 @@
+
+def f (a,)
+	if a > 0 ; def g () ; a ; end g ; return
+	else ; def g () ; -1 * a ; end g ; 
+	end if
+	g
+end f
+
+f (-2,) ; it ; it ()
+f (3,) ; it ()

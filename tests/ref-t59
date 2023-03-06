@@ -1,0 +1,7 @@
+# ----line: "end f"
+# --phrase: end f ; 
+#   0  expr: end f
+#   0  seme: ( end f ) 
+#   0 value: ( `end 'f ) 
+? reduce_end: 'end' outside function definition
+#   0 reduce: [Fatal , null ]

@@ -1,0 +1,23 @@
+# ----line: "call 3 n "
+# --phrase: call 3 n  ; 
+#   0  expr: call 3 n 
+#   0  seme: ( call 3N n ) 
+#   0 value: ( `call 3 'n ) 
+#   0 reduce: [Ok , 3  ]
+Ok 
+n = 3 
+it = 3 
+# ----line: "else ;  print 1"
+# --phrase: else  ; print 1 ; 
+#   0  expr: else 
+#   0  seme: ( else ) 
+#   0 value: ( `else ) 
+#   0 reduce: [Skip , 0  ]
+#   1  expr: print 1
+#   1  seme: ( print 1N ) 
+#   1 value: ( `print 1 ) 
+#   1 reduce: [Skip , 0  ]
+Skip 
+n = 3 
+it = 0 
+? main: unexpected end of program

@@ -1,0 +1,17 @@
+# ----line: "def f (a,b) ; "
+# --phrase: def f (a,b)  ; 
+#   0  expr: def f (a,b) 
+#   0  seme: ( def f { a b } ) 
+#   0 value: ( `def 'f { 'a 'b } ) 
+#   0 reduce: [Fun , `(f ('a 'b ) 0 val)  ]
+Fun 
+it = `(f ('a 'b ) 0 val) 
+# ----line: "	end g"
+# --phrase: end g ; 
+#   0  expr: end g
+#   0  seme: ( end g ) 
+#   0 value: ( `end 'g ) 
+#   0 reduce: [Fun , `(f ('a 'b ) 1 val)  ]
+Fun 
+it = `(f ('a 'b ) 1 val) 
+? main: unexpected end of program

@@ -1,0 +1,16 @@
+# ----line: "call 3 n"
+# --phrase: call 3 n ; 
+#   0  expr: call 3 n
+#   0  seme: ( call 3N n ) 
+#   0 value: ( `call 3 'n ) 
+#   0 reduce: [Ok , 3  ]
+Ok 
+n = 3 
+it = 3 
+# ----line: "end f"
+# --phrase: end f ; 
+#   0  expr: end f
+#   0  seme: ( end f ) 
+#   0 value: ( `end 'f ) 
+? reduce_end: 'end' outside function definition
+#   0 reduce: [Fatal , null ]
