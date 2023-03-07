@@ -4,9 +4,15 @@
 #   0  seme: { a b } 
 #   0 value: { 'a 'b } 
 #   0 reduce: [Ok , { 'a 'b }  ]
+env:
+	state: Ok 
+	it = { 'a 'b } 
 #   1  expr: call it param
 #   1  seme: ( call it param ) 
 #   1 value: ( `call { 'a 'b } 'param ) 
 ? interp: unknown symbol 'a'
 ? reduce_prefix2_arg: 1st argument is null
 #   1 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	it = { 'a 'b } 

@@ -4,8 +4,9 @@
 #   0  seme: ( if 4N >= 2N ) 
 #   0 value: ( `if 4 `>= 2 ) 
 #   0 reduce: [Ok , 1  ]
-Ok 
-it = 1 
+env:
+	state: Ok 
+	it = 1 
 # ----line: "	print one"
 # --phrase: print one ; 
 #   0  expr: print one
@@ -13,49 +14,60 @@ it = 1
 #   0 value: ( `print 'one ) 
 'one 
 #   0 reduce: [Ok , 'one  ]
-Ok 
-it = 'one 
+env:
+	state: Ok 
+	it = 'one 
 # ----line: "	if 2. = 2 "
 # --phrase: if 2. = 2  ; 
 #   0  expr: if 2. = 2 
 #   0  seme: ( if 2.00R = 2N ) 
 #   0 value: ( `if 2.00 `= 2 ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 # ----line: "		print two"
 # --phrase: print two ; 
 #   0  expr: print two
 #   0  seme: ( print two ) 
 #   0 value: ( `print 'two ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 # ----line: "	end if"
 # --phrase: end if ; 
 #   0  expr: end if
 #   0  seme: ( end if ) 
 #   0 value: ( `end `if ) 
 #   0 reduce: [Ok , 0  ]
-Ok 
-it = 0 
+env:
+	state: Ok 
+	it = 0 
 # ----line: "	if 3 > 1 ; print three ; end if"
 # --phrase: if 3 > 1  ; print three  ; end if ; 
 #   0  expr: if 3 > 1 
 #   0  seme: ( if 3N > 1N ) 
 #   0 value: ( `if 3 `> 1 ) 
 #   0 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
 #   1  expr: print three 
 #   1  seme: ( print three ) 
 #   1 value: ( `print 'three ) 
 'three 
 #   1 reduce: [Ok , 'three  ]
+env:
+	state: Ok 
+	it = 'three 
 #   2  expr: end if
 #   2  seme: ( end if ) 
 #   2 value: ( `end `if ) 
 #   2 reduce: [Ok , 'three  ]
-Ok 
-it = 'three 
+env:
+	state: Ok 
+	it = 'three 
 # ----line: "	print four"
 # --phrase: print four ; 
 #   0  expr: print four
@@ -63,16 +75,18 @@ it = 'three
 #   0 value: ( `print 'four ) 
 'four 
 #   0 reduce: [Ok , 'four  ]
-Ok 
-it = 'four 
+env:
+	state: Ok 
+	it = 'four 
 # ----line: "end if"
 # --phrase: end if ; 
 #   0  expr: end if
 #   0  seme: ( end if ) 
 #   0 value: ( `end `if ) 
 #   0 reduce: [Ok , 'four  ]
-Ok 
-it = 'four 
+env:
+	state: Ok 
+	it = 'four 
 # ----line: "print done"
 # --phrase: print done ; 
 #   0  expr: print done
@@ -80,5 +94,9 @@ it = 'four
 #   0 value: ( `print 'done ) 
 'done 
 #   0 reduce: [Ok , 'done  ]
-Ok 
-it = 'done 
+env:
+	state: Ok 
+	it = 'done 
+env:
+	state: Ok 
+	it = 'done 

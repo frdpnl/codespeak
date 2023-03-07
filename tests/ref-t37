@@ -4,61 +4,72 @@
 #   0  seme: { if not 2N > 1N } 
 #   0 value: { `if `not 2 `> 1 } 
 #   0 reduce: [Ok , { `if `not 2 `> 1 }  ]
-Ok 
-it = { `if `not 2 `> 1 } 
+env:
+	state: Ok 
+	it = { `if `not 2 `> 1 } 
 # ----line: "do it"
 # --phrase: do it ; 
 #   0  expr: do it
 #   0  seme: ( do it ) 
 #   0 value: ( `do { `if `not 2 `> 1 } ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 # ----line: "print really?"
 # --phrase: print really? ; 
 #   0  expr: print really?
 #   0  seme: ( print really? ) 
 #   0 value: ( `print 'really? ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 # ----line: "list end if"
 # --phrase: list end if ; 
 #   0  expr: list end if
 #   0  seme: ( list end if ) 
 #   0 value: ( `list `end `if ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 # ----line: "do it"
 # --phrase: do it ; 
 #   0  expr: do it
 #   0  seme: ( do it ) 
 #   0 value: ( `do 0 ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 # ----line: "print really?!"
 # --phrase: print really?! ; 
 #   0  expr: print really?!
 #   0  seme: ( print really?! ) 
 #   0 value: ( `print 'really?! ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 # ----line: "end if"
 # --phrase: end if ; 
 #   0  expr: end if
 #   0  seme: ( end if ) 
 #   0 value: ( `end `if ) 
 #   0 reduce: [Ok , 0  ]
-Ok 
-it = 0 
+env:
+	state: Ok 
+	it = 0 
 # ----line: "finally"
 # --phrase: finally ; 
 #   0  expr: finally
 #   0  seme: ( finally ) 
 #   0 value: ( 'finally ) 
 #   0 reduce: [Ok , 'finally  ]
-Ok 
-it = 'finally 
+env:
+	state: Ok 
+	it = 'finally 
+env:
+	state: Ok 
+	it = 'finally 

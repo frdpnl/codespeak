@@ -4,28 +4,52 @@
 #   0  seme: ( 2N * 3.00R ) 
 #   0 value: ( 2 `* 3.00 ) 
 #   0 reduce: [Ok , 6.00  ]
+env:
+	state: Ok 
+	it = 6.00 
 #   1  expr: call it p 
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 6.00 'p ) 
 #   1 reduce: [Ok , 6.00  ]
+env:
+	state: Ok 
+	it = 6.00 
+	p = 6.00 
 #   2  expr: p, ~=,6
 #   2  seme: { p ~= 6N } 
 #   2 value: { 'p `~= 6 } 
 #   2 reduce: [Ok , { 'p `~= 6 }  ]
+env:
+	state: Ok 
+	it = { 'p `~= 6 } 
+	p = 6.00 
 #   3  expr: print it 
 #   3  seme: ( print it ) 
 #   3 value: ( `print { 'p `~= 6 } ) 
 { 'p `~= 6 } 
 #   3 reduce: [Ok , { 'p `~= 6 }  ]
+env:
+	state: Ok 
+	it = { 'p `~= 6 } 
+	p = 6.00 
 #   4  expr: do it 
 #   4  seme: ( do it ) 
 #   4 value: ( `do { 'p `~= 6 } ) 
 #   4 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
+	p = 6.00 
 #   5  expr: print it
 #   5  seme: ( print it ) 
 #   5 value: ( `print 1 ) 
 1 
 #   5 reduce: [Ok , 1  ]
-Ok 
-it = 1 
-p = 6.00 
+env:
+	state: Ok 
+	it = 1 
+	p = 6.00 
+env:
+	state: Ok 
+	it = 1 
+	p = 6.00 

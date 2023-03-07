@@ -4,17 +4,24 @@
 #   0  seme: ( define dec { b } ) 
 #   0 value: ( `define 'dec { 'b } ) 
 #   0 reduce: [Fun , `(dec ('b ) 0 val)  ]
+env:
+	state: Fun 
+	it = `(dec ('b ) 0 val) 
 #   1  expr: b - 1 
 #   1  seme: ( b - 1N ) 
 #   1 value: ( 'b `- 1 ) 
 #   1 reduce: [Fun , `(dec ('b ) 1 val)  ]
+env:
+	state: Fun 
+	it = `(dec ('b ) 1 val) 
 #   2  expr: end dec
 #   2  seme: ( end dec ) 
 #   2 value: ( `end 'dec ) 
 #   2 reduce: [Ok , `(dec ('b ) 1 val)  ]
-Ok 
-it = `(dec ('b ) 1 val) 
-dec = `(dec ('b ) 1 val) 
+env:
+	state: Ok 
+	it = `(dec ('b ) 1 val) 
+	dec = `(dec ('b ) 1 val) 
 # ----line: "print (show dec)"
 # --phrase: print (show dec) ; 
 #   0  expr: print (show dec)
@@ -23,3 +30,7 @@ dec = `(dec ('b ) 1 val)
 ? reduce_prefix1_arg: symbol not prefixed to one argument
 ? reduce_fun: invalid argument to `dec
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	it = `(dec ('b ) 1 val) 
+	dec = `(dec ('b ) 1 val) 

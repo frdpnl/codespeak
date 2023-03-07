@@ -4,39 +4,57 @@
 #   0  seme: ( rem: testing comments ) 
 #   0 value: ( `rem: 'testing 'comments ) 
 #   0 reduce: [Ok , Nil  ]
-Ok 
-it = Nil 
+env:
+	state: Ok 
+	it = Nil 
 # ----line: "if 5 > 4 ; rem: a simple test ; print it "
 # --phrase: if 5 > 4  ; rem: a simple test  ; print it  ; 
 #   0  expr: if 5 > 4 
 #   0  seme: ( if 5N > 4N ) 
 #   0 value: ( `if 5 `> 4 ) 
 #   0 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
 #   1  expr: rem: a simple test 
 #   1  seme: ( rem: a simple test ) 
 #   1 value: ( `rem: 'a 'simple 'test ) 
 #   1 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
 #   2  expr: print it 
 #   2  seme: ( print it ) 
 #   2 value: ( `print 1 ) 
 1 
 #   2 reduce: [Ok , 1  ]
-Ok 
-it = 1 
+env:
+	state: Ok 
+	it = 1 
 # ----line: "if true? ; print it ; rem: again"
 # --phrase: if true?  ; print it  ; rem: again ; 
 #   0  expr: if true? 
 #   0  seme: ( if true? ) 
 #   0 value: ( `if `true? ) 
 #   0 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
 #   1  expr: print it 
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
 1 
 #   1 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
 #   2  expr: rem: again
 #   2  seme: ( rem: again ) 
 #   2 value: ( `rem: 'again ) 
 #   2 reduce: [Ok , 1  ]
-Ok 
-it = 1 
+env:
+	state: Ok 
+	it = 1 
+env:
+	state: Ok 
+	it = 1 

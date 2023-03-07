@@ -4,17 +4,24 @@
 #   0  seme: ( define f Nil ) 
 #   0 value: ( `define 'f Nil ) 
 #   0 reduce: [Fun , `(f () 0 val)  ]
+env:
+	state: Fun 
+	it = `(f () 0 val) 
 #   1  expr: 1 
 #   1  seme: ( 1N ) 
 #   1 value: ( 1 ) 
 #   1 reduce: [Fun , `(f () 1 val)  ]
+env:
+	state: Fun 
+	it = `(f () 1 val) 
 #   2  expr: end f
 #   2  seme: ( end f ) 
 #   2 value: ( `end 'f ) 
 #   2 reduce: [Ok , `(f () 1 val)  ]
-Ok 
-it = `(f () 1 val) 
-f = `(f () 1 val) 
+env:
+	state: Ok 
+	it = `(f () 1 val) 
+	f = `(f () 1 val) 
 # ----line: "f () ; print it"
 # --phrase: f ()  ; print it ; 
 #   0  expr: f () 
@@ -22,18 +29,28 @@ f = `(f () 1 val)
 #   0 value: ( `(f () 1 val) Nil ) 
 - reduce_fun value: ( 1 ) 
 - reduce_fun reduce: [Ok , 1  ]
-Ok 
-it = 1 
-parent:
-Ok 
-it = `(f () 1 val) 
-f = `(f () 1 val) 
+- reduce_fun local: env:
+	state: Ok 
+	it = 1 
+parent env:
+	state: Ok 
+	it = `(f () 1 val) 
+	f = `(f () 1 val) 
 #   0 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
+	f = `(f () 1 val) 
 #   1  expr: print it
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
 1 
 #   1 reduce: [Ok , 1  ]
-Ok 
-it = 1 
-f = `(f () 1 val) 
+env:
+	state: Ok 
+	it = 1 
+	f = `(f () 1 val) 
+env:
+	state: Ok 
+	it = 1 
+	f = `(f () 1 val) 

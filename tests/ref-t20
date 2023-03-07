@@ -4,17 +4,24 @@
 #   0  seme: ( define dec { a } ) 
 #   0 value: ( `define 'dec { 'a } ) 
 #   0 reduce: [Fun , `(dec ('a ) 0 val)  ]
+env:
+	state: Fun 
+	it = `(dec ('a ) 0 val) 
 #   1  expr: a - 1 
 #   1  seme: ( a - 1N ) 
 #   1 value: ( 'a `- 1 ) 
 #   1 reduce: [Fun , `(dec ('a ) 1 val)  ]
+env:
+	state: Fun 
+	it = `(dec ('a ) 1 val) 
 #   2  expr: end dec
 #   2  seme: ( end dec ) 
 #   2 value: ( `end 'dec ) 
 #   2 reduce: [Ok , `(dec ('a ) 1 val)  ]
-Ok 
-it = `(dec ('a ) 1 val) 
-dec = `(dec ('a ) 1 val) 
+env:
+	state: Ok 
+	it = `(dec ('a ) 1 val) 
+	dec = `(dec ('a ) 1 val) 
 # ----line: "dec (1,)"
 # --phrase: dec (1,) ; 
 #   0  expr: dec (1,)
@@ -22,14 +29,20 @@ dec = `(dec ('a ) 1 val)
 #   0 value: ( `(dec ('a ) 1 val) { 1 } ) 
 - reduce_fun value: ( 'a `- 1 ) 
 - reduce_fun reduce: [Ok , 0  ]
-Ok 
-a = 1 
-it = 0 
-parent:
-Ok 
-it = `(dec ('a ) 1 val) 
-dec = `(dec ('a ) 1 val) 
+- reduce_fun local: env:
+	state: Ok 
+	a = 1 
+	it = 0 
+parent env:
+	state: Ok 
+	it = `(dec ('a ) 1 val) 
+	dec = `(dec ('a ) 1 val) 
 #   0 reduce: [Ok , 0  ]
-Ok 
-it = 0 
-dec = `(dec ('a ) 1 val) 
+env:
+	state: Ok 
+	it = 0 
+	dec = `(dec ('a ) 1 val) 
+env:
+	state: Ok 
+	it = 0 
+	dec = `(dec ('a ) 1 val) 

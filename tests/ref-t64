@@ -4,33 +4,47 @@
 #   0  seme: ( list a b ) 
 #   0 value: ( `list 'a 'b ) 
 #   0 reduce: [Ok , { 'a 'b }  ]
-Ok 
-it = { 'a 'b } 
+env:
+	state: Ok 
+	it = { 'a 'b } 
 # ----line: "def f it ; () ; () ; a - b ; end f "
 # --phrase: def f it  ; ()  ; ()  ; a - b  ; end f  ; 
 #   0  expr: def f it 
 #   0  seme: ( def f it ) 
 #   0 value: ( `def 'f { 'a 'b } ) 
 #   0 reduce: [Fun , `(f ('a 'b ) 0 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a 'b ) 0 val) 
 #   1  expr: () 
 #   1  seme: ( Nil ) 
 #   1 value: ( Nil ) 
 #   1 reduce: [Fun , `(f ('a 'b ) 1 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a 'b ) 1 val) 
 #   2  expr: () 
 #   2  seme: ( Nil ) 
 #   2 value: ( Nil ) 
 #   2 reduce: [Fun , `(f ('a 'b ) 2 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a 'b ) 2 val) 
 #   3  expr: a - b 
 #   3  seme: ( a - b ) 
 #   3 value: ( 'a `- 'b ) 
 #   3 reduce: [Fun , `(f ('a 'b ) 3 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a 'b ) 3 val) 
 #   4  expr: end f 
 #   4  seme: ( end f ) 
 #   4 value: ( `end 'f ) 
 #   4 reduce: [Ok , `(f ('a 'b ) 3 val)  ]
-Ok 
-it = `(f ('a 'b ) 3 val) 
-f = `(f ('a 'b ) 3 val) 
+env:
+	state: Ok 
+	it = `(f ('a 'b ) 3 val) 
+	f = `(f ('a 'b ) 3 val) 
 # ----line: "f (1, 2)"
 # --phrase: f (1, 2) ; 
 #   0  expr: f (1, 2)
@@ -42,15 +56,21 @@ f = `(f ('a 'b ) 3 val)
 - reduce_fun reduce: [Ok , Nil  ]
 - reduce_fun value: ( 'a `- 'b ) 
 - reduce_fun reduce: [Ok , -1  ]
-Ok 
-a = 1 
-b = 2 
-it = -1 
-parent:
-Ok 
-it = `(f ('a 'b ) 3 val) 
-f = `(f ('a 'b ) 3 val) 
+- reduce_fun local: env:
+	state: Ok 
+	a = 1 
+	b = 2 
+	it = -1 
+parent env:
+	state: Ok 
+	it = `(f ('a 'b ) 3 val) 
+	f = `(f ('a 'b ) 3 val) 
 #   0 reduce: [Ok , -1  ]
-Ok 
-it = -1 
-f = `(f ('a 'b ) 3 val) 
+env:
+	state: Ok 
+	it = -1 
+	f = `(f ('a 'b ) 3 val) 
+env:
+	state: Ok 
+	it = -1 
+	f = `(f ('a 'b ) 3 val) 

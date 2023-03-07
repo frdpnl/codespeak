@@ -4,25 +4,28 @@
 #   0  seme: ( define f { a b } ) 
 #   0 value: ( `define 'f { 'a 'b } ) 
 #   0 reduce: [Fun , `(f ('a 'b ) 0 val)  ]
-Fun 
-it = `(f ('a 'b ) 0 val) 
+env:
+	state: Fun 
+	it = `(f ('a 'b ) 0 val) 
 # ----line: "	1"
 # --phrase: 1 ; 
 #   0  expr: 1
 #   0  seme: ( 1N ) 
 #   0 value: ( 1 ) 
 #   0 reduce: [Fun , `(f ('a 'b ) 1 val)  ]
-Fun 
-it = `(f ('a 'b ) 1 val) 
+env:
+	state: Fun 
+	it = `(f ('a 'b ) 1 val) 
 # ----line: "end f"
 # --phrase: end f ; 
 #   0  expr: end f
 #   0  seme: ( end f ) 
 #   0 value: ( `end 'f ) 
 #   0 reduce: [Ok , `(f ('a 'b ) 1 val)  ]
-Ok 
-it = `(f ('a 'b ) 1 val) 
-f = `(f ('a 'b ) 1 val) 
+env:
+	state: Ok 
+	it = `(f ('a 'b ) 1 val) 
+	f = `(f ('a 'b ) 1 val) 
 # ----line: "f (1, 2)"
 # --phrase: f (1, 2) ; 
 #   0  expr: f (1, 2)
@@ -30,15 +33,21 @@ f = `(f ('a 'b ) 1 val)
 #   0 value: ( `(f ('a 'b ) 1 val) { 1 2 } ) 
 - reduce_fun value: ( 1 ) 
 - reduce_fun reduce: [Ok , 1  ]
-Ok 
-a = 1 
-b = 2 
-it = 1 
-parent:
-Ok 
-it = `(f ('a 'b ) 1 val) 
-f = `(f ('a 'b ) 1 val) 
+- reduce_fun local: env:
+	state: Ok 
+	a = 1 
+	b = 2 
+	it = 1 
+parent env:
+	state: Ok 
+	it = `(f ('a 'b ) 1 val) 
+	f = `(f ('a 'b ) 1 val) 
 #   0 reduce: [Ok , 1  ]
-Ok 
-it = 1 
-f = `(f ('a 'b ) 1 val) 
+env:
+	state: Ok 
+	it = 1 
+	f = `(f ('a 'b ) 1 val) 
+env:
+	state: Ok 
+	it = 1 
+	f = `(f ('a 'b ) 1 val) 

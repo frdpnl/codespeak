@@ -4,9 +4,10 @@
 #   0  seme: ( call 3N n ) 
 #   0 value: ( `call 3 'n ) 
 #   0 reduce: [Ok , 3  ]
-Ok 
-n = 3 
-it = 3 
+env:
+	state: Ok 
+	n = 3 
+	it = 3 
 # ----line: "end f"
 # --phrase: end f ; 
 #   0  expr: end f
@@ -14,3 +15,7 @@ it = 3
 #   0 value: ( `end 'f ) 
 ? reduce_end: 'end' outside function definition
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	n = 3 
+	it = 3 

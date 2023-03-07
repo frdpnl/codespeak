@@ -4,22 +4,28 @@
 #   0  seme: ( if ) 
 #   0 value: ( `if ) 
 #   0 reduce: [Ok , `if  ]
-Ok 
-it = `if 
+env:
+	state: Ok 
+	it = `if 
 # ----line: "end if"
 # --phrase: end if ; 
 #   0  expr: end if
 #   0  seme: ( end if ) 
 #   0 value: ( `end `if ) 
 #   0 reduce: [Ok , `if  ]
-Ok 
-it = `if 
+env:
+	state: Ok 
+	it = `if 
 # ----line: "if ()"
 # --phrase: if () ; 
 #   0  expr: if ()
 #   0  seme: ( if Nil ) 
 #   0 value: ( `if Nil ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
+env:
+	state: Skip 
+	it = 0 
 ? main: unexpected end of program
+env:
+	state: Skip 
+	it = 0 

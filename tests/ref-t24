@@ -4,61 +4,78 @@
 #   0  seme: ( 3N ) 
 #   0 value: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
+env:
+	state: Ok 
+	it = 3 
 #   1  expr: call it a
 #   1  seme: ( call it a ) 
 #   1 value: ( `call 3 'a ) 
 #   1 reduce: [Ok , 3  ]
-Ok 
-it = 3 
-a = 3 
+env:
+	state: Ok 
+	it = 3 
+	a = 3 
 # ----line: "4 ; call it b"
 # --phrase: 4  ; call it b ; 
 #   0  expr: 4 
 #   0  seme: ( 4N ) 
 #   0 value: ( 4 ) 
 #   0 reduce: [Ok , 4  ]
+env:
+	state: Ok 
+	it = 4 
+	a = 3 
 #   1  expr: call it b
 #   1  seme: ( call it b ) 
 #   1 value: ( `call 4 'b ) 
 #   1 reduce: [Ok , 4  ]
-Ok 
-it = 4 
-a = 3 
-b = 4 
+env:
+	state: Ok 
+	it = 4 
+	a = 3 
+	b = 4 
 # ----line: "if a > b"
 # --phrase: if a > b ; 
 #   0  expr: if a > b
 #   0  seme: ( if a > b ) 
 #   0 value: ( `if 'a `> 'b ) 
 #   0 reduce: [Skip , 0  ]
-Skip 
-it = 0 
-a = 3 
-b = 4 
+env:
+	state: Skip 
+	it = 0 
+	a = 3 
+	b = 4 
 # ----line: "	a - b; print it"
 # --phrase: a - b ; print it ; 
 #   0  expr: a - b
 #   0  seme: ( a - b ) 
 #   0 value: ( 'a `- 'b ) 
 #   0 reduce: [Skip , 0  ]
+env:
+	state: Skip 
+	it = 0 
+	a = 3 
+	b = 4 
 #   1  expr: print it
 #   1  seme: ( print it ) 
 #   1 value: ( `print 0 ) 
 #   1 reduce: [Skip , 0  ]
-Skip 
-it = 0 
-a = 3 
-b = 4 
+env:
+	state: Skip 
+	it = 0 
+	a = 3 
+	b = 4 
 # ----line: "end if"
 # --phrase: end if ; 
 #   0  expr: end if
 #   0  seme: ( end if ) 
 #   0 value: ( `end `if ) 
 #   0 reduce: [Ok , 0  ]
-Ok 
-it = 0 
-a = 3 
-b = 4 
+env:
+	state: Ok 
+	it = 0 
+	a = 3 
+	b = 4 
 # ----line: "print it"
 # --phrase: print it ; 
 #   0  expr: print it
@@ -66,26 +83,43 @@ b = 4
 #   0 value: ( `print 0 ) 
 0 
 #   0 reduce: [Ok , 0  ]
-Ok 
-it = 0 
-a = 3 
-b = 4 
+env:
+	state: Ok 
+	it = 0 
+	a = 3 
+	b = 4 
 # ----line: "if false? ; print it ; end if"
 # --phrase: if false?  ; print it  ; end if ; 
 #   0  expr: if false? 
 #   0  seme: ( if false? ) 
 #   0 value: ( `if `false? ) 
 #   0 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
+	a = 3 
+	b = 4 
 #   1  expr: print it 
 #   1  seme: ( print it ) 
 #   1 value: ( `print 1 ) 
 1 
 #   1 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
+	a = 3 
+	b = 4 
 #   2  expr: end if
 #   2  seme: ( end if ) 
 #   2 value: ( `end `if ) 
 #   2 reduce: [Ok , 1  ]
-Ok 
-it = 1 
-a = 3 
-b = 4 
+env:
+	state: Ok 
+	it = 1 
+	a = 3 
+	b = 4 
+env:
+	state: Ok 
+	it = 1 
+	a = 3 
+	b = 4 

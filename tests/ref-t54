@@ -4,8 +4,16 @@
 #   0  seme: ( call 3N n ) 
 #   0 value: ( `call 3 'n ) 
 #   0 reduce: [Ok , 3  ]
+env:
+	state: Ok 
+	n = 3 
+	it = 3 
 #   1  expr: n else 
 #   1  seme: ( n else ) 
 #   1 value: ( 'n `else ) 
 ? reduce_else: 'else' syntax incorrect
 #   1 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	n = 3 
+	it = 3 

@@ -4,14 +4,20 @@
 #   0  seme: ( define inc { a } ) 
 #   0 value: ( `define 'inc { 'a } ) 
 #   0 reduce: [Fun , `(inc ('a ) 0 val)  ]
-Fun 
-it = `(inc ('a ) 0 val) 
+env:
+	state: Fun 
+	it = `(inc ('a ) 0 val) 
 # ----line: "end inc"
 # --phrase: end inc ; 
 #   0  expr: end inc
 #   0  seme: ( end inc ) 
 #   0 value: ( `end 'inc ) 
 #   0 reduce: [Ok , `(inc ('a ) 0 val)  ]
-Ok 
-it = `(inc ('a ) 0 val) 
-inc = `(inc ('a ) 0 val) 
+env:
+	state: Ok 
+	it = `(inc ('a ) 0 val) 
+	inc = `(inc ('a ) 0 val) 
+env:
+	state: Ok 
+	it = `(inc ('a ) 0 val) 
+	inc = `(inc ('a ) 0 val) 

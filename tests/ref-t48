@@ -4,17 +4,24 @@
 #   0  seme: ( def f { a } ) 
 #   0 value: ( `def 'f { 'a } ) 
 #   0 reduce: [Fun , `(f ('a ) 0 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 0 val) 
 #   1  expr: a + 2 
 #   1  seme: ( a + 2N ) 
 #   1 value: ( 'a `+ 2 ) 
 #   1 reduce: [Fun , `(f ('a ) 1 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 1 val) 
 #   2  expr: end f
 #   2  seme: ( end f ) 
 #   2 value: ( `end 'f ) 
 #   2 reduce: [Ok , `(f ('a ) 1 val)  ]
-Ok 
-it = `(f ('a ) 1 val) 
-f = `(f ('a ) 1 val) 
+env:
+	state: Ok 
+	it = `(f ('a ) 1 val) 
+	f = `(f ('a ) 1 val) 
 # ----line: "(4,) f"
 # --phrase: (4,) f ; 
 #   0  expr: (4,) f
@@ -23,3 +30,7 @@ f = `(f ('a ) 1 val)
 ? reduce_prefix1_arg: symbol not prefixed to one argument
 ? reduce_fun: invalid argument to `f
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	it = `(f ('a ) 1 val) 
+	f = `(f ('a ) 1 val) 

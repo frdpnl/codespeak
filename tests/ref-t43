@@ -4,30 +4,43 @@
 #   0  seme: ( def f Nil ) 
 #   0 value: ( `def 'f Nil ) 
 #   0 reduce: [Fun , `(f () 0 val)  ]
-Fun 
-it = `(f () 0 val) 
+env:
+	state: Fun 
+	it = `(f () 0 val) 
 # ----line: "if 1 ; ok ; end if"
 # --phrase: if 1  ; ok  ; end if ; 
 #   0  expr: if 1 
 #   0  seme: ( if 1N ) 
 #   0 value: ( `if 1 ) 
 #   0 reduce: [Fun , `(f () 1 val)  ]
+env:
+	state: Fun 
+	it = `(f () 1 val) 
 #   1  expr: ok 
 #   1  seme: ( ok ) 
 #   1 value: ( 'ok ) 
 #   1 reduce: [Fun , `(f () 2 val)  ]
+env:
+	state: Fun 
+	it = `(f () 2 val) 
 #   2  expr: end if
 #   2  seme: ( end if ) 
 #   2 value: ( `end `if ) 
 #   2 reduce: [Fun , `(f () 3 val)  ]
-Fun 
-it = `(f () 3 val) 
+env:
+	state: Fun 
+	it = `(f () 3 val) 
 # ----line: "end f"
 # --phrase: end f ; 
 #   0  expr: end f
 #   0  seme: ( end f ) 
 #   0 value: ( `end 'f ) 
 #   0 reduce: [Ok , `(f () 3 val)  ]
-Ok 
-it = `(f () 3 val) 
-f = `(f () 3 val) 
+env:
+	state: Ok 
+	it = `(f () 3 val) 
+	f = `(f () 3 val) 
+env:
+	state: Ok 
+	it = `(f () 3 val) 
+	f = `(f () 3 val) 

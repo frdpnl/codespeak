@@ -4,23 +4,43 @@
 #   0  seme: ( * ) 
 #   0 value: ( `* ) 
 #   0 reduce: [Ok , `*  ]
+env:
+	state: Ok 
+	it = `* 
 #   1  expr: call it op
 #   1  seme: ( call it op ) 
 #   1 value: ( `call `* 'op ) 
 #   1 reduce: [Ok , `*  ]
+env:
+	state: Ok 
+	it = `* 
+	op = `* 
 #   2  expr: 1, op, 3
 #   2  seme: { 1N op 3N } 
 #   2 value: { 1 `* 3 } 
 #   2 reduce: [Ok , { 1 `* 3 }  ]
+env:
+	state: Ok 
+	it = { 1 `* 3 } 
+	op = `* 
 #   3  expr: do it
 #   3  seme: ( do it ) 
 #   3 value: ( `do { 1 `* 3 } ) 
 #   3 reduce: [Ok , 3  ]
+env:
+	state: Ok 
+	it = 3 
+	op = `* 
 #   4  expr: print it
 #   4  seme: ( print it ) 
 #   4 value: ( `print 3 ) 
 3 
 #   4 reduce: [Ok , 3  ]
-Ok 
-it = 3 
-op = `* 
+env:
+	state: Ok 
+	it = 3 
+	op = `* 
+env:
+	state: Ok 
+	it = 3 
+	op = `* 

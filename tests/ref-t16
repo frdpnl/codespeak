@@ -4,14 +4,25 @@
 #   0  seme: ( define inc Nil ) 
 #   0 value: ( `define 'inc Nil ) 
 #   0 reduce: [Fun , `(inc () 0 val)  ]
+env:
+	state: Fun 
+	it = `(inc () 0 val) 
 #   1  expr: 1 
 #   1  seme: ( 1N ) 
 #   1 value: ( 1 ) 
 #   1 reduce: [Fun , `(inc () 1 val)  ]
+env:
+	state: Fun 
+	it = `(inc () 1 val) 
 #   2  expr: end inc
 #   2  seme: ( end inc ) 
 #   2 value: ( `end 'inc ) 
 #   2 reduce: [Ok , `(inc () 1 val)  ]
-Ok 
-it = `(inc () 1 val) 
-inc = `(inc () 1 val) 
+env:
+	state: Ok 
+	it = `(inc () 1 val) 
+	inc = `(inc () 1 val) 
+env:
+	state: Ok 
+	it = `(inc () 1 val) 
+	inc = `(inc () 1 val) 

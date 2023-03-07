@@ -4,17 +4,24 @@
 #   0  seme: ( def f { a } ) 
 #   0 value: ( `def 'f { 'a } ) 
 #   0 reduce: [Fun , `(f ('a ) 0 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 0 val) 
 #   1  expr: a + 2 
 #   1  seme: ( a + 2N ) 
 #   1 value: ( 'a `+ 2 ) 
 #   1 reduce: [Fun , `(f ('a ) 1 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 1 val) 
 #   2  expr: end f
 #   2  seme: ( end f ) 
 #   2 value: ( `end 'f ) 
 #   2 reduce: [Ok , `(f ('a ) 1 val)  ]
-Ok 
-it = `(f ('a ) 1 val) 
-f = `(f ('a ) 1 val) 
+env:
+	state: Ok 
+	it = `(f ('a ) 1 val) 
+	f = `(f ('a ) 1 val) 
 # ----line: "f 4"
 # --phrase: f 4 ; 
 #   0  expr: f 4
@@ -22,3 +29,7 @@ f = `(f ('a ) 1 val)
 #   0 value: ( `(f ('a ) 1 val) 4 ) 
 ? reduce_fun: argument to `f not a list or '()'
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	it = `(f ('a ) 1 val) 
+	f = `(f ('a ) 1 val) 

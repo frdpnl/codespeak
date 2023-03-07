@@ -4,17 +4,24 @@
 #   0  seme: ( define f { a } ) 
 #   0 value: ( `define 'f { 'a } ) 
 #   0 reduce: [Fun , `(f ('a ) 0 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 0 val) 
 #   1  expr: 1 
 #   1  seme: ( 1N ) 
 #   1 value: ( 1 ) 
 #   1 reduce: [Fun , `(f ('a ) 1 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 1 val) 
 #   2  expr: end f
 #   2  seme: ( end f ) 
 #   2 value: ( `end 'f ) 
 #   2 reduce: [Ok , `(f ('a ) 1 val)  ]
-Ok 
-it = `(f ('a ) 1 val) 
-f = `(f ('a ) 1 val) 
+env:
+	state: Ok 
+	it = `(f ('a ) 1 val) 
+	f = `(f ('a ) 1 val) 
 # ----line: "f ()"
 # --phrase: f () ; 
 #   0  expr: f ()
@@ -22,3 +29,7 @@ f = `(f ('a ) 1 val)
 #   0 value: ( `(f ('a ) 1 val) Nil ) 
 ? reduce_fun: expected argument to `f
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	it = `(f ('a ) 1 val) 
+	f = `(f ('a ) 1 val) 

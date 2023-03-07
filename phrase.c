@@ -34,6 +34,8 @@
 #include <limits.h>
 #include <assert.h>
 
+bool Dbg = false;
+
 /* ----- words to evaluate --------- */
 
 typedef enum { SEP, LEFT, RIGHT, STR } wtype;  
@@ -966,14 +968,15 @@ print_symval(Symval *a) {
 static void
 print_env(Env *a) {
 	assert(a != NULL);
-	print_inxs(a->state);
-	printf("\n");
+	printf("env:\n");
+	printf("\tstate: "); print_inxs(a->state); printf("\n");
 	for (size_t i=0; i<a->n; ++i) {
+		printf("\t");
 		print_symval(a->s[i]);
 		printf("\n");
 	}
 	if (a->parent) {
-		printf("parent:\n");
+		printf("parent ");
 		print_env(a->parent);
 	}
 }
@@ -2061,10 +2064,10 @@ reduce_fun(Env *e, Val *s, size_t p) {
 	Val *v;
 	for (size_t i=0; i<f->symf.body.n; ++i) {
 		v = copy_v(f->symf.body.v[i]);
-		printf("- %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n");
+		if (Dbg) { printf("- %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n"); }
 		Ir xs = interp(le, v, false);
 		free_v(v);
-		printf("- %s %5s: ", __FUNCTION__, "reduce"); print_rc(xs); printf("\n"); 
+		if (Dbg) { printf("- %s %5s: ", __FUNCTION__, "reduce"); print_rc(xs); printf("\n"); } 
 		le->state = xs.state;
 		if (le->state == FATAL) {
 			free_env(le, false);
@@ -2086,7 +2089,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 			break;
 		}
 	}
-	print_env(le); 
+	if (Dbg) { printf("- %s %5s: ", __FUNCTION__, "local"); print_env(le); }
 	/* return local (function's) 'it to caller */
 	char *sym = IT;
 	Val *lit = NULL;
@@ -2350,7 +2353,7 @@ interp_seq(Env *e, Val *b, bool look) {
 		/* stop condition: seq reduces to single element */
 		if (b->seq.v.n == 1) {
 			c = b->seq.v.v[0];
-			/* loop end, return the reduced to value, 
+			/* loop end, return the reduced-to value, 
 			 * unless it's an operator of 0 arity,
 			 * then, fall through & execute it below */
 			/* (functions all have one parameter) */
@@ -2561,7 +2564,7 @@ interp_ph(Env *env, Phrase *a) {
 	assert(env != NULL && "environment null");
 	assert(a != NULL && "phrase null");
 	for (size_t i=0; i<a->n; ++i) {
-		printf("# %3lu %5s: %s\n", i, "expr", a->x[i]);
+		if (Dbg) { printf("# %3lu %5s: %s\n", i, "expr", a->x[i]); }
 		Expr *ex = exp_of_words(a->x[i]);
 		/* a is freed where allocated: caller allocated */
 		if (ex == NULL) {
@@ -2572,17 +2575,17 @@ interp_ph(Env *env, Phrase *a) {
 		if (sm == NULL) {
 			return false;
 		}
-		printf("# %3lu %5s: ", i, "seme"); print_s(sm); printf("\n");
+		if (Dbg) { printf("# %3lu %5s: ", i, "seme"); print_s(sm); printf("\n"); }
 		Val *v = val_of_seme(env, sm);
 		free_s(sm);
 		free(sm);
 		if (v == NULL) {
 			return false;
 		}
-		printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n");
+		if (Dbg) { printf("# %3lu %5s: ", i, "value"); print_v(v); printf("\n"); }
 		Ir xs = interp(env, v, false);
 		free_v(v);
-		printf("# %3lu %5s: ", i, "reduce"); print_rc(xs); printf("\n"); 
+		if (Dbg) { printf("# %3lu %5s: ", i, "reduce"); print_rc(xs); printf("\n"); }
 		if (xs.state == FATAL) {
 			return false;
 		}
@@ -2597,17 +2600,12 @@ interp_ph(Env *env, Phrase *a) {
 			free_symval(it);
 			return false;
 		}
+		if (Dbg) { print_env(env); }
 	}
-	print_env(env); 
 	return true;
 }
 
 /* ----- main ----- */
-
-static void
-usage(const char *exe) {
-	printf("usage: %s\n", exe);
-}
 
 typedef enum {LINE, EMPTY, END, ERR} Lrc;
 
@@ -2643,9 +2641,8 @@ readline(char **S) {
 
 int
 main(int argc, char **argv) {
-	if (argc != 1) {
-		usage(argv[0]);
-		return EXIT_FAILURE;
+	if (argc == 2) {
+		Dbg = true;
 	}
 	Env *e = malloc(sizeof(*e));
 	assert(e != NULL);
@@ -2658,6 +2655,7 @@ main(int argc, char **argv) {
 		Lrc rc = readline(&line);
 		switch (rc) {
 			case ERR:
+				print_env(e);
 				free_env(e, true);
 				return EXIT_FAILURE;
 			case END:
@@ -2665,12 +2663,13 @@ main(int argc, char **argv) {
 					printf("? %s: unexpected end of program\n",
 							__FUNCTION__);
 				}
+				print_env(e);
 				free_env(e, true);
 				return EXIT_SUCCESS;
 			case EMPTY:
 				continue;
 			case LINE:
-				printf("# ----line: \"%s\"\n", line);
+				if (Dbg) { printf("# ----line: \"%s\"\n", line); }
 				break;
 		}
 		Phrase *ph = phrase_of_str(line);
@@ -2679,10 +2678,11 @@ main(int argc, char **argv) {
 			free_env(e, true);
 			return EXIT_FAILURE;
 		}
-		printf("# --phrase: "); print_ph(ph); 
+		if (Dbg) { printf("# --phrase: "); print_ph(ph); }
 		bool r = interp_ph(e, ph);
 		free_ph(ph);
 		if (!r) {
+			print_env(e);
 			free_env(e, true);
 			return EXIT_FAILURE;
 		}

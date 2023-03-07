@@ -4,17 +4,24 @@
 #   0  seme: ( define f Nil ) 
 #   0 value: ( `define 'f Nil ) 
 #   0 reduce: [Fun , `(f () 0 val)  ]
+env:
+	state: Fun 
+	it = `(f () 0 val) 
 #   1  expr: () 
 #   1  seme: ( Nil ) 
 #   1 value: ( Nil ) 
 #   1 reduce: [Fun , `(f () 1 val)  ]
+env:
+	state: Fun 
+	it = `(f () 1 val) 
 #   2  expr: end f
 #   2  seme: ( end f ) 
 #   2 value: ( `end 'f ) 
 #   2 reduce: [Ok , `(f () 1 val)  ]
-Ok 
-it = `(f () 1 val) 
-f = `(f () 1 val) 
+env:
+	state: Ok 
+	it = `(f () 1 val) 
+	f = `(f () 1 val) 
 # ----line: "f ()"
 # --phrase: f () ; 
 #   0  expr: f ()
@@ -22,40 +29,53 @@ f = `(f () 1 val)
 #   0 value: ( `(f () 1 val) Nil ) 
 - reduce_fun value: ( Nil ) 
 - reduce_fun reduce: [Ok , Nil  ]
-Ok 
-it = Nil 
-parent:
-Ok 
-it = `(f () 1 val) 
-f = `(f () 1 val) 
+- reduce_fun local: env:
+	state: Ok 
+	it = Nil 
+parent env:
+	state: Ok 
+	it = `(f () 1 val) 
+	f = `(f () 1 val) 
 #   0 reduce: [Ok , Nil  ]
-Ok 
-it = Nil 
-f = `(f () 1 val) 
+env:
+	state: Ok 
+	it = Nil 
+	f = `(f () 1 val) 
 # ----line: "define g () ; end g"
 # --phrase: define g ()  ; end g ; 
 #   0  expr: define g () 
 #   0  seme: ( define g Nil ) 
 #   0 value: ( `define 'g Nil ) 
 #   0 reduce: [Fun , `(g () 0 val)  ]
+env:
+	state: Fun 
+	it = `(g () 0 val) 
+	f = `(f () 1 val) 
 #   1  expr: end g
 #   1  seme: ( end g ) 
 #   1 value: ( `end 'g ) 
 #   1 reduce: [Ok , `(g () 0 val)  ]
-Ok 
-it = `(g () 0 val) 
-f = `(f () 1 val) 
-g = `(g () 0 val) 
+env:
+	state: Ok 
+	it = `(g () 0 val) 
+	f = `(f () 1 val) 
+	g = `(g () 0 val) 
 # ----line: "g ()"
 # --phrase: g () ; 
 #   0  expr: g ()
 #   0  seme: ( g Nil ) 
 #   0 value: ( `(g () 0 val) Nil ) 
-Ok 
-parent:
-Ok 
-it = `(g () 0 val) 
-f = `(f () 1 val) 
-g = `(g () 0 val) 
+- reduce_fun local: env:
+	state: Ok 
+parent env:
+	state: Ok 
+	it = `(g () 0 val) 
+	f = `(f () 1 val) 
+	g = `(g () 0 val) 
 ? reduce_fun: 'it' from 'g' undefined
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	it = `(g () 0 val) 
+	f = `(f () 1 val) 
+	g = `(g () 0 val) 

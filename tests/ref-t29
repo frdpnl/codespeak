@@ -5,3 +5,5 @@
 #   0 value: ( `define 'f { Nil } ) 
 ? reduce_def: expecting symbol for function parameter
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 

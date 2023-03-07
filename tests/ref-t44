@@ -4,33 +4,42 @@
 #   0  seme: ( def f { a } ) 
 #   0 value: ( `def 'f { 'a } ) 
 #   0 reduce: [Fun , `(f ('a ) 0 val)  ]
-Fun 
-it = `(f ('a ) 0 val) 
+env:
+	state: Fun 
+	it = `(f ('a ) 0 val) 
 # ----line: "	def g () ; 2 ; end g"
 # --phrase: def g ()  ; 2  ; end g ; 
 #   0  expr: def g () 
 #   0  seme: ( def g Nil ) 
 #   0 value: ( `def 'g Nil ) 
 #   0 reduce: [Fun , `(f ('a ) 1 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 1 val) 
 #   1  expr: 2 
 #   1  seme: ( 2N ) 
 #   1 value: ( 2 ) 
 #   1 reduce: [Fun , `(f ('a ) 2 val)  ]
+env:
+	state: Fun 
+	it = `(f ('a ) 2 val) 
 #   2  expr: end g
 #   2  seme: ( end g ) 
 #   2 value: ( `end 'g ) 
 #   2 reduce: [Fun , `(f ('a ) 3 val)  ]
-Fun 
-it = `(f ('a ) 3 val) 
+env:
+	state: Fun 
+	it = `(f ('a ) 3 val) 
 # ----line: "end f"
 # --phrase: end f ; 
 #   0  expr: end f
 #   0  seme: ( end f ) 
 #   0 value: ( `end 'f ) 
 #   0 reduce: [Ok , `(f ('a ) 3 val)  ]
-Ok 
-it = `(f ('a ) 3 val) 
-f = `(f ('a ) 3 val) 
+env:
+	state: Ok 
+	it = `(f ('a ) 3 val) 
+	f = `(f ('a ) 3 val) 
 # ----line: "f (3,) ; call it f3"
 # --phrase: f (3,)  ; call it f3 ; 
 #   0  expr: f (3,) 
@@ -42,23 +51,29 @@ f = `(f ('a ) 3 val)
 - reduce_fun reduce: [Fun , `(g () 1 val)  ]
 - reduce_fun value: ( `end 'g ) 
 - reduce_fun reduce: [Ok , `(g () 1 val)  ]
-Ok 
-a = 3 
-it = `(g () 1 val) 
-g = `(g () 1 val) 
-parent:
-Ok 
-it = `(f ('a ) 3 val) 
-f = `(f ('a ) 3 val) 
+- reduce_fun local: env:
+	state: Ok 
+	a = 3 
+	it = `(g () 1 val) 
+	g = `(g () 1 val) 
+parent env:
+	state: Ok 
+	it = `(f ('a ) 3 val) 
+	f = `(f ('a ) 3 val) 
 #   0 reduce: [Ok , `(g () 1 val)  ]
+env:
+	state: Ok 
+	it = `(g () 1 val) 
+	f = `(f ('a ) 3 val) 
 #   1  expr: call it f3
 #   1  seme: ( call it f3 ) 
 #   1 value: ( `call `(g () 1 val) 'f3 ) 
 #   1 reduce: [Ok , `(g () 1 val)  ]
-Ok 
-it = `(g () 1 val) 
-f = `(f ('a ) 3 val) 
-f3 = `(g () 1 val) 
+env:
+	state: Ok 
+	it = `(g () 1 val) 
+	f = `(f ('a ) 3 val) 
+	f3 = `(g () 1 val) 
 # ----line: "f3 ()"
 # --phrase: f3 () ; 
 #   0  expr: f3 ()
@@ -66,15 +81,22 @@ f3 = `(g () 1 val)
 #   0 value: ( `(g () 1 val) Nil ) 
 - reduce_fun value: ( 2 ) 
 - reduce_fun reduce: [Ok , 2  ]
-Ok 
-it = 2 
-parent:
-Ok 
-it = `(g () 1 val) 
-f = `(f ('a ) 3 val) 
-f3 = `(g () 1 val) 
+- reduce_fun local: env:
+	state: Ok 
+	it = 2 
+parent env:
+	state: Ok 
+	it = `(g () 1 val) 
+	f = `(f ('a ) 3 val) 
+	f3 = `(g () 1 val) 
 #   0 reduce: [Ok , 2  ]
-Ok 
-it = 2 
-f = `(f ('a ) 3 val) 
-f3 = `(g () 1 val) 
+env:
+	state: Ok 
+	it = 2 
+	f = `(f ('a ) 3 val) 
+	f3 = `(g () 1 val) 
+env:
+	state: Ok 
+	it = 2 
+	f = `(f ('a ) 3 val) 
+	f3 = `(g () 1 val) 

@@ -4,25 +4,48 @@
 #   0  seme: ( 3N ) 
 #   0 value: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
+env:
+	state: Ok 
+	it = 3 
 #   1  expr: call it p
 #   1  seme: ( call it p ) 
 #   1 value: ( `call 3 'p ) 
 #   1 reduce: [Ok , 3  ]
+env:
+	state: Ok 
+	it = 3 
+	p = 3 
 #   2  expr: call 4 p
 #   2  seme: ( call 4N p ) 
 #   2 value: ( `call 4 'p ) 
 #   2 reduce: [Ok , 4  ]
+env:
+	state: Ok 
+	it = 4 
+	p = 4 
 #   3  expr: p
 #   3  seme: ( p ) 
 #   3 value: ( 'p ) 
 #   3 reduce: [Ok , 'p  ]
+env:
+	state: Ok 
+	it = 'p 
+	p = 4 
 #   4  expr: print it
 #   4  seme: ( print it ) 
 #   4 value: ( `print 'p ) 
 'p 
 #   4 reduce: [Ok , 'p  ]
+env:
+	state: Ok 
+	it = 'p 
+	p = 4 
 #   5  expr: solve it
 #   5  seme: ( solve it ) 
 #   5 value: ( 'solve 'p ) 
 ? interp_seq: sequence without function
 #   5 reduce: [Fatal , null ]
+env:
+	state: Ok 
+	it = 'p 
+	p = 4 

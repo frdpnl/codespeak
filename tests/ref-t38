@@ -5,3 +5,5 @@
 #   0 value: ( `if 't ) 
 ? interp: unknown symbol 't'
 #   0 reduce: [Fatal , null ]
+env:
+	state: Ok 

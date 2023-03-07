@@ -4,36 +4,61 @@
 #   0  seme: ( 2N * 2N ) 
 #   0 value: ( 2 `* 2 ) 
 #   0 reduce: [Ok , 4  ]
+env:
+	state: Ok 
+	it = 4 
 #   1  expr: call it n 
 #   1  seme: ( call it n ) 
 #   1 value: ( `call 4 'n ) 
 #   1 reduce: [Ok , 4  ]
+env:
+	state: Ok 
+	it = 4 
+	n = 4 
 #   2  expr: if n - 1 > n * 2 
 #   2  seme: ( if n - 1N > n * 2N ) 
 #   2 value: ( `if 'n `- 1 `> 'n `* 2 ) 
 #   2 reduce: [Skip , 0  ]
+env:
+	state: Skip 
+	it = 0 
+	n = 4 
 #   3  expr: print wrong 
 #   3  seme: ( print wrong ) 
 #   3 value: ( `print 'wrong ) 
 #   3 reduce: [Skip , 0  ]
+env:
+	state: Skip 
+	it = 0 
+	n = 4 
 #   4  expr: end if
 #   4  seme: ( end if ) 
 #   4 value: ( `end `if ) 
 #   4 reduce: [Ok , 0  ]
-Ok 
-it = 0 
-n = 4 
+env:
+	state: Ok 
+	it = 0 
+	n = 4 
 # ----line: "if false? ; print n * 2"
 # --phrase: if false?  ; print n * 2 ; 
 #   0  expr: if false? 
 #   0  seme: ( if false? ) 
 #   0 value: ( `if `false? ) 
 #   0 reduce: [Ok , 1  ]
+env:
+	state: Ok 
+	it = 1 
+	n = 4 
 #   1  expr: print n * 2
 #   1  seme: ( print n * 2N ) 
 #   1 value: ( `print 'n `* 2 ) 
 'n 
 #   1 reduce: [Ok , 8  ]
-Ok 
-it = 8 
-n = 4 
+env:
+	state: Ok 
+	it = 8 
+	n = 4 
+env:
+	state: Ok 
+	it = 8 
+	n = 4 

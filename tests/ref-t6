@@ -4,5 +4,9 @@
 #   0  seme: ( 2N ) 
 #   0 value: ( 2 ) 
 #   0 reduce: [Ok , 2  ]
-Ok 
-it = 2 
+env:
+	state: Ok 
+	it = 2 
+env:
+	state: Ok 
+	it = 2 
