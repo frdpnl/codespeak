@@ -653,10 +653,12 @@ print_v(Val *a) {
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
 			}
-			printf(") %lu vals: ", a->symf.body.n);
+			printf(") %lu val ", a->symf.body.n);
 			for (size_t i=0; i<a->symf.body.n; ++i) {
 				print_v(a->symf.body.v[i]);
+				printf("; ");
 			}
+			printf(") ");
 			break;
 		case VSYM:
 			printf("'%s ", a->sym.v);
