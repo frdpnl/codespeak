@@ -181,7 +181,6 @@ reduce_items	phrase.c	/^reduce_items(Env *e, Val *a, bool look) {$/;"	f	typeref:
 reduce_leq	phrase.c	/^reduce_leq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_les	phrase.c	/^reduce_les(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_list	phrase.c	/^reduce_list(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
-reduce_look	phrase.c	/^reduce_look(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_min	phrase.c	/^reduce_min(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_mul	phrase.c	/^reduce_mul(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_neq	phrase.c	/^reduce_neq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
@@ -195,7 +194,9 @@ reduce_print	phrase.c	/^reduce_print(Env *e, Val *s, size_t p) {$/;"	f	typeref:t
 reduce_rem	phrase.c	/^reduce_rem(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_return	phrase.c	/^reduce_return(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_skip	phrase.c	/^reduce_skip(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
+reduce_solve	phrase.c	/^reduce_solve(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_true	phrase.c	/^reduce_true(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
+resolve_special	phrase.c	/^resolve_special(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 s	phrase.c	/^	Sem *s;$/;"	m	struct:List_	typeref:typename:Sem *	file:
 s	phrase.c	/^	Symval **s;$/;"	m	struct:Env_	typeref:typename:Symval **	file:
 sem_nat	phrase.c	/^sem_nat(long long a) {$/;"	f	typeref:typename:Sem *	file:

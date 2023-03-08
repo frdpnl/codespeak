@@ -1,7 +1,7 @@
 
 define dec (b,) ; b - 1 ; end dec
 
-print (show dec)
+print dec
 
 define inc (a,) 
 1 + a 
