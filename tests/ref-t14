@@ -1,60 +1,98 @@
-# ----line: "rem: testing comments"
-# --phrase: rem: testing comments ; 
-#   0  expr: rem: testing comments
-#   0  seme: ( rem: testing comments ) 
-#   0 value: ( `rem: 'testing 'comments ) 
+> input: "rem: testing comments"
+# phrase: rem: testing comments ; 
+#   0   expr: rem: testing comments
+#   0   seme: ( rem: testing comments ) 
+#   0  value: ( 'rem: 'testing 'comments ) 
+##  reduce_items (0) entry: ( 'rem: 'testing 'comments ) 
+##  interp_seq (0) entry: ( `rem: 'testing 'comments ) 
+##  interp_seq resolved: ( `rem: 'testing 'comments ) 
+##  interp_seq reduced: ( Nil ) 
 #   0 reduce: [Ok , Nil  ]
-env:
-	state: Ok 
-	it = Nil 
-# ----line: "if 5 > 4 ; rem: a simple test ; print it "
-# --phrase: if 5 > 4  ; rem: a simple test  ; print it  ; 
-#   0  expr: if 5 > 4 
-#   0  seme: ( if 5N > 4N ) 
-#   0 value: ( `if 5 `> 4 ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = Nil 
+> input: "if 5 > 4 ; rem: a simple test ; print it "
+# phrase: if 5 > 4  ; rem: a simple test  ; print it  ; 
+#   0   expr: if 5 > 4 
+#   0   seme: ( if 5N > 4N ) 
+#   0  value: ( 'if 5 '> 4 ) 
+##  reduce_items (0) entry: ( 'if 5 '> 4 ) 
+##  interp_seq (0) entry: ( `if 5 `> 4 ) 
+##  interp_seq resolved: ( `if 5 `> 4 ) 
+##  interp_seq reduced: ( `if 1 ) 
+##  interp_seq reduced: ( 1 ) 
 #   0 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-#   1  expr: rem: a simple test 
-#   1  seme: ( rem: a simple test ) 
-#   1 value: ( `rem: 'a 'simple 'test ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#   1   expr: rem: a simple test 
+#   1   seme: ( rem: a simple test ) 
+#   1  value: ( 'rem: 'a 'simple 'test ) 
+##  reduce_items (0) entry: ( 'rem: 'a 'simple 'test ) 
+##  interp_seq (0) entry: ( `rem: 'a 'simple 'test ) 
+##  interp_seq resolved: ( `rem: 'a 'simple 'test ) 
+##  interp_seq reduced: ( 1 ) 
 #   1 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-#   2  expr: print it 
-#   2  seme: ( print it ) 
-#   2 value: ( `print 1 ) 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#   2   expr: print it 
+#   2   seme: ( print it ) 
+#   2  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print 1 ) 
 1 
+##  interp_seq reduced: ( 1 ) 
 #   2 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-# ----line: "if true? ; print it ; rem: again"
-# --phrase: if true?  ; print it  ; rem: again ; 
-#   0  expr: if true? 
-#   0  seme: ( if true? ) 
-#   0 value: ( `if `true? ) 
+#   2 env:
+# env:
+#	state: Ok 
+#	it = 1 
+> input: "if true? ; print it ; rem: again"
+# phrase: if true?  ; print it  ; rem: again ; 
+#   0   expr: if true? 
+#   0   seme: ( if true? ) 
+#   0  value: ( 'if 'true? ) 
+##  reduce_items (0) entry: ( 'if 'true? ) 
+##  interp_seq (0) entry: ( `if `true? ) 
+##  interp_seq resolved: ( `if `true? ) 
+##  interp_seq reduced: ( `if 1 ) 
+##  interp_seq reduced: ( 1 ) 
 #   0 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-#   1  expr: print it 
-#   1  seme: ( print it ) 
-#   1 value: ( `print 1 ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#   1   expr: print it 
+#   1   seme: ( print it ) 
+#   1  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print 1 ) 
 1 
+##  interp_seq reduced: ( 1 ) 
 #   1 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-#   2  expr: rem: again
-#   2  seme: ( rem: again ) 
-#   2 value: ( `rem: 'again ) 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#   2   expr: rem: again
+#   2   seme: ( rem: again ) 
+#   2  value: ( 'rem: 'again ) 
+##  reduce_items (0) entry: ( 'rem: 'again ) 
+##  interp_seq (0) entry: ( `rem: 'again ) 
+##  interp_seq resolved: ( `rem: 'again ) 
+##  interp_seq reduced: ( 1 ) 
 #   2 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-env:
-	state: Ok 
-	it = 1 
+#   2 env:
+# env:
+#	state: Ok 
+#	it = 1 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 1 

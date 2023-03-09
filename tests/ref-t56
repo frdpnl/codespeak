@@ -1,33 +1,47 @@
-# ----line: "call 3 n "
-# --phrase: call 3 n  ; 
-#   0  expr: call 3 n 
-#   0  seme: ( call 3N n ) 
-#   0 value: ( `call 3 'n ) 
+> input: "call 3 n "
+# phrase: call 3 n  ; 
+#   0   expr: call 3 n 
+#   0   seme: ( call 3N n ) 
+#   0  value: ( 'call 3 'n ) 
+##  reduce_items (0) entry: ( 'call 3 'n ) 
+##  interp_seq (0) entry: ( `call 3 'n ) 
+##  interp_seq resolved: ( `call 3 'n ) 
+##  interp_seq reduced: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
-env:
-	state: Ok 
-	n = 3 
-	it = 3 
-# ----line: "else ;  print 1"
-# --phrase: else  ; print 1 ; 
-#   0  expr: else 
-#   0  seme: ( else ) 
-#   0 value: ( `else ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	n = 3 
+#	it = 3 
+> input: "else ;  print 1"
+# phrase: else  ; print 1 ; 
+#   0   expr: else 
+#   0   seme: ( else ) 
+#   0  value: ( 'else ) 
+##  reduce_items (0) entry: ( 'else ) 
+##  interp_seq (0) entry: ( `else ) 
+##  interp_seq resolved: ( `else ) 
+##  interp_seq reduced: ( 0 ) 
 #   0 reduce: [Skip , 0  ]
-env:
-	state: Skip 
-	n = 3 
-	it = 0 
-#   1  expr: print 1
-#   1  seme: ( print 1N ) 
-#   1 value: ( `print 1 ) 
+#   0 env:
+# env:
+#	state: Skip 
+#	n = 3 
+#	it = 0 
+#   1   expr: print 1
+#   1   seme: ( print 1N ) 
+#   1  value: ( 'print 1 ) 
+##  reduce_items (0) entry: ( 'print 1 ) 
+##  interp_seq (0) entry: ( `print 1 ) 
 #   1 reduce: [Skip , 0  ]
-env:
-	state: Skip 
-	n = 3 
-	it = 0 
+#   1 env:
+# env:
+#	state: Skip 
+#	n = 3 
+#	it = 0 
 ? main: unexpected end of program
-env:
-	state: Skip 
-	n = 3 
-	it = 0 
+> main: exit
+> env:
+>	state: Skip 
+>	n = 3 
+>	it = 0 

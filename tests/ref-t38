@@ -1,9 +1,10 @@
-# ----line: "if t ; nooooo ; end if"
-# --phrase: if t  ; nooooo  ; end if ; 
-#   0  expr: if t 
-#   0  seme: ( if t ) 
-#   0 value: ( `if 't ) 
+> input: "if t ; nooooo ; end if"
+# phrase: if t  ; nooooo  ; end if ; 
+#   0   expr: if t 
+#   0   seme: ( if t ) 
+#   0  value: ( 'if 't ) 
+##  reduce_items (0) entry: ( 'if 't ) 
+##  interp_seq (0) entry: ( `if 't ) 
+##  interp_seq resolved: ( `if 't ) 
 ? interp: unknown symbol 't'
 #   0 reduce: [Fatal , null ]
-env:
-	state: Ok 

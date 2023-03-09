@@ -1,28 +1,42 @@
-# ----line: "define inc ()  ; 1 ; end inc"
-# --phrase: define inc ()  ; 1  ; end inc ; 
-#   0  expr: define inc () 
-#   0  seme: ( define inc Nil ) 
-#   0 value: ( `define 'inc Nil ) 
-#   0 reduce: [Fun , `(inc () 0 val)  ]
-env:
-	state: Fun 
-	it = `(inc () 0 val) 
-#   1  expr: 1 
-#   1  seme: ( 1N ) 
-#   1 value: ( 1 ) 
-#   1 reduce: [Fun , `(inc () 1 val)  ]
-env:
-	state: Fun 
-	it = `(inc () 1 val) 
-#   2  expr: end inc
-#   2  seme: ( end inc ) 
-#   2 value: ( `end 'inc ) 
-#   2 reduce: [Ok , `(inc () 1 val)  ]
-env:
-	state: Ok 
-	it = `(inc () 1 val) 
-	inc = `(inc () 1 val) 
-env:
-	state: Ok 
-	it = `(inc () 1 val) 
-	inc = `(inc () 1 val) 
+> input: "define inc ()  ; 1 ; end inc"
+# phrase: define inc ()  ; 1  ; end inc ; 
+#   0   expr: define inc () 
+#   0   seme: ( define inc Nil ) 
+#   0  value: ( 'define 'inc Nil ) 
+##  reduce_items (0) entry: ( 'define 'inc Nil ) 
+##  interp_seq (0) entry: ( `define 'inc Nil ) 
+##  interp_seq resolved: ( `define 'inc Nil ) 
+##  interp_seq reduced: ( `(inc () =0= ) ) 
+#   0 reduce: [Fun , `(inc () =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(inc () =0= ) 
+#   1   expr: 1 
+#   1   seme: ( 1N ) 
+#   1  value: ( 1 ) 
+##  reduce_items (0) entry: ( 1 ) 
+##  interp_seq (0) entry: ( 1 ) 
+#   1 reduce: [Fun , `(inc () =1= ( 1 ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	it = `(inc () =1= ( 1 ) ) 
+#   2   expr: end inc
+#   2   seme: ( end inc ) 
+#   2  value: ( 'end 'inc ) 
+##  reduce_items (0) entry: ( 'end 'inc ) 
+##  interp_seq (0) entry: ( `end 'inc ) 
+##  interp_seq resolved: ( `end 'inc ) 
+##  interp_seq reduced: ( `(inc () =1= ( 1 ) ) ) 
+#   2 reduce: [Ok , `(inc () =1= ( 1 ) )  ]
+#   2 env:
+# env:
+#	state: Ok 
+#	it = `(inc () =1= ( 1 ) ) 
+#	inc = `(inc () =1= ( 1 ) ) 
+> main: exit
+> env:
+>	state: Ok 
+>	it = `(inc () =1= ( 1 ) ) 
+>	inc = `(inc () =1= ( 1 ) ) 

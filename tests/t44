@@ -4,5 +4,5 @@ def f (a,)
 end f
 
 f (3,) ; call it f3
-f3 ()
+f3 () ; print it
 

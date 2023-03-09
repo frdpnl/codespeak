@@ -1,46 +1,73 @@
-# ----line: "* ; call it op; 1, op, 3; do it; print it"
-# --phrase: *  ; call it op ; 1, op, 3 ; do it ; print it ; 
-#   0  expr: * 
-#   0  seme: ( * ) 
-#   0 value: ( `* ) 
+> input: "* ; call it op; 1, op, 3; do it; print it"
+# phrase: *  ; call it op ; 1, op, 3 ; do it ; print it ; 
+#   0   expr: * 
+#   0   seme: ( * ) 
+#   0  value: ( '* ) 
+##  reduce_items (0) entry: ( '* ) 
+##  interp_seq (0) entry: ( `* ) 
+##  interp_seq resolved: ( `* ) 
 #   0 reduce: [Ok , `*  ]
-env:
-	state: Ok 
-	it = `* 
-#   1  expr: call it op
-#   1  seme: ( call it op ) 
-#   1 value: ( `call `* 'op ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `* 
+#   1   expr: call it op
+#   1   seme: ( call it op ) 
+#   1  value: ( 'call 'it 'op ) 
+##  reduce_items (0) entry: ( 'call 'it 'op ) 
+##  interp_seq (0) entry: ( `call 'it 'op ) 
+##  interp_seq resolved: ( `call `* 'op ) 
+##  interp_seq reduced: ( `* ) 
 #   1 reduce: [Ok , `*  ]
-env:
-	state: Ok 
-	it = `* 
-	op = `* 
-#   2  expr: 1, op, 3
-#   2  seme: { 1N op 3N } 
-#   2 value: { 1 `* 3 } 
-#   2 reduce: [Ok , { 1 `* 3 }  ]
-env:
-	state: Ok 
-	it = { 1 `* 3 } 
-	op = `* 
-#   3  expr: do it
-#   3  seme: ( do it ) 
-#   3 value: ( `do { 1 `* 3 } ) 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = `* 
+#	op = `* 
+#   2   expr: 1, op, 3
+#   2   seme: { 1N op 3N } 
+#   2  value: { 1 'op 3 } 
+##  reduce_items (0) entry: { 1 'op 3 } 
+#   2 reduce: [Ok , { 1 'op 3 }  ]
+#   2 env:
+# env:
+#	state: Ok 
+#	it = { 1 'op 3 } 
+#	op = `* 
+#   3   expr: do it
+#   3   seme: ( do it ) 
+#   3  value: ( 'do 'it ) 
+##  reduce_items (0) entry: ( 'do 'it ) 
+##  interp_seq (0) entry: ( `do 'it ) 
+##  interp_seq resolved: ( `do { 1 'op 3 } ) 
+##  reduce_items (0) entry: { 1 'op 3 } 
+##  reduce_items (0) entry: ( 1 'op 3 ) 
+##  interp_seq (0) entry: ( 1 'op 3 ) 
+##  interp_seq resolved: ( 1 `* 3 ) 
+##  interp_seq reduced: ( 3 ) 
+##  interp_seq reduced: ( 3 ) 
 #   3 reduce: [Ok , 3  ]
-env:
-	state: Ok 
-	it = 3 
-	op = `* 
-#   4  expr: print it
-#   4  seme: ( print it ) 
-#   4 value: ( `print 3 ) 
+#   3 env:
+# env:
+#	state: Ok 
+#	it = 3 
+#	op = `* 
+#   4   expr: print it
+#   4   seme: ( print it ) 
+#   4  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print 3 ) 
 3 
+##  interp_seq reduced: ( 3 ) 
 #   4 reduce: [Ok , 3  ]
-env:
-	state: Ok 
-	it = 3 
-	op = `* 
-env:
-	state: Ok 
-	it = 3 
-	op = `* 
+#   4 env:
+# env:
+#	state: Ok 
+#	it = 3 
+#	op = `* 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 3 
+>	op = `* 

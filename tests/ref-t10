@@ -1,35 +1,58 @@
-# ----line: "1 = 0; true?"
-# --phrase: 1 = 0 ; true? ; 
-#   0  expr: 1 = 0
-#   0  seme: ( 1N = 0N ) 
-#   0 value: ( 1 `= 0 ) 
+> input: "1 = 0; true?"
+# phrase: 1 = 0 ; true? ; 
+#   0   expr: 1 = 0
+#   0   seme: ( 1N = 0N ) 
+#   0  value: ( 1 '= 0 ) 
+##  reduce_items (0) entry: ( 1 '= 0 ) 
+##  interp_seq (0) entry: ( 1 `= 0 ) 
+##  interp_seq resolved: ( 1 `= 0 ) 
+##  interp_seq reduced: ( 0 ) 
 #   0 reduce: [Ok , 0  ]
-env:
-	state: Ok 
-	it = 0 
-#   1  expr: true?
-#   1  seme: ( true? ) 
-#   1 value: ( `true? ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 0 
+#   1   expr: true?
+#   1   seme: ( true? ) 
+#   1  value: ( 'true? ) 
+##  reduce_items (0) entry: ( 'true? ) 
+##  interp_seq (0) entry: ( `true? ) 
+##  interp_seq resolved: ( `true? ) 
+##  interp_seq reduced: ( 0 ) 
 #   1 reduce: [Ok , 0  ]
-env:
-	state: Ok 
-	it = 0 
-# ----line: "-11 > -1. ;  true? > false? ;"
-# --phrase: -11 > -1.  ; true? > false?  ; 
-#   0  expr: -11 > -1. 
-#   0  seme: ( -11N > -1.00R ) 
-#   0 value: ( -11 `> -1.00 ) 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 0 
+> input: "-11 > -1. ;  true? > false? ;"
+# phrase: -11 > -1.  ; true? > false?  ; 
+#   0   expr: -11 > -1. 
+#   0   seme: ( -11N > -1.00R ) 
+#   0  value: ( -11 '> -1.00 ) 
+##  reduce_items (0) entry: ( -11 '> -1.00 ) 
+##  interp_seq (0) entry: ( -11 `> -1.00 ) 
+##  interp_seq resolved: ( -11 `> -1.00 ) 
+##  interp_seq reduced: ( 0 ) 
 #   0 reduce: [Ok , 0  ]
-env:
-	state: Ok 
-	it = 0 
-#   1  expr: true? > false? 
-#   1  seme: ( true? > false? ) 
-#   1 value: ( `true? `> `false? ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 0 
+#   1   expr: true? > false? 
+#   1   seme: ( true? > false? ) 
+#   1  value: ( 'true? '> 'false? ) 
+##  reduce_items (0) entry: ( 'true? '> 'false? ) 
+##  interp_seq (0) entry: ( `true? `> `false? ) 
+##  interp_seq resolved: ( `true? `> `false? ) 
+##  interp_seq reduced: ( 0 `> `false? ) 
+##  interp_seq reduced: ( 0 `> 1 ) 
+##  interp_seq reduced: ( 0 ) 
 #   1 reduce: [Ok , 0  ]
-env:
-	state: Ok 
-	it = 0 
-env:
-	state: Ok 
-	it = 0 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 0 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 0 

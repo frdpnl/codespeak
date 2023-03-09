@@ -1,12 +1,17 @@
-# ----line: "2"
-# --phrase: 2 ; 
-#   0  expr: 2
-#   0  seme: ( 2N ) 
-#   0 value: ( 2 ) 
+> input: "2"
+# phrase: 2 ; 
+#   0   expr: 2
+#   0   seme: ( 2N ) 
+#   0  value: ( 2 ) 
+##  reduce_items (0) entry: ( 2 ) 
+##  interp_seq (0) entry: ( 2 ) 
+##  interp_seq resolved: ( 2 ) 
 #   0 reduce: [Ok , 2  ]
-env:
-	state: Ok 
-	it = 2 
-env:
-	state: Ok 
-	it = 2 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 2 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 2 

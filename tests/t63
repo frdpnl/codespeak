@@ -1,5 +1,6 @@
 
 list a b ; def f it ; a + b ; end f 
 f (1, 2)
+print it
 
 

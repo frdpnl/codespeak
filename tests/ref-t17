@@ -1,23 +1,36 @@
-# ----line: "define inc (a,) "
-# --phrase: define inc (a,)  ; 
-#   0  expr: define inc (a,) 
-#   0  seme: ( define inc { a } ) 
-#   0 value: ( `define 'inc { 'a } ) 
-#   0 reduce: [Fun , `(inc ('a ) 0 val)  ]
-env:
-	state: Fun 
-	it = `(inc ('a ) 0 val) 
-# ----line: "end inc"
-# --phrase: end inc ; 
-#   0  expr: end inc
-#   0  seme: ( end inc ) 
-#   0 value: ( `end 'inc ) 
-#   0 reduce: [Ok , `(inc ('a ) 0 val)  ]
-env:
-	state: Ok 
-	it = `(inc ('a ) 0 val) 
-	inc = `(inc ('a ) 0 val) 
-env:
-	state: Ok 
-	it = `(inc ('a ) 0 val) 
-	inc = `(inc ('a ) 0 val) 
+> input: "define inc (a,) "
+# phrase: define inc (a,)  ; 
+#   0   expr: define inc (a,) 
+#   0   seme: ( define inc { a } ) 
+#   0  value: ( 'define 'inc { 'a } ) 
+##  reduce_items (0) entry: ( 'define 'inc { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq (0) entry: ( `define 'inc { 'a } ) 
+##  interp_seq resolved: ( `define 'inc { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq reduced: ( `(inc ('a ) =0= ) ) 
+#   0 reduce: [Fun , `(inc ('a ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(inc ('a ) =0= ) 
+> input: "end inc"
+# phrase: end inc ; 
+#   0   expr: end inc
+#   0   seme: ( end inc ) 
+#   0  value: ( 'end 'inc ) 
+##  reduce_items (0) entry: ( 'end 'inc ) 
+##  interp_seq (0) entry: ( `end 'inc ) 
+##  interp_seq resolved: ( `end 'inc ) 
+##  interp_seq reduced: ( `(inc ('a ) =0= ) ) 
+#   0 reduce: [Ok , `(inc ('a ) =0= )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(inc ('a ) =0= ) 
+#	inc = `(inc ('a ) =0= ) 
+> main: exit
+> env:
+>	state: Ok 
+>	it = `(inc ('a ) =0= ) 
+>	inc = `(inc ('a ) =0= ) 

@@ -1,55 +1,89 @@
-# ----line: "2 * 3.; call it   p ; p, ~=,6; print it ; do it ; print it"
-# --phrase: 2 * 3. ; call it p  ; p, ~=,6 ; print it  ; do it  ; print it ; 
-#   0  expr: 2 * 3.
-#   0  seme: ( 2N * 3.00R ) 
-#   0 value: ( 2 `* 3.00 ) 
+> input: "2 * 3.; call it   p ; p, ~=,6; print it ; do it ; print it"
+# phrase: 2 * 3. ; call it p  ; p, ~=,6 ; print it  ; do it  ; print it ; 
+#   0   expr: 2 * 3.
+#   0   seme: ( 2N * 3.00R ) 
+#   0  value: ( 2 '* 3.00 ) 
+##  reduce_items (0) entry: ( 2 '* 3.00 ) 
+##  interp_seq (0) entry: ( 2 `* 3.00 ) 
+##  interp_seq resolved: ( 2 `* 3.00 ) 
+##  interp_seq reduced: ( 6.00 ) 
 #   0 reduce: [Ok , 6.00  ]
-env:
-	state: Ok 
-	it = 6.00 
-#   1  expr: call it p 
-#   1  seme: ( call it p ) 
-#   1 value: ( `call 6.00 'p ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 6.00 
+#   1   expr: call it p 
+#   1   seme: ( call it p ) 
+#   1  value: ( 'call 'it 'p ) 
+##  reduce_items (0) entry: ( 'call 'it 'p ) 
+##  interp_seq (0) entry: ( `call 'it 'p ) 
+##  interp_seq resolved: ( `call 6.00 'p ) 
+##  interp_seq reduced: ( 6.00 ) 
 #   1 reduce: [Ok , 6.00  ]
-env:
-	state: Ok 
-	it = 6.00 
-	p = 6.00 
-#   2  expr: p, ~=,6
-#   2  seme: { p ~= 6N } 
-#   2 value: { 'p `~= 6 } 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 6.00 
+#	p = 6.00 
+#   2   expr: p, ~=,6
+#   2   seme: { p ~= 6N } 
+#   2  value: { 'p '~= 6 } 
+##  reduce_items (0) entry: { 'p '~= 6 } 
 #   2 reduce: [Ok , { 'p `~= 6 }  ]
-env:
-	state: Ok 
-	it = { 'p `~= 6 } 
-	p = 6.00 
-#   3  expr: print it 
-#   3  seme: ( print it ) 
-#   3 value: ( `print { 'p `~= 6 } ) 
-{ 'p `~= 6 } 
-#   3 reduce: [Ok , { 'p `~= 6 }  ]
-env:
-	state: Ok 
-	it = { 'p `~= 6 } 
-	p = 6.00 
-#   4  expr: do it 
-#   4  seme: ( do it ) 
-#   4 value: ( `do { 'p `~= 6 } ) 
+#   2 env:
+# env:
+#	state: Ok 
+#	it = { 'p `~= 6 } 
+#	p = 6.00 
+#   3   expr: print it 
+#   3   seme: ( print it ) 
+#   3  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print { 'p `~= 6 } ) 
+##  reduce_items (1) entry: { 'p `~= 6 } 
+{ 6.00 `~= 6 } 
+##  interp_seq reduced: ( { 6.00 `~= 6 } ) 
+#   3 reduce: [Ok , { 6.00 `~= 6 }  ]
+#   3 env:
+# env:
+#	state: Ok 
+#	it = { 6.00 `~= 6 } 
+#	p = 6.00 
+#   4   expr: do it 
+#   4   seme: ( do it ) 
+#   4  value: ( 'do 'it ) 
+##  reduce_items (0) entry: ( 'do 'it ) 
+##  interp_seq (0) entry: ( `do 'it ) 
+##  interp_seq resolved: ( `do { 6.00 `~= 6 } ) 
+##  reduce_items (0) entry: { 6.00 `~= 6 } 
+##  reduce_items (0) entry: ( 6.00 `~= 6 ) 
+##  interp_seq (0) entry: ( 6.00 `~= 6 ) 
+##  interp_seq resolved: ( 6.00 `~= 6 ) 
+##  interp_seq reduced: ( 1 ) 
+##  interp_seq reduced: ( 1 ) 
 #   4 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-	p = 6.00 
-#   5  expr: print it
-#   5  seme: ( print it ) 
-#   5 value: ( `print 1 ) 
+#   4 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#	p = 6.00 
+#   5   expr: print it
+#   5   seme: ( print it ) 
+#   5  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print 1 ) 
 1 
+##  interp_seq reduced: ( 1 ) 
 #   5 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-	p = 6.00 
-env:
-	state: Ok 
-	it = 1 
-	p = 6.00 
+#   5 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#	p = 6.00 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 1 
+>	p = 6.00 

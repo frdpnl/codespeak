@@ -1,113 +1,180 @@
-# ----line: "def a* (a,) "
-# --phrase: def a* (a,)  ; 
-#   0  expr: def a* (a,) 
-#   0  seme: ( def a* { a } ) 
-#   0 value: ( `def 'a* { 'a } ) 
-#   0 reduce: [Fun , `(a* ('a ) 0 val)  ]
-env:
-	state: Fun 
-	it = `(a* ('a ) 0 val) 
-# ----line: "	def f (x,) ; a * x ; end f"
-# --phrase: def f (x,)  ; a * x  ; end f ; 
-#   0  expr: def f (x,) 
-#   0  seme: ( def f { x } ) 
-#   0 value: ( `def 'f { 'x } ) 
-#   0 reduce: [Fun , `(a* ('a ) 1 val)  ]
-env:
-	state: Fun 
-	it = `(a* ('a ) 1 val) 
-#   1  expr: a * x 
-#   1  seme: ( a * x ) 
-#   1 value: ( 'a `* 'x ) 
-#   1 reduce: [Fun , `(a* ('a ) 2 val)  ]
-env:
-	state: Fun 
-	it = `(a* ('a ) 2 val) 
-#   2  expr: end f
-#   2  seme: ( end f ) 
-#   2 value: ( `end 'f ) 
-#   2 reduce: [Fun , `(a* ('a ) 3 val)  ]
-env:
-	state: Fun 
-	it = `(a* ('a ) 3 val) 
-# ----line: "end a*"
-# --phrase: end a* ; 
-#   0  expr: end a*
-#   0  seme: ( end a* ) 
-#   0 value: ( `end 'a* ) 
-#   0 reduce: [Ok , `(a* ('a ) 3 val)  ]
-env:
-	state: Ok 
-	it = `(a* ('a ) 3 val) 
-	a* = `(a* ('a ) 3 val) 
-# ----line: "a* (-1,) ; call it opposite"
-# --phrase: a* (-1,)  ; call it opposite ; 
-#   0  expr: a* (-1,) 
-#   0  seme: ( a* { -1N } ) 
-#   0 value: ( `(a* ('a ) 3 val) { -1 } ) 
-- reduce_fun value: ( `def 'f { 'x } ) 
-- reduce_fun reduce: [Fun , `(f ('x ) 0 val)  ]
-- reduce_fun value: ( 'a `* 'x ) 
-- reduce_fun reduce: [Fun , `(f ('x ) 1 val)  ]
-- reduce_fun value: ( `end 'f ) 
-- reduce_fun reduce: [Ok , `(f ('x ) 1 val)  ]
-- reduce_fun local: env:
-	state: Ok 
-	a = -1 
-	it = `(f ('x ) 1 val) 
-	f = `(f ('x ) 1 val) 
-parent env:
-	state: Ok 
-	it = `(a* ('a ) 3 val) 
-	a* = `(a* ('a ) 3 val) 
-#   0 reduce: [Ok , `(f ('x ) 1 val)  ]
-env:
-	state: Ok 
-	it = `(f ('x ) 1 val) 
-	a* = `(a* ('a ) 3 val) 
-#   1  expr: call it opposite
-#   1  seme: ( call it opposite ) 
-#   1 value: ( `call `(f ('x ) 1 val) 'opposite ) 
-#   1 reduce: [Ok , `(f ('x ) 1 val)  ]
-env:
-	state: Ok 
-	it = `(f ('x ) 1 val) 
-	a* = `(a* ('a ) 3 val) 
-	opposite = `(f ('x ) 1 val) 
-# ----line: "opposite (2,) ; print it"
-# --phrase: opposite (2,)  ; print it ; 
-#   0  expr: opposite (2,) 
-#   0  seme: ( opposite { 2N } ) 
-#   0 value: ( `(f ('x ) 1 val) { 2 } ) 
-- reduce_fun value: ( -1 `* 'x ) 
-- reduce_fun reduce: [Ok , -2  ]
-- reduce_fun local: env:
-	state: Ok 
-	x = 2 
-	it = -2 
-parent env:
-	state: Ok 
-	it = `(f ('x ) 1 val) 
-	a* = `(a* ('a ) 3 val) 
-	opposite = `(f ('x ) 1 val) 
+> input: "def a* (a,) "
+# phrase: def a* (a,)  ; 
+#   0   expr: def a* (a,) 
+#   0   seme: ( def a* { a } ) 
+#   0  value: ( 'def 'a* { 'a } ) 
+##  reduce_items (0) entry: ( 'def 'a* { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq (0) entry: ( `def 'a* { 'a } ) 
+##  interp_seq resolved: ( `def 'a* { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq reduced: ( `(a* ('a ) =0= ) ) 
+#   0 reduce: [Fun , `(a* ('a ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(a* ('a ) =0= ) 
+> input: "	def f (x,) ; a * x ; end f"
+# phrase: def f (x,)  ; a * x  ; end f ; 
+#   0   expr: def f (x,) 
+#   0   seme: ( def f { x } ) 
+#   0  value: ( 'def 'f { 'x } ) 
+##  reduce_items (0) entry: ( 'def 'f { 'x } ) 
+##  reduce_items (0) entry: { 'x } 
+##  interp_seq (0) entry: ( `def 'f { 'x } ) 
+#   0 reduce: [Fun , `(a* ('a ) =1= ( `def 'f { 'x } ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(a* ('a ) =1= ( `def 'f { 'x } ) ) 
+#   1   expr: a * x 
+#   1   seme: ( a * x ) 
+#   1  value: ( 'a '* 'x ) 
+##  reduce_items (0) entry: ( 'a '* 'x ) 
+##  interp_seq (0) entry: ( 'a `* 'x ) 
+#   1 reduce: [Fun , `(a* ('a ) =2= ( `def 'f { 'x } ) ( 'a `* 'x ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	it = `(a* ('a ) =2= ( `def 'f { 'x } ) ( 'a `* 'x ) ) 
+#   2   expr: end f
+#   2   seme: ( end f ) 
+#   2  value: ( 'end 'f ) 
+##  reduce_items (0) entry: ( 'end 'f ) 
+##  interp_seq (0) entry: ( `end 'f ) 
+##  interp_seq resolved: ( `end 'f ) 
+##  interp_seq reduced: ( `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) ) 
+#   2 reduce: [Fun , `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) )  ]
+#   2 env:
+# env:
+#	state: Fun 
+#	it = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+> input: "end a*"
+# phrase: end a* ; 
+#   0   expr: end a*
+#   0   seme: ( end a* ) 
+#   0  value: ( 'end 'a* ) 
+##  reduce_items (0) entry: ( 'end 'a* ) 
+##  interp_seq (0) entry: ( `end 'a* ) 
+##  interp_seq resolved: ( `end 'a* ) 
+##  interp_seq reduced: ( `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) ) 
+#   0 reduce: [Ok , `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+#	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+> input: "a* (-1,) ; call it opposite"
+# phrase: a* (-1,)  ; call it opposite ; 
+#   0   expr: a* (-1,) 
+#   0   seme: ( a* { -1N } ) 
+#   0  value: ( 'a* { -1 } ) 
+##  reduce_items (0) entry: ( 'a* { -1 } ) 
+##  reduce_items (0) entry: { -1 } 
+##  interp_seq (0) entry: ( 'a* { -1 } ) 
+##  interp_seq resolved: ( `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) { -1 } ) 
+##  reduce_items (1) entry: { -1 } 
+##  reduce_fun value: ( `def 'f { 'x } ) 
+##  reduce_items (0) entry: ( `def 'f { 'x } ) 
+##  reduce_items (0) entry: { 'x } 
+##  interp_seq (0) entry: ( `def 'f { 'x } ) 
+##  interp_seq resolved: ( `def 'f { 'x } ) 
+##  reduce_items (0) entry: { 'x } 
+##  interp_seq reduced: ( `(f ('x ) =0= ) ) 
+##  reduce_fun reduce: [Fun , `(f ('x ) =0= )  ]
+##  reduce_fun value: ( 'a `* 'x ) 
+##  reduce_items (0) entry: ( 'a `* 'x ) 
+##  interp_seq (0) entry: ( 'a `* 'x ) 
+##  reduce_fun reduce: [Fun , `(f ('x ) =1= ( -1 `* 'x ) )  ]
+##  reduce_fun value: ( `end 'f ) 
+##  reduce_items (0) entry: ( `end 'f ) 
+##  interp_seq (0) entry: ( `end 'f ) 
+##  interp_seq resolved: ( `end 'f ) 
+##  interp_seq reduced: ( `(f ('x ) =1= ( -1 `* 'x ) ) ) 
+##  reduce_fun reduce: [Ok , `(f ('x ) =1= ( -1 `* 'x ) )  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	a = -1 
+##	it = `(f ('x ) =1= ( -1 `* 'x ) ) 
+##	f = `(f ('x ) =1= ( -1 `* 'x ) ) 
+## parent ## env:
+##	state: Ok 
+##	it = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+##	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+##  interp_seq reduced: ( `(f ('x ) =1= ( -1 `* 'x ) ) ) 
+#   0 reduce: [Ok , `(f ('x ) =1= ( -1 `* 'x ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(f ('x ) =1= ( -1 `* 'x ) ) 
+#	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+#   1   expr: call it opposite
+#   1   seme: ( call it opposite ) 
+#   1  value: ( 'call 'it 'opposite ) 
+##  reduce_items (0) entry: ( 'call 'it 'opposite ) 
+##  interp_seq (0) entry: ( `call 'it 'opposite ) 
+##  interp_seq resolved: ( `call `(f ('x ) =1= ( -1 `* 'x ) ) 'opposite ) 
+##  interp_seq reduced: ( `(f ('x ) =1= ( -1 `* 'x ) ) ) 
+#   1 reduce: [Ok , `(f ('x ) =1= ( -1 `* 'x ) )  ]
+#   1 env:
+# env:
+#	state: Ok 
+#	it = `(f ('x ) =1= ( -1 `* 'x ) ) 
+#	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+#	opposite = `(f ('x ) =1= ( -1 `* 'x ) ) 
+> input: "opposite (2,) ; print it"
+# phrase: opposite (2,)  ; print it ; 
+#   0   expr: opposite (2,) 
+#   0   seme: ( opposite { 2N } ) 
+#   0  value: ( 'opposite { 2 } ) 
+##  reduce_items (0) entry: ( 'opposite { 2 } ) 
+##  reduce_items (0) entry: { 2 } 
+##  interp_seq (0) entry: ( 'opposite { 2 } ) 
+##  interp_seq resolved: ( `(f ('x ) =1= ( -1 `* 'x ) ) { 2 } ) 
+##  reduce_items (1) entry: { 2 } 
+##  reduce_fun value: ( -1 `* 'x ) 
+##  reduce_items (0) entry: ( -1 `* 'x ) 
+##  interp_seq (0) entry: ( -1 `* 'x ) 
+##  interp_seq resolved: ( -1 `* 'x ) 
+##  interp_seq reduced: ( -2 ) 
+##  reduce_fun reduce: [Ok , -2  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	x = 2 
+##	it = -2 
+## parent ## env:
+##	state: Ok 
+##	it = `(f ('x ) =1= ( -1 `* 'x ) ) 
+##	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+##	opposite = `(f ('x ) =1= ( -1 `* 'x ) ) 
+##  interp_seq reduced: ( -2 ) 
 #   0 reduce: [Ok , -2  ]
-env:
-	state: Ok 
-	it = -2 
-	a* = `(a* ('a ) 3 val) 
-	opposite = `(f ('x ) 1 val) 
-#   1  expr: print it
-#   1  seme: ( print it ) 
-#   1 value: ( `print -2 ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = -2 
+#	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+#	opposite = `(f ('x ) =1= ( -1 `* 'x ) ) 
+#   1   expr: print it
+#   1   seme: ( print it ) 
+#   1  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print -2 ) 
 -2 
+##  interp_seq reduced: ( -2 ) 
 #   1 reduce: [Ok , -2  ]
-env:
-	state: Ok 
-	it = -2 
-	a* = `(a* ('a ) 3 val) 
-	opposite = `(f ('x ) 1 val) 
-env:
-	state: Ok 
-	it = -2 
-	a* = `(a* ('a ) 3 val) 
-	opposite = `(f ('x ) 1 val) 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = -2 
+#	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+#	opposite = `(f ('x ) =1= ( -1 `* 'x ) ) 
+> main: exit
+> env:
+>	state: Ok 
+>	it = -2 
+>	a* = `(a* ('a ) =3= ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
+>	opposite = `(f ('x ) =1= ( -1 `* 'x ) ) 

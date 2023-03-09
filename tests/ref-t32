@@ -1,53 +1,80 @@
-# ----line: "define f (a,b) "
-# --phrase: define f (a,b)  ; 
-#   0  expr: define f (a,b) 
-#   0  seme: ( define f { a b } ) 
-#   0 value: ( `define 'f { 'a 'b } ) 
-#   0 reduce: [Fun , `(f ('a 'b ) 0 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a 'b ) 0 val) 
-# ----line: "	1"
-# --phrase: 1 ; 
-#   0  expr: 1
-#   0  seme: ( 1N ) 
-#   0 value: ( 1 ) 
-#   0 reduce: [Fun , `(f ('a 'b ) 1 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a 'b ) 1 val) 
-# ----line: "end f"
-# --phrase: end f ; 
-#   0  expr: end f
-#   0  seme: ( end f ) 
-#   0 value: ( `end 'f ) 
-#   0 reduce: [Ok , `(f ('a 'b ) 1 val)  ]
-env:
-	state: Ok 
-	it = `(f ('a 'b ) 1 val) 
-	f = `(f ('a 'b ) 1 val) 
-# ----line: "f (1, 2)"
-# --phrase: f (1, 2) ; 
-#   0  expr: f (1, 2)
-#   0  seme: ( f { 1N 2N } ) 
-#   0 value: ( `(f ('a 'b ) 1 val) { 1 2 } ) 
-- reduce_fun value: ( 1 ) 
-- reduce_fun reduce: [Ok , 1  ]
-- reduce_fun local: env:
-	state: Ok 
-	a = 1 
-	b = 2 
-	it = 1 
-parent env:
-	state: Ok 
-	it = `(f ('a 'b ) 1 val) 
-	f = `(f ('a 'b ) 1 val) 
+> input: "define f (a,b) "
+# phrase: define f (a,b)  ; 
+#   0   expr: define f (a,b) 
+#   0   seme: ( define f { a b } ) 
+#   0  value: ( 'define 'f { 'a 'b } ) 
+##  reduce_items (0) entry: ( 'define 'f { 'a 'b } ) 
+##  reduce_items (0) entry: { 'a 'b } 
+##  interp_seq (0) entry: ( `define 'f { 'a 'b } ) 
+##  interp_seq resolved: ( `define 'f { 'a 'b } ) 
+##  reduce_items (0) entry: { 'a 'b } 
+##  interp_seq reduced: ( `(f ('a 'b ) =0= ) ) 
+#   0 reduce: [Fun , `(f ('a 'b ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a 'b ) =0= ) 
+> input: "	1"
+# phrase: 1 ; 
+#   0   expr: 1
+#   0   seme: ( 1N ) 
+#   0  value: ( 1 ) 
+##  reduce_items (0) entry: ( 1 ) 
+##  interp_seq (0) entry: ( 1 ) 
+#   0 reduce: [Fun , `(f ('a 'b ) =1= ( 1 ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a 'b ) =1= ( 1 ) ) 
+> input: "end f"
+# phrase: end f ; 
+#   0   expr: end f
+#   0   seme: ( end f ) 
+#   0  value: ( 'end 'f ) 
+##  reduce_items (0) entry: ( 'end 'f ) 
+##  interp_seq (0) entry: ( `end 'f ) 
+##  interp_seq resolved: ( `end 'f ) 
+##  interp_seq reduced: ( `(f ('a 'b ) =1= ( 1 ) ) ) 
+#   0 reduce: [Ok , `(f ('a 'b ) =1= ( 1 ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(f ('a 'b ) =1= ( 1 ) ) 
+#	f = `(f ('a 'b ) =1= ( 1 ) ) 
+> input: "f (1, 2)"
+# phrase: f (1, 2) ; 
+#   0   expr: f (1, 2)
+#   0   seme: ( f { 1N 2N } ) 
+#   0  value: ( 'f { 1 2 } ) 
+##  reduce_items (0) entry: ( 'f { 1 2 } ) 
+##  reduce_items (0) entry: { 1 2 } 
+##  interp_seq (0) entry: ( 'f { 1 2 } ) 
+##  interp_seq resolved: ( `(f ('a 'b ) =1= ( 1 ) ) { 1 2 } ) 
+##  reduce_items (1) entry: { 1 2 } 
+##  reduce_fun value: ( 1 ) 
+##  reduce_items (0) entry: ( 1 ) 
+##  interp_seq (0) entry: ( 1 ) 
+##  interp_seq resolved: ( 1 ) 
+##  reduce_fun reduce: [Ok , 1  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	a = 1 
+##	b = 2 
+##	it = 1 
+## parent ## env:
+##	state: Ok 
+##	it = `(f ('a 'b ) =1= ( 1 ) ) 
+##	f = `(f ('a 'b ) =1= ( 1 ) ) 
+##  interp_seq reduced: ( 1 ) 
 #   0 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-	f = `(f ('a 'b ) 1 val) 
-env:
-	state: Ok 
-	it = 1 
-	f = `(f ('a 'b ) 1 val) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#	f = `(f ('a 'b ) =1= ( 1 ) ) 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 1 
+>	f = `(f ('a 'b ) =1= ( 1 ) ) 

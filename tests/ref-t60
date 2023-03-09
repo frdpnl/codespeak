@@ -1,22 +1,35 @@
-# ----line: "def f (a,b) ; "
-# --phrase: def f (a,b)  ; 
-#   0  expr: def f (a,b) 
-#   0  seme: ( def f { a b } ) 
-#   0 value: ( `def 'f { 'a 'b } ) 
-#   0 reduce: [Fun , `(f ('a 'b ) 0 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a 'b ) 0 val) 
-# ----line: "	end g"
-# --phrase: end g ; 
-#   0  expr: end g
-#   0  seme: ( end g ) 
-#   0 value: ( `end 'g ) 
-#   0 reduce: [Fun , `(f ('a 'b ) 1 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a 'b ) 1 val) 
+> input: "def f (a,b) ; "
+# phrase: def f (a,b)  ; 
+#   0   expr: def f (a,b) 
+#   0   seme: ( def f { a b } ) 
+#   0  value: ( 'def 'f { 'a 'b } ) 
+##  reduce_items (0) entry: ( 'def 'f { 'a 'b } ) 
+##  reduce_items (0) entry: { 'a 'b } 
+##  interp_seq (0) entry: ( `def 'f { 'a 'b } ) 
+##  interp_seq resolved: ( `def 'f { 'a 'b } ) 
+##  reduce_items (0) entry: { 'a 'b } 
+##  interp_seq reduced: ( `(f ('a 'b ) =0= ) ) 
+#   0 reduce: [Fun , `(f ('a 'b ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a 'b ) =0= ) 
+> input: "	end g"
+# phrase: end g ; 
+#   0   expr: end g
+#   0   seme: ( end g ) 
+#   0  value: ( 'end 'g ) 
+##  reduce_items (0) entry: ( 'end 'g ) 
+##  interp_seq (0) entry: ( `end 'g ) 
+##  interp_seq resolved: ( `end 'g ) 
+##  interp_seq reduced: ( `(f ('a 'b ) =1= ( `end 'g ) ) ) 
+#   0 reduce: [Fun , `(f ('a 'b ) =1= ( `end 'g ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a 'b ) =1= ( `end 'g ) ) 
 ? main: unexpected end of program
-env:
-	state: Fun 
-	it = `(f ('a 'b ) 1 val) 
+> main: exit
+> env:
+>	state: Fun 
+>	it = `(f ('a 'b ) =1= ( `end 'g ) ) 

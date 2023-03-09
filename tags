@@ -144,7 +144,7 @@ phrase_of_str	phrase.c	/^phrase_of_str(char *a) {$/;"	f	typeref:typename:Phrase 
 position	phrase.c	/^position(Val *a, List_v lv) {$/;"	f	typeref:typename:int	file:
 prefixed1	phrase.c	/^prefixed1(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
 prefixed2	phrase.c	/^prefixed2(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
-print_env	phrase.c	/^print_env(Env *a) {$/;"	f	typeref:typename:void	file:
+print_env	phrase.c	/^print_env(Env *a, const char *col1) {$/;"	f	typeref:typename:void	file:
 print_inxs	phrase.c	/^print_inxs(inxs s) {$/;"	f	typeref:typename:void	file:
 print_ph	phrase.c	/^print_ph(Phrase *a) {$/;"	f	typeref:typename:void	file:
 print_rc	phrase.c	/^print_rc(Ir a) {$/;"	f	typeref:typename:void	file:

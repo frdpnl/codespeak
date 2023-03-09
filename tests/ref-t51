@@ -1,35 +1,51 @@
-# ----line: "def f (a,) ; a + 2 ; end f"
-# --phrase: def f (a,)  ; a + 2  ; end f ; 
-#   0  expr: def f (a,) 
-#   0  seme: ( def f { a } ) 
-#   0 value: ( `def 'f { 'a } ) 
-#   0 reduce: [Fun , `(f ('a ) 0 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 0 val) 
-#   1  expr: a + 2 
-#   1  seme: ( a + 2N ) 
-#   1 value: ( 'a `+ 2 ) 
-#   1 reduce: [Fun , `(f ('a ) 1 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 1 val) 
-#   2  expr: end f
-#   2  seme: ( end f ) 
-#   2 value: ( `end 'f ) 
-#   2 reduce: [Ok , `(f ('a ) 1 val)  ]
-env:
-	state: Ok 
-	it = `(f ('a ) 1 val) 
-	f = `(f ('a ) 1 val) 
-# ----line: "f (1, 2)"
-# --phrase: f (1, 2) ; 
-#   0  expr: f (1, 2)
-#   0  seme: ( f { 1N 2N } ) 
-#   0 value: ( `(f ('a ) 1 val) { 1 2 } ) 
+> input: "def f (a,) ; a + 2 ; end f"
+# phrase: def f (a,)  ; a + 2  ; end f ; 
+#   0   expr: def f (a,) 
+#   0   seme: ( def f { a } ) 
+#   0  value: ( 'def 'f { 'a } ) 
+##  reduce_items (0) entry: ( 'def 'f { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq (0) entry: ( `def 'f { 'a } ) 
+##  interp_seq resolved: ( `def 'f { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq reduced: ( `(f ('a ) =0= ) ) 
+#   0 reduce: [Fun , `(f ('a ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =0= ) 
+#   1   expr: a + 2 
+#   1   seme: ( a + 2N ) 
+#   1  value: ( 'a '+ 2 ) 
+##  reduce_items (0) entry: ( 'a '+ 2 ) 
+##  interp_seq (0) entry: ( 'a `+ 2 ) 
+#   1 reduce: [Fun , `(f ('a ) =1= ( 'a `+ 2 ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =1= ( 'a `+ 2 ) ) 
+#   2   expr: end f
+#   2   seme: ( end f ) 
+#   2  value: ( 'end 'f ) 
+##  reduce_items (0) entry: ( 'end 'f ) 
+##  interp_seq (0) entry: ( `end 'f ) 
+##  interp_seq resolved: ( `end 'f ) 
+##  interp_seq reduced: ( `(f ('a ) =1= ( 'a `+ 2 ) ) ) 
+#   2 reduce: [Ok , `(f ('a ) =1= ( 'a `+ 2 ) )  ]
+#   2 env:
+# env:
+#	state: Ok 
+#	it = `(f ('a ) =1= ( 'a `+ 2 ) ) 
+#	f = `(f ('a ) =1= ( 'a `+ 2 ) ) 
+> input: "f (1, 2)"
+# phrase: f (1, 2) ; 
+#   0   expr: f (1, 2)
+#   0   seme: ( f { 1N 2N } ) 
+#   0  value: ( 'f { 1 2 } ) 
+##  reduce_items (0) entry: ( 'f { 1 2 } ) 
+##  reduce_items (0) entry: { 1 2 } 
+##  interp_seq (0) entry: ( 'f { 1 2 } ) 
+##  interp_seq resolved: ( `(f ('a ) =1= ( 'a `+ 2 ) ) { 1 2 } ) 
+##  reduce_items (1) entry: { 1 2 } 
 ? reduce_fun: number of arguments to `f mismatch
 #   0 reduce: [Fatal , null ]
-env:
-	state: Ok 
-	it = `(f ('a ) 1 val) 
-	f = `(f ('a ) 1 val) 

@@ -1,5 +1,5 @@
 
-a, b ; call it param; def f params ; end f 
+a, b ; call it param; def f param ; end f 
 
 
 

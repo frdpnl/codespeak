@@ -1,102 +1,159 @@
-# ----line: "if 4 >= 2 "
-# --phrase: if 4 >= 2  ; 
-#   0  expr: if 4 >= 2 
-#   0  seme: ( if 4N >= 2N ) 
-#   0 value: ( `if 4 `>= 2 ) 
+> input: "if 4 >= 2 "
+# phrase: if 4 >= 2  ; 
+#   0   expr: if 4 >= 2 
+#   0   seme: ( if 4N >= 2N ) 
+#   0  value: ( 'if 4 '>= 2 ) 
+##  reduce_items (0) entry: ( 'if 4 '>= 2 ) 
+##  interp_seq (0) entry: ( `if 4 `>= 2 ) 
+##  interp_seq resolved: ( `if 4 `>= 2 ) 
+##  interp_seq reduced: ( `if 1 ) 
+##  interp_seq reduced: ( 1 ) 
 #   0 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-# ----line: "	print one"
-# --phrase: print one ; 
-#   0  expr: print one
-#   0  seme: ( print one ) 
-#   0 value: ( `print 'one ) 
-'one 
-#   0 reduce: [Ok , 'one  ]
-env:
-	state: Ok 
-	it = 'one 
-# ----line: "	if 2. = 2 "
-# --phrase: if 2. = 2  ; 
-#   0  expr: if 2. = 2 
-#   0  seme: ( if 2.00R = 2N ) 
-#   0 value: ( `if 2.00 `= 2 ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 1 
+> input: "	print 1"
+# phrase: print 1 ; 
+#   0   expr: print 1
+#   0   seme: ( print 1N ) 
+#   0  value: ( 'print 1 ) 
+##  reduce_items (0) entry: ( 'print 1 ) 
+##  interp_seq (0) entry: ( `print 1 ) 
+##  interp_seq resolved: ( `print 1 ) 
+1 
+##  interp_seq reduced: ( 1 ) 
+#   0 reduce: [Ok , 1  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 1 
+> input: "	if 2. = 2 "
+# phrase: if 2. = 2  ; 
+#   0   expr: if 2. = 2 
+#   0   seme: ( if 2.00R = 2N ) 
+#   0  value: ( 'if 2.00 '= 2 ) 
+##  reduce_items (0) entry: ( 'if 2.00 '= 2 ) 
+##  interp_seq (0) entry: ( `if 2.00 `= 2 ) 
+##  interp_seq resolved: ( `if 2.00 `= 2 ) 
+##  interp_seq reduced: ( `if 0 ) 
+##  interp_seq reduced: ( 0 ) 
 #   0 reduce: [Skip , 0  ]
-env:
-	state: Skip 
-	it = 0 
-# ----line: "		print two"
-# --phrase: print two ; 
-#   0  expr: print two
-#   0  seme: ( print two ) 
-#   0 value: ( `print 'two ) 
+#   0 env:
+# env:
+#	state: Skip 
+#	it = 0 
+> input: "		print 2"
+# phrase: print 2 ; 
+#   0   expr: print 2
+#   0   seme: ( print 2N ) 
+#   0  value: ( 'print 2 ) 
+##  reduce_items (0) entry: ( 'print 2 ) 
+##  interp_seq (0) entry: ( `print 2 ) 
 #   0 reduce: [Skip , 0  ]
-env:
-	state: Skip 
-	it = 0 
-# ----line: "	end if"
-# --phrase: end if ; 
-#   0  expr: end if
-#   0  seme: ( end if ) 
-#   0 value: ( `end `if ) 
+#   0 env:
+# env:
+#	state: Skip 
+#	it = 0 
+> input: "	end if"
+# phrase: end if ; 
+#   0   expr: end if
+#   0   seme: ( end if ) 
+#   0  value: ( 'end 'if ) 
+##  reduce_items (0) entry: ( 'end 'if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( 0 ) 
 #   0 reduce: [Ok , 0  ]
-env:
-	state: Ok 
-	it = 0 
-# ----line: "	if 3 > 1 ; print three ; end if"
-# --phrase: if 3 > 1  ; print three  ; end if ; 
-#   0  expr: if 3 > 1 
-#   0  seme: ( if 3N > 1N ) 
-#   0 value: ( `if 3 `> 1 ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 0 
+> input: "	if 3 > 1 ; print 3 ; end if"
+# phrase: if 3 > 1  ; print 3  ; end if ; 
+#   0   expr: if 3 > 1 
+#   0   seme: ( if 3N > 1N ) 
+#   0  value: ( 'if 3 '> 1 ) 
+##  reduce_items (0) entry: ( 'if 3 '> 1 ) 
+##  interp_seq (0) entry: ( `if 3 `> 1 ) 
+##  interp_seq resolved: ( `if 3 `> 1 ) 
+##  interp_seq reduced: ( `if 1 ) 
+##  interp_seq reduced: ( 1 ) 
 #   0 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-#   1  expr: print three 
-#   1  seme: ( print three ) 
-#   1 value: ( `print 'three ) 
-'three 
-#   1 reduce: [Ok , 'three  ]
-env:
-	state: Ok 
-	it = 'three 
-#   2  expr: end if
-#   2  seme: ( end if ) 
-#   2 value: ( `end `if ) 
-#   2 reduce: [Ok , 'three  ]
-env:
-	state: Ok 
-	it = 'three 
-# ----line: "	print four"
-# --phrase: print four ; 
-#   0  expr: print four
-#   0  seme: ( print four ) 
-#   0 value: ( `print 'four ) 
-'four 
-#   0 reduce: [Ok , 'four  ]
-env:
-	state: Ok 
-	it = 'four 
-# ----line: "end if"
-# --phrase: end if ; 
-#   0  expr: end if
-#   0  seme: ( end if ) 
-#   0 value: ( `end `if ) 
-#   0 reduce: [Ok , 'four  ]
-env:
-	state: Ok 
-	it = 'four 
-# ----line: "print done"
-# --phrase: print done ; 
-#   0  expr: print done
-#   0  seme: ( print done ) 
-#   0 value: ( `print 'done ) 
-'done 
-#   0 reduce: [Ok , 'done  ]
-env:
-	state: Ok 
-	it = 'done 
-env:
-	state: Ok 
-	it = 'done 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#   1   expr: print 3 
+#   1   seme: ( print 3N ) 
+#   1  value: ( 'print 3 ) 
+##  reduce_items (0) entry: ( 'print 3 ) 
+##  interp_seq (0) entry: ( `print 3 ) 
+##  interp_seq resolved: ( `print 3 ) 
+3 
+##  interp_seq reduced: ( 3 ) 
+#   1 reduce: [Ok , 3  ]
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 3 
+#   2   expr: end if
+#   2   seme: ( end if ) 
+#   2  value: ( 'end 'if ) 
+##  reduce_items (0) entry: ( 'end 'if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( 3 ) 
+#   2 reduce: [Ok , 3  ]
+#   2 env:
+# env:
+#	state: Ok 
+#	it = 3 
+> input: "	print 4"
+# phrase: print 4 ; 
+#   0   expr: print 4
+#   0   seme: ( print 4N ) 
+#   0  value: ( 'print 4 ) 
+##  reduce_items (0) entry: ( 'print 4 ) 
+##  interp_seq (0) entry: ( `print 4 ) 
+##  interp_seq resolved: ( `print 4 ) 
+4 
+##  interp_seq reduced: ( 4 ) 
+#   0 reduce: [Ok , 4  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 4 
+> input: "end if"
+# phrase: end if ; 
+#   0   expr: end if
+#   0   seme: ( end if ) 
+#   0  value: ( 'end 'if ) 
+##  reduce_items (0) entry: ( 'end 'if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( 4 ) 
+#   0 reduce: [Ok , 4  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 4 
+> input: "print 5"
+# phrase: print 5 ; 
+#   0   expr: print 5
+#   0   seme: ( print 5N ) 
+#   0  value: ( 'print 5 ) 
+##  reduce_items (0) entry: ( 'print 5 ) 
+##  interp_seq (0) entry: ( `print 5 ) 
+##  interp_seq resolved: ( `print 5 ) 
+5 
+##  interp_seq reduced: ( 5 ) 
+#   0 reduce: [Ok , 5  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 5 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 5 

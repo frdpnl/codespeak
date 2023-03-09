@@ -1,96 +1,151 @@
-# ----line: "call 3 n"
-# --phrase: call 3 n ; 
-#   0  expr: call 3 n
-#   0  seme: ( call 3N n ) 
-#   0 value: ( `call 3 'n ) 
+> input: "call 3 n"
+# phrase: call 3 n ; 
+#   0   expr: call 3 n
+#   0   seme: ( call 3N n ) 
+#   0  value: ( 'call 3 'n ) 
+##  reduce_items (0) entry: ( 'call 3 'n ) 
+##  interp_seq (0) entry: ( `call 3 'n ) 
+##  interp_seq resolved: ( `call 3 'n ) 
+##  interp_seq reduced: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
-env:
-	state: Ok 
-	n = 3 
-	it = 3 
-# ----line: "def f (a,) ; if a > 1 ; print n ; end if ; end f"
-# --phrase: def f (a,)  ; if a > 1  ; print n  ; end if  ; end f ; 
-#   0  expr: def f (a,) 
-#   0  seme: ( def f { a } ) 
-#   0 value: ( `def 'f { 'a } ) 
-#   0 reduce: [Fun , `(f ('a ) 0 val)  ]
-env:
-	state: Fun 
-	n = 3 
-	it = `(f ('a ) 0 val) 
-#   1  expr: if a > 1 
-#   1  seme: ( if a > 1N ) 
-#   1 value: ( `if 'a `> 1 ) 
-#   1 reduce: [Fun , `(f ('a ) 1 val)  ]
-env:
-	state: Fun 
-	n = 3 
-	it = `(f ('a ) 1 val) 
-#   2  expr: print n 
-#   2  seme: ( print n ) 
-#   2 value: ( `print 'n ) 
-#   2 reduce: [Fun , `(f ('a ) 2 val)  ]
-env:
-	state: Fun 
-	n = 3 
-	it = `(f ('a ) 2 val) 
-#   3  expr: end if 
-#   3  seme: ( end if ) 
-#   3 value: ( `end `if ) 
-#   3 reduce: [Fun , `(f ('a ) 3 val)  ]
-env:
-	state: Fun 
-	n = 3 
-	it = `(f ('a ) 3 val) 
-#   4  expr: end f
-#   4  seme: ( end f ) 
-#   4 value: ( `end 'f ) 
-#   4 reduce: [Ok , `(f ('a ) 3 val)  ]
-env:
-	state: Ok 
-	n = 3 
-	it = `(f ('a ) 3 val) 
-	f = `(f ('a ) 3 val) 
-# ----line: "call 4 n"
-# --phrase: call 4 n ; 
-#   0  expr: call 4 n
-#   0  seme: ( call 4N n ) 
-#   0 value: ( `call 4 'n ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	n = 3 
+#	it = 3 
+> input: "def f (a,) ; if a > 1 ; print n ; end if ; end f"
+# phrase: def f (a,)  ; if a > 1  ; print n  ; end if  ; end f ; 
+#   0   expr: def f (a,) 
+#   0   seme: ( def f { a } ) 
+#   0  value: ( 'def 'f { 'a } ) 
+##  reduce_items (0) entry: ( 'def 'f { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq (0) entry: ( `def 'f { 'a } ) 
+##  interp_seq resolved: ( `def 'f { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq reduced: ( `(f ('a ) =0= ) ) 
+#   0 reduce: [Fun , `(f ('a ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	n = 3 
+#	it = `(f ('a ) =0= ) 
+#   1   expr: if a > 1 
+#   1   seme: ( if a > 1N ) 
+#   1  value: ( 'if 'a '> 1 ) 
+##  reduce_items (0) entry: ( 'if 'a '> 1 ) 
+##  interp_seq (0) entry: ( `if 'a `> 1 ) 
+#   1 reduce: [Fun , `(f ('a ) =1= ( `if 'a `> 1 ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	n = 3 
+#	it = `(f ('a ) =1= ( `if 'a `> 1 ) ) 
+#   2   expr: print n 
+#   2   seme: ( print n ) 
+#   2  value: ( 'print 'n ) 
+##  reduce_items (0) entry: ( 'print 'n ) 
+##  interp_seq (0) entry: ( `print 'n ) 
+#   2 reduce: [Fun , `(f ('a ) =2= ( `if 'a `> 1 ) ( `print 3 ) )  ]
+#   2 env:
+# env:
+#	state: Fun 
+#	n = 3 
+#	it = `(f ('a ) =2= ( `if 'a `> 1 ) ( `print 3 ) ) 
+#   3   expr: end if 
+#   3   seme: ( end if ) 
+#   3  value: ( 'end 'if ) 
+##  reduce_items (0) entry: ( 'end 'if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) ) 
+#   3 reduce: [Fun , `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) )  ]
+#   3 env:
+# env:
+#	state: Fun 
+#	n = 3 
+#	it = `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 
+#   4   expr: end f
+#   4   seme: ( end f ) 
+#   4  value: ( 'end 'f ) 
+##  reduce_items (0) entry: ( 'end 'f ) 
+##  interp_seq (0) entry: ( `end 'f ) 
+##  interp_seq resolved: ( `end 'f ) 
+##  interp_seq reduced: ( `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) ) 
+#   4 reduce: [Ok , `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) )  ]
+#   4 env:
+# env:
+#	state: Ok 
+#	n = 3 
+#	it = `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 
+#	f = `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 
+> input: "call 4 n"
+# phrase: call 4 n ; 
+#   0   expr: call 4 n
+#   0   seme: ( call 4N n ) 
+#   0  value: ( 'call 4 'n ) 
+##  reduce_items (0) entry: ( 'call 4 'n ) 
+##  interp_seq (0) entry: ( `call 4 'n ) 
+##  interp_seq resolved: ( `call 4 'n ) 
+##  interp_seq reduced: ( 4 ) 
 #   0 reduce: [Ok , 4  ]
-env:
-	state: Ok 
-	n = 4 
-	it = 4 
-	f = `(f ('a ) 3 val) 
-# ----line: "f (2,)"
-# --phrase: f (2,) ; 
-#   0  expr: f (2,)
-#   0  seme: ( f { 2N } ) 
-#   0 value: ( `(f ('a ) 3 val) { 2 } ) 
-- reduce_fun value: ( `if 'a `> 1 ) 
-- reduce_fun reduce: [Ok , 1  ]
-- reduce_fun value: ( `print 3 ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	n = 4 
+#	it = 4 
+#	f = `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 
+> input: "f (2,)"
+# phrase: f (2,) ; 
+#   0   expr: f (2,)
+#   0   seme: ( f { 2N } ) 
+#   0  value: ( 'f { 2 } ) 
+##  reduce_items (0) entry: ( 'f { 2 } ) 
+##  reduce_items (0) entry: { 2 } 
+##  interp_seq (0) entry: ( 'f { 2 } ) 
+##  interp_seq resolved: ( `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) { 2 } ) 
+##  reduce_items (1) entry: { 2 } 
+##  reduce_fun value: ( `if 'a `> 1 ) 
+##  reduce_items (0) entry: ( `if 'a `> 1 ) 
+##  interp_seq (0) entry: ( `if 'a `> 1 ) 
+##  interp_seq resolved: ( `if 'a `> 1 ) 
+##  interp_seq reduced: ( `if 1 ) 
+##  interp_seq reduced: ( 1 ) 
+##  reduce_fun reduce: [Ok , 1  ]
+##  reduce_fun value: ( `print 3 ) 
+##  reduce_items (0) entry: ( `print 3 ) 
+##  interp_seq (0) entry: ( `print 3 ) 
+##  interp_seq resolved: ( `print 3 ) 
 3 
-- reduce_fun reduce: [Ok , 3  ]
-- reduce_fun value: ( `end `if ) 
-- reduce_fun reduce: [Ok , 3  ]
-- reduce_fun local: env:
-	state: Ok 
-	a = 2 
-	it = 3 
-parent env:
-	state: Ok 
-	n = 4 
-	it = 4 
-	f = `(f ('a ) 3 val) 
+##  interp_seq reduced: ( 3 ) 
+##  reduce_fun reduce: [Ok , 3  ]
+##  reduce_fun value: ( `end `if ) 
+##  reduce_items (0) entry: ( `end `if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( 3 ) 
+##  reduce_fun reduce: [Ok , 3  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	a = 2 
+##	it = 3 
+## parent ## env:
+##	state: Ok 
+##	n = 4 
+##	it = 4 
+##	f = `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 
+##  interp_seq reduced: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
-env:
-	state: Ok 
-	n = 4 
-	it = 3 
-	f = `(f ('a ) 3 val) 
-env:
-	state: Ok 
-	n = 4 
-	it = 3 
-	f = `(f ('a ) 3 val) 
+#   0 env:
+# env:
+#	state: Ok 
+#	n = 4 
+#	it = 3 
+#	f = `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 
+> main: exit
+> env:
+>	state: Ok 
+>	n = 4 
+>	it = 3 
+>	f = `(f ('a ) =3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 

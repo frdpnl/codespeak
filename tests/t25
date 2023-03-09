@@ -1,10 +1,10 @@
 
 if 4 >= 2 
-	print one
+	print 1
 	if 2. = 2 
-		print two
+		print 2
 	end if
-	if 3 > 1 ; print three ; end if
-	print four
+	if 3 > 1 ; print 3 ; end if
+	print 4
 end if
-print done
+print 5

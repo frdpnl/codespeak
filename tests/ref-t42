@@ -1,9 +1,10 @@
-# ----line: "end do"
-# --phrase: end do ; 
-#   0  expr: end do
-#   0  seme: ( end do ) 
-#   0 value: ( `end `do ) 
-? reduce_end: 'end' with wrong operator
+> input: "end do"
+# phrase: end do ; 
+#   0   expr: end do
+#   0   seme: ( end do ) 
+#   0  value: ( 'end 'do ) 
+##  reduce_items (0) entry: ( 'end 'do ) 
+##  interp_seq (0) entry: ( `end `do ) 
+##  interp_seq resolved: ( `end `do ) 
+? reduce_end: 'end' with wrong operator argument
 #   0 reduce: [Fatal , null ]
-env:
-	state: Ok 

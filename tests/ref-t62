@@ -1,18 +1,21 @@
-# ----line: "a, b ; call it param; def f params ; end f "
-# --phrase: a, b  ; call it param ; def f params  ; end f  ; 
-#   0  expr: a, b 
-#   0  seme: { a b } 
-#   0 value: { 'a 'b } 
+> input: "a, b ; call it param; def f param ; end f "
+# phrase: a, b  ; call it param ; def f param  ; end f  ; 
+#   0   expr: a, b 
+#   0   seme: { a b } 
+#   0  value: { 'a 'b } 
+##  reduce_items (0) entry: { 'a 'b } 
 #   0 reduce: [Ok , { 'a 'b }  ]
-env:
-	state: Ok 
-	it = { 'a 'b } 
-#   1  expr: call it param
-#   1  seme: ( call it param ) 
-#   1 value: ( `call { 'a 'b } 'param ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = { 'a 'b } 
+#   1   expr: call it param
+#   1   seme: ( call it param ) 
+#   1  value: ( 'call 'it 'param ) 
+##  reduce_items (0) entry: ( 'call 'it 'param ) 
+##  interp_seq (0) entry: ( `call 'it 'param ) 
+##  interp_seq resolved: ( `call { 'a 'b } 'param ) 
+##  reduce_items (1) entry: { 'a 'b } 
 ? interp: unknown symbol 'a'
 ? reduce_prefix2_arg: 1st argument is null
 #   1 reduce: [Fatal , null ]
-env:
-	state: Ok 
-	it = { 'a 'b } 

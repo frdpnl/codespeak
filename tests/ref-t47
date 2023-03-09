@@ -1,47 +1,85 @@
-# ----line: "if 2 > 0 ; print positive"
-# --phrase: if 2 > 0  ; print positive ; 
-#   0  expr: if 2 > 0 
-#   0  seme: ( if 2N > 0N ) 
-#   0 value: ( `if 2 `> 0 ) 
+> input: "if 2 > 0 ; 1"
+# phrase: if 2 > 0  ; 1 ; 
+#   0   expr: if 2 > 0 
+#   0   seme: ( if 2N > 0N ) 
+#   0  value: ( 'if 2 '> 0 ) 
+##  reduce_items (0) entry: ( 'if 2 '> 0 ) 
+##  interp_seq (0) entry: ( `if 2 `> 0 ) 
+##  interp_seq resolved: ( `if 2 `> 0 ) 
+##  interp_seq reduced: ( `if 1 ) 
+##  interp_seq reduced: ( 1 ) 
 #   0 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-#   1  expr: print positive
-#   1  seme: ( print positive ) 
-#   1 value: ( `print 'positive ) 
-'positive 
-#   1 reduce: [Ok , 'positive  ]
-env:
-	state: Ok 
-	it = 'positive 
-# ----line: "else"
-# --phrase: else ; 
-#   0  expr: else
-#   0  seme: ( else ) 
-#   0 value: ( `else ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 1 
+#   1   expr: 1
+#   1   seme: ( 1N ) 
+#   1  value: ( 1 ) 
+##  reduce_items (0) entry: ( 1 ) 
+##  interp_seq (0) entry: ( 1 ) 
+##  interp_seq resolved: ( 1 ) 
+#   1 reduce: [Ok , 1  ]
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 1 
+> input: "else"
+# phrase: else ; 
+#   0   expr: else
+#   0   seme: ( else ) 
+#   0  value: ( 'else ) 
+##  reduce_items (0) entry: ( 'else ) 
+##  interp_seq (0) entry: ( `else ) 
+##  interp_seq resolved: ( `else ) 
+##  interp_seq reduced: ( 0 ) 
 #   0 reduce: [Skip , 0  ]
-env:
-	state: Skip 
-	it = 0 
-# ----line: "	print negative"
-# --phrase: print negative ; 
-#   0  expr: print negative
-#   0  seme: ( print negative ) 
-#   0 value: ( `print 'negative ) 
+#   0 env:
+# env:
+#	state: Skip 
+#	it = 0 
+> input: "	-1"
+# phrase: -1 ; 
+#   0   expr: -1
+#   0   seme: ( -1N ) 
+#   0  value: ( -1 ) 
+##  reduce_items (0) entry: ( -1 ) 
+##  interp_seq (0) entry: ( -1 ) 
 #   0 reduce: [Skip , 0  ]
-env:
-	state: Skip 
-	it = 0 
-# ----line: "end if"
-# --phrase: end if ; 
-#   0  expr: end if
-#   0  seme: ( end if ) 
-#   0 value: ( `end `if ) 
+#   0 env:
+# env:
+#	state: Skip 
+#	it = 0 
+> input: "end if"
+# phrase: end if ; 
+#   0   expr: end if
+#   0   seme: ( end if ) 
+#   0  value: ( 'end 'if ) 
+##  reduce_items (0) entry: ( 'end 'if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( 0 ) 
 #   0 reduce: [Ok , 0  ]
-env:
-	state: Ok 
-	it = 0 
-env:
-	state: Ok 
-	it = 0 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 0 
+> input: "print it"
+# phrase: print it ; 
+#   0   expr: print it
+#   0   seme: ( print it ) 
+#   0  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print 0 ) 
+0 
+##  interp_seq reduced: ( 0 ) 
+#   0 reduce: [Ok , 0  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 0 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 0 

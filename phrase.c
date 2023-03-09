@@ -653,10 +653,9 @@ print_v(Val *a) {
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
 			}
-			printf(") %lu val ", a->symf.body.n);
+			printf(") =%lu= ", a->symf.body.n);
 			for (size_t i=0; i<a->symf.body.n; ++i) {
 				print_v(a->symf.body.v[i]);
-				printf("; ");
 			}
 			printf(") ");
 			break;
@@ -971,18 +970,18 @@ print_symval(Symval *a) {
 	print_v(a->v);
 }
 static void
-print_env(Env *a) {
+print_env(Env *a, const char *col1) {
 	assert(a != NULL);
-	printf("env:\n");
-	printf("\tstate: "); print_inxs(a->state); printf("\n");
+	printf("%s env:\n", col1);
+	printf("%s\tstate: ", col1); print_inxs(a->state); printf("\n");
 	for (size_t i=0; i<a->n; ++i) {
-		printf("\t");
+		printf("%s\t", col1);
 		print_symval(a->s[i]);
 		printf("\n");
 	}
 	if (a->parent) {
-		printf("parent ");
-		print_env(a->parent);
+		printf("%s parent ", col1);
+		print_env(a->parent, col1);
 	}
 }
 static Symval *
@@ -1959,14 +1958,14 @@ reduce_end(Env *e, Val *s, size_t p) {
 			return (Ir) {rc.state, s};
 		}
 		if (a->symop.v != reduce_if) {
-			printf("? %s: 'end' with wrong operator\n",
+			printf("? %s: 'end' with wrong operator argument\n",
 					__FUNCTION__);
 			free_v(a);
 			return (Ir) {FATAL, NULL};
 		}
 		Val *c = lookup(e, IT, false);
 		if (c == NULL) {
-			printf("? %s: 'it' undefined\n",
+			printf("? %s: 'it' required, but undefined\n",
 					__FUNCTION__);
 			free_v(a);
 			return (Ir) {FATAL, NULL};
@@ -1984,7 +1983,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 		}
 		Val *c = lookup(e, IT, false);
 		if (c == NULL) {
-			printf("? %s: 'it' undefined\n", 
+			printf("? %s: 'it' required, yet undefined\n", 
 					__FUNCTION__);
 			free_v(a);
 			return (Ir) {FATAL, NULL};
@@ -2098,7 +2097,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 			break;
 		}
 	}
-	if (Dbg) { printf("##  %s %5s ", __FUNCTION__, "local"); print_env(le); }
+	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "local"); print_env(le, "##"); }
 	/* return local (function's) 'it to caller */
 	char *sym = IT;
 	Val *lit = NULL;
@@ -2635,7 +2634,7 @@ interp_ph(Env *env, Phrase *a) {
 			free_symval(it);
 			return false;
 		}
-		if (Dbg) { printf("# %3lu ", i); print_env(env); }
+		if (Dbg) { printf("# %3lu env:\n", i); print_env(env, "#"); }
 	}
 	return true;
 }
@@ -2690,8 +2689,8 @@ main(int argc, char **argv) {
 		Lrc rc = readline(&line);
 		switch (rc) {
 			case ERR:
-				printf("error\n"); print_env(e);
-				print_env(e);
+				printf("? %s: error\n", __FUNCTION__); 
+				print_env(e, "?");
 				free_env(e, true);
 				return EXIT_FAILURE;
 			case END:
@@ -2699,13 +2698,13 @@ main(int argc, char **argv) {
 					printf("? %s: unexpected end of program\n",
 							__FUNCTION__);
 				}
-				printf("exit\n"); print_env(e);
+				printf("> %s: exit\n", __FUNCTION__); print_env(e, ">");
 				free_env(e, true);
 				return EXIT_SUCCESS;
 			case EMPTY:
 				continue;
 			case LINE:
-				if (Dbg) { printf("# line: \"%s\"\n", line); }
+				printf("> input: \"%s\"\n", line);
 				break;
 		}
 		Phrase *ph = phrase_of_str(line);

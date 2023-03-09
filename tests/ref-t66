@@ -1,220 +1,364 @@
-# ----line: "def f (a,)"
-# --phrase: def f (a,) ; 
-#   0  expr: def f (a,)
-#   0  seme: ( def f { a } ) 
-#   0 value: ( `def 'f { 'a } ) 
-#   0 reduce: [Fun , `(f ('a ) 0 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 0 val) 
-# ----line: "	if a > 0 ; def g () ; a ; end g ; return"
-# --phrase: if a > 0  ; def g ()  ; a  ; end g  ; return ; 
-#   0  expr: if a > 0 
-#   0  seme: ( if a > 0N ) 
-#   0 value: ( `if 'a `> 0 ) 
-#   0 reduce: [Fun , `(f ('a ) 1 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 1 val) 
-#   1  expr: def g () 
-#   1  seme: ( def g Nil ) 
-#   1 value: ( `def 'g Nil ) 
-#   1 reduce: [Fun , `(f ('a ) 2 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 2 val) 
-#   2  expr: a 
-#   2  seme: ( a ) 
-#   2 value: ( 'a ) 
-#   2 reduce: [Fun , `(f ('a ) 3 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 3 val) 
-#   3  expr: end g 
-#   3  seme: ( end g ) 
-#   3 value: ( `end 'g ) 
-#   3 reduce: [Fun , `(f ('a ) 4 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 4 val) 
-#   4  expr: return
-#   4  seme: ( return ) 
-#   4 value: ( `return ) 
-#   4 reduce: [Fun , `(f ('a ) 5 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 5 val) 
-# ----line: "	else ; def g () ; -1 * a ; end g ; "
-# --phrase: else  ; def g ()  ; -1 * a  ; end g  ; 
-#   0  expr: else 
-#   0  seme: ( else ) 
-#   0 value: ( `else ) 
-#   0 reduce: [Fun , `(f ('a ) 6 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 6 val) 
-#   1  expr: def g () 
-#   1  seme: ( def g Nil ) 
-#   1 value: ( `def 'g Nil ) 
-#   1 reduce: [Fun , `(f ('a ) 7 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 7 val) 
-#   2  expr: -1 * a 
-#   2  seme: ( -1N * a ) 
-#   2 value: ( -1 `* 'a ) 
-#   2 reduce: [Fun , `(f ('a ) 8 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 8 val) 
-#   3  expr: end g 
-#   3  seme: ( end g ) 
-#   3 value: ( `end 'g ) 
-#   3 reduce: [Fun , `(f ('a ) 9 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 9 val) 
-# ----line: "	end if"
-# --phrase: end if ; 
-#   0  expr: end if
-#   0  seme: ( end if ) 
-#   0 value: ( `end `if ) 
-#   0 reduce: [Fun , `(f ('a ) 10 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 10 val) 
-# ----line: "	g"
-# --phrase: g ; 
-#   0  expr: g
-#   0  seme: ( g ) 
-#   0 value: ( 'g ) 
-#   0 reduce: [Fun , `(f ('a ) 11 val)  ]
-env:
-	state: Fun 
-	it = `(f ('a ) 11 val) 
-# ----line: "end f"
-# --phrase: end f ; 
-#   0  expr: end f
-#   0  seme: ( end f ) 
-#   0 value: ( `end 'f ) 
-#   0 reduce: [Ok , `(f ('a ) 11 val)  ]
-env:
-	state: Ok 
-	it = `(f ('a ) 11 val) 
-	f = `(f ('a ) 11 val) 
-# ----line: "f (-2,) ; it ; it ()"
-# --phrase: f (-2,)  ; it  ; it () ; 
-#   0  expr: f (-2,) 
-#   0  seme: ( f { -2N } ) 
-#   0 value: ( `(f ('a ) 11 val) { -2 } ) 
-- reduce_fun value: ( `if 'a `> 0 ) 
-- reduce_fun reduce: [Skip , 0  ]
-- reduce_fun value: ( `def 'g Nil ) 
-- reduce_fun reduce: [Skip , 0  ]
-- reduce_fun value: ( 'a ) 
-- reduce_fun reduce: [Skip , 0  ]
-- reduce_fun value: ( `end 'g ) 
-- reduce_fun reduce: [Skip , 0  ]
-- reduce_fun value: ( `return ) 
-- reduce_fun reduce: [Skip , 0  ]
-- reduce_fun value: ( `else ) 
-- reduce_fun reduce: [Ok , 1  ]
-- reduce_fun value: ( `def 'g Nil ) 
-- reduce_fun reduce: [Fun , `(g () 0 val)  ]
-- reduce_fun value: ( -1 `* 'a ) 
-- reduce_fun reduce: [Fun , `(g () 1 val)  ]
-- reduce_fun value: ( `end 'g ) 
-- reduce_fun reduce: [Ok , `(g () 1 val)  ]
-- reduce_fun value: ( `end `if ) 
-- reduce_fun reduce: [Ok , `(g () 1 val)  ]
-- reduce_fun value: ( 'g ) 
-- reduce_fun reduce: [Ok , 'g  ]
-- reduce_fun local: env:
-	state: Ok 
-	a = -2 
-	it = 'g 
-	g = `(g () 1 val) 
-parent env:
-	state: Ok 
-	it = `(f ('a ) 11 val) 
-	f = `(f ('a ) 11 val) 
-#   0 reduce: [Ok , `(g () 1 val)  ]
-env:
-	state: Ok 
-	it = `(g () 1 val) 
-	f = `(f ('a ) 11 val) 
-#   1  expr: it 
-#   1  seme: ( it ) 
-#   1 value: ( `(g () 1 val) ) 
-#   1 reduce: [Ok , `(g () 1 val)  ]
-env:
-	state: Ok 
-	it = `(g () 1 val) 
-	f = `(f ('a ) 11 val) 
-#   2  expr: it ()
-#   2  seme: ( it Nil ) 
-#   2 value: ( `(g () 1 val) Nil ) 
-- reduce_fun value: ( -1 `* -2 ) 
-- reduce_fun reduce: [Ok , 2  ]
-- reduce_fun local: env:
-	state: Ok 
-	it = 2 
-parent env:
-	state: Ok 
-	it = `(g () 1 val) 
-	f = `(f ('a ) 11 val) 
+> input: "def f (a,)"
+# phrase: def f (a,) ; 
+#   0   expr: def f (a,)
+#   0   seme: ( def f { a } ) 
+#   0  value: ( 'def 'f { 'a } ) 
+##  reduce_items (0) entry: ( 'def 'f { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq (0) entry: ( `def 'f { 'a } ) 
+##  interp_seq resolved: ( `def 'f { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq reduced: ( `(f ('a ) =0= ) ) 
+#   0 reduce: [Fun , `(f ('a ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =0= ) 
+> input: "	if a > 0 ; def g () ; a ; end g ; return"
+# phrase: if a > 0  ; def g ()  ; a  ; end g  ; return ; 
+#   0   expr: if a > 0 
+#   0   seme: ( if a > 0N ) 
+#   0  value: ( 'if 'a '> 0 ) 
+##  reduce_items (0) entry: ( 'if 'a '> 0 ) 
+##  interp_seq (0) entry: ( `if 'a `> 0 ) 
+#   0 reduce: [Fun , `(f ('a ) =1= ( `if 'a `> 0 ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =1= ( `if 'a `> 0 ) ) 
+#   1   expr: def g () 
+#   1   seme: ( def g Nil ) 
+#   1  value: ( 'def 'g Nil ) 
+##  reduce_items (0) entry: ( 'def 'g Nil ) 
+##  interp_seq (0) entry: ( `def 'g Nil ) 
+#   1 reduce: [Fun , `(f ('a ) =2= ( `if 'a `> 0 ) ( `def 'g Nil ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =2= ( `if 'a `> 0 ) ( `def 'g Nil ) ) 
+#   2   expr: a 
+#   2   seme: ( a ) 
+#   2  value: ( 'a ) 
+##  reduce_items (0) entry: ( 'a ) 
+##  interp_seq (0) entry: ( 'a ) 
+#   2 reduce: [Fun , `(f ('a ) =3= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) )  ]
+#   2 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =3= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ) 
+#   3   expr: end g 
+#   3   seme: ( end g ) 
+#   3  value: ( 'end 'g ) 
+##  reduce_items (0) entry: ( 'end 'g ) 
+##  interp_seq (0) entry: ( `end 'g ) 
+##  interp_seq resolved: ( `end 'g ) 
+##  interp_seq reduced: ( `(f ('a ) =4= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ) ) 
+#   3 reduce: [Fun , `(f ('a ) =4= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) )  ]
+#   3 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =4= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ) 
+#   4   expr: return
+#   4   seme: ( return ) 
+#   4  value: ( 'return ) 
+##  reduce_items (0) entry: ( 'return ) 
+##  interp_seq (0) entry: ( `return ) 
+#   4 reduce: [Fun , `(f ('a ) =5= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) )  ]
+#   4 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =5= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ) 
+> input: "	else ; def g () ; -1 * a ; end g ; "
+# phrase: else  ; def g ()  ; -1 * a  ; end g  ; 
+#   0   expr: else 
+#   0   seme: ( else ) 
+#   0  value: ( 'else ) 
+##  reduce_items (0) entry: ( 'else ) 
+##  interp_seq (0) entry: ( `else ) 
+#   0 reduce: [Fun , `(f ('a ) =6= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =6= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ) 
+#   1   expr: def g () 
+#   1   seme: ( def g Nil ) 
+#   1  value: ( 'def 'g Nil ) 
+##  reduce_items (0) entry: ( 'def 'g Nil ) 
+##  interp_seq (0) entry: ( `def 'g Nil ) 
+#   1 reduce: [Fun , `(f ('a ) =7= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =7= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ) 
+#   2   expr: -1 * a 
+#   2   seme: ( -1N * a ) 
+#   2  value: ( -1 '* 'a ) 
+##  reduce_items (0) entry: ( -1 '* 'a ) 
+##  interp_seq (0) entry: ( -1 `* 'a ) 
+#   2 reduce: [Fun , `(f ('a ) =8= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) )  ]
+#   2 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =8= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ) 
+#   3   expr: end g 
+#   3   seme: ( end g ) 
+#   3  value: ( 'end 'g ) 
+##  reduce_items (0) entry: ( 'end 'g ) 
+##  interp_seq (0) entry: ( `end 'g ) 
+##  interp_seq resolved: ( `end 'g ) 
+##  interp_seq reduced: ( `(f ('a ) =9= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ) ) 
+#   3 reduce: [Fun , `(f ('a ) =9= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) )  ]
+#   3 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =9= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ) 
+> input: "	end if"
+# phrase: end if ; 
+#   0   expr: end if
+#   0   seme: ( end if ) 
+#   0  value: ( 'end 'if ) 
+##  reduce_items (0) entry: ( 'end 'if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( `(f ('a ) =10= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ) ) 
+#   0 reduce: [Fun , `(f ('a ) =10= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =10= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ) 
+> input: "	g"
+# phrase: g ; 
+#   0   expr: g
+#   0   seme: ( g ) 
+#   0  value: ( 'g ) 
+##  reduce_items (0) entry: ( 'g ) 
+##  interp_seq (0) entry: ( 'g ) 
+#   0 reduce: [Fun , `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+> input: "end f"
+# phrase: end f ; 
+#   0   expr: end f
+#   0   seme: ( end f ) 
+#   0  value: ( 'end 'f ) 
+##  reduce_items (0) entry: ( 'end 'f ) 
+##  interp_seq (0) entry: ( `end 'f ) 
+##  interp_seq resolved: ( `end 'f ) 
+##  interp_seq reduced: ( `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) ) 
+#   0 reduce: [Ok , `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+> input: "f (-2,) ; it ; it ()"
+# phrase: f (-2,)  ; it  ; it () ; 
+#   0   expr: f (-2,) 
+#   0   seme: ( f { -2N } ) 
+#   0  value: ( 'f { -2 } ) 
+##  reduce_items (0) entry: ( 'f { -2 } ) 
+##  reduce_items (0) entry: { -2 } 
+##  interp_seq (0) entry: ( 'f { -2 } ) 
+##  interp_seq resolved: ( `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) { -2 } ) 
+##  reduce_items (1) entry: { -2 } 
+##  reduce_fun value: ( `if 'a `> 0 ) 
+##  reduce_items (0) entry: ( `if 'a `> 0 ) 
+##  interp_seq (0) entry: ( `if 'a `> 0 ) 
+##  interp_seq resolved: ( `if 'a `> 0 ) 
+##  interp_seq reduced: ( `if 0 ) 
+##  interp_seq reduced: ( 0 ) 
+##  reduce_fun reduce: [Skip , 0  ]
+##  reduce_fun value: ( `def 'g Nil ) 
+##  reduce_items (0) entry: ( `def 'g Nil ) 
+##  interp_seq (0) entry: ( `def 'g Nil ) 
+##  reduce_fun reduce: [Skip , 0  ]
+##  reduce_fun value: ( 'a ) 
+##  reduce_items (0) entry: ( 'a ) 
+##  interp_seq (0) entry: ( 'a ) 
+##  reduce_fun reduce: [Skip , 0  ]
+##  reduce_fun value: ( `end 'g ) 
+##  reduce_items (0) entry: ( `end 'g ) 
+##  interp_seq (0) entry: ( `end 'g ) 
+##  reduce_fun reduce: [Skip , 0  ]
+##  reduce_fun value: ( `return ) 
+##  reduce_items (0) entry: ( `return ) 
+##  interp_seq (0) entry: ( `return ) 
+##  reduce_fun reduce: [Skip , 0  ]
+##  reduce_fun value: ( `else ) 
+##  reduce_items (0) entry: ( `else ) 
+##  interp_seq (0) entry: ( `else ) 
+##  interp_seq resolved: ( `else ) 
+##  interp_seq reduced: ( 1 ) 
+##  reduce_fun reduce: [Ok , 1  ]
+##  reduce_fun value: ( `def 'g Nil ) 
+##  reduce_items (0) entry: ( `def 'g Nil ) 
+##  interp_seq (0) entry: ( `def 'g Nil ) 
+##  interp_seq resolved: ( `def 'g Nil ) 
+##  interp_seq reduced: ( `(g () =0= ) ) 
+##  reduce_fun reduce: [Fun , `(g () =0= )  ]
+##  reduce_fun value: ( -1 `* 'a ) 
+##  reduce_items (0) entry: ( -1 `* 'a ) 
+##  interp_seq (0) entry: ( -1 `* 'a ) 
+##  reduce_fun reduce: [Fun , `(g () =1= ( -1 `* -2 ) )  ]
+##  reduce_fun value: ( `end 'g ) 
+##  reduce_items (0) entry: ( `end 'g ) 
+##  interp_seq (0) entry: ( `end 'g ) 
+##  interp_seq resolved: ( `end 'g ) 
+##  interp_seq reduced: ( `(g () =1= ( -1 `* -2 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##  reduce_fun value: ( `end `if ) 
+##  reduce_items (0) entry: ( `end `if ) 
+##  interp_seq (0) entry: ( `end `if ) 
+##  interp_seq resolved: ( `end `if ) 
+##  interp_seq reduced: ( `(g () =1= ( -1 `* -2 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##  reduce_fun value: ( 'g ) 
+##  reduce_items (0) entry: ( 'g ) 
+##  interp_seq (0) entry: ( 'g ) 
+##  interp_seq resolved: ( `(g () =1= ( -1 `* -2 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	a = -2 
+##	it = `(g () =1= ( -1 `* -2 ) ) 
+##	g = `(g () =1= ( -1 `* -2 ) ) 
+## parent ## env:
+##	state: Ok 
+##	it = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+##  interp_seq reduced: ( `(g () =1= ( -1 `* -2 ) ) ) 
+#   0 reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(g () =1= ( -1 `* -2 ) ) 
+#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#   1   expr: it 
+#   1   seme: ( it ) 
+#   1  value: ( 'it ) 
+##  reduce_items (0) entry: ( 'it ) 
+##  interp_seq (0) entry: ( 'it ) 
+##  interp_seq resolved: ( `(g () =1= ( -1 `* -2 ) ) ) 
+#   1 reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+#   1 env:
+# env:
+#	state: Ok 
+#	it = `(g () =1= ( -1 `* -2 ) ) 
+#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#   2   expr: it ()
+#   2   seme: ( it Nil ) 
+#   2  value: ( 'it Nil ) 
+##  reduce_items (0) entry: ( 'it Nil ) 
+##  interp_seq (0) entry: ( 'it Nil ) 
+##  interp_seq resolved: ( `(g () =1= ( -1 `* -2 ) ) Nil ) 
+##  reduce_fun value: ( -1 `* -2 ) 
+##  reduce_items (0) entry: ( -1 `* -2 ) 
+##  interp_seq (0) entry: ( -1 `* -2 ) 
+##  interp_seq resolved: ( -1 `* -2 ) 
+##  interp_seq reduced: ( 2 ) 
+##  reduce_fun reduce: [Ok , 2  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	it = 2 
+## parent ## env:
+##	state: Ok 
+##	it = `(g () =1= ( -1 `* -2 ) ) 
+##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+##  interp_seq reduced: ( 2 ) 
 #   2 reduce: [Ok , 2  ]
-env:
-	state: Ok 
-	it = 2 
-	f = `(f ('a ) 11 val) 
-# ----line: "f (3,) ; it ()"
-# --phrase: f (3,)  ; it () ; 
-#   0  expr: f (3,) 
-#   0  seme: ( f { 3N } ) 
-#   0 value: ( `(f ('a ) 11 val) { 3 } ) 
-- reduce_fun value: ( `if 'a `> 0 ) 
-- reduce_fun reduce: [Ok , 1  ]
-- reduce_fun value: ( `def 'g Nil ) 
-- reduce_fun reduce: [Fun , `(g () 0 val)  ]
-- reduce_fun value: ( 'a ) 
-- reduce_fun reduce: [Fun , `(g () 1 val)  ]
-- reduce_fun value: ( `end 'g ) 
-- reduce_fun reduce: [Ok , `(g () 1 val)  ]
-- reduce_fun value: ( `return ) 
-- reduce_fun reduce: [Return , `(g () 1 val)  ]
-- reduce_fun local: env:
-	state: Return 
-	a = 3 
-	it = `(g () 1 val) 
-	g = `(g () 1 val) 
-parent env:
-	state: Ok 
-	it = 2 
-	f = `(f ('a ) 11 val) 
-#   0 reduce: [Ok , `(g () 1 val)  ]
-env:
-	state: Ok 
-	it = `(g () 1 val) 
-	f = `(f ('a ) 11 val) 
-#   1  expr: it ()
-#   1  seme: ( it Nil ) 
-#   1 value: ( `(g () 1 val) Nil ) 
-- reduce_fun value: ( 3 ) 
-- reduce_fun reduce: [Ok , 3  ]
-- reduce_fun local: env:
-	state: Ok 
-	it = 3 
-parent env:
-	state: Ok 
-	it = `(g () 1 val) 
-	f = `(f ('a ) 11 val) 
+#   2 env:
+# env:
+#	state: Ok 
+#	it = 2 
+#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+> input: "f (3,) ; it ()"
+# phrase: f (3,)  ; it () ; 
+#   0   expr: f (3,) 
+#   0   seme: ( f { 3N } ) 
+#   0  value: ( 'f { 3 } ) 
+##  reduce_items (0) entry: ( 'f { 3 } ) 
+##  reduce_items (0) entry: { 3 } 
+##  interp_seq (0) entry: ( 'f { 3 } ) 
+##  interp_seq resolved: ( `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) { 3 } ) 
+##  reduce_items (1) entry: { 3 } 
+##  reduce_fun value: ( `if 'a `> 0 ) 
+##  reduce_items (0) entry: ( `if 'a `> 0 ) 
+##  interp_seq (0) entry: ( `if 'a `> 0 ) 
+##  interp_seq resolved: ( `if 'a `> 0 ) 
+##  interp_seq reduced: ( `if 1 ) 
+##  interp_seq reduced: ( 1 ) 
+##  reduce_fun reduce: [Ok , 1  ]
+##  reduce_fun value: ( `def 'g Nil ) 
+##  reduce_items (0) entry: ( `def 'g Nil ) 
+##  interp_seq (0) entry: ( `def 'g Nil ) 
+##  interp_seq resolved: ( `def 'g Nil ) 
+##  interp_seq reduced: ( `(g () =0= ) ) 
+##  reduce_fun reduce: [Fun , `(g () =0= )  ]
+##  reduce_fun value: ( 'a ) 
+##  reduce_items (0) entry: ( 'a ) 
+##  interp_seq (0) entry: ( 'a ) 
+##  reduce_fun reduce: [Fun , `(g () =1= ( 3 ) )  ]
+##  reduce_fun value: ( `end 'g ) 
+##  reduce_items (0) entry: ( `end 'g ) 
+##  interp_seq (0) entry: ( `end 'g ) 
+##  interp_seq resolved: ( `end 'g ) 
+##  interp_seq reduced: ( `(g () =1= ( 3 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () =1= ( 3 ) )  ]
+##  reduce_fun value: ( `return ) 
+##  reduce_items (0) entry: ( `return ) 
+##  interp_seq (0) entry: ( `return ) 
+##  interp_seq resolved: ( `return ) 
+##  interp_seq reduced: ( `(g () =1= ( 3 ) ) ) 
+##  reduce_fun reduce: [Return , `(g () =1= ( 3 ) )  ]
+##  reduce_fun local:
+## env:
+##	state: Return 
+##	a = 3 
+##	it = `(g () =1= ( 3 ) ) 
+##	g = `(g () =1= ( 3 ) ) 
+## parent ## env:
+##	state: Ok 
+##	it = 2 
+##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+##  interp_seq reduced: ( `(g () =1= ( 3 ) ) ) 
+#   0 reduce: [Ok , `(g () =1= ( 3 ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(g () =1= ( 3 ) ) 
+#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#   1   expr: it ()
+#   1   seme: ( it Nil ) 
+#   1  value: ( 'it Nil ) 
+##  reduce_items (0) entry: ( 'it Nil ) 
+##  interp_seq (0) entry: ( 'it Nil ) 
+##  interp_seq resolved: ( `(g () =1= ( 3 ) ) Nil ) 
+##  reduce_fun value: ( 3 ) 
+##  reduce_items (0) entry: ( 3 ) 
+##  interp_seq (0) entry: ( 3 ) 
+##  interp_seq resolved: ( 3 ) 
+##  reduce_fun reduce: [Ok , 3  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	it = 3 
+## parent ## env:
+##	state: Ok 
+##	it = `(g () =1= ( 3 ) ) 
+##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+##  interp_seq reduced: ( 3 ) 
 #   1 reduce: [Ok , 3  ]
-env:
-	state: Ok 
-	it = 3 
-	f = `(f ('a ) 11 val) 
-env:
-	state: Ok 
-	it = 3 
-	f = `(f ('a ) 11 val) 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 3 
+#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 3 
+>	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 

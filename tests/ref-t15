@@ -1,36 +1,138 @@
-# ----line: "define dec (b,) ; b - 1 ; end dec"
-# --phrase: define dec (b,)  ; b - 1  ; end dec ; 
-#   0  expr: define dec (b,) 
-#   0  seme: ( define dec { b } ) 
-#   0 value: ( `define 'dec { 'b } ) 
-#   0 reduce: [Fun , `(dec ('b ) 0 val)  ]
-env:
-	state: Fun 
-	it = `(dec ('b ) 0 val) 
-#   1  expr: b - 1 
-#   1  seme: ( b - 1N ) 
-#   1 value: ( 'b `- 1 ) 
-#   1 reduce: [Fun , `(dec ('b ) 1 val)  ]
-env:
-	state: Fun 
-	it = `(dec ('b ) 1 val) 
-#   2  expr: end dec
-#   2  seme: ( end dec ) 
-#   2 value: ( `end 'dec ) 
-#   2 reduce: [Ok , `(dec ('b ) 1 val)  ]
-env:
-	state: Ok 
-	it = `(dec ('b ) 1 val) 
-	dec = `(dec ('b ) 1 val) 
-# ----line: "print (show dec)"
-# --phrase: print (show dec) ; 
-#   0  expr: print (show dec)
-#   0  seme: ( print ( show dec ) ) 
-#   0 value: ( `print ( 'show `(dec ('b ) 1 val) ) ) 
-? reduce_prefix1_arg: symbol not prefixed to one argument
-? reduce_fun: invalid argument to `dec
-#   0 reduce: [Fatal , null ]
-env:
-	state: Ok 
-	it = `(dec ('b ) 1 val) 
-	dec = `(dec ('b ) 1 val) 
+> input: "define dec (b,) ; b - 1 ; end dec"
+# phrase: define dec (b,)  ; b - 1  ; end dec ; 
+#   0   expr: define dec (b,) 
+#   0   seme: ( define dec { b } ) 
+#   0  value: ( 'define 'dec { 'b } ) 
+##  reduce_items (0) entry: ( 'define 'dec { 'b } ) 
+##  reduce_items (0) entry: { 'b } 
+##  interp_seq (0) entry: ( `define 'dec { 'b } ) 
+##  interp_seq resolved: ( `define 'dec { 'b } ) 
+##  reduce_items (0) entry: { 'b } 
+##  interp_seq reduced: ( `(dec ('b ) =0= ) ) 
+#   0 reduce: [Fun , `(dec ('b ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(dec ('b ) =0= ) 
+#   1   expr: b - 1 
+#   1   seme: ( b - 1N ) 
+#   1  value: ( 'b '- 1 ) 
+##  reduce_items (0) entry: ( 'b '- 1 ) 
+##  interp_seq (0) entry: ( 'b `- 1 ) 
+#   1 reduce: [Fun , `(dec ('b ) =1= ( 'b `- 1 ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	it = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+#   2   expr: end dec
+#   2   seme: ( end dec ) 
+#   2  value: ( 'end 'dec ) 
+##  reduce_items (0) entry: ( 'end 'dec ) 
+##  interp_seq (0) entry: ( `end 'dec ) 
+##  interp_seq resolved: ( `end 'dec ) 
+##  interp_seq reduced: ( `(dec ('b ) =1= ( 'b `- 1 ) ) ) 
+#   2 reduce: [Ok , `(dec ('b ) =1= ( 'b `- 1 ) )  ]
+#   2 env:
+# env:
+#	state: Ok 
+#	it = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+#	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+> input: "print dec"
+# phrase: print dec ; 
+#   0   expr: print dec
+#   0   seme: ( print dec ) 
+#   0  value: ( 'print 'dec ) 
+##  reduce_items (0) entry: ( 'print 'dec ) 
+##  interp_seq (0) entry: ( `print 'dec ) 
+##  interp_seq resolved: ( `print `(dec ('b ) =1= ( 'b `- 1 ) ) ) 
+`(dec ('b ) =1= ( 'b `- 1 ) ) 
+##  interp_seq reduced: ( `(dec ('b ) =1= ( 'b `- 1 ) ) ) 
+#   0 reduce: [Ok , `(dec ('b ) =1= ( 'b `- 1 ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+#	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+> input: "define inc (a,) "
+# phrase: define inc (a,)  ; 
+#   0   expr: define inc (a,) 
+#   0   seme: ( define inc { a } ) 
+#   0  value: ( 'define 'inc { 'a } ) 
+##  reduce_items (0) entry: ( 'define 'inc { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq (0) entry: ( `define 'inc { 'a } ) 
+##  interp_seq resolved: ( `define 'inc { 'a } ) 
+##  reduce_items (0) entry: { 'a } 
+##  interp_seq reduced: ( `(inc ('a ) =0= ) ) 
+#   0 reduce: [Fun , `(inc ('a ) =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(inc ('a ) =0= ) 
+#	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+> input: "1 + a "
+# phrase: 1 + a  ; 
+#   0   expr: 1 + a 
+#   0   seme: ( 1N + a ) 
+#   0  value: ( 1 '+ 'a ) 
+##  reduce_items (0) entry: ( 1 '+ 'a ) 
+##  interp_seq (0) entry: ( 1 `+ 'a ) 
+#   0 reduce: [Fun , `(inc ('a ) =1= ( 1 `+ 'a ) )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(inc ('a ) =1= ( 1 `+ 'a ) ) 
+#	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+> input: "end inc"
+# phrase: end inc ; 
+#   0   expr: end inc
+#   0   seme: ( end inc ) 
+#   0  value: ( 'end 'inc ) 
+##  reduce_items (0) entry: ( 'end 'inc ) 
+##  interp_seq (0) entry: ( `end 'inc ) 
+##  interp_seq resolved: ( `end 'inc ) 
+##  interp_seq reduced: ( `(inc ('a ) =1= ( 1 `+ 'a ) ) ) 
+#   0 reduce: [Ok , `(inc ('a ) =1= ( 1 `+ 'a ) )  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = `(inc ('a ) =1= ( 1 `+ 'a ) ) 
+#	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+#	inc = `(inc ('a ) =1= ( 1 `+ 'a ) ) 
+> input: "1 * 2; print it"
+# phrase: 1 * 2 ; print it ; 
+#   0   expr: 1 * 2
+#   0   seme: ( 1N * 2N ) 
+#   0  value: ( 1 '* 2 ) 
+##  reduce_items (0) entry: ( 1 '* 2 ) 
+##  interp_seq (0) entry: ( 1 `* 2 ) 
+##  interp_seq resolved: ( 1 `* 2 ) 
+##  interp_seq reduced: ( 2 ) 
+#   0 reduce: [Ok , 2  ]
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 2 
+#	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+#	inc = `(inc ('a ) =1= ( 1 `+ 'a ) ) 
+#   1   expr: print it
+#   1   seme: ( print it ) 
+#   1  value: ( 'print 'it ) 
+##  reduce_items (0) entry: ( 'print 'it ) 
+##  interp_seq (0) entry: ( `print 'it ) 
+##  interp_seq resolved: ( `print 2 ) 
+2 
+##  interp_seq reduced: ( 2 ) 
+#   1 reduce: [Ok , 2  ]
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 2 
+#	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+#	inc = `(inc ('a ) =1= ( 1 `+ 'a ) ) 
+> main: exit
+> env:
+>	state: Ok 
+>	it = 2 
+>	dec = `(dec ('b ) =1= ( 'b `- 1 ) ) 
+>	inc = `(inc ('a ) =1= ( 1 `+ 'a ) ) 

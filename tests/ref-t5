@@ -1,73 +1,65 @@
-# ----line: "2 * 2. - 1 ; call it n"
-# --phrase: 2 * 2. - 1  ; call it n ; 
-#   0  expr: 2 * 2. - 1 
-#   0  seme: ( 2N * 2.00R - 1N ) 
-#   0 value: ( 2 `* 2.00 `- 1 ) 
+> input: "2 * 2. - 1 ; call it n"
+# phrase: 2 * 2. - 1  ; call it n ; 
+#   0   expr: 2 * 2. - 1 
+#   0   seme: ( 2N * 2.00R - 1N ) 
+#   0  value: ( 2 '* 2.00 '- 1 ) 
+##  reduce_items (0) entry: ( 2 '* 2.00 '- 1 ) 
+##  interp_seq (0) entry: ( 2 `* 2.00 `- 1 ) 
+##  interp_seq resolved: ( 2 `* 2.00 `- 1 ) 
+##  interp_seq reduced: ( 4.00 `- 1 ) 
+##  interp_seq reduced: ( 3.00 ) 
 #   0 reduce: [Ok , 3.00  ]
-env:
-	state: Ok 
-	it = 3.00 
-#   1  expr: call it n
-#   1  seme: ( call it n ) 
-#   1 value: ( `call 3.00 'n ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = 3.00 
+#   1   expr: call it n
+#   1   seme: ( call it n ) 
+#   1  value: ( 'call 'it 'n ) 
+##  reduce_items (0) entry: ( 'call 'it 'n ) 
+##  interp_seq (0) entry: ( `call 'it 'n ) 
+##  interp_seq resolved: ( `call 3.00 'n ) 
+##  interp_seq reduced: ( 3.00 ) 
 #   1 reduce: [Ok , 3.00  ]
-env:
-	state: Ok 
-	it = 3.00 
-	n = 3.00 
-# ----line: "1., +, 2 ; call it A"
-# --phrase: 1., +, 2  ; call it A ; 
-#   0  expr: 1., +, 2 
-#   0  seme: { 1.00R + 2N } 
-#   0 value: { 1.00 `+ 2 } 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = 3.00 
+#	n = 3.00 
+> input: "1., +, 2 ; call it A"
+# phrase: 1., +, 2  ; call it A ; 
+#   0   expr: 1., +, 2 
+#   0   seme: { 1.00R + 2N } 
+#   0  value: { 1.00 '+ 2 } 
+##  reduce_items (0) entry: { 1.00 '+ 2 } 
 #   0 reduce: [Ok , { 1.00 `+ 2 }  ]
-env:
-	state: Ok 
-	it = { 1.00 `+ 2 } 
-	n = 3.00 
-#   1  expr: call it A
-#   1  seme: ( call it A ) 
-#   1 value: ( `call { 1.00 `+ 2 } 'A ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = { 1.00 `+ 2 } 
+#	n = 3.00 
+#   1   expr: call it A
+#   1   seme: ( call it A ) 
+#   1  value: ( 'call 'it 'A ) 
+##  reduce_items (0) entry: ( 'call 'it 'A ) 
+##  interp_seq (0) entry: ( `call 'it 'A ) 
+##  interp_seq resolved: ( `call { 1.00 `+ 2 } 'A ) 
+##  reduce_items (1) entry: { 1.00 `+ 2 } 
+##  interp_seq reduced: ( { 1.00 `+ 2 } ) 
 #   1 reduce: [Ok , { 1.00 `+ 2 }  ]
-env:
-	state: Ok 
-	it = { 1.00 `+ 2 } 
-	n = 3.00 
-	A = { 1.00 `+ 2 } 
-# ----line: "do A ; "
-# --phrase: do A  ; 
-#   0  expr: do A 
-#   0  seme: ( do A ) 
-#   0 value: ( `do 'A ) 
-#   0 reduce: [Ok , 3.00  ]
-env:
-	state: Ok 
-	it = 3.00 
-	n = 3.00 
-	A = { 1.00 `+ 2 } 
-# ----line: "it = n ; print it"
-# --phrase: it = n  ; print it ; 
-#   0  expr: it = n 
-#   0  seme: ( it = n ) 
-#   0 value: ( 3.00 `= 'n ) 
-#   0 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-	n = 3.00 
-	A = { 1.00 `+ 2 } 
-#   1  expr: print it
-#   1  seme: ( print it ) 
-#   1 value: ( `print 1 ) 
-1 
-#   1 reduce: [Ok , 1  ]
-env:
-	state: Ok 
-	it = 1 
-	n = 3.00 
-	A = { 1.00 `+ 2 } 
-env:
-	state: Ok 
-	it = 1 
-	n = 3.00 
-	A = { 1.00 `+ 2 } 
+#   1 env:
+# env:
+#	state: Ok 
+#	it = { 1.00 `+ 2 } 
+#	n = 3.00 
+#	A = { 1.00 `+ 2 } 
+> input: "do A ; "
+# phrase: do A  ; 
+#   0   expr: do A 
+#   0   seme: ( do A ) 
+#   0  value: ( 'do 'A ) 
+##  reduce_items (0) entry: ( 'do 'A ) 
+##  interp_seq (0) entry: ( `do 'A ) 
+##  interp_seq resolved: ( `do 'A ) 
+? reduce_do: argument not a list
+#   0 reduce: [Fatal , null ]

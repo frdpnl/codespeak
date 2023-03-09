@@ -1,19 +1,23 @@
-# ----line: "call 3 n ; return"
-# --phrase: call 3 n  ; return ; 
-#   0  expr: call 3 n 
-#   0  seme: ( call 3N n ) 
-#   0 value: ( `call 3 'n ) 
+> input: "call 3 n ; return"
+# phrase: call 3 n  ; return ; 
+#   0   expr: call 3 n 
+#   0   seme: ( call 3N n ) 
+#   0  value: ( 'call 3 'n ) 
+##  reduce_items (0) entry: ( 'call 3 'n ) 
+##  interp_seq (0) entry: ( `call 3 'n ) 
+##  interp_seq resolved: ( `call 3 'n ) 
+##  interp_seq reduced: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
-env:
-	state: Ok 
-	n = 3 
-	it = 3 
-#   1  expr: return
-#   1  seme: ( return ) 
-#   1 value: ( `return ) 
+#   0 env:
+# env:
+#	state: Ok 
+#	n = 3 
+#	it = 3 
+#   1   expr: return
+#   1   seme: ( return ) 
+#   1  value: ( 'return ) 
+##  reduce_items (0) entry: ( 'return ) 
+##  interp_seq (0) entry: ( `return ) 
+##  interp_seq resolved: ( `return ) 
 ? reduce_return: 'return' outside function
 #   1 reduce: [Fatal , null ]
-env:
-	state: Ok 
-	n = 3 
-	it = 3 

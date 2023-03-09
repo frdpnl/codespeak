@@ -1,81 +1,112 @@
-# ----line: "define f () ; () ; end f"
-# --phrase: define f ()  ; ()  ; end f ; 
-#   0  expr: define f () 
-#   0  seme: ( define f Nil ) 
-#   0 value: ( `define 'f Nil ) 
-#   0 reduce: [Fun , `(f () 0 val)  ]
-env:
-	state: Fun 
-	it = `(f () 0 val) 
-#   1  expr: () 
-#   1  seme: ( Nil ) 
-#   1 value: ( Nil ) 
-#   1 reduce: [Fun , `(f () 1 val)  ]
-env:
-	state: Fun 
-	it = `(f () 1 val) 
-#   2  expr: end f
-#   2  seme: ( end f ) 
-#   2 value: ( `end 'f ) 
-#   2 reduce: [Ok , `(f () 1 val)  ]
-env:
-	state: Ok 
-	it = `(f () 1 val) 
-	f = `(f () 1 val) 
-# ----line: "f ()"
-# --phrase: f () ; 
-#   0  expr: f ()
-#   0  seme: ( f Nil ) 
-#   0 value: ( `(f () 1 val) Nil ) 
-- reduce_fun value: ( Nil ) 
-- reduce_fun reduce: [Ok , Nil  ]
-- reduce_fun local: env:
-	state: Ok 
-	it = Nil 
-parent env:
-	state: Ok 
-	it = `(f () 1 val) 
-	f = `(f () 1 val) 
+> input: "define f () ; () ; end f"
+# phrase: define f ()  ; ()  ; end f ; 
+#   0   expr: define f () 
+#   0   seme: ( define f Nil ) 
+#   0  value: ( 'define 'f Nil ) 
+##  reduce_items (0) entry: ( 'define 'f Nil ) 
+##  interp_seq (0) entry: ( `define 'f Nil ) 
+##  interp_seq resolved: ( `define 'f Nil ) 
+##  interp_seq reduced: ( `(f () =0= ) ) 
+#   0 reduce: [Fun , `(f () =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(f () =0= ) 
+#   1   expr: () 
+#   1   seme: ( Nil ) 
+#   1  value: ( Nil ) 
+##  reduce_items (0) entry: ( Nil ) 
+##  interp_seq (0) entry: ( Nil ) 
+#   1 reduce: [Fun , `(f () =1= ( Nil ) )  ]
+#   1 env:
+# env:
+#	state: Fun 
+#	it = `(f () =1= ( Nil ) ) 
+#   2   expr: end f
+#   2   seme: ( end f ) 
+#   2  value: ( 'end 'f ) 
+##  reduce_items (0) entry: ( 'end 'f ) 
+##  interp_seq (0) entry: ( `end 'f ) 
+##  interp_seq resolved: ( `end 'f ) 
+##  interp_seq reduced: ( `(f () =1= ( Nil ) ) ) 
+#   2 reduce: [Ok , `(f () =1= ( Nil ) )  ]
+#   2 env:
+# env:
+#	state: Ok 
+#	it = `(f () =1= ( Nil ) ) 
+#	f = `(f () =1= ( Nil ) ) 
+> input: "f ()"
+# phrase: f () ; 
+#   0   expr: f ()
+#   0   seme: ( f Nil ) 
+#   0  value: ( 'f Nil ) 
+##  reduce_items (0) entry: ( 'f Nil ) 
+##  interp_seq (0) entry: ( 'f Nil ) 
+##  interp_seq resolved: ( `(f () =1= ( Nil ) ) Nil ) 
+##  reduce_fun value: ( Nil ) 
+##  reduce_items (0) entry: ( Nil ) 
+##  interp_seq (0) entry: ( Nil ) 
+##  interp_seq resolved: ( Nil ) 
+##  reduce_fun reduce: [Ok , Nil  ]
+##  reduce_fun local:
+## env:
+##	state: Ok 
+##	it = Nil 
+## parent ## env:
+##	state: Ok 
+##	it = `(f () =1= ( Nil ) ) 
+##	f = `(f () =1= ( Nil ) ) 
+##  interp_seq reduced: ( Nil ) 
 #   0 reduce: [Ok , Nil  ]
-env:
-	state: Ok 
-	it = Nil 
-	f = `(f () 1 val) 
-# ----line: "define g () ; end g"
-# --phrase: define g ()  ; end g ; 
-#   0  expr: define g () 
-#   0  seme: ( define g Nil ) 
-#   0 value: ( `define 'g Nil ) 
-#   0 reduce: [Fun , `(g () 0 val)  ]
-env:
-	state: Fun 
-	it = `(g () 0 val) 
-	f = `(f () 1 val) 
-#   1  expr: end g
-#   1  seme: ( end g ) 
-#   1 value: ( `end 'g ) 
-#   1 reduce: [Ok , `(g () 0 val)  ]
-env:
-	state: Ok 
-	it = `(g () 0 val) 
-	f = `(f () 1 val) 
-	g = `(g () 0 val) 
-# ----line: "g ()"
-# --phrase: g () ; 
-#   0  expr: g ()
-#   0  seme: ( g Nil ) 
-#   0 value: ( `(g () 0 val) Nil ) 
-- reduce_fun local: env:
-	state: Ok 
-parent env:
-	state: Ok 
-	it = `(g () 0 val) 
-	f = `(f () 1 val) 
-	g = `(g () 0 val) 
+#   0 env:
+# env:
+#	state: Ok 
+#	it = Nil 
+#	f = `(f () =1= ( Nil ) ) 
+> input: "define g () ; end g"
+# phrase: define g ()  ; end g ; 
+#   0   expr: define g () 
+#   0   seme: ( define g Nil ) 
+#   0  value: ( 'define 'g Nil ) 
+##  reduce_items (0) entry: ( 'define 'g Nil ) 
+##  interp_seq (0) entry: ( `define 'g Nil ) 
+##  interp_seq resolved: ( `define 'g Nil ) 
+##  interp_seq reduced: ( `(g () =0= ) ) 
+#   0 reduce: [Fun , `(g () =0= )  ]
+#   0 env:
+# env:
+#	state: Fun 
+#	it = `(g () =0= ) 
+#	f = `(f () =1= ( Nil ) ) 
+#   1   expr: end g
+#   1   seme: ( end g ) 
+#   1  value: ( 'end 'g ) 
+##  reduce_items (0) entry: ( 'end 'g ) 
+##  interp_seq (0) entry: ( `end 'g ) 
+##  interp_seq resolved: ( `end 'g ) 
+##  interp_seq reduced: ( `(g () =0= ) ) 
+#   1 reduce: [Ok , `(g () =0= )  ]
+#   1 env:
+# env:
+#	state: Ok 
+#	it = `(g () =0= ) 
+#	f = `(f () =1= ( Nil ) ) 
+#	g = `(g () =0= ) 
+> input: "g ()"
+# phrase: g () ; 
+#   0   expr: g ()
+#   0   seme: ( g Nil ) 
+#   0  value: ( 'g Nil ) 
+##  reduce_items (0) entry: ( 'g Nil ) 
+##  interp_seq (0) entry: ( 'g Nil ) 
+##  interp_seq resolved: ( `(g () =0= ) Nil ) 
+##  reduce_fun local:
+## env:
+##	state: Ok 
+## parent ## env:
+##	state: Ok 
+##	it = `(g () =0= ) 
+##	f = `(f () =1= ( Nil ) ) 
+##	g = `(g () =0= ) 
 ? reduce_fun: 'it' from 'g' undefined
 #   0 reduce: [Fatal , null ]
-env:
-	state: Ok 
-	it = `(g () 0 val) 
-	f = `(f () 1 val) 
-	g = `(g () 0 val) 
