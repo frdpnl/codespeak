@@ -5,38 +5,48 @@
 #   0  value: ( 'def 'f { 'a } ) 
 ##  reduce_items (0) entry: ( 'def 'f { 'a } ) 
 ##  reduce_items (0) entry: { 'a } 
+##  reduce_items (0) exit: from { 'a } 
+##  reduce_items (0) ...   to { 'a } 
+##  reduce_items (0) exit: from ( 'def 'f { 'a } ) 
+##  reduce_items (0) ...   to ( `def 'f { 'a } ) 
 ##  interp_seq (0) entry: ( `def 'f { 'a } ) 
 ##  interp_seq resolved: ( `def 'f { 'a } ) 
 ##  reduce_items (0) entry: { 'a } 
-##  interp_seq reduced: ( `(f ('a ) =0= ) ) 
-#   0 reduce: [Fun , `(f ('a ) =0= )  ]
+##  reduce_items (0) exit: from { 'a } 
+##  reduce_items (0) ...   to { 'a } 
+##  interp_seq reduced: ( `(f ('a ) x0 = ) ) 
+#   0 reduce: [Fun , `(f ('a ) x0 = )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =0= ) 
+#	it = `(f ('a ) x0 = ) 
 #   1   expr: a + 2 
 #   1   seme: ( a + 2N ) 
 #   1  value: ( 'a '+ 2 ) 
 ##  reduce_items (0) entry: ( 'a '+ 2 ) 
+##  reduce_items (0) exit: from ( 'a '+ 2 ) 
+##  reduce_items (0) ...   to ( 'a `+ 2 ) 
 ##  interp_seq (0) entry: ( 'a `+ 2 ) 
-#   1 reduce: [Fun , `(f ('a ) =1= ( 'a `+ 2 ) )  ]
+#   1 reduce: [Fun , `(f ('a ) x1 = ( 'a `+ 2 ) )  ]
 #   1 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =1= ( 'a `+ 2 ) ) 
+#	it = `(f ('a ) x1 = ( 'a `+ 2 ) ) 
 #   2   expr: end f
 #   2   seme: ( end f ) 
 #   2  value: ( 'end 'f ) 
 ##  reduce_items (0) entry: ( 'end 'f ) 
+##  reduce_items (0) exit: from ( 'end 'f ) 
+##  reduce_items (0) ...   to ( `end 'f ) 
 ##  interp_seq (0) entry: ( `end 'f ) 
 ##  interp_seq resolved: ( `end 'f ) 
-##  interp_seq reduced: ( `(f ('a ) =1= ( 'a `+ 2 ) ) ) 
-#   2 reduce: [Ok , `(f ('a ) =1= ( 'a `+ 2 ) )  ]
+##  interp_seq reduced: ( `(f ('a ) x1 = ( 'a `+ 2 ) ) ) 
+#   2 reduce: [Ok , `(f ('a ) x1 = ( 'a `+ 2 ) )  ]
 #   2 env:
 # env:
 #	state: Ok 
-#	it = `(f ('a ) =1= ( 'a `+ 2 ) ) 
-#	f = `(f ('a ) =1= ( 'a `+ 2 ) ) 
+#	it = `(f ('a ) x1 = ( 'a `+ 2 ) ) 
+#	f = `(f ('a ) x1 = ( 'a `+ 2 ) ) 
 > input: "(4,) f"
 # phrase: (4,) f ; 
 #   0   expr: (4,) f
@@ -44,8 +54,12 @@
 #   0  value: ( { 4 } 'f ) 
 ##  reduce_items (0) entry: ( { 4 } 'f ) 
 ##  reduce_items (0) entry: { 4 } 
+##  reduce_items (0) exit: from { 4 } 
+##  reduce_items (0) ...   to { 4 } 
+##  reduce_items (0) exit: from ( { 4 } 'f ) 
+##  reduce_items (0) ...   to ( { 4 } 'f ) 
 ##  interp_seq (0) entry: ( { 4 } 'f ) 
-##  interp_seq resolved: ( { 4 } `(f ('a ) =1= ( 'a `+ 2 ) ) ) 
+##  interp_seq resolved: ( { 4 } `(f ('a ) x1 = ( 'a `+ 2 ) ) ) 
 ? reduce_prefix1_arg: symbol not prefixed to one argument
 ? reduce_fun: invalid argument to `f
 #   0 reduce: [Fatal , null ]

@@ -4,6 +4,8 @@
 #   0   seme: ( end do ) 
 #   0  value: ( 'end 'do ) 
 ##  reduce_items (0) entry: ( 'end 'do ) 
+##  reduce_items (0) exit: from ( 'end 'do ) 
+##  reduce_items (0) ...   to ( `end `do ) 
 ##  interp_seq (0) entry: ( `end `do ) 
 ##  interp_seq resolved: ( `end `do ) 
 ? reduce_end: 'end' with wrong operator argument

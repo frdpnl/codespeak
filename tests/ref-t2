@@ -4,6 +4,8 @@
 #   0   seme: ( 3N ) 
 #   0  value: ( 3 ) 
 ##  reduce_items (0) entry: ( 3 ) 
+##  reduce_items (0) exit: from ( 3 ) 
+##  reduce_items (0) ...   to ( 3 ) 
 ##  interp_seq (0) entry: ( 3 ) 
 ##  interp_seq resolved: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
@@ -15,6 +17,8 @@
 #   1   seme: ( call it p ) 
 #   1  value: ( 'call 'it 'p ) 
 ##  reduce_items (0) entry: ( 'call 'it 'p ) 
+##  reduce_items (0) exit: from ( 'call 'it 'p ) 
+##  reduce_items (0) ...   to ( `call 'it 'p ) 
 ##  interp_seq (0) entry: ( `call 'it 'p ) 
 ##  interp_seq resolved: ( `call 3 'p ) 
 ##  interp_seq reduced: ( 3 ) 
@@ -28,6 +32,8 @@
 #   2   seme: ( call 4N p ) 
 #   2  value: ( 'call 4 'p ) 
 ##  reduce_items (0) entry: ( 'call 4 'p ) 
+##  reduce_items (0) exit: from ( 'call 4 'p ) 
+##  reduce_items (0) ...   to ( `call 4 'p ) 
 ##  interp_seq (0) entry: ( `call 4 'p ) 
 ##  interp_seq resolved: ( `call 4 'p ) 
 ##  interp_seq reduced: ( 4 ) 
@@ -41,6 +47,8 @@
 #   3   seme: ( p ) 
 #   3  value: ( 'p ) 
 ##  reduce_items (0) entry: ( 'p ) 
+##  reduce_items (0) exit: from ( 'p ) 
+##  reduce_items (0) ...   to ( 'p ) 
 ##  interp_seq (0) entry: ( 'p ) 
 ##  interp_seq resolved: ( 'p ) 
 #   3 reduce: [Ok , 'p  ]
@@ -53,6 +61,8 @@
 #   4   seme: ( print it ) 
 #   4  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print 'p ) 
 4 
@@ -67,6 +77,8 @@
 #   5   seme: ( solve it ) 
 #   5  value: ( 'solve 'it ) 
 ##  reduce_items (0) entry: ( 'solve 'it ) 
+##  reduce_items (0) exit: from ( 'solve 'it ) 
+##  reduce_items (0) ...   to ( `solve 'it ) 
 ##  interp_seq (0) entry: ( `solve 'it ) 
 ##  interp_seq resolved: ( `solve 4 ) 
 ##  interp_seq reduced: ( 4 ) 
@@ -80,6 +92,8 @@
 #   6   seme: ( print it ) 
 #   6  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print 4 ) 
 4 
@@ -90,7 +104,7 @@
 #	state: Ok 
 #	it = 4 
 #	p = 4 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 4 

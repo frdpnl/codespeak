@@ -5,19 +5,27 @@
 #   0  value: ( 'def 'f { 'a 'b } ) 
 ##  reduce_items (0) entry: ( 'def 'f { 'a 'b } ) 
 ##  reduce_items (0) entry: { 'a 'b } 
+##  reduce_items (0) exit: from { 'a 'b } 
+##  reduce_items (0) ...   to { 'a 'b } 
+##  reduce_items (0) exit: from ( 'def 'f { 'a 'b } ) 
+##  reduce_items (0) ...   to ( `def 'f { 'a 'b } ) 
 ##  interp_seq (0) entry: ( `def 'f { 'a 'b } ) 
 ##  interp_seq resolved: ( `def 'f { 'a 'b } ) 
 ##  reduce_items (0) entry: { 'a 'b } 
-##  interp_seq reduced: ( `(f ('a 'b ) =0= ) ) 
-#   0 reduce: [Fun , `(f ('a 'b ) =0= )  ]
+##  reduce_items (0) exit: from { 'a 'b } 
+##  reduce_items (0) ...   to { 'a 'b } 
+##  interp_seq reduced: ( `(f ('a 'b ) x0 = ) ) 
+#   0 reduce: [Fun , `(f ('a 'b ) x0 = )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a 'b ) =0= ) 
+#	it = `(f ('a 'b ) x0 = ) 
 #   1   expr: end 3
 #   1   seme: ( end 3N ) 
 #   1  value: ( 'end 3 ) 
 ##  reduce_items (0) entry: ( 'end 3 ) 
+##  reduce_items (0) exit: from ( 'end 3 ) 
+##  reduce_items (0) ...   to ( `end 3 ) 
 ##  interp_seq (0) entry: ( `end 3 ) 
 ##  interp_seq resolved: ( `end 3 ) 
 ? reduce_end: 'end' with wrong argument type

@@ -4,6 +4,8 @@
 #   0   seme: { call 23N n } 
 #   0  value: { 'call 23 'n } 
 ##  reduce_items (0) entry: { 'call 23 'n } 
+##  reduce_items (0) exit: from { 'call 23 'n } 
+##  reduce_items (0) ...   to { `call 23 'n } 
 #   0 reduce: [Ok , { `call 23 'n }  ]
 #   0 env:
 # env:
@@ -13,10 +15,16 @@
 #   1   seme: ( do it ) 
 #   1  value: ( 'do 'it ) 
 ##  reduce_items (0) entry: ( 'do 'it ) 
+##  reduce_items (0) exit: from ( 'do 'it ) 
+##  reduce_items (0) ...   to ( `do 'it ) 
 ##  interp_seq (0) entry: ( `do 'it ) 
 ##  interp_seq resolved: ( `do { `call 23 'n } ) 
 ##  reduce_items (0) entry: { `call 23 'n } 
+##  reduce_items (0) exit: from { `call 23 'n } 
+##  reduce_items (0) ...   to { `call 23 'n } 
 ##  reduce_items (0) entry: ( `call 23 'n ) 
+##  reduce_items (0) exit: from ( `call 23 'n ) 
+##  reduce_items (0) ...   to ( `call 23 'n ) 
 ##  interp_seq (0) entry: ( `call 23 'n ) 
 ##  interp_seq resolved: ( `call 23 'n ) 
 ##  interp_seq reduced: ( 23 ) 
@@ -27,7 +35,7 @@
 #	state: Ok 
 #	it = 23 
 #	n = 23 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 23 

@@ -4,6 +4,8 @@
 #   0   seme: ( if 2N > 1.00R ) 
 #   0  value: ( 'if 2 '> 1.00 ) 
 ##  reduce_items (0) entry: ( 'if 2 '> 1.00 ) 
+##  reduce_items (0) exit: from ( 'if 2 '> 1.00 ) 
+##  reduce_items (0) ...   to ( `if 2 `> 1.00 ) 
 ##  interp_seq (0) entry: ( `if 2 `> 1.00 ) 
 ##  interp_seq resolved: ( `if 2 `> 1.00 ) 
 ##  interp_seq reduced: ( `if 1 ) 
@@ -17,6 +19,8 @@
 #   1   seme: ( print correct ) 
 #   1  value: ( 'print 'correct ) 
 ##  reduce_items (0) entry: ( 'print 'correct ) 
+##  reduce_items (0) exit: from ( 'print 'correct ) 
+##  reduce_items (0) ...   to ( `print 'correct ) 
 ##  interp_seq (0) entry: ( `print 'correct ) 
 ##  interp_seq resolved: ( `print 'correct ) 
 ? interp: unknown symbol 'correct'

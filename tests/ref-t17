@@ -5,32 +5,40 @@
 #   0  value: ( 'define 'inc { 'a } ) 
 ##  reduce_items (0) entry: ( 'define 'inc { 'a } ) 
 ##  reduce_items (0) entry: { 'a } 
+##  reduce_items (0) exit: from { 'a } 
+##  reduce_items (0) ...   to { 'a } 
+##  reduce_items (0) exit: from ( 'define 'inc { 'a } ) 
+##  reduce_items (0) ...   to ( `define 'inc { 'a } ) 
 ##  interp_seq (0) entry: ( `define 'inc { 'a } ) 
 ##  interp_seq resolved: ( `define 'inc { 'a } ) 
 ##  reduce_items (0) entry: { 'a } 
-##  interp_seq reduced: ( `(inc ('a ) =0= ) ) 
-#   0 reduce: [Fun , `(inc ('a ) =0= )  ]
+##  reduce_items (0) exit: from { 'a } 
+##  reduce_items (0) ...   to { 'a } 
+##  interp_seq reduced: ( `(inc ('a ) x0 = ) ) 
+#   0 reduce: [Fun , `(inc ('a ) x0 = )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(inc ('a ) =0= ) 
+#	it = `(inc ('a ) x0 = ) 
 > input: "end inc"
 # phrase: end inc ; 
 #   0   expr: end inc
 #   0   seme: ( end inc ) 
 #   0  value: ( 'end 'inc ) 
 ##  reduce_items (0) entry: ( 'end 'inc ) 
+##  reduce_items (0) exit: from ( 'end 'inc ) 
+##  reduce_items (0) ...   to ( `end 'inc ) 
 ##  interp_seq (0) entry: ( `end 'inc ) 
 ##  interp_seq resolved: ( `end 'inc ) 
-##  interp_seq reduced: ( `(inc ('a ) =0= ) ) 
-#   0 reduce: [Ok , `(inc ('a ) =0= )  ]
+##  interp_seq reduced: ( `(inc ('a ) x0 = ) ) 
+#   0 reduce: [Ok , `(inc ('a ) x0 = )  ]
 #   0 env:
 # env:
 #	state: Ok 
-#	it = `(inc ('a ) =0= ) 
-#	inc = `(inc ('a ) =0= ) 
-> main: exit
+#	it = `(inc ('a ) x0 = ) 
+#	inc = `(inc ('a ) x0 = ) 
+> exit
 > env:
 >	state: Ok 
->	it = `(inc ('a ) =0= ) 
->	inc = `(inc ('a ) =0= ) 
+>	it = `(inc ('a ) x0 = ) 
+>	inc = `(inc ('a ) x0 = ) 

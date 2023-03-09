@@ -4,6 +4,8 @@
 #   0   seme: ( 1N = 0N ) 
 #   0  value: ( 1 '= 0 ) 
 ##  reduce_items (0) entry: ( 1 '= 0 ) 
+##  reduce_items (0) exit: from ( 1 '= 0 ) 
+##  reduce_items (0) ...   to ( 1 `= 0 ) 
 ##  interp_seq (0) entry: ( 1 `= 0 ) 
 ##  interp_seq resolved: ( 1 `= 0 ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -16,6 +18,8 @@
 #   1   seme: ( true? ) 
 #   1  value: ( 'true? ) 
 ##  reduce_items (0) entry: ( 'true? ) 
+##  reduce_items (0) exit: from ( 'true? ) 
+##  reduce_items (0) ...   to ( `true? ) 
 ##  interp_seq (0) entry: ( `true? ) 
 ##  interp_seq resolved: ( `true? ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -30,6 +34,8 @@
 #   0   seme: ( -11N > -1.00R ) 
 #   0  value: ( -11 '> -1.00 ) 
 ##  reduce_items (0) entry: ( -11 '> -1.00 ) 
+##  reduce_items (0) exit: from ( -11 '> -1.00 ) 
+##  reduce_items (0) ...   to ( -11 `> -1.00 ) 
 ##  interp_seq (0) entry: ( -11 `> -1.00 ) 
 ##  interp_seq resolved: ( -11 `> -1.00 ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -42,6 +48,8 @@
 #   1   seme: ( true? > false? ) 
 #   1  value: ( 'true? '> 'false? ) 
 ##  reduce_items (0) entry: ( 'true? '> 'false? ) 
+##  reduce_items (0) exit: from ( 'true? '> 'false? ) 
+##  reduce_items (0) ...   to ( `true? `> `false? ) 
 ##  interp_seq (0) entry: ( `true? `> `false? ) 
 ##  interp_seq resolved: ( `true? `> `false? ) 
 ##  interp_seq reduced: ( 0 `> `false? ) 
@@ -52,7 +60,7 @@
 # env:
 #	state: Ok 
 #	it = 0 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 0 

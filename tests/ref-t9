@@ -4,6 +4,8 @@
 #   0   seme: ( * ) 
 #   0  value: ( '* ) 
 ##  reduce_items (0) entry: ( '* ) 
+##  reduce_items (0) exit: from ( '* ) 
+##  reduce_items (0) ...   to ( `* ) 
 ##  interp_seq (0) entry: ( `* ) 
 ##  interp_seq resolved: ( `* ) 
 #   0 reduce: [Ok , `*  ]
@@ -15,6 +17,8 @@
 #   1   seme: ( call it op1 ) 
 #   1  value: ( 'call 'it 'op1 ) 
 ##  reduce_items (0) entry: ( 'call 'it 'op1 ) 
+##  reduce_items (0) exit: from ( 'call 'it 'op1 ) 
+##  reduce_items (0) ...   to ( `call 'it 'op1 ) 
 ##  interp_seq (0) entry: ( `call 'it 'op1 ) 
 ##  interp_seq resolved: ( `call `* 'op1 ) 
 ##  interp_seq reduced: ( `* ) 
@@ -28,6 +32,8 @@
 #   2   seme: ( call op1 op2 ) 
 #   2  value: ( 'call 'op1 'op2 ) 
 ##  reduce_items (0) entry: ( 'call 'op1 'op2 ) 
+##  reduce_items (0) exit: from ( 'call 'op1 'op2 ) 
+##  reduce_items (0) ...   to ( `call 'op1 'op2 ) 
 ##  interp_seq (0) entry: ( `call 'op1 'op2 ) 
 ##  interp_seq resolved: ( `call `* 'op2 ) 
 ##  interp_seq reduced: ( `* ) 
@@ -42,6 +48,8 @@
 #   3   seme: ( call op2 op3 ) 
 #   3  value: ( 'call 'op2 'op3 ) 
 ##  reduce_items (0) entry: ( 'call 'op2 'op3 ) 
+##  reduce_items (0) exit: from ( 'call 'op2 'op3 ) 
+##  reduce_items (0) ...   to ( `call 'op2 'op3 ) 
 ##  interp_seq (0) entry: ( `call 'op2 'op3 ) 
 ##  interp_seq resolved: ( `call `* 'op3 ) 
 ##  interp_seq reduced: ( `* ) 
@@ -59,6 +67,8 @@
 #   0   seme: { 2N op3 4.00R } 
 #   0  value: { 2 'op3 4.00 } 
 ##  reduce_items (0) entry: { 2 'op3 4.00 } 
+##  reduce_items (0) exit: from { 2 'op3 4.00 } 
+##  reduce_items (0) ...   to { 2 'op3 4.00 } 
 #   0 reduce: [Ok , { 2 'op3 4.00 }  ]
 #   0 env:
 # env:
@@ -71,10 +81,16 @@
 #   1   seme: ( do it ) 
 #   1  value: ( 'do 'it ) 
 ##  reduce_items (0) entry: ( 'do 'it ) 
+##  reduce_items (0) exit: from ( 'do 'it ) 
+##  reduce_items (0) ...   to ( `do 'it ) 
 ##  interp_seq (0) entry: ( `do 'it ) 
 ##  interp_seq resolved: ( `do { 2 'op3 4.00 } ) 
 ##  reduce_items (0) entry: { 2 'op3 4.00 } 
+##  reduce_items (0) exit: from { 2 'op3 4.00 } 
+##  reduce_items (0) ...   to { 2 'op3 4.00 } 
 ##  reduce_items (0) entry: ( 2 'op3 4.00 ) 
+##  reduce_items (0) exit: from ( 2 'op3 4.00 ) 
+##  reduce_items (0) ...   to ( 2 'op3 4.00 ) 
 ##  interp_seq (0) entry: ( 2 'op3 4.00 ) 
 ##  interp_seq resolved: ( 2 `* 4.00 ) 
 ##  interp_seq reduced: ( 8.00 ) 
@@ -91,6 +107,8 @@
 #   2   seme: ( print it ) 
 #   2  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print 8.00 ) 
 8.00 
@@ -103,7 +121,7 @@
 #	op1 = `* 
 #	op2 = `* 
 #	op3 = `* 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 8.00 

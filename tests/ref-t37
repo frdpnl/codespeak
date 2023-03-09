@@ -4,6 +4,8 @@
 #   0   seme: { if not 2N > 1N } 
 #   0  value: { 'if 'not 2 '> 1 } 
 ##  reduce_items (0) entry: { 'if 'not 2 '> 1 } 
+##  reduce_items (0) exit: from { 'if 'not 2 '> 1 } 
+##  reduce_items (0) ...   to { `if `not 2 `> 1 } 
 #   0 reduce: [Ok , { `if `not 2 `> 1 }  ]
 #   0 env:
 # env:
@@ -15,10 +17,16 @@
 #   0   seme: ( do it ) 
 #   0  value: ( 'do 'it ) 
 ##  reduce_items (0) entry: ( 'do 'it ) 
+##  reduce_items (0) exit: from ( 'do 'it ) 
+##  reduce_items (0) ...   to ( `do 'it ) 
 ##  interp_seq (0) entry: ( `do 'it ) 
 ##  interp_seq resolved: ( `do { `if `not 2 `> 1 } ) 
 ##  reduce_items (0) entry: { `if `not 2 `> 1 } 
+##  reduce_items (0) exit: from { `if `not 2 `> 1 } 
+##  reduce_items (0) ...   to { `if `not 2 `> 1 } 
 ##  reduce_items (0) entry: ( `if `not 2 `> 1 ) 
+##  reduce_items (0) exit: from ( `if `not 2 `> 1 ) 
+##  reduce_items (0) ...   to ( `if `not 2 `> 1 ) 
 ##  interp_seq (0) entry: ( `if `not 2 `> 1 ) 
 ##  interp_seq resolved: ( `if `not 2 `> 1 ) 
 ##  interp_seq reduced: ( `if `not 1 ) 
@@ -36,6 +44,8 @@
 #   0   seme: ( print really? ) 
 #   0  value: ( 'print 'really? ) 
 ##  reduce_items (0) entry: ( 'print 'really? ) 
+##  reduce_items (0) exit: from ( 'print 'really? ) 
+##  reduce_items (0) ...   to ( `print 'really? ) 
 ##  interp_seq (0) entry: ( `print 'really? ) 
 #   0 reduce: [Skip , 0  ]
 #   0 env:
@@ -48,6 +58,8 @@
 #   0   seme: ( list end if ) 
 #   0  value: ( 'list 'end 'if ) 
 ##  reduce_items (0) entry: ( 'list 'end 'if ) 
+##  reduce_items (0) exit: from ( 'list 'end 'if ) 
+##  reduce_items (0) ...   to ( `list `end `if ) 
 ##  interp_seq (0) entry: ( `list `end `if ) 
 #   0 reduce: [Skip , 0  ]
 #   0 env:
@@ -60,6 +72,8 @@
 #   0   seme: ( do it ) 
 #   0  value: ( 'do 'it ) 
 ##  reduce_items (0) entry: ( 'do 'it ) 
+##  reduce_items (0) exit: from ( 'do 'it ) 
+##  reduce_items (0) ...   to ( `do 'it ) 
 ##  interp_seq (0) entry: ( `do 'it ) 
 #   0 reduce: [Skip , 0  ]
 #   0 env:
@@ -72,6 +86,8 @@
 #   0   seme: ( print really?! ) 
 #   0  value: ( 'print 'really?! ) 
 ##  reduce_items (0) entry: ( 'print 'really?! ) 
+##  reduce_items (0) exit: from ( 'print 'really?! ) 
+##  reduce_items (0) ...   to ( `print 'really?! ) 
 ##  interp_seq (0) entry: ( `print 'really?! ) 
 #   0 reduce: [Skip , 0  ]
 #   0 env:
@@ -84,6 +100,8 @@
 #   0   seme: ( end if ) 
 #   0  value: ( 'end 'if ) 
 ##  reduce_items (0) entry: ( 'end 'if ) 
+##  reduce_items (0) exit: from ( 'end 'if ) 
+##  reduce_items (0) ...   to ( `end `if ) 
 ##  interp_seq (0) entry: ( `end `if ) 
 ##  interp_seq resolved: ( `end `if ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -98,6 +116,8 @@
 #   0   seme: ( finally ) 
 #   0  value: ( 'finally ) 
 ##  reduce_items (0) entry: ( 'finally ) 
+##  reduce_items (0) exit: from ( 'finally ) 
+##  reduce_items (0) ...   to ( 'finally ) 
 ##  interp_seq (0) entry: ( 'finally ) 
 ##  interp_seq resolved: ( 'finally ) 
 #   0 reduce: [Ok , 'finally  ]
@@ -105,7 +125,7 @@
 # env:
 #	state: Ok 
 #	it = 'finally 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 'finally 

@@ -4,6 +4,8 @@
 #   0   seme: ( call 3N n ) 
 #   0  value: ( 'call 3 'n ) 
 ##  reduce_items (0) entry: ( 'call 3 'n ) 
+##  reduce_items (0) exit: from ( 'call 3 'n ) 
+##  reduce_items (0) ...   to ( `call 3 'n ) 
 ##  interp_seq (0) entry: ( `call 3 'n ) 
 ##  interp_seq resolved: ( `call 3 'n ) 
 ##  interp_seq reduced: ( 3 ) 
@@ -19,6 +21,8 @@
 #   0   seme: ( end f ) 
 #   0  value: ( 'end 'f ) 
 ##  reduce_items (0) entry: ( 'end 'f ) 
+##  reduce_items (0) exit: from ( 'end 'f ) 
+##  reduce_items (0) ...   to ( `end 'f ) 
 ##  interp_seq (0) entry: ( `end 'f ) 
 ##  interp_seq resolved: ( `end 'f ) 
 ? reduce_end: 'end' outside function definition

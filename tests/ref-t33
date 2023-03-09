@@ -5,66 +5,80 @@
 #   0  value: ( 'define 'f { 'a 'b } ) 
 ##  reduce_items (0) entry: ( 'define 'f { 'a 'b } ) 
 ##  reduce_items (0) entry: { 'a 'b } 
+##  reduce_items (0) exit: from { 'a 'b } 
+##  reduce_items (0) ...   to { 'a 'b } 
+##  reduce_items (0) exit: from ( 'define 'f { 'a 'b } ) 
+##  reduce_items (0) ...   to ( `define 'f { 'a 'b } ) 
 ##  interp_seq (0) entry: ( `define 'f { 'a 'b } ) 
 ##  interp_seq resolved: ( `define 'f { 'a 'b } ) 
 ##  reduce_items (0) entry: { 'a 'b } 
-##  interp_seq reduced: ( `(f ('a 'b ) =0= ) ) 
-#   0 reduce: [Fun , `(f ('a 'b ) =0= )  ]
+##  reduce_items (0) exit: from { 'a 'b } 
+##  reduce_items (0) ...   to { 'a 'b } 
+##  interp_seq reduced: ( `(f ('a 'b ) x0 = ) ) 
+#   0 reduce: [Fun , `(f ('a 'b ) x0 = )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a 'b ) =0= ) 
+#	it = `(f ('a 'b ) x0 = ) 
 > input: "	1"
 # phrase: 1 ; 
 #   0   expr: 1
 #   0   seme: ( 1N ) 
 #   0  value: ( 1 ) 
 ##  reduce_items (0) entry: ( 1 ) 
+##  reduce_items (0) exit: from ( 1 ) 
+##  reduce_items (0) ...   to ( 1 ) 
 ##  interp_seq (0) entry: ( 1 ) 
-#   0 reduce: [Fun , `(f ('a 'b ) =1= ( 1 ) )  ]
+#   0 reduce: [Fun , `(f ('a 'b ) x1 = ( 1 ) )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a 'b ) =1= ( 1 ) ) 
+#	it = `(f ('a 'b ) x1 = ( 1 ) ) 
 > input: "	2"
 # phrase: 2 ; 
 #   0   expr: 2
 #   0   seme: ( 2N ) 
 #   0  value: ( 2 ) 
 ##  reduce_items (0) entry: ( 2 ) 
+##  reduce_items (0) exit: from ( 2 ) 
+##  reduce_items (0) ...   to ( 2 ) 
 ##  interp_seq (0) entry: ( 2 ) 
-#   0 reduce: [Fun , `(f ('a 'b ) =2= ( 1 ) ( 2 ) )  ]
+#   0 reduce: [Fun , `(f ('a 'b ) x2 = ( 1 ) ( 2 ) )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a 'b ) =2= ( 1 ) ( 2 ) ) 
+#	it = `(f ('a 'b ) x2 = ( 1 ) ( 2 ) ) 
 > input: "	3"
 # phrase: 3 ; 
 #   0   expr: 3
 #   0   seme: ( 3N ) 
 #   0  value: ( 3 ) 
 ##  reduce_items (0) entry: ( 3 ) 
+##  reduce_items (0) exit: from ( 3 ) 
+##  reduce_items (0) ...   to ( 3 ) 
 ##  interp_seq (0) entry: ( 3 ) 
-#   0 reduce: [Fun , `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) )  ]
+#   0 reduce: [Fun , `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
+#	it = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 
 > input: "end f"
 # phrase: end f ; 
 #   0   expr: end f
 #   0   seme: ( end f ) 
 #   0  value: ( 'end 'f ) 
 ##  reduce_items (0) entry: ( 'end 'f ) 
+##  reduce_items (0) exit: from ( 'end 'f ) 
+##  reduce_items (0) ...   to ( `end 'f ) 
 ##  interp_seq (0) entry: ( `end 'f ) 
 ##  interp_seq resolved: ( `end 'f ) 
-##  interp_seq reduced: ( `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) ) 
-#   0 reduce: [Ok , `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) )  ]
+##  interp_seq reduced: ( `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) ) 
+#   0 reduce: [Ok , `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) )  ]
 #   0 env:
 # env:
 #	state: Ok 
-#	it = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
-#	f = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
+#	it = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 
+#	f = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 
 > input: "f (1, 2) ; it = 3"
 # phrase: f (1, 2)  ; it = 3 ; 
 #   0   expr: f (1, 2) 
@@ -72,21 +86,33 @@
 #   0  value: ( 'f { 1 2 } ) 
 ##  reduce_items (0) entry: ( 'f { 1 2 } ) 
 ##  reduce_items (0) entry: { 1 2 } 
+##  reduce_items (0) exit: from { 1 2 } 
+##  reduce_items (0) ...   to { 1 2 } 
+##  reduce_items (0) exit: from ( 'f { 1 2 } ) 
+##  reduce_items (0) ...   to ( 'f { 1 2 } ) 
 ##  interp_seq (0) entry: ( 'f { 1 2 } ) 
-##  interp_seq resolved: ( `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) { 1 2 } ) 
+##  interp_seq resolved: ( `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) { 1 2 } ) 
 ##  reduce_items (1) entry: { 1 2 } 
+##  reduce_items (1) exit: from { 1 2 } 
+##  reduce_items (1) ...   to { 1 2 } 
 ##  reduce_fun value: ( 1 ) 
 ##  reduce_items (0) entry: ( 1 ) 
+##  reduce_items (0) exit: from ( 1 ) 
+##  reduce_items (0) ...   to ( 1 ) 
 ##  interp_seq (0) entry: ( 1 ) 
 ##  interp_seq resolved: ( 1 ) 
 ##  reduce_fun reduce: [Ok , 1  ]
 ##  reduce_fun value: ( 2 ) 
 ##  reduce_items (0) entry: ( 2 ) 
+##  reduce_items (0) exit: from ( 2 ) 
+##  reduce_items (0) ...   to ( 2 ) 
 ##  interp_seq (0) entry: ( 2 ) 
 ##  interp_seq resolved: ( 2 ) 
 ##  reduce_fun reduce: [Ok , 2  ]
 ##  reduce_fun value: ( 3 ) 
 ##  reduce_items (0) entry: ( 3 ) 
+##  reduce_items (0) exit: from ( 3 ) 
+##  reduce_items (0) ...   to ( 3 ) 
 ##  interp_seq (0) entry: ( 3 ) 
 ##  interp_seq resolved: ( 3 ) 
 ##  reduce_fun reduce: [Ok , 3  ]
@@ -98,19 +124,21 @@
 ##	it = 3 
 ## parent ## env:
 ##	state: Ok 
-##	it = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
-##	f = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
+##	it = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 
+##	f = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 
 ##  interp_seq reduced: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
 #   0 env:
 # env:
 #	state: Ok 
 #	it = 3 
-#	f = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
+#	f = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 
 #   1   expr: it = 3
 #   1   seme: ( it = 3N ) 
 #   1  value: ( 'it '= 3 ) 
 ##  reduce_items (0) entry: ( 'it '= 3 ) 
+##  reduce_items (0) exit: from ( 'it '= 3 ) 
+##  reduce_items (0) ...   to ( 'it `= 3 ) 
 ##  interp_seq (0) entry: ( 'it `= 3 ) 
 ##  interp_seq resolved: ( 3 `= 3 ) 
 ##  interp_seq reduced: ( 1 ) 
@@ -119,9 +147,9 @@
 # env:
 #	state: Ok 
 #	it = 1 
-#	f = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
-> main: exit
+#	f = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 
+> exit
 > env:
 >	state: Ok 
 >	it = 1 
->	f = `(f ('a 'b ) =3= ( 1 ) ( 2 ) ( 3 ) ) 
+>	f = `(f ('a 'b ) x3 = ( 1 ) ( 2 ) ( 3 ) ) 

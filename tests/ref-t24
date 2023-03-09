@@ -4,6 +4,8 @@
 #   0   seme: ( 3N ) 
 #   0  value: ( 3 ) 
 ##  reduce_items (0) entry: ( 3 ) 
+##  reduce_items (0) exit: from ( 3 ) 
+##  reduce_items (0) ...   to ( 3 ) 
 ##  interp_seq (0) entry: ( 3 ) 
 ##  interp_seq resolved: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
@@ -15,6 +17,8 @@
 #   1   seme: ( call it a ) 
 #   1  value: ( 'call 'it 'a ) 
 ##  reduce_items (0) entry: ( 'call 'it 'a ) 
+##  reduce_items (0) exit: from ( 'call 'it 'a ) 
+##  reduce_items (0) ...   to ( `call 'it 'a ) 
 ##  interp_seq (0) entry: ( `call 'it 'a ) 
 ##  interp_seq resolved: ( `call 3 'a ) 
 ##  interp_seq reduced: ( 3 ) 
@@ -30,6 +34,8 @@
 #   0   seme: ( 4N ) 
 #   0  value: ( 4 ) 
 ##  reduce_items (0) entry: ( 4 ) 
+##  reduce_items (0) exit: from ( 4 ) 
+##  reduce_items (0) ...   to ( 4 ) 
 ##  interp_seq (0) entry: ( 4 ) 
 ##  interp_seq resolved: ( 4 ) 
 #   0 reduce: [Ok , 4  ]
@@ -42,6 +48,8 @@
 #   1   seme: ( call it b ) 
 #   1  value: ( 'call 'it 'b ) 
 ##  reduce_items (0) entry: ( 'call 'it 'b ) 
+##  reduce_items (0) exit: from ( 'call 'it 'b ) 
+##  reduce_items (0) ...   to ( `call 'it 'b ) 
 ##  interp_seq (0) entry: ( `call 'it 'b ) 
 ##  interp_seq resolved: ( `call 4 'b ) 
 ##  interp_seq reduced: ( 4 ) 
@@ -58,6 +66,8 @@
 #   0   seme: ( if a > b ) 
 #   0  value: ( 'if 'a '> 'b ) 
 ##  reduce_items (0) entry: ( 'if 'a '> 'b ) 
+##  reduce_items (0) exit: from ( 'if 'a '> 'b ) 
+##  reduce_items (0) ...   to ( `if 'a `> 'b ) 
 ##  interp_seq (0) entry: ( `if 'a `> 'b ) 
 ##  interp_seq resolved: ( `if 'a `> 'b ) 
 ##  interp_seq reduced: ( `if 0 ) 
@@ -75,6 +85,8 @@
 #   0   seme: ( a - b ) 
 #   0  value: ( 'a '- 'b ) 
 ##  reduce_items (0) entry: ( 'a '- 'b ) 
+##  reduce_items (0) exit: from ( 'a '- 'b ) 
+##  reduce_items (0) ...   to ( 'a `- 'b ) 
 ##  interp_seq (0) entry: ( 'a `- 'b ) 
 #   0 reduce: [Skip , 0  ]
 #   0 env:
@@ -87,6 +99,8 @@
 #   1   seme: ( print it ) 
 #   1  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 #   1 reduce: [Skip , 0  ]
 #   1 env:
@@ -101,6 +115,8 @@
 #   0   seme: ( end if ) 
 #   0  value: ( 'end 'if ) 
 ##  reduce_items (0) entry: ( 'end 'if ) 
+##  reduce_items (0) exit: from ( 'end 'if ) 
+##  reduce_items (0) ...   to ( `end `if ) 
 ##  interp_seq (0) entry: ( `end `if ) 
 ##  interp_seq resolved: ( `end `if ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -117,6 +133,8 @@
 #   0   seme: ( print it ) 
 #   0  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print 0 ) 
 0 
@@ -134,6 +152,8 @@
 #   0   seme: ( if false? ) 
 #   0  value: ( 'if 'false? ) 
 ##  reduce_items (0) entry: ( 'if 'false? ) 
+##  reduce_items (0) exit: from ( 'if 'false? ) 
+##  reduce_items (0) ...   to ( `if `false? ) 
 ##  interp_seq (0) entry: ( `if `false? ) 
 ##  interp_seq resolved: ( `if `false? ) 
 ##  interp_seq reduced: ( `if 1 ) 
@@ -149,6 +169,8 @@
 #   1   seme: ( print it ) 
 #   1  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print 1 ) 
 1 
@@ -164,6 +186,8 @@
 #   2   seme: ( end if ) 
 #   2  value: ( 'end 'if ) 
 ##  reduce_items (0) entry: ( 'end 'if ) 
+##  reduce_items (0) exit: from ( 'end 'if ) 
+##  reduce_items (0) ...   to ( `end `if ) 
 ##  interp_seq (0) entry: ( `end `if ) 
 ##  interp_seq resolved: ( `end `if ) 
 ##  interp_seq reduced: ( 1 ) 
@@ -174,7 +198,7 @@
 #	it = 1 
 #	a = 3 
 #	b = 4 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 1 

@@ -4,6 +4,8 @@
 #   0   seme: ( define f ) 
 #   0  value: ( 'define 'f ) 
 ##  reduce_items (0) entry: ( 'define 'f ) 
+##  reduce_items (0) exit: from ( 'define 'f ) 
+##  reduce_items (0) ...   to ( `define 'f ) 
 ##  interp_seq (0) entry: ( `define 'f ) 
 ##  interp_seq resolved: ( `define 'f ) 
 ? reduce_def: incorrect number of arguments to 'define'

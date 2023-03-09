@@ -4,6 +4,8 @@
 #   0   seme: ( 2N * 2N ) 
 #   0  value: ( 2 '* 2 ) 
 ##  reduce_items (0) entry: ( 2 '* 2 ) 
+##  reduce_items (0) exit: from ( 2 '* 2 ) 
+##  reduce_items (0) ...   to ( 2 `* 2 ) 
 ##  interp_seq (0) entry: ( 2 `* 2 ) 
 ##  interp_seq resolved: ( 2 `* 2 ) 
 ##  interp_seq reduced: ( 4 ) 
@@ -16,6 +18,8 @@
 #   1   seme: ( call it n ) 
 #   1  value: ( 'call 'it 'n ) 
 ##  reduce_items (0) entry: ( 'call 'it 'n ) 
+##  reduce_items (0) exit: from ( 'call 'it 'n ) 
+##  reduce_items (0) ...   to ( `call 'it 'n ) 
 ##  interp_seq (0) entry: ( `call 'it 'n ) 
 ##  interp_seq resolved: ( `call 4 'n ) 
 ##  interp_seq reduced: ( 4 ) 
@@ -29,6 +33,8 @@
 #   2   seme: ( if n - 1N > n * 2N ) 
 #   2  value: ( 'if 'n '- 1 '> 'n '* 2 ) 
 ##  reduce_items (0) entry: ( 'if 'n '- 1 '> 'n '* 2 ) 
+##  reduce_items (0) exit: from ( 'if 'n '- 1 '> 'n '* 2 ) 
+##  reduce_items (0) ...   to ( `if 'n `- 1 `> 'n `* 2 ) 
 ##  interp_seq (0) entry: ( `if 'n `- 1 `> 'n `* 2 ) 
 ##  interp_seq resolved: ( `if 'n `- 1 `> 'n `* 2 ) 
 ##  interp_seq reduced: ( `if 'n `- 1 `> 8 ) 
@@ -45,6 +51,8 @@
 #   3   seme: ( print wrong ) 
 #   3  value: ( 'print 'wrong ) 
 ##  reduce_items (0) entry: ( 'print 'wrong ) 
+##  reduce_items (0) exit: from ( 'print 'wrong ) 
+##  reduce_items (0) ...   to ( `print 'wrong ) 
 ##  interp_seq (0) entry: ( `print 'wrong ) 
 #   3 reduce: [Skip , 0  ]
 #   3 env:
@@ -56,6 +64,8 @@
 #   4   seme: ( end if ) 
 #   4  value: ( 'end 'if ) 
 ##  reduce_items (0) entry: ( 'end 'if ) 
+##  reduce_items (0) exit: from ( 'end 'if ) 
+##  reduce_items (0) ...   to ( `end `if ) 
 ##  interp_seq (0) entry: ( `end `if ) 
 ##  interp_seq resolved: ( `end `if ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -71,6 +81,8 @@
 #   0   seme: ( if false? ) 
 #   0  value: ( 'if 'false? ) 
 ##  reduce_items (0) entry: ( 'if 'false? ) 
+##  reduce_items (0) exit: from ( 'if 'false? ) 
+##  reduce_items (0) ...   to ( `if `false? ) 
 ##  interp_seq (0) entry: ( `if `false? ) 
 ##  interp_seq resolved: ( `if `false? ) 
 ##  interp_seq reduced: ( `if 1 ) 
@@ -85,6 +97,8 @@
 #   1   seme: ( print n * 2N ) 
 #   1  value: ( 'print 'n '* 2 ) 
 ##  reduce_items (0) entry: ( 'print 'n '* 2 ) 
+##  reduce_items (0) exit: from ( 'print 'n '* 2 ) 
+##  reduce_items (0) ...   to ( `print 'n `* 2 ) 
 ##  interp_seq (0) entry: ( `print 'n `* 2 ) 
 ##  interp_seq resolved: ( `print 'n `* 2 ) 
 4 
@@ -96,7 +110,7 @@
 #	state: Ok 
 #	it = 8 
 #	n = 4 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 8 

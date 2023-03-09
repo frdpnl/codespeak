@@ -4,6 +4,8 @@
 #   0   seme: ( n ) 
 #   0  value: ( 'n ) 
 ##  reduce_items (0) entry: ( 'n ) 
+##  reduce_items (0) exit: from ( 'n ) 
+##  reduce_items (0) ...   to ( 'n ) 
 ##  interp_seq (0) entry: ( 'n ) 
 ##  interp_seq resolved: ( 'n ) 
 #   0 reduce: [Ok , 'n  ]
@@ -15,6 +17,8 @@
 #   1   seme: ( call it p ) 
 #   1  value: ( 'call 'it 'p ) 
 ##  reduce_items (0) entry: ( 'call 'it 'p ) 
+##  reduce_items (0) exit: from ( 'call 'it 'p ) 
+##  reduce_items (0) ...   to ( `call 'it 'p ) 
 ##  interp_seq (0) entry: ( `call 'it 'p ) 
 ##  interp_seq resolved: ( `call 'n 'p ) 
 ? interp: unknown symbol 'n'

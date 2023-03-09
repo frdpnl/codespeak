@@ -4,6 +4,8 @@
 #   0   seme: { a b } 
 #   0  value: { 'a 'b } 
 ##  reduce_items (0) entry: { 'a 'b } 
+##  reduce_items (0) exit: from { 'a 'b } 
+##  reduce_items (0) ...   to { 'a 'b } 
 #   0 reduce: [Ok , { 'a 'b }  ]
 #   0 env:
 # env:
@@ -13,6 +15,8 @@
 #   1   seme: ( call it param ) 
 #   1  value: ( 'call 'it 'param ) 
 ##  reduce_items (0) entry: ( 'call 'it 'param ) 
+##  reduce_items (0) exit: from ( 'call 'it 'param ) 
+##  reduce_items (0) ...   to ( `call 'it 'param ) 
 ##  interp_seq (0) entry: ( `call 'it 'param ) 
 ##  interp_seq resolved: ( `call { 'a 'b } 'param ) 
 ##  reduce_items (1) entry: { 'a 'b } 

@@ -4,6 +4,8 @@
 #   0   seme: ( 2N * 2.00R - 1N ) 
 #   0  value: ( 2 '* 2.00 '- 1 ) 
 ##  reduce_items (0) entry: ( 2 '* 2.00 '- 1 ) 
+##  reduce_items (0) exit: from ( 2 '* 2.00 '- 1 ) 
+##  reduce_items (0) ...   to ( 2 `* 2.00 `- 1 ) 
 ##  interp_seq (0) entry: ( 2 `* 2.00 `- 1 ) 
 ##  interp_seq resolved: ( 2 `* 2.00 `- 1 ) 
 ##  interp_seq reduced: ( 4.00 `- 1 ) 
@@ -17,6 +19,8 @@
 #   1   seme: ( call it n ) 
 #   1  value: ( 'call 'it 'n ) 
 ##  reduce_items (0) entry: ( 'call 'it 'n ) 
+##  reduce_items (0) exit: from ( 'call 'it 'n ) 
+##  reduce_items (0) ...   to ( `call 'it 'n ) 
 ##  interp_seq (0) entry: ( `call 'it 'n ) 
 ##  interp_seq resolved: ( `call 3.00 'n ) 
 ##  interp_seq reduced: ( 3.00 ) 
@@ -32,6 +36,8 @@
 #   0   seme: { 1.00R + 2N } 
 #   0  value: { 1.00 '+ 2 } 
 ##  reduce_items (0) entry: { 1.00 '+ 2 } 
+##  reduce_items (0) exit: from { 1.00 '+ 2 } 
+##  reduce_items (0) ...   to { 1.00 `+ 2 } 
 #   0 reduce: [Ok , { 1.00 `+ 2 }  ]
 #   0 env:
 # env:
@@ -42,9 +48,13 @@
 #   1   seme: ( call it A ) 
 #   1  value: ( 'call 'it 'A ) 
 ##  reduce_items (0) entry: ( 'call 'it 'A ) 
+##  reduce_items (0) exit: from ( 'call 'it 'A ) 
+##  reduce_items (0) ...   to ( `call 'it 'A ) 
 ##  interp_seq (0) entry: ( `call 'it 'A ) 
 ##  interp_seq resolved: ( `call { 1.00 `+ 2 } 'A ) 
 ##  reduce_items (1) entry: { 1.00 `+ 2 } 
+##  reduce_items (1) exit: from { 1.00 `+ 2 } 
+##  reduce_items (1) ...   to { 1.00 `+ 2 } 
 ##  interp_seq reduced: ( { 1.00 `+ 2 } ) 
 #   1 reduce: [Ok , { 1.00 `+ 2 }  ]
 #   1 env:
@@ -59,6 +69,8 @@
 #   0   seme: ( do A ) 
 #   0  value: ( 'do 'A ) 
 ##  reduce_items (0) entry: ( 'do 'A ) 
+##  reduce_items (0) exit: from ( 'do 'A ) 
+##  reduce_items (0) ...   to ( `do 'A ) 
 ##  interp_seq (0) entry: ( `do 'A ) 
 ##  interp_seq resolved: ( `do 'A ) 
 ? reduce_do: argument not a list

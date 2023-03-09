@@ -9,6 +9,7 @@
 !_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
 !_TAG_PROGRAM_URL	https://ctags.io/	/official site/
 !_TAG_PROGRAM_VERSION	5.9.0	//
+DEF	phrase.c	/^	DEF,	\/* we're processing a (multiline) function definition *\/$/;"	e	enum:__anon2f313ef90c03	file:
 Dbg	phrase.c	/^bool Dbg = false;$/;"	v	typeref:typename:bool
 EMPTY	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
 END	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
@@ -19,8 +20,7 @@ Env	phrase.c	/^} Env;$/;"	t	typeref:struct:Env_	file:
 Env_	phrase.c	/^typedef struct Env_ {$/;"	s	file:
 Expr	phrase.c	/^} Expr;$/;"	t	typeref:struct:__anon2f313ef90308	file:
 FATAL	phrase.c	/^	FATAL$/;"	e	enum:__anon2f313ef90c03	file:
-FUN	phrase.c	/^	FUN,	\/* we're processing a (multiline) function definition *\/$/;"	e	enum:__anon2f313ef90c03	file:
-FUNPRIO	phrase.c	/^#define FUNPRIO /;"	d	file:
+FPRIO	phrase.c	/^#define FPRIO /;"	d	file:
 IT	phrase.c	/^#define IT /;"	d	file:
 Ir	phrase.c	/^} Ir;		\/* return type for reduce *\/$/;"	t	typeref:struct:__anon2f313ef90e08	file:
 LEFT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
@@ -107,9 +107,12 @@ free_x	phrase.c	/^free_x(Expr *a) {$/;"	f	typeref:typename:void	file:
 hdr	phrase.c	/^	} hdr;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90508	file:
 hdr	phrase.c	/^	} hdr;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef90f08	file:
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
-interp	phrase.c	/^interp(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
+interp	phrase.c	/^interp(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+interp_later	phrase.c	/^interp_later(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+interp_now	phrase.c	/^interp_now(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_ph	phrase.c	/^interp_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
 interp_seq	phrase.c	/^interp_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ir	file:
+interp_skip	phrase.c	/^interp_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 inxs	phrase.c	/^} inxs;$/;"	t	typeref:enum:__anon2f313ef90c03	file:
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/;"	f	typeref:typename:bool	file:
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/;"	f	typeref:typename:bool	file:
@@ -177,7 +180,6 @@ reduce_geq	phrase.c	/^reduce_geq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typen
 reduce_gre	phrase.c	/^reduce_gre(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_if	phrase.c	/^reduce_if(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_infix_arg	phrase.c	/^reduce_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool lookb) {$/;"	f	typeref:typename:bool	file:
-reduce_items	phrase.c	/^reduce_items(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 reduce_leq	phrase.c	/^reduce_leq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_les	phrase.c	/^reduce_les(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_list	phrase.c	/^reduce_list(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:

@@ -4,6 +4,8 @@
 #   0   seme: { 1N + 2N } 
 #   0  value: { 1 '+ 2 } 
 ##  reduce_items (0) entry: { 1 '+ 2 } 
+##  reduce_items (0) exit: from { 1 '+ 2 } 
+##  reduce_items (0) ...   to { 1 `+ 2 } 
 #   0 reduce: [Ok , { 1 `+ 2 }  ]
 #   0 env:
 # env:
@@ -13,9 +15,13 @@
 #   1   seme: ( list it ) 
 #   1  value: ( 'list 'it ) 
 ##  reduce_items (0) entry: ( 'list 'it ) 
+##  reduce_items (0) exit: from ( 'list 'it ) 
+##  reduce_items (0) ...   to ( `list 'it ) 
 ##  interp_seq (0) entry: ( `list 'it ) 
 ##  interp_seq resolved: ( `list { 1 `+ 2 } ) 
 ##  reduce_items (0) entry: { 1 `+ 2 } 
+##  reduce_items (0) exit: from { 1 `+ 2 } 
+##  reduce_items (0) ...   to { 1 `+ 2 } 
 ##  interp_seq reduced: ( { { 1 `+ 2 } } ) 
 #   1 reduce: [Ok , { { 1 `+ 2 } }  ]
 #   1 env:
@@ -26,12 +32,22 @@
 #   2   seme: ( do it ) 
 #   2  value: ( 'do 'it ) 
 ##  reduce_items (0) entry: ( 'do 'it ) 
+##  reduce_items (0) exit: from ( 'do 'it ) 
+##  reduce_items (0) ...   to ( `do 'it ) 
 ##  interp_seq (0) entry: ( `do 'it ) 
 ##  interp_seq resolved: ( `do { { 1 `+ 2 } } ) 
 ##  reduce_items (0) entry: { { 1 `+ 2 } } 
 ##  reduce_items (0) entry: { 1 `+ 2 } 
+##  reduce_items (0) exit: from { 1 `+ 2 } 
+##  reduce_items (0) ...   to { 1 `+ 2 } 
+##  reduce_items (0) exit: from { { 1 `+ 2 } } 
+##  reduce_items (0) ...   to { { 1 `+ 2 } } 
 ##  reduce_items (0) entry: ( { 1 `+ 2 } ) 
 ##  reduce_items (0) entry: { 1 `+ 2 } 
+##  reduce_items (0) exit: from { 1 `+ 2 } 
+##  reduce_items (0) ...   to { 1 `+ 2 } 
+##  reduce_items (0) exit: from ( { 1 `+ 2 } ) 
+##  reduce_items (0) ...   to ( { 1 `+ 2 } ) 
 ##  interp_seq (0) entry: ( { 1 `+ 2 } ) 
 ##  interp_seq resolved: ( { 1 `+ 2 } ) 
 ##  interp_seq reduced: ( { 1 `+ 2 } ) 
@@ -44,10 +60,16 @@
 #   3   seme: ( do it ) 
 #   3  value: ( 'do 'it ) 
 ##  reduce_items (0) entry: ( 'do 'it ) 
+##  reduce_items (0) exit: from ( 'do 'it ) 
+##  reduce_items (0) ...   to ( `do 'it ) 
 ##  interp_seq (0) entry: ( `do 'it ) 
 ##  interp_seq resolved: ( `do { 1 `+ 2 } ) 
 ##  reduce_items (0) entry: { 1 `+ 2 } 
+##  reduce_items (0) exit: from { 1 `+ 2 } 
+##  reduce_items (0) ...   to { 1 `+ 2 } 
 ##  reduce_items (0) entry: ( 1 `+ 2 ) 
+##  reduce_items (0) exit: from ( 1 `+ 2 ) 
+##  reduce_items (0) ...   to ( 1 `+ 2 ) 
 ##  interp_seq (0) entry: ( 1 `+ 2 ) 
 ##  interp_seq resolved: ( 1 `+ 2 ) 
 ##  interp_seq reduced: ( 3 ) 
@@ -61,6 +83,8 @@
 #   4   seme: ( print it ) 
 #   4  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print 3 ) 
 3 
@@ -70,7 +94,7 @@
 # env:
 #	state: Ok 
 #	it = 3 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 3 

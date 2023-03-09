@@ -4,6 +4,8 @@
 #   0   seme: ( 2N ) 
 #   0  value: ( 2 ) 
 ##  reduce_items (0) entry: ( 2 ) 
+##  reduce_items (0) exit: from ( 2 ) 
+##  reduce_items (0) ...   to ( 2 ) 
 ##  interp_seq (0) entry: ( 2 ) 
 ##  interp_seq resolved: ( 2 ) 
 #   0 reduce: [Ok , 2  ]
@@ -15,6 +17,8 @@
 #   1   seme: ( end foo ) 
 #   1  value: ( 'end 'foo ) 
 ##  reduce_items (0) entry: ( 'end 'foo ) 
+##  reduce_items (0) exit: from ( 'end 'foo ) 
+##  reduce_items (0) ...   to ( `end 'foo ) 
 ##  interp_seq (0) entry: ( `end 'foo ) 
 ##  interp_seq resolved: ( `end 'foo ) 
 ? reduce_end: 'end' outside function definition

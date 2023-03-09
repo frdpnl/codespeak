@@ -4,6 +4,8 @@
 #   0   seme: ( 2N * 3.00R ) 
 #   0  value: ( 2 '* 3.00 ) 
 ##  reduce_items (0) entry: ( 2 '* 3.00 ) 
+##  reduce_items (0) exit: from ( 2 '* 3.00 ) 
+##  reduce_items (0) ...   to ( 2 `* 3.00 ) 
 ##  interp_seq (0) entry: ( 2 `* 3.00 ) 
 ##  interp_seq resolved: ( 2 `* 3.00 ) 
 ##  interp_seq reduced: ( 6.00 ) 
@@ -16,6 +18,8 @@
 #   1   seme: ( call it p ) 
 #   1  value: ( 'call 'it 'p ) 
 ##  reduce_items (0) entry: ( 'call 'it 'p ) 
+##  reduce_items (0) exit: from ( 'call 'it 'p ) 
+##  reduce_items (0) ...   to ( `call 'it 'p ) 
 ##  interp_seq (0) entry: ( `call 'it 'p ) 
 ##  interp_seq resolved: ( `call 6.00 'p ) 
 ##  interp_seq reduced: ( 6.00 ) 
@@ -29,6 +33,8 @@
 #   2   seme: { p ~= 6N } 
 #   2  value: { 'p '~= 6 } 
 ##  reduce_items (0) entry: { 'p '~= 6 } 
+##  reduce_items (0) exit: from { 'p '~= 6 } 
+##  reduce_items (0) ...   to { 'p `~= 6 } 
 #   2 reduce: [Ok , { 'p `~= 6 }  ]
 #   2 env:
 # env:
@@ -39,9 +45,13 @@
 #   3   seme: ( print it ) 
 #   3  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print { 'p `~= 6 } ) 
 ##  reduce_items (1) entry: { 'p `~= 6 } 
+##  reduce_items (1) exit: from { 'p `~= 6 } 
+##  reduce_items (1) ...   to { 6.00 `~= 6 } 
 { 6.00 `~= 6 } 
 ##  interp_seq reduced: ( { 6.00 `~= 6 } ) 
 #   3 reduce: [Ok , { 6.00 `~= 6 }  ]
@@ -54,10 +64,16 @@
 #   4   seme: ( do it ) 
 #   4  value: ( 'do 'it ) 
 ##  reduce_items (0) entry: ( 'do 'it ) 
+##  reduce_items (0) exit: from ( 'do 'it ) 
+##  reduce_items (0) ...   to ( `do 'it ) 
 ##  interp_seq (0) entry: ( `do 'it ) 
 ##  interp_seq resolved: ( `do { 6.00 `~= 6 } ) 
 ##  reduce_items (0) entry: { 6.00 `~= 6 } 
+##  reduce_items (0) exit: from { 6.00 `~= 6 } 
+##  reduce_items (0) ...   to { 6.00 `~= 6 } 
 ##  reduce_items (0) entry: ( 6.00 `~= 6 ) 
+##  reduce_items (0) exit: from ( 6.00 `~= 6 ) 
+##  reduce_items (0) ...   to ( 6.00 `~= 6 ) 
 ##  interp_seq (0) entry: ( 6.00 `~= 6 ) 
 ##  interp_seq resolved: ( 6.00 `~= 6 ) 
 ##  interp_seq reduced: ( 1 ) 
@@ -72,6 +88,8 @@
 #   5   seme: ( print it ) 
 #   5  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print 1 ) 
 1 
@@ -82,7 +100,7 @@
 #	state: Ok 
 #	it = 1 
 #	p = 6.00 
-> main: exit
+> exit
 > env:
 >	state: Ok 
 >	it = 1 

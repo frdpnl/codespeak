@@ -4,6 +4,8 @@
 #   0   seme: ( call 3N n ) 
 #   0  value: ( 'call 3 'n ) 
 ##  reduce_items (0) entry: ( 'call 3 'n ) 
+##  reduce_items (0) exit: from ( 'call 3 'n ) 
+##  reduce_items (0) ...   to ( `call 3 'n ) 
 ##  interp_seq (0) entry: ( `call 3 'n ) 
 ##  interp_seq resolved: ( `call 3 'n ) 
 ##  interp_seq reduced: ( 3 ) 
@@ -19,6 +21,8 @@
 #   0   seme: ( else ) 
 #   0  value: ( 'else ) 
 ##  reduce_items (0) entry: ( 'else ) 
+##  reduce_items (0) exit: from ( 'else ) 
+##  reduce_items (0) ...   to ( `else ) 
 ##  interp_seq (0) entry: ( `else ) 
 ##  interp_seq resolved: ( `else ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -32,6 +36,8 @@
 #   1   seme: ( print 1N ) 
 #   1  value: ( 'print 1 ) 
 ##  reduce_items (0) entry: ( 'print 1 ) 
+##  reduce_items (0) exit: from ( 'print 1 ) 
+##  reduce_items (0) ...   to ( `print 1 ) 
 ##  interp_seq (0) entry: ( `print 1 ) 
 #   1 reduce: [Skip , 0  ]
 #   1 env:
@@ -40,7 +46,7 @@
 #	n = 3 
 #	it = 0 
 ? main: unexpected end of program
-> main: exit
+> exit
 > env:
 >	state: Skip 
 >	n = 3 

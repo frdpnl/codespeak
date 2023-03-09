@@ -5,154 +5,184 @@
 #   0  value: ( 'def 'f { 'a } ) 
 ##  reduce_items (0) entry: ( 'def 'f { 'a } ) 
 ##  reduce_items (0) entry: { 'a } 
+##  reduce_items (0) exit: from { 'a } 
+##  reduce_items (0) ...   to { 'a } 
+##  reduce_items (0) exit: from ( 'def 'f { 'a } ) 
+##  reduce_items (0) ...   to ( `def 'f { 'a } ) 
 ##  interp_seq (0) entry: ( `def 'f { 'a } ) 
 ##  interp_seq resolved: ( `def 'f { 'a } ) 
 ##  reduce_items (0) entry: { 'a } 
-##  interp_seq reduced: ( `(f ('a ) =0= ) ) 
-#   0 reduce: [Fun , `(f ('a ) =0= )  ]
+##  reduce_items (0) exit: from { 'a } 
+##  reduce_items (0) ...   to { 'a } 
+##  interp_seq reduced: ( `(f ('a ) x0 = ) ) 
+#   0 reduce: [Fun , `(f ('a ) x0 = )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =0= ) 
+#	it = `(f ('a ) x0 = ) 
 > input: "	if a > 0 ; def g () ; a ; end g ; return"
 # phrase: if a > 0  ; def g ()  ; a  ; end g  ; return ; 
 #   0   expr: if a > 0 
 #   0   seme: ( if a > 0N ) 
 #   0  value: ( 'if 'a '> 0 ) 
 ##  reduce_items (0) entry: ( 'if 'a '> 0 ) 
+##  reduce_items (0) exit: from ( 'if 'a '> 0 ) 
+##  reduce_items (0) ...   to ( `if 'a `> 0 ) 
 ##  interp_seq (0) entry: ( `if 'a `> 0 ) 
-#   0 reduce: [Fun , `(f ('a ) =1= ( `if 'a `> 0 ) )  ]
+#   0 reduce: [Fun , `(f ('a ) x1 = ( `if 'a `> 0 ) )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =1= ( `if 'a `> 0 ) ) 
+#	it = `(f ('a ) x1 = ( `if 'a `> 0 ) ) 
 #   1   expr: def g () 
 #   1   seme: ( def g Nil ) 
 #   1  value: ( 'def 'g Nil ) 
 ##  reduce_items (0) entry: ( 'def 'g Nil ) 
+##  reduce_items (0) exit: from ( 'def 'g Nil ) 
+##  reduce_items (0) ...   to ( `def 'g Nil ) 
 ##  interp_seq (0) entry: ( `def 'g Nil ) 
-#   1 reduce: [Fun , `(f ('a ) =2= ( `if 'a `> 0 ) ( `def 'g Nil ) )  ]
+#   1 reduce: [Fun , `(f ('a ) x2 = ( `if 'a `> 0 ) ( `def 'g Nil ) )  ]
 #   1 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =2= ( `if 'a `> 0 ) ( `def 'g Nil ) ) 
+#	it = `(f ('a ) x2 = ( `if 'a `> 0 ) ( `def 'g Nil ) ) 
 #   2   expr: a 
 #   2   seme: ( a ) 
 #   2  value: ( 'a ) 
 ##  reduce_items (0) entry: ( 'a ) 
+##  reduce_items (0) exit: from ( 'a ) 
+##  reduce_items (0) ...   to ( 'a ) 
 ##  interp_seq (0) entry: ( 'a ) 
-#   2 reduce: [Fun , `(f ('a ) =3= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) )  ]
+#   2 reduce: [Fun , `(f ('a ) x3 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) )  ]
 #   2 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =3= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ) 
+#	it = `(f ('a ) x3 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ) 
 #   3   expr: end g 
 #   3   seme: ( end g ) 
 #   3  value: ( 'end 'g ) 
 ##  reduce_items (0) entry: ( 'end 'g ) 
+##  reduce_items (0) exit: from ( 'end 'g ) 
+##  reduce_items (0) ...   to ( `end 'g ) 
 ##  interp_seq (0) entry: ( `end 'g ) 
 ##  interp_seq resolved: ( `end 'g ) 
-##  interp_seq reduced: ( `(f ('a ) =4= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ) ) 
-#   3 reduce: [Fun , `(f ('a ) =4= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) )  ]
+##  interp_seq reduced: ( `(f ('a ) x4 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ) ) 
+#   3 reduce: [Fun , `(f ('a ) x4 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) )  ]
 #   3 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =4= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ) 
+#	it = `(f ('a ) x4 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ) 
 #   4   expr: return
 #   4   seme: ( return ) 
 #   4  value: ( 'return ) 
 ##  reduce_items (0) entry: ( 'return ) 
+##  reduce_items (0) exit: from ( 'return ) 
+##  reduce_items (0) ...   to ( `return ) 
 ##  interp_seq (0) entry: ( `return ) 
-#   4 reduce: [Fun , `(f ('a ) =5= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) )  ]
+#   4 reduce: [Fun , `(f ('a ) x5 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) )  ]
 #   4 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =5= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ) 
+#	it = `(f ('a ) x5 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ) 
 > input: "	else ; def g () ; -1 * a ; end g ; "
 # phrase: else  ; def g ()  ; -1 * a  ; end g  ; 
 #   0   expr: else 
 #   0   seme: ( else ) 
 #   0  value: ( 'else ) 
 ##  reduce_items (0) entry: ( 'else ) 
+##  reduce_items (0) exit: from ( 'else ) 
+##  reduce_items (0) ...   to ( `else ) 
 ##  interp_seq (0) entry: ( `else ) 
-#   0 reduce: [Fun , `(f ('a ) =6= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) )  ]
+#   0 reduce: [Fun , `(f ('a ) x6 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) .( `return ) ( `else ) )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =6= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ) 
+#	it = `(f ('a ) x6 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) .( `return ) ( `else ) ) 
 #   1   expr: def g () 
 #   1   seme: ( def g Nil ) 
 #   1  value: ( 'def 'g Nil ) 
 ##  reduce_items (0) entry: ( 'def 'g Nil ) 
+##  reduce_items (0) exit: from ( 'def 'g Nil ) 
+##  reduce_items (0) ...   to ( `def 'g Nil ) 
 ##  interp_seq (0) entry: ( `def 'g Nil ) 
-#   1 reduce: [Fun , `(f ('a ) =7= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) )  ]
+#   1 reduce: [Fun , `(f ('a ) x7 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ..( `else ) ( `def 'g Nil ) )  ]
 #   1 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =7= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ) 
+#	it = `(f ('a ) x7 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ..( `else ) ( `def 'g Nil ) ) 
 #   2   expr: -1 * a 
 #   2   seme: ( -1N * a ) 
 #   2  value: ( -1 '* 'a ) 
 ##  reduce_items (0) entry: ( -1 '* 'a ) 
+##  reduce_items (0) exit: from ( -1 '* 'a ) 
+##  reduce_items (0) ...   to ( -1 `* 'a ) 
 ##  interp_seq (0) entry: ( -1 `* 'a ) 
-#   2 reduce: [Fun , `(f ('a ) =8= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) )  ]
+#   2 reduce: [Fun , `(f ('a ) x8 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ...( `def 'g Nil ) ( -1 `* 'a ) )  ]
 #   2 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =8= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ) 
+#	it = `(f ('a ) x8 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ...( `def 'g Nil ) ( -1 `* 'a ) ) 
 #   3   expr: end g 
 #   3   seme: ( end g ) 
 #   3  value: ( 'end 'g ) 
 ##  reduce_items (0) entry: ( 'end 'g ) 
+##  reduce_items (0) exit: from ( 'end 'g ) 
+##  reduce_items (0) ...   to ( `end 'g ) 
 ##  interp_seq (0) entry: ( `end 'g ) 
 ##  interp_seq resolved: ( `end 'g ) 
-##  interp_seq reduced: ( `(f ('a ) =9= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ) ) 
-#   3 reduce: [Fun , `(f ('a ) =9= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) )  ]
+##  interp_seq reduced: ( `(f ('a ) x9 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ....( -1 `* 'a ) ( `end 'g ) ) ) 
+#   3 reduce: [Fun , `(f ('a ) x9 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ....( -1 `* 'a ) ( `end 'g ) )  ]
 #   3 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =9= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ) 
+#	it = `(f ('a ) x9 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ....( -1 `* 'a ) ( `end 'g ) ) 
 > input: "	end if"
 # phrase: end if ; 
 #   0   expr: end if
 #   0   seme: ( end if ) 
 #   0  value: ( 'end 'if ) 
 ##  reduce_items (0) entry: ( 'end 'if ) 
+##  reduce_items (0) exit: from ( 'end 'if ) 
+##  reduce_items (0) ...   to ( `end `if ) 
 ##  interp_seq (0) entry: ( `end `if ) 
 ##  interp_seq resolved: ( `end `if ) 
-##  interp_seq reduced: ( `(f ('a ) =10= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ) ) 
-#   0 reduce: [Fun , `(f ('a ) =10= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) )  ]
+##  interp_seq reduced: ( `(f ('a ) x10 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) .....( `end 'g ) ( `end `if ) ) ) 
+#   0 reduce: [Fun , `(f ('a ) x10 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) .....( `end 'g ) ( `end `if ) )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =10= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ) 
+#	it = `(f ('a ) x10 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) .....( `end 'g ) ( `end `if ) ) 
 > input: "	g"
 # phrase: g ; 
 #   0   expr: g
 #   0   seme: ( g ) 
 #   0  value: ( 'g ) 
 ##  reduce_items (0) entry: ( 'g ) 
+##  reduce_items (0) exit: from ( 'g ) 
+##  reduce_items (0) ...   to ( 'g ) 
 ##  interp_seq (0) entry: ( 'g ) 
-#   0 reduce: [Fun , `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) )  ]
+#   0 reduce: [Fun , `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#	it = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 > input: "end f"
 # phrase: end f ; 
 #   0   expr: end f
 #   0   seme: ( end f ) 
 #   0  value: ( 'end 'f ) 
 ##  reduce_items (0) entry: ( 'end 'f ) 
+##  reduce_items (0) exit: from ( 'end 'f ) 
+##  reduce_items (0) ...   to ( `end 'f ) 
 ##  interp_seq (0) entry: ( `end 'f ) 
 ##  interp_seq resolved: ( `end 'f ) 
-##  interp_seq reduced: ( `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) ) 
-#   0 reduce: [Ok , `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) )  ]
+##  interp_seq reduced: ( `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) ) 
+#   0 reduce: [Ok , `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) )  ]
 #   0 env:
 # env:
 #	state: Ok 
-#	it = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
-#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#	it = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
+#	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 > input: "f (-2,) ; it ; it ()"
 # phrase: f (-2,)  ; it  ; it () ; 
 #   0   expr: f (-2,) 
@@ -160,11 +190,19 @@
 #   0  value: ( 'f { -2 } ) 
 ##  reduce_items (0) entry: ( 'f { -2 } ) 
 ##  reduce_items (0) entry: { -2 } 
+##  reduce_items (0) exit: from { -2 } 
+##  reduce_items (0) ...   to { -2 } 
+##  reduce_items (0) exit: from ( 'f { -2 } ) 
+##  reduce_items (0) ...   to ( 'f { -2 } ) 
 ##  interp_seq (0) entry: ( 'f { -2 } ) 
-##  interp_seq resolved: ( `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) { -2 } ) 
+##  interp_seq resolved: ( `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) { -2 } ) 
 ##  reduce_items (1) entry: { -2 } 
+##  reduce_items (1) exit: from { -2 } 
+##  reduce_items (1) ...   to { -2 } 
 ##  reduce_fun value: ( `if 'a `> 0 ) 
 ##  reduce_items (0) entry: ( `if 'a `> 0 ) 
+##  reduce_items (0) exit: from ( `if 'a `> 0 ) 
+##  reduce_items (0) ...   to ( `if 'a `> 0 ) 
 ##  interp_seq (0) entry: ( `if 'a `> 0 ) 
 ##  interp_seq resolved: ( `if 'a `> 0 ) 
 ##  interp_seq reduced: ( `if 0 ) 
@@ -172,90 +210,117 @@
 ##  reduce_fun reduce: [Skip , 0  ]
 ##  reduce_fun value: ( `def 'g Nil ) 
 ##  reduce_items (0) entry: ( `def 'g Nil ) 
+##  reduce_items (0) exit: from ( `def 'g Nil ) 
+##  reduce_items (0) ...   to ( `def 'g Nil ) 
 ##  interp_seq (0) entry: ( `def 'g Nil ) 
 ##  reduce_fun reduce: [Skip , 0  ]
 ##  reduce_fun value: ( 'a ) 
 ##  reduce_items (0) entry: ( 'a ) 
+##  reduce_items (0) exit: from ( 'a ) 
+##  reduce_items (0) ...   to ( 'a ) 
 ##  interp_seq (0) entry: ( 'a ) 
 ##  reduce_fun reduce: [Skip , 0  ]
 ##  reduce_fun value: ( `end 'g ) 
 ##  reduce_items (0) entry: ( `end 'g ) 
+##  reduce_items (0) exit: from ( `end 'g ) 
+##  reduce_items (0) ...   to ( `end 'g ) 
 ##  interp_seq (0) entry: ( `end 'g ) 
 ##  reduce_fun reduce: [Skip , 0  ]
 ##  reduce_fun value: ( `return ) 
 ##  reduce_items (0) entry: ( `return ) 
+##  reduce_items (0) exit: from ( `return ) 
+##  reduce_items (0) ...   to ( `return ) 
 ##  interp_seq (0) entry: ( `return ) 
 ##  reduce_fun reduce: [Skip , 0  ]
 ##  reduce_fun value: ( `else ) 
 ##  reduce_items (0) entry: ( `else ) 
+##  reduce_items (0) exit: from ( `else ) 
+##  reduce_items (0) ...   to ( `else ) 
 ##  interp_seq (0) entry: ( `else ) 
 ##  interp_seq resolved: ( `else ) 
 ##  interp_seq reduced: ( 1 ) 
 ##  reduce_fun reduce: [Ok , 1  ]
 ##  reduce_fun value: ( `def 'g Nil ) 
 ##  reduce_items (0) entry: ( `def 'g Nil ) 
+##  reduce_items (0) exit: from ( `def 'g Nil ) 
+##  reduce_items (0) ...   to ( `def 'g Nil ) 
 ##  interp_seq (0) entry: ( `def 'g Nil ) 
 ##  interp_seq resolved: ( `def 'g Nil ) 
-##  interp_seq reduced: ( `(g () =0= ) ) 
-##  reduce_fun reduce: [Fun , `(g () =0= )  ]
+##  interp_seq reduced: ( `(g () x0 = ) ) 
+##  reduce_fun reduce: [Fun , `(g () x0 = )  ]
 ##  reduce_fun value: ( -1 `* 'a ) 
 ##  reduce_items (0) entry: ( -1 `* 'a ) 
+##  reduce_items (0) exit: from ( -1 `* 'a ) 
+##  reduce_items (0) ...   to ( -1 `* 'a ) 
 ##  interp_seq (0) entry: ( -1 `* 'a ) 
-##  reduce_fun reduce: [Fun , `(g () =1= ( -1 `* -2 ) )  ]
+## reduce_body: replacing free 'a  with -2 
+##  reduce_fun reduce: [Fun , `(g () x1 = ( -1 `* -2 ) )  ]
 ##  reduce_fun value: ( `end 'g ) 
 ##  reduce_items (0) entry: ( `end 'g ) 
+##  reduce_items (0) exit: from ( `end 'g ) 
+##  reduce_items (0) ...   to ( `end 'g ) 
 ##  interp_seq (0) entry: ( `end 'g ) 
 ##  interp_seq resolved: ( `end 'g ) 
-##  interp_seq reduced: ( `(g () =1= ( -1 `* -2 ) ) ) 
-##  reduce_fun reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##  interp_seq reduced: ( `(g () x1 = ( -1 `* -2 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () x1 = ( -1 `* -2 ) )  ]
 ##  reduce_fun value: ( `end `if ) 
 ##  reduce_items (0) entry: ( `end `if ) 
+##  reduce_items (0) exit: from ( `end `if ) 
+##  reduce_items (0) ...   to ( `end `if ) 
 ##  interp_seq (0) entry: ( `end `if ) 
 ##  interp_seq resolved: ( `end `if ) 
-##  interp_seq reduced: ( `(g () =1= ( -1 `* -2 ) ) ) 
-##  reduce_fun reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##  interp_seq reduced: ( `(g () x1 = ( -1 `* -2 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () x1 = ( -1 `* -2 ) )  ]
 ##  reduce_fun value: ( 'g ) 
 ##  reduce_items (0) entry: ( 'g ) 
+##  reduce_items (0) exit: from ( 'g ) 
+##  reduce_items (0) ...   to ( 'g ) 
 ##  interp_seq (0) entry: ( 'g ) 
-##  interp_seq resolved: ( `(g () =1= ( -1 `* -2 ) ) ) 
-##  reduce_fun reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##  interp_seq resolved: ( `(g () x1 = ( -1 `* -2 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () x1 = ( -1 `* -2 ) )  ]
 ##  reduce_fun local:
 ## env:
 ##	state: Ok 
 ##	a = -2 
-##	it = `(g () =1= ( -1 `* -2 ) ) 
-##	g = `(g () =1= ( -1 `* -2 ) ) 
+##	it = `(g () x1 = ( -1 `* -2 ) ) 
+##	g = `(g () x1 = ( -1 `* -2 ) ) 
 ## parent ## env:
 ##	state: Ok 
-##	it = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
-##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
-##  interp_seq reduced: ( `(g () =1= ( -1 `* -2 ) ) ) 
-#   0 reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##	it = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
+##	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
+##  interp_seq reduced: ( `(g () x1 = ( -1 `* -2 ) ) ) 
+#   0 reduce: [Ok , `(g () x1 = ( -1 `* -2 ) )  ]
 #   0 env:
 # env:
 #	state: Ok 
-#	it = `(g () =1= ( -1 `* -2 ) ) 
-#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#	it = `(g () x1 = ( -1 `* -2 ) ) 
+#	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 #   1   expr: it 
 #   1   seme: ( it ) 
 #   1  value: ( 'it ) 
 ##  reduce_items (0) entry: ( 'it ) 
+##  reduce_items (0) exit: from ( 'it ) 
+##  reduce_items (0) ...   to ( 'it ) 
 ##  interp_seq (0) entry: ( 'it ) 
-##  interp_seq resolved: ( `(g () =1= ( -1 `* -2 ) ) ) 
-#   1 reduce: [Ok , `(g () =1= ( -1 `* -2 ) )  ]
+##  interp_seq resolved: ( `(g () x1 = ( -1 `* -2 ) ) ) 
+#   1 reduce: [Ok , `(g () x1 = ( -1 `* -2 ) )  ]
 #   1 env:
 # env:
 #	state: Ok 
-#	it = `(g () =1= ( -1 `* -2 ) ) 
-#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#	it = `(g () x1 = ( -1 `* -2 ) ) 
+#	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 #   2   expr: it ()
 #   2   seme: ( it Nil ) 
 #   2  value: ( 'it Nil ) 
 ##  reduce_items (0) entry: ( 'it Nil ) 
+##  reduce_items (0) exit: from ( 'it Nil ) 
+##  reduce_items (0) ...   to ( 'it Nil ) 
 ##  interp_seq (0) entry: ( 'it Nil ) 
-##  interp_seq resolved: ( `(g () =1= ( -1 `* -2 ) ) Nil ) 
+##  interp_seq resolved: ( `(g () x1 = ( -1 `* -2 ) ) Nil ) 
 ##  reduce_fun value: ( -1 `* -2 ) 
 ##  reduce_items (0) entry: ( -1 `* -2 ) 
+##  reduce_items (0) exit: from ( -1 `* -2 ) 
+##  reduce_items (0) ...   to ( -1 `* -2 ) 
 ##  interp_seq (0) entry: ( -1 `* -2 ) 
 ##  interp_seq resolved: ( -1 `* -2 ) 
 ##  interp_seq reduced: ( 2 ) 
@@ -266,15 +331,15 @@
 ##	it = 2 
 ## parent ## env:
 ##	state: Ok 
-##	it = `(g () =1= ( -1 `* -2 ) ) 
-##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+##	it = `(g () x1 = ( -1 `* -2 ) ) 
+##	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 ##  interp_seq reduced: ( 2 ) 
 #   2 reduce: [Ok , 2  ]
 #   2 env:
 # env:
 #	state: Ok 
 #	it = 2 
-#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 > input: "f (3,) ; it ()"
 # phrase: f (3,)  ; it () ; 
 #   0   expr: f (3,) 
@@ -282,11 +347,19 @@
 #   0  value: ( 'f { 3 } ) 
 ##  reduce_items (0) entry: ( 'f { 3 } ) 
 ##  reduce_items (0) entry: { 3 } 
+##  reduce_items (0) exit: from { 3 } 
+##  reduce_items (0) ...   to { 3 } 
+##  reduce_items (0) exit: from ( 'f { 3 } ) 
+##  reduce_items (0) ...   to ( 'f { 3 } ) 
 ##  interp_seq (0) entry: ( 'f { 3 } ) 
-##  interp_seq resolved: ( `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) { 3 } ) 
+##  interp_seq resolved: ( `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) { 3 } ) 
 ##  reduce_items (1) entry: { 3 } 
+##  reduce_items (1) exit: from { 3 } 
+##  reduce_items (1) ...   to { 3 } 
 ##  reduce_fun value: ( `if 'a `> 0 ) 
 ##  reduce_items (0) entry: ( `if 'a `> 0 ) 
+##  reduce_items (0) exit: from ( `if 'a `> 0 ) 
+##  reduce_items (0) ...   to ( `if 'a `> 0 ) 
 ##  interp_seq (0) entry: ( `if 'a `> 0 ) 
 ##  interp_seq resolved: ( `if 'a `> 0 ) 
 ##  interp_seq reduced: ( `if 1 ) 
@@ -294,51 +367,64 @@
 ##  reduce_fun reduce: [Ok , 1  ]
 ##  reduce_fun value: ( `def 'g Nil ) 
 ##  reduce_items (0) entry: ( `def 'g Nil ) 
+##  reduce_items (0) exit: from ( `def 'g Nil ) 
+##  reduce_items (0) ...   to ( `def 'g Nil ) 
 ##  interp_seq (0) entry: ( `def 'g Nil ) 
 ##  interp_seq resolved: ( `def 'g Nil ) 
-##  interp_seq reduced: ( `(g () =0= ) ) 
-##  reduce_fun reduce: [Fun , `(g () =0= )  ]
+##  interp_seq reduced: ( `(g () x0 = ) ) 
+##  reduce_fun reduce: [Fun , `(g () x0 = )  ]
 ##  reduce_fun value: ( 'a ) 
 ##  reduce_items (0) entry: ( 'a ) 
+##  reduce_items (0) exit: from ( 'a ) 
+##  reduce_items (0) ...   to ( 'a ) 
 ##  interp_seq (0) entry: ( 'a ) 
-##  reduce_fun reduce: [Fun , `(g () =1= ( 3 ) )  ]
+## reduce_body: replacing free 'a  with 3 
+##  reduce_fun reduce: [Fun , `(g () x1 = ( 3 ) )  ]
 ##  reduce_fun value: ( `end 'g ) 
 ##  reduce_items (0) entry: ( `end 'g ) 
+##  reduce_items (0) exit: from ( `end 'g ) 
+##  reduce_items (0) ...   to ( `end 'g ) 
 ##  interp_seq (0) entry: ( `end 'g ) 
 ##  interp_seq resolved: ( `end 'g ) 
-##  interp_seq reduced: ( `(g () =1= ( 3 ) ) ) 
-##  reduce_fun reduce: [Ok , `(g () =1= ( 3 ) )  ]
+##  interp_seq reduced: ( `(g () x1 = ( 3 ) ) ) 
+##  reduce_fun reduce: [Ok , `(g () x1 = ( 3 ) )  ]
 ##  reduce_fun value: ( `return ) 
 ##  reduce_items (0) entry: ( `return ) 
+##  reduce_items (0) exit: from ( `return ) 
+##  reduce_items (0) ...   to ( `return ) 
 ##  interp_seq (0) entry: ( `return ) 
 ##  interp_seq resolved: ( `return ) 
-##  interp_seq reduced: ( `(g () =1= ( 3 ) ) ) 
-##  reduce_fun reduce: [Return , `(g () =1= ( 3 ) )  ]
+##  interp_seq reduced: ( `(g () x1 = ( 3 ) ) ) 
+##  reduce_fun reduce: [Return , `(g () x1 = ( 3 ) )  ]
 ##  reduce_fun local:
 ## env:
 ##	state: Return 
 ##	a = 3 
-##	it = `(g () =1= ( 3 ) ) 
-##	g = `(g () =1= ( 3 ) ) 
+##	it = `(g () x1 = ( 3 ) ) 
+##	g = `(g () x1 = ( 3 ) ) 
 ## parent ## env:
 ##	state: Ok 
 ##	it = 2 
-##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
-##  interp_seq reduced: ( `(g () =1= ( 3 ) ) ) 
-#   0 reduce: [Ok , `(g () =1= ( 3 ) )  ]
+##	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
+##  interp_seq reduced: ( `(g () x1 = ( 3 ) ) ) 
+#   0 reduce: [Ok , `(g () x1 = ( 3 ) )  ]
 #   0 env:
 # env:
 #	state: Ok 
-#	it = `(g () =1= ( 3 ) ) 
-#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+#	it = `(g () x1 = ( 3 ) ) 
+#	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 #   1   expr: it ()
 #   1   seme: ( it Nil ) 
 #   1  value: ( 'it Nil ) 
 ##  reduce_items (0) entry: ( 'it Nil ) 
+##  reduce_items (0) exit: from ( 'it Nil ) 
+##  reduce_items (0) ...   to ( 'it Nil ) 
 ##  interp_seq (0) entry: ( 'it Nil ) 
-##  interp_seq resolved: ( `(g () =1= ( 3 ) ) Nil ) 
+##  interp_seq resolved: ( `(g () x1 = ( 3 ) ) Nil ) 
 ##  reduce_fun value: ( 3 ) 
 ##  reduce_items (0) entry: ( 3 ) 
+##  reduce_items (0) exit: from ( 3 ) 
+##  reduce_items (0) ...   to ( 3 ) 
 ##  interp_seq (0) entry: ( 3 ) 
 ##  interp_seq resolved: ( 3 ) 
 ##  reduce_fun reduce: [Ok , 3  ]
@@ -348,17 +434,17 @@
 ##	it = 3 
 ## parent ## env:
 ##	state: Ok 
-##	it = `(g () =1= ( 3 ) ) 
-##	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+##	it = `(g () x1 = ( 3 ) ) 
+##	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
 ##  interp_seq reduced: ( 3 ) 
 #   1 reduce: [Ok , 3  ]
 #   1 env:
 # env:
 #	state: Ok 
 #	it = 3 
-#	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
-> main: exit
+#	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
+> exit
 > env:
 >	state: Ok 
 >	it = 3 
->	f = `(f ('a ) =11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ( `end 'g ) ( `return ) ( `else ) ( `def 'g Nil ) ( -1 `* 'a ) ( `end 'g ) ( `end `if ) ( 'g ) ) 
+>	f = `(f ('a ) x11 = ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 

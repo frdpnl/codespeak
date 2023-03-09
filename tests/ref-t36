@@ -4,6 +4,8 @@
 #   0   seme: ( if ) 
 #   0  value: ( 'if ) 
 ##  reduce_items (0) entry: ( 'if ) 
+##  reduce_items (0) exit: from ( 'if ) 
+##  reduce_items (0) ...   to ( `if ) 
 ##  interp_seq (0) entry: ( `if ) 
 ##  interp_seq resolved: ( `if ) 
 #   0 reduce: [Ok , `if  ]
@@ -17,6 +19,8 @@
 #   0   seme: ( end if ) 
 #   0  value: ( 'end 'if ) 
 ##  reduce_items (0) entry: ( 'end 'if ) 
+##  reduce_items (0) exit: from ( 'end 'if ) 
+##  reduce_items (0) ...   to ( `end `if ) 
 ##  interp_seq (0) entry: ( `end `if ) 
 ##  interp_seq resolved: ( `end `if ) 
 ##  interp_seq reduced: ( `if ) 
@@ -31,6 +35,8 @@
 #   0   seme: ( if Nil ) 
 #   0  value: ( 'if Nil ) 
 ##  reduce_items (0) entry: ( 'if Nil ) 
+##  reduce_items (0) exit: from ( 'if Nil ) 
+##  reduce_items (0) ...   to ( `if Nil ) 
 ##  interp_seq (0) entry: ( `if Nil ) 
 ##  interp_seq resolved: ( `if Nil ) 
 ##  interp_seq reduced: ( 0 ) 
@@ -40,7 +46,7 @@
 #	state: Skip 
 #	it = 0 
 ? main: unexpected end of program
-> main: exit
+> exit
 > env:
 >	state: Skip 
 >	it = 0 

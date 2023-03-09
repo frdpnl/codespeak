@@ -4,6 +4,8 @@
 #   0   seme: ( 3N ) 
 #   0  value: ( 3 ) 
 ##  reduce_items (0) entry: ( 3 ) 
+##  reduce_items (0) exit: from ( 3 ) 
+##  reduce_items (0) ...   to ( 3 ) 
 ##  interp_seq (0) entry: ( 3 ) 
 ##  interp_seq resolved: ( 3 ) 
 #   0 reduce: [Ok , 3  ]
@@ -15,6 +17,8 @@
 #   1   seme: ( call it A ) 
 #   1  value: ( 'call 'it 'A ) 
 ##  reduce_items (0) entry: ( 'call 'it 'A ) 
+##  reduce_items (0) exit: from ( 'call 'it 'A ) 
+##  reduce_items (0) ...   to ( `call 'it 'A ) 
 ##  interp_seq (0) entry: ( `call 'it 'A ) 
 ##  interp_seq resolved: ( `call 3 'A ) 
 ##  interp_seq reduced: ( 3 ) 
@@ -31,41 +35,52 @@
 #   0  value: ( 'def 'f { 'x } ) 
 ##  reduce_items (0) entry: ( 'def 'f { 'x } ) 
 ##  reduce_items (0) entry: { 'x } 
+##  reduce_items (0) exit: from { 'x } 
+##  reduce_items (0) ...   to { 'x } 
+##  reduce_items (0) exit: from ( 'def 'f { 'x } ) 
+##  reduce_items (0) ...   to ( `def 'f { 'x } ) 
 ##  interp_seq (0) entry: ( `def 'f { 'x } ) 
 ##  interp_seq resolved: ( `def 'f { 'x } ) 
 ##  reduce_items (0) entry: { 'x } 
-##  interp_seq reduced: ( `(f ('x ) =0= ) ) 
-#   0 reduce: [Fun , `(f ('x ) =0= )  ]
+##  reduce_items (0) exit: from { 'x } 
+##  reduce_items (0) ...   to { 'x } 
+##  interp_seq reduced: ( `(f ('x ) x0 = ) ) 
+#   0 reduce: [Fun , `(f ('x ) x0 = )  ]
 #   0 env:
 # env:
 #	state: Fun 
-#	it = `(f ('x ) =0= ) 
+#	it = `(f ('x ) x0 = ) 
 #	A = 3 
 #   1   expr: A * x 
 #   1   seme: ( A * x ) 
 #   1  value: ( 'A '* 'x ) 
 ##  reduce_items (0) entry: ( 'A '* 'x ) 
+##  reduce_items (0) exit: from ( 'A '* 'x ) 
+##  reduce_items (0) ...   to ( 'A `* 'x ) 
 ##  interp_seq (0) entry: ( 'A `* 'x ) 
-#   1 reduce: [Fun , `(f ('x ) =1= ( 3 `* 'x ) )  ]
+## reduce_body: replacing free 'A  with 3 
+#   1 reduce: [Fun , `(f ('x ) x1 = ( 3 `* 'x ) )  ]
 #   1 env:
 # env:
 #	state: Fun 
-#	it = `(f ('x ) =1= ( 3 `* 'x ) ) 
+#	it = `(f ('x ) x1 = ( 3 `* 'x ) ) 
 #	A = 3 
 #   2   expr: end f
 #   2   seme: ( end f ) 
 #   2  value: ( 'end 'f ) 
 ##  reduce_items (0) entry: ( 'end 'f ) 
+##  reduce_items (0) exit: from ( 'end 'f ) 
+##  reduce_items (0) ...   to ( `end 'f ) 
 ##  interp_seq (0) entry: ( `end 'f ) 
 ##  interp_seq resolved: ( `end 'f ) 
-##  interp_seq reduced: ( `(f ('x ) =1= ( 3 `* 'x ) ) ) 
-#   2 reduce: [Ok , `(f ('x ) =1= ( 3 `* 'x ) )  ]
+##  interp_seq reduced: ( `(f ('x ) x1 = ( 3 `* 'x ) ) ) 
+#   2 reduce: [Ok , `(f ('x ) x1 = ( 3 `* 'x ) )  ]
 #   2 env:
 # env:
 #	state: Ok 
-#	it = `(f ('x ) =1= ( 3 `* 'x ) ) 
+#	it = `(f ('x ) x1 = ( 3 `* 'x ) ) 
 #	A = 3 
-#	f = `(f ('x ) =1= ( 3 `* 'x ) ) 
+#	f = `(f ('x ) x1 = ( 3 `* 'x ) ) 
 > input: "f (-1,) ; print it"
 # phrase: f (-1,)  ; print it ; 
 #   0   expr: f (-1,) 
@@ -73,11 +88,19 @@
 #   0  value: ( 'f { -1 } ) 
 ##  reduce_items (0) entry: ( 'f { -1 } ) 
 ##  reduce_items (0) entry: { -1 } 
+##  reduce_items (0) exit: from { -1 } 
+##  reduce_items (0) ...   to { -1 } 
+##  reduce_items (0) exit: from ( 'f { -1 } ) 
+##  reduce_items (0) ...   to ( 'f { -1 } ) 
 ##  interp_seq (0) entry: ( 'f { -1 } ) 
-##  interp_seq resolved: ( `(f ('x ) =1= ( 3 `* 'x ) ) { -1 } ) 
+##  interp_seq resolved: ( `(f ('x ) x1 = ( 3 `* 'x ) ) { -1 } ) 
 ##  reduce_items (1) entry: { -1 } 
+##  reduce_items (1) exit: from { -1 } 
+##  reduce_items (1) ...   to { -1 } 
 ##  reduce_fun value: ( 3 `* 'x ) 
 ##  reduce_items (0) entry: ( 3 `* 'x ) 
+##  reduce_items (0) exit: from ( 3 `* 'x ) 
+##  reduce_items (0) ...   to ( 3 `* 'x ) 
 ##  interp_seq (0) entry: ( 3 `* 'x ) 
 ##  interp_seq resolved: ( 3 `* 'x ) 
 ##  interp_seq reduced: ( -3 ) 
@@ -89,9 +112,9 @@
 ##	it = -3 
 ## parent ## env:
 ##	state: Ok 
-##	it = `(f ('x ) =1= ( 3 `* 'x ) ) 
+##	it = `(f ('x ) x1 = ( 3 `* 'x ) ) 
 ##	A = 3 
-##	f = `(f ('x ) =1= ( 3 `* 'x ) ) 
+##	f = `(f ('x ) x1 = ( 3 `* 'x ) ) 
 ##  interp_seq reduced: ( -3 ) 
 #   0 reduce: [Ok , -3  ]
 #   0 env:
@@ -99,11 +122,13 @@
 #	state: Ok 
 #	it = -3 
 #	A = 3 
-#	f = `(f ('x ) =1= ( 3 `* 'x ) ) 
+#	f = `(f ('x ) x1 = ( 3 `* 'x ) ) 
 #   1   expr: print it
 #   1   seme: ( print it ) 
 #   1  value: ( 'print 'it ) 
 ##  reduce_items (0) entry: ( 'print 'it ) 
+##  reduce_items (0) exit: from ( 'print 'it ) 
+##  reduce_items (0) ...   to ( `print 'it ) 
 ##  interp_seq (0) entry: ( `print 'it ) 
 ##  interp_seq resolved: ( `print -3 ) 
 -3 
@@ -114,10 +139,10 @@
 #	state: Ok 
 #	it = -3 
 #	A = 3 
-#	f = `(f ('x ) =1= ( 3 `* 'x ) ) 
-> main: exit
+#	f = `(f ('x ) x1 = ( 3 `* 'x ) ) 
+> exit
 > env:
 >	state: Ok 
 >	it = -3 
 >	A = 3 
->	f = `(f ('x ) =1= ( 3 `* 'x ) ) 
+>	f = `(f ('x ) x1 = ( 3 `* 'x ) ) 
