@@ -109,11 +109,11 @@ hdr	phrase.c	/^	} hdr;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef90f08	
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
 interp	phrase.c	/^interp(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_body	phrase.c	/^interp_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
-interp_later	phrase.c	/^interp_later(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+interp_maybe_later	phrase.c	/^interp_maybe_later(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+interp_maybe_skip	phrase.c	/^interp_maybe_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_now	phrase.c	/^interp_now(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_ph	phrase.c	/^interp_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
 interp_seq	phrase.c	/^interp_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ir	file:
-interp_skip	phrase.c	/^interp_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 inxs	phrase.c	/^} inxs;$/;"	t	typeref:enum:__anon2f313ef90c03	file:
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/;"	f	typeref:typename:bool	file:
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/;"	f	typeref:typename:bool	file:

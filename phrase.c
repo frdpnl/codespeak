@@ -2502,7 +2502,7 @@ interp_now(Env *e, Val *a, bool look) {
 }
 
 static Ir
-interp_later(Env *e, Val *a) {
+interp_maybe_later(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
 	assert(a != NULL);
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
@@ -2514,35 +2514,19 @@ interp_later(Env *e, Val *a) {
 		return rc;
 	}
 	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
-	/* rem: end _ : */
 	if (b->seq.v.v[0]->hdr.t == VSYMOP 
 			&& b->seq.v.v[0]->symop.v == reduce_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1) {
-		/* try to handle the 'end: */
-		return interp_now(e, a, false);
-		/*
-		Ir rc = reduce_end(e, b, 0);
-		if (rc.state == FATAL) {
-			free_v(b);
-			return rc;
-		}
-		if (rc.v->seq.v.n != 1) {
-			free_v(rc.v);
-			printf("? %s: incorrect seq returned\n",
-					__FUNCTION__);
-			return (Ir) {FATAL, NULL};
-		}
-		Val *c = copy_v(rc.v->seq.v.v[0]);
-		free_v(rc.v);
-		return (Ir) {rc.state, c};
-		*/
+		Ir rc = interp_now(e, b, false);
+		free_v(b);
+		return rc;
 	}
-	/* default: add to fun body: */
+	free_v(b);
 	return interp_body(e, a, 0);
 }
 
 static Ir
-interp_skip(Env *e, Val *a) {
+interp_maybe_skip(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
 	assert(a != NULL);
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
@@ -2566,6 +2550,7 @@ interp_skip(Env *e, Val *a) {
 		free_v(b);
 		return rc;
 	}
+	/* default: skip expression */
 	free_v(b);
 	Val *it = lookup(e, IT, false);
 	if (it == NULL) {
@@ -2582,9 +2567,9 @@ interp(Env *e, Val *a) {
 	assert(a != NULL && "value is null");
 	switch (e->state) {
 		case DEF:
-			return interp_later(e, a);
+			return interp_maybe_later(e, a);
 		case SKIP:
-			return interp_skip(e, a);
+			return interp_maybe_skip(e, a);
 		case OK:
 			return interp_now(e, a, false);
 		default:
