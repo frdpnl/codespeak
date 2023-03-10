@@ -11,11 +11,12 @@
 !_TAG_PROGRAM_VERSION	5.9.0	//
 DEF	phrase.c	/^	DEF,	\/* we're processing a (multiline) function definition *\/$/;"	e	enum:__anon2f313ef90c03	file:
 Dbg	phrase.c	/^bool Dbg = false;$/;"	v	typeref:typename:bool
-EMPTY	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
-END	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
+EMPTYL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
 ENDF	phrase.c	/^#define ENDF /;"	d	file:
 ENDIF	phrase.c	/^#define ENDIF /;"	d	file:
-ERR	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
+ENDL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
+ERRL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
+ERROR	phrase.c	/^	ERROR,$/;"	e	enum:__anon2f313ef90c03	file:
 Env	phrase.c	/^} Env;$/;"	t	typeref:struct:Env_	file:
 Env_	phrase.c	/^typedef struct Env_ {$/;"	s	file:
 Expr	phrase.c	/^} Expr;$/;"	t	typeref:struct:__anon2f313ef90308	file:
@@ -24,12 +25,12 @@ FPRIO	phrase.c	/^#define FPRIO /;"	d	file:
 IT	phrase.c	/^#define IT /;"	d	file:
 Ir	phrase.c	/^} Ir;		\/* return type for reduce *\/$/;"	t	typeref:struct:__anon2f313ef90e08	file:
 LEFT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
-LINE	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
+LINE	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
 List	phrase.c	/^} List;$/;"	t	typeref:struct:List_	file:
 List_	phrase.c	/^typedef struct List_ {$/;"	s	file:
 List_v	phrase.c	/^} List_v;$/;"	t	typeref:struct:List_v_	file:
 List_v_	phrase.c	/^typedef struct List_v_ {$/;"	s	file:
-Lrc	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	t	typeref:enum:__anon2f313ef91803	file:
+Lrc	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	t	typeref:enum:__anon2f313ef91803	file:
 NSYMS	phrase.c	/^#define NSYMS /;"	d	file:
 OK	phrase.c	/^	OK,$/;"	e	enum:__anon2f313ef90c03	file:
 Phrase	phrase.c	/^} Phrase;$/;"	t	typeref:struct:__anon2f313ef91708	file:
@@ -89,12 +90,13 @@ __anon2f313ef91408	phrase.c	/^	struct {$/;"	s	union:Val_	file:
 __anon2f313ef91508	phrase.c	/^	struct {$/;"	s	union:Val_	file:
 __anon2f313ef91608	phrase.c	/^	struct {$/;"	s	union:Val_	file:
 __anon2f313ef91708	phrase.c	/^typedef struct {$/;"	s	file:
-__anon2f313ef91803	phrase.c	/^typedef enum {LINE, EMPTY, END, ERR} Lrc;$/;"	g	file:
+__anon2f313ef91803	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	g	file:
 added_sym	phrase.c	/^added_sym(Env *a, Symval *b, bool err) {$/;"	f	typeref:typename:bool	file:
 arity	phrase.c	/^		int arity;$/;"	m	struct:Val_::__anon2f313ef91208	typeref:typename:int	file:
 arity	phrase.c	/^	int arity;$/;"	m	struct:Symop_	typeref:typename:int	file:
 body	phrase.c	/^		List_v body;$/;"	m	struct:Val_::__anon2f313ef91308	typeref:typename:List_v	file:
 copy_v	phrase.c	/^copy_v(Val *a) {$/;"	f	typeref:typename:Val *	file:
+exec_seq	phrase.c	/^exec_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ir	file:
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/;"	f	typeref:typename:Expr *	file:
 expr	phrase.c	/^expr() {$/;"	f	typeref:typename:Expr *	file:
 f	phrase.c	/^	Ir (*f)(Env *e, Val *s, size_t p);$/;"	m	struct:Symop_	typeref:typename:Ir (*)(Env * e,Val * s,size_t p)	file:
@@ -104,6 +106,9 @@ free_s	phrase.c	/^free_s(Sem *a) {$/;"	f	typeref:typename:void	file:
 free_symval	phrase.c	/^free_symval(Symval *a) {$/;"	f	typeref:typename:void	file:
 free_v	phrase.c	/^free_v(Val *a) {$/;"	f	typeref:typename:void	file:
 free_x	phrase.c	/^free_x(Expr *a) {$/;"	f	typeref:typename:void	file:
+handle_atom	phrase.c	/^handle_atom(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
+handle_lst	phrase.c	/^handle_lst(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
+handle_seq	phrase.c	/^handle_seq(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 hdr	phrase.c	/^	} hdr;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90508	file:
 hdr	phrase.c	/^	} hdr;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef90f08	file:
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
@@ -113,7 +118,6 @@ interp_maybe_later	phrase.c	/^interp_maybe_later(Env *e, Val *a) {$/;"	f	typeref
 interp_maybe_skip	phrase.c	/^interp_maybe_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_now	phrase.c	/^interp_now(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_ph	phrase.c	/^interp_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
-interp_seq	phrase.c	/^interp_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ir	file:
 inxs	phrase.c	/^} inxs;$/;"	t	typeref:enum:__anon2f313ef90c03	file:
 isatom_v	phrase.c	/^isatom_v(Val *a) {$/;"	f	typeref:typename:bool	file:
 isequal_v	phrase.c	/^isequal_v(Val *a, Val *b) {$/;"	f	typeref:typename:bool	file:

@@ -572,6 +572,7 @@ typedef enum {
 	SKIP,	/* for 'if, skip until 'else or 'endif */
 	DEF,	/* we're processing a (multiline) function definition */
 	RETURN,	/* returning from function (short circuit) */
+	ERROR,
 	FATAL
 } inxs;
 
@@ -703,6 +704,9 @@ print_inxs(inxs s) {
 			break;
 		case RETURN:
 			printf("Return ");
+			break;
+		case ERROR:
+			printf("Error ");
 			break;
 		case FATAL:
 			printf("Fatal ");
@@ -1809,56 +1813,6 @@ position(Val *a, List_v lv) {
 	return -1;
 }
 
-static Ir
-interp_body(Env *e, Val *s, size_t p) {
-	Val *fun = lookup(e, IT, false);
-	if (fun == NULL) {
-		printf("? %s: 'it' required, yet undefined\n", __FUNCTION__);
-		return (Ir) {FATAL, NULL};
-	}
-	if (fun->hdr.t != VSYMF) {
-		printf("? %s: 'it' is not a function\n", __FUNCTION__);
-		return (Ir) {FATAL, NULL};
-	}
-	/* closure: replace free symbols with env value */
-	for (size_t i=0; i<s->seq.v.n; ++i) {
-		Val *c = s->seq.v.v[i];
-		/* we're only concerned with symbols */
-		if (c->hdr.t != VSYM) {
-			continue;
-		}
-		/* 'it resolved later */
-		if (strncmp(c->sym.v, IT, 3) == 0) {
-			continue;
-		}
-		/* if this function, then skip (recursive call) */
-		if (strncmp(c->sym.v, fun->symf.name, sizeof(c->sym.v)) == 0) {
-			continue;
-		}
-		/* ignore function parameters */
-		int id = position(c, fun->symf.param);
-		if (id != -1) {
-			continue;
-		}
-		Val *fv = lookup(e, c->sym.v, true);
-		/* unknown sym, can be normal, determined in function or operator */
-		if (fv == NULL) {
-			continue;
-		}
-		/* closure: replace sym with value from env */
-		if (Dbg) { 
-			printf("## %s: replacing free ",__FUNCTION__);
-			print_v(c);
-			printf(" with ");
-			print_v(fv);
-			printf("\n");
-		}
-		free_v(c);
-		s->seq.v.v[i] = copy_v(fv);
-	}
-	fun->symf.body = push_l(fun->symf.body, s);
-	return (Ir) {DEF, copy_v(fun)};
-}
 static Ir 
 reduce_else(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
@@ -1970,12 +1924,6 @@ reduce_end(Env *e, Val *s, size_t p) {
 	Val *b = NULL;
 	if (a->hdr.t == VSYMOP) {
 		/* rem: end if */
-		if (e->state == DEF) {
-			free_v(a);
-			Ir rc = interp_body(e, s, p);
-			upd_prefix1(s, p, rc.v);
-			return (Ir) {rc.state, s};
-		}
 		if (a->symop.v != reduce_if) {
 			printf("? %s: 'end' with wrong operator argument\n",
 					__FUNCTION__);
@@ -2016,9 +1964,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
 			/* rem: not the function being defined, then part of the body */
 			free_v(a);
-			Ir rc = interp_body(e, s, p);
-			upd_prefix1(s, p, rc.v);
-			return (Ir) {rc.state, s};
+			return (Ir) {ERROR, NULL};
 		}
 		/* rem: end 'fun ; add the fun symbol */
 		b = copy_v(c);
@@ -2336,9 +2282,9 @@ solve_if_fun(Env *e, Val *a) {
 }
 
 static Ir 
-interp_seq(Env *e, Val *b, bool look) {
-	assert(b != NULL);
+exec_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
+	assert(b != NULL);
 	if (Dbg) { printf("##  %s (%d) entry: ", __FUNCTION__, look); print_v(b); printf("\n"); }
 	/* resolve symbols to operators, functions */
 	Ir rc = solve_if_fun(e, b);
@@ -2414,97 +2360,151 @@ interp_seq(Env *e, Val *b, bool look) {
 	printf("? %s: sequence empty\n",__FUNCTION__);
 	return (Ir) {FATAL, NULL};
 }
+static Ir 
+handle_seq(Env *e, Val *a, bool look) {
+	Ir rc;
+	Val *b = NULL;
+	for (size_t i=0; i < a->seq.v.n; ++i) {
+		rc = interp_now(e, a->seq.v.v[i], look);
+		if (rc.state != OK) {
+			/* other states have no meaning inside a seq */
+			free_v(b);
+			free_v(rc.v);
+			return (Ir) {FATAL, NULL};
+		}
+		b = push_v(VSEQ, b, rc.v);
+		free_v(rc.v);
+	}
+	if (b == NULL) {
+		b = malloc(sizeof(*b));
+		assert( b != NULL);
+		b->hdr.t = VNIL;
+		return (Ir) {OK, b};
+	}
+	rc = exec_seq(e, b, look);
+	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(rc.v); printf("\n"); }
+	free_v(b);
+	return rc;
+}
+static Ir 
+handle_atom(Env *e, Val *a, bool look) {
+	if (a->hdr.t == VSYM) {
+		/* resolve operators */
+		Symop *so = lookup_op(a->sym.v);
+		if (so != NULL) {
+			Val *b = malloc(sizeof(*b));
+			b->hdr.t = VSYMOP;
+			b->symop.prio = so->prio;
+			b->symop.v = so->f;
+			b->symop.arity = so->arity;
+			strncpy(b->symop.name, so->name, 1+strlen(so->name));
+			return (Ir) {OK, b};
+		}
+		/* resolve 'it */
+		if (strncmp(a->sym.v, IT, 3) == 0) {
+			Val *b = lookup(e, IT, false);
+			if (b == NULL) {
+				printf("? %s: 'it undefined\n",
+					__FUNCTION__);
+				return (Ir) {FATAL, NULL};
+			} 
+			return (Ir) {OK, copy_v(b)};
+		}
+		/* resolve according to the look directive */
+		if (look) {
+			Val *b = lookup(e, a->sym.v, true);
+			if (b == NULL) {
+				printf("? %s: unknown symbol '%s'\n",
+					__FUNCTION__, a->sym.v);
+				return (Ir) {FATAL, NULL};
+			} 
+			return (Ir) {OK, copy_v(b)};
+		}
+	}
+	return (Ir) {OK, copy_v(a)};
+}
+static Ir 
+handle_lst(Env *e, Val *a, bool look) {
+	Ir rc;
+	Val *b = NULL;
+	for (size_t i=0; i < a->lst.v.n; ++i) {
+		rc = interp_now(e, a->lst.v.v[i], look);
+		if (rc.state != OK) {
+			/* other states have no meaning inside a list */
+			free_v(b);
+			free_v(rc.v);
+			return (Ir) {FATAL, NULL};
+		}
+		b = push_v(VLST, b, rc.v);
+		free_v(rc.v);
+	}
+	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(b); printf("\n"); }
+	return (Ir) {OK, b};
+}
 
 static Ir 
 interp_now(Env *e, Val *a, bool look) {
 	/* returns a fresh value, 'a untouched */
 	if (isatom_v(a)) {
-		if (a->hdr.t == VSYM) {
-			/* resolve operators */
-			Symop *so = lookup_op(a->sym.v);
-			if (so != NULL) {
-				Val *b = malloc(sizeof(*b));
-				b->hdr.t = VSYMOP;
-				b->symop.prio = so->prio;
-				b->symop.v = so->f;
-				b->symop.arity = so->arity;
-				strncpy(b->symop.name, so->name, 1+strlen(so->name));
-				return (Ir) {OK, b};
-			}
-			/* resolve 'it */
-			if (strncmp(a->sym.v, IT, 3) == 0) {
-				Val *b = lookup(e, IT, false);
-				if (b == NULL) {
-					printf("? %s: 'it undefined\n",
-						__FUNCTION__);
-					return (Ir) {FATAL, NULL};
-				} 
-				return (Ir) {OK, copy_v(b)};
-			}
-			/* resolve according to the look directive */
-			if (look) {
-				Val *b = lookup(e, a->sym.v, true);
-				if (b == NULL) {
-					printf("? %s: unknown symbol '%s'\n",
-						__FUNCTION__, a->sym.v);
-					return (Ir) {FATAL, NULL};
-				} 
-				return (Ir) {OK, copy_v(b)};
-			}
-		}
-		return (Ir) {OK, copy_v(a)};
+		return handle_atom(e, a, look);
 	}
 	if (a->hdr.t == VLST) {
-		Ir rc;
-		Val *b = NULL;
-		for (size_t i=0; i < a->lst.v.n; ++i) {
-			rc = interp_now(e, a->lst.v.v[i], look);
-			if (rc.state != OK) {
-				/* other states have no meaning inside a list */
-				free_v(b);
-				free_v(rc.v);
-				return (Ir) {FATAL, NULL};
-			}
-			b = push_v(VLST, b, rc.v);
-			free_v(rc.v);
-		}
-		if (Dbg) { printf("##  %s i-lst: ", __FUNCTION__); print_v(b); printf("\n"); }
-		return (Ir) {OK, b};
+		return handle_lst(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		Ir rc;
-		Val *b = NULL;
-		for (size_t i=0; i < a->seq.v.n; ++i) {
-			rc = interp_now(e, a->seq.v.v[i], look);
-			if (rc.state != OK) {
-				/* other states have no meaning inside a seq */
-				free_v(b);
-				free_v(rc.v);
-				return (Ir) {FATAL, NULL};
-			}
-			b = push_v(VSEQ, b, rc.v);
-			free_v(rc.v);
-		}
-		if (b == NULL) {
-			b = malloc(sizeof(*b));
-			assert( b != NULL);
-			b->hdr.t = VNIL;
-			return (Ir) {OK, b};
-		}
-		rc = interp_seq(e, b, look);
-		if (Dbg) { printf("##  %s i-seq: ", __FUNCTION__); print_v(rc.v); printf("\n"); }
-		free_v(b);
-		return rc;
+		return handle_seq(e, a, look);
 	}
-	printf("? %s: unknown value type\n",
-			__FUNCTION__);
+	printf("? %s: unknown value\n", __FUNCTION__);
 	return (Ir) {FATAL, NULL};
+}
+
+static Ir
+interp_body(Env *e, Val *s, size_t p) {
+	Val *fun = lookup(e, IT, false);
+	if (fun == NULL) {
+		printf("? %s: 'it' required, yet undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	if (fun->hdr.t != VSYMF) {
+		printf("? %s: 'it' is not a function\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	/* closure: replace free symbols with env value */
+	for (size_t i=0; i<s->seq.v.n; ++i) {
+		Val *c = s->seq.v.v[i];
+		/* we're only concerned with symbols */
+		if (c->hdr.t != VSYM) {
+			continue;
+		}
+		/* 'it resolved later */
+		if (strncmp(c->sym.v, IT, 3) == 0) {
+			continue;
+		}
+		/* skip recursive call */
+		if (strncmp(c->sym.v, fun->symf.name, sizeof(c->sym.v)) == 0) {
+			continue;
+		}
+		/* ignore function parameters */
+		int id = position(c, fun->symf.param);
+		if (id != -1) {
+			continue;
+		}
+		Val *fv = lookup(e, c->sym.v, true);
+		/* unknown sym, can be normal, determined in function or operator */
+		if (fv == NULL) {
+			continue;
+		}
+		/* closure: replace sym with value from env */
+		free_v(c);
+		s->seq.v.v[i] = copy_v(fv);
+	}
+	fun->symf.body = push_l(fun->symf.body, s);
+	return (Ir) {DEF, copy_v(fun)};
 }
 
 static Ir
 interp_maybe_later(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
-	assert(a != NULL);
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
 	Val *b = copy_v(a);
 	/* resolve symbols to operators, functions */
@@ -2518,17 +2518,23 @@ interp_maybe_later(Env *e, Val *a) {
 			&& b->seq.v.v[0]->symop.v == reduce_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1) {
 		Ir rc = interp_now(e, b, false);
+		/* not a valid end expression */
+		if (rc.state == ERROR) {
+			rc = interp_body(e, b, 0);
+			free_v(b);
+			return rc;
+		}
 		free_v(b);
 		return rc;
 	}
+	rc = interp_body(e, b, 0);
 	free_v(b);
-	return interp_body(e, a, 0);
+	return rc;
 }
 
 static Ir
 interp_maybe_skip(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
-	assert(a != NULL);
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
 	Val *b = copy_v(a);
 	/* resolve symbols to operators, functions */
@@ -2550,7 +2556,7 @@ interp_maybe_skip(Env *e, Val *a) {
 		free_v(b);
 		return rc;
 	}
-	/* default: skip expression */
+	/* default: skip val */
 	free_v(b);
 	Val *it = lookup(e, IT, false);
 	if (it == NULL) {
@@ -2738,7 +2744,7 @@ interp_ph(Env *env, Phrase *a) {
 
 /* ----- main ----- */
 
-typedef enum {LINE, EMPTY, END, ERR} Lrc;
+typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;
 
 static Lrc 
 readline(char **S) {
@@ -2752,11 +2758,11 @@ readline(char **S) {
 			printf("? %s: %s\n",
 					__FUNCTION__,
 					strerror(errno));
-			return ERR;
+			return ERRL;
 		}
 		free(line);
 		*S = NULL;
-		return END;
+		return ENDL;
 	}
 	if (isspace((int)line[rd-1])) {
 		line[rd-1] = '\0';
@@ -2764,7 +2770,7 @@ readline(char **S) {
 	if (strlen(line) == 0) {
 		free(line);
 		*S = NULL;
-		return EMPTY;
+		return EMPTYL;
 	}
 	*S = line;
 	return LINE;
@@ -2785,12 +2791,12 @@ main(int argc, char **argv) {
 	while (1) {
 		Lrc rc = readline(&line);
 		switch (rc) {
-			case ERR:
+			case ERRL:
 				printf("? %s: error\n", __FUNCTION__); 
 				print_env(e, "?");
 				free_env(e, true);
 				return EXIT_FAILURE;
-			case END:
+			case ENDL:
 				if (e->state != OK) {
 					printf("? %s: unexpected end of program\n",
 							__FUNCTION__);
@@ -2798,7 +2804,7 @@ main(int argc, char **argv) {
 				printf("> exit\n"); print_env(e, ">");
 				free_env(e, true);
 				return EXIT_SUCCESS;
-			case EMPTY:
+			case EMPTYL:
 				continue;
 			case LINE:
 				printf("> input: \"%s\"\n", line);
