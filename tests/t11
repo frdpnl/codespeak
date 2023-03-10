@@ -1,4 +1,8 @@
 
+call 1 correct
+call correct true
+call (not true) false
+
 if 2 > 1. ; print correct ; end if
 if not 2 > 1. ; print it
 end if

@@ -108,6 +108,7 @@ hdr	phrase.c	/^	} hdr;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90508	
 hdr	phrase.c	/^	} hdr;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef90f08	file:
 infixed	phrase.c	/^infixed(size_t p, size_t n) {$/;"	f	typeref:typename:bool	file:
 interp	phrase.c	/^interp(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+interp_body	phrase.c	/^interp_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_later	phrase.c	/^interp_later(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_now	phrase.c	/^interp_now(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_ph	phrase.c	/^interp_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
@@ -165,7 +166,6 @@ rea	phrase.c	/^	} rea;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90708	
 rea	phrase.c	/^	} rea;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef91108	file:
 readline	phrase.c	/^readline(char **S) {$/;"	f	typeref:typename:Lrc	file:
 reduce_and	phrase.c	/^reduce_and(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
-reduce_body	phrase.c	/^reduce_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_call	phrase.c	/^reduce_call(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_def	phrase.c	/^reduce_def(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_div	phrase.c	/^reduce_div(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
@@ -195,10 +195,8 @@ reduce_prefixn_arg	phrase.c	/^reduce_prefixn_arg(Env *e, Val *s, size_t p, Val *
 reduce_print	phrase.c	/^reduce_print(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_rem	phrase.c	/^reduce_rem(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_return	phrase.c	/^reduce_return(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
-reduce_skip	phrase.c	/^reduce_skip(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_solve	phrase.c	/^reduce_solve(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_true	phrase.c	/^reduce_true(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
-resolve_special	phrase.c	/^resolve_special(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 s	phrase.c	/^	Sem *s;$/;"	m	struct:List_	typeref:typename:Sem *	file:
 s	phrase.c	/^	Symval **s;$/;"	m	struct:Env_	typeref:typename:Symval **	file:
 sem_nat	phrase.c	/^sem_nat(long long a) {$/;"	f	typeref:typename:Sem *	file:
@@ -210,6 +208,7 @@ seme_of_exp	phrase.c	/^seme_of_exp(Expr *a) {$/;"	f	typeref:typename:Sem *	file:
 seme_of_exp_part	phrase.c	/^seme_of_exp_part(Expr *a, size_t from, size_t tox) {$/;"	f	typeref:typename:Sem *	file:
 seq	phrase.c	/^	} seq;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90a08	file:
 seq	phrase.c	/^	} seq;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef91608	file:
+solve_if_fun	phrase.c	/^solve_if_fun(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 state	phrase.c	/^	inxs state;$/;"	m	struct:Env_	typeref:typename:inxs	file:
 state	phrase.c	/^	inxs state;$/;"	m	struct:__anon2f313ef90e08	typeref:typename:inxs	file:
 stored_sym	phrase.c	/^stored_sym(Env *a, Symval *b) {$/;"	f	typeref:typename:bool	file:

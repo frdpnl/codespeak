@@ -1673,8 +1673,19 @@ reduce_solve(Env *e, Val *s, size_t p) {
 static Ir 
 reduce_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!reduce_prefix1_arg(e, s, p, &a, true)) {
+	if (!reduce_prefix1_arg(e, s, p, &a, false)) {
 		return (Ir) {FATAL, NULL};
+	}
+	if (a->hdr.t == VSYM) {
+		Val *b = lookup(e, a->sym.v, false);
+		if (b == NULL) {
+			printf("? %s: argument symbol undefined (%s)\n", 
+					__FUNCTION__, a->sym.v);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
+		}
+		free_v(a);
+		a = copy_v(b);
 	}
 	if (a->hdr.t != VLST) {
 		printf("? %s: argument not a list\n", 
@@ -1799,7 +1810,7 @@ position(Val *a, List_v lv) {
 }
 
 static Ir
-reduce_body(Env *e, Val *s, size_t p) {
+interp_body(Env *e, Val *s, size_t p) {
 	Val *fun = lookup(e, IT, false);
 	if (fun == NULL) {
 		printf("? %s: 'it' required, yet undefined\n", __FUNCTION__);
@@ -1847,15 +1858,6 @@ reduce_body(Env *e, Val *s, size_t p) {
 	}
 	fun->symf.body = push_l(fun->symf.body, s);
 	return (Ir) {DEF, copy_v(fun)};
-}
-static Ir
-reduce_skip(Env *e, Val *s, size_t p) {
-	Val *it = lookup(e, IT, false);
-	if (it == NULL) {
-		printf("? %s: 'it' undefined\n", __FUNCTION__);
-		return (Ir) {FATAL, NULL};
-	}
-	return (Ir) {SKIP, copy_v(it)};
 }
 static Ir 
 reduce_else(Env *e, Val *s, size_t p) {
@@ -1970,7 +1972,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 		/* rem: end if */
 		if (e->state == DEF) {
 			free_v(a);
-			Ir rc = reduce_body(e, s, p);
+			Ir rc = interp_body(e, s, p);
 			upd_prefix1(s, p, rc.v);
 			return (Ir) {rc.state, s};
 		}
@@ -2014,7 +2016,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
 			/* rem: not the function being defined, then part of the body */
 			free_v(a);
-			Ir rc = reduce_body(e, s, p);
+			Ir rc = interp_body(e, s, p);
 			upd_prefix1(s, p, rc.v);
 			return (Ir) {rc.state, s};
 		}
@@ -2301,24 +2303,27 @@ val_of_seme(Env *e, Sem *s) {
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
 static Ir 
-resolve_special(Env *e, Val *a) {
+solve_if_fun(Env *e, Val *a) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
-	Val *it = lookup(e, IT, false);
 	Val *b = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		b = a->seq.v.v[i];
 		if (b->hdr.t == VSYM) {
-			if (strncmp(b->sym.v, IT, 3) == 0) {
-				if (it == NULL) {
-					printf("? %s: 'it' undefined\n", __FUNCTION__);
-					return (Ir) {FATAL, NULL};
-				}
+			Val *c = NULL;
+			Symop *so = lookup_op(b->sym.v);
+			if (so != NULL) {
+				c = malloc(sizeof(*c));
+				c->hdr.t = VSYMOP;
+				c->symop.prio = so->prio;
+				c->symop.v = so->f;
+				c->symop.arity = so->arity;
+				strncpy(c->symop.name, so->name, 1+strlen(so->name));
 				free_v(b);
-				a->seq.v.v[i] = copy_v(it);
+				a->seq.v.v[i] = c;
 				continue;
-			} 
-			Val *c = lookup(e, b->sym.v, false);
+			}
+			c = lookup(e, b->sym.v, false);
 			if (c != NULL && (c->hdr.t == VSYMF
 					|| c->hdr.t == VSYMOP)) {
 				free_v(b);
@@ -2332,10 +2337,11 @@ resolve_special(Env *e, Val *a) {
 
 static Ir 
 interp_seq(Env *e, Val *b, bool look) {
+	assert(b != NULL);
 	/* symbol application: consumes the seq, until 1 item left */
 	if (Dbg) { printf("##  %s (%d) entry: ", __FUNCTION__, look); print_v(b); printf("\n"); }
-	/* resolve 'it, operators, functions */
-	Ir rc = resolve_special(e, b);
+	/* resolve symbols to operators, functions */
+	Ir rc = solve_if_fun(e, b);
 	if (rc.state == FATAL) {
 		return rc;
 	}
@@ -2411,7 +2417,6 @@ interp_seq(Env *e, Val *b, bool look) {
 
 static Ir 
 interp_now(Env *e, Val *a, bool look) {
-	/* interprets the val a, in environment e */
 	/* returns a fresh value, 'a untouched */
 	if (isatom_v(a)) {
 		if (a->hdr.t == VSYM) {
@@ -2425,6 +2430,16 @@ interp_now(Env *e, Val *a, bool look) {
 				b->symop.arity = so->arity;
 				strncpy(b->symop.name, so->name, 1+strlen(so->name));
 				return (Ir) {OK, b};
+			}
+			/* resolve 'it */
+			if (strncmp(a->sym.v, IT, 3) == 0) {
+				Val *b = lookup(e, IT, false);
+				if (b == NULL) {
+					printf("? %s: 'it undefined\n",
+						__FUNCTION__);
+					return (Ir) {FATAL, NULL};
+				} 
+				return (Ir) {OK, copy_v(b)};
 			}
 			/* resolve according to the look directive */
 			if (look) {
@@ -2470,6 +2485,12 @@ interp_now(Env *e, Val *a, bool look) {
 			b = push_v(VSEQ, b, rc.v);
 			free_v(rc.v);
 		}
+		if (b == NULL) {
+			b = malloc(sizeof(*b));
+			assert( b != NULL);
+			b->hdr.t = VNIL;
+			return (Ir) {OK, b};
+		}
 		rc = interp_seq(e, b, look);
 		if (Dbg) { printf("##  %s i-seq: ", __FUNCTION__); print_v(rc.v); printf("\n"); }
 		free_v(b);
@@ -2482,33 +2503,76 @@ interp_now(Env *e, Val *a, bool look) {
 
 static Ir
 interp_later(Env *e, Val *a) {
-	Val *b = a;
-	if (e->state == DEF) {
-		if (!(b->seq.v.v[0]->hdr.t == VSYMOP 
-				&& b->seq.v.v[0]->symop.v == reduce_end
-				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1)) {
-			return reduce_body(e, b, 0);
-		}
+	/* returns a fresh value, 'a untouched */
+	assert(a != NULL);
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
+	Val *b = copy_v(a);
+	/* resolve symbols to operators, functions */
+	Ir rc = solve_if_fun(e, b);
+	if (rc.state == FATAL) {
+		free_v(b);
+		return rc;
 	}
-	return (Ir) {OK, NULL};
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	/* rem: end _ : */
+	if (b->seq.v.v[0]->hdr.t == VSYMOP 
+			&& b->seq.v.v[0]->symop.v == reduce_end
+			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1) {
+		/* try to handle the 'end: */
+		return interp_now(e, a, false);
+		/*
+		Ir rc = reduce_end(e, b, 0);
+		if (rc.state == FATAL) {
+			free_v(b);
+			return rc;
+		}
+		if (rc.v->seq.v.n != 1) {
+			free_v(rc.v);
+			printf("? %s: incorrect seq returned\n",
+					__FUNCTION__);
+			return (Ir) {FATAL, NULL};
+		}
+		Val *c = copy_v(rc.v->seq.v.v[0]);
+		free_v(rc.v);
+		return (Ir) {rc.state, c};
+		*/
+	}
+	/* default: add to fun body: */
+	return interp_body(e, a, 0);
 }
 
 static Ir
 interp_skip(Env *e, Val *a) {
-	Val *b = a;
-	if (e->state == SKIP) {
-		bool an_endif = b->seq.v.v[0]->hdr.t == VSYMOP 
-				&& b->seq.v.v[0]->symop.v == reduce_end
-				&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
-				&& b->seq.v.v[1]->hdr.t == VSYMOP 
-				&& b->seq.v.v[1]->symop.v == reduce_if ;
-		bool an_else = b->seq.v.v[0]->hdr.t == VSYMOP 
-				&& b->seq.v.v[0]->symop.v == reduce_else ;
-		if (!an_endif && !an_else) {
-			return reduce_skip(e, b, 0);
-		}
+	/* returns a fresh value, 'a untouched */
+	assert(a != NULL);
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
+	Val *b = copy_v(a);
+	/* resolve symbols to operators, functions */
+	Ir rc = solve_if_fun(e, b);
+	if (rc.state == FATAL) {
+		free_v(b);
+		return rc;
 	}
-	return (Ir) {OK, NULL};
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	bool an_endif = b->seq.v.v[0]->hdr.t == VSYMOP 
+			&& b->seq.v.v[0]->symop.v == reduce_end
+			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
+			&& b->seq.v.v[1]->hdr.t == VSYMOP 
+			&& b->seq.v.v[1]->symop.v == reduce_if ;
+	bool an_else = b->seq.v.v[0]->hdr.t == VSYMOP 
+			&& b->seq.v.v[0]->symop.v == reduce_else ;
+	if (an_endif || an_else) {
+		Ir rc = interp_now(e, b, false);
+		free_v(b);
+		return rc;
+	}
+	free_v(b);
+	Val *it = lookup(e, IT, false);
+	if (it == NULL) {
+		printf("? %s: 'it' undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	return (Ir) {SKIP, copy_v(it)};
 }
 
 static Ir 
