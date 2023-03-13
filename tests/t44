@@ -6,3 +6,7 @@ end f
 f (3,) ; call it f3
 f3 () ; print it
 
+call (f (4,)) f4 
+it ; print it
+it () ; print it
+

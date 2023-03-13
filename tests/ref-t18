@@ -1,41 +1,7 @@
 > input: "define inc (a,) "
-# phrase: define inc (a,)  ; 
-#   0   expr: define inc (a,) 
-#   0   seme: ( define inc { a } ) 
-#   0  value: ( 'define 'inc { 'a } ) 
-##  reduce_items (0) entry: ( 'define 'inc { 'a } ) 
-##  reduce_items (0) entry: { 'a } 
-##  reduce_items (0) exit: from { 'a } 
-##  reduce_items (0) ...   to { 'a } 
-##  reduce_items (0) exit: from ( 'define 'inc { 'a } ) 
-##  reduce_items (0) ...   to ( `define 'inc { 'a } ) 
-##  interp_seq (0) entry: ( `define 'inc { 'a } ) 
-##  interp_seq resolved: ( `define 'inc { 'a } ) 
-##  reduce_items (0) entry: { 'a } 
-##  reduce_items (0) exit: from { 'a } 
-##  reduce_items (0) ...   to { 'a } 
-##  interp_seq reduced: ( `(inc ('a ) x0 = ) ) 
-#   0 reduce: [Fun , `(inc ('a ) x0 = )  ]
-#   0 env:
-# env:
-#	state: Fun 
-#	it = `(inc ('a ) x0 = ) 
 > input: "end "
-# phrase: end  ; 
-#   0   expr: end 
-#   0   seme: ( end ) 
-#   0  value: ( 'end ) 
-##  reduce_items (0) entry: ( 'end ) 
-##  reduce_items (0) exit: from ( 'end ) 
-##  reduce_items (0) ...   to ( `end ) 
-##  interp_seq (0) entry: ( `end ) 
-#   0 reduce: [Fun , `(inc ('a ) x1 = ( `end ) )  ]
-#   0 env:
-# env:
-#	state: Fun 
-#	it = `(inc ('a ) x1 = ( `end ) ) 
 ? main: unexpected end of program
 > exit
 > env:
 >	state: Fun 
->	it = `(inc ('a ) x1 = ( `end ) ) 
+>	it = `(inc ('a )x1= ( `end ) ) 

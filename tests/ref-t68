@@ -1,0 +1,17 @@
+> input: "def makef (a,)"
+> input: "	if a = 0 ; def g (x,) ; -1 * x ; end g"
+> input: "	else ; def g(x,) ; x / a ; end g"
+> input: "	end if"
+> input: "	g"
+> input: "end makef"
+> input: "makef (0,) ; it (4,) ; print it"
+-4 
+> input: "makef (3,) ; it (4,) ; print it"
+1 
+> input: "makef (3.,) ; it (4,) ; print it"
+1.33 
+> exit
+> env:
+>	state: Ok 
+>	it = 1.33 
+>	makef = `(makef ('a )x10= ( `if 'a `= 0 ) ( `def 'g { 'x } ) ( -1 `* 'x ) .....( `end `if ) ( 'g ) ) 

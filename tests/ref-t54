@@ -1,27 +1,2 @@
 > input: "call 3 n ; n else "
-# phrase: call 3 n  ; n else  ; 
-#   0   expr: call 3 n 
-#   0   seme: ( call 3N n ) 
-#   0  value: ( 'call 3 'n ) 
-##  reduce_items (0) entry: ( 'call 3 'n ) 
-##  reduce_items (0) exit: from ( 'call 3 'n ) 
-##  reduce_items (0) ...   to ( `call 3 'n ) 
-##  interp_seq (0) entry: ( `call 3 'n ) 
-##  interp_seq resolved: ( `call 3 'n ) 
-##  interp_seq reduced: ( 3 ) 
-#   0 reduce: [Ok , 3  ]
-#   0 env:
-# env:
-#	state: Ok 
-#	n = 3 
-#	it = 3 
-#   1   expr: n else 
-#   1   seme: ( n else ) 
-#   1  value: ( 'n 'else ) 
-##  reduce_items (0) entry: ( 'n 'else ) 
-##  reduce_items (0) exit: from ( 'n 'else ) 
-##  reduce_items (0) ...   to ( 'n `else ) 
-##  interp_seq (0) entry: ( 'n `else ) 
-##  interp_seq resolved: ( 'n `else ) 
 ? reduce_else: 'else' syntax incorrect
-#   1 reduce: [Fatal , null ]

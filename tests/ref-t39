@@ -1,12 +1,2 @@
 > input: "end if"
-# phrase: end if ; 
-#   0   expr: end if
-#   0   seme: ( end if ) 
-#   0  value: ( 'end 'if ) 
-##  reduce_items (0) entry: ( 'end 'if ) 
-##  reduce_items (0) exit: from ( 'end 'if ) 
-##  reduce_items (0) ...   to ( `end `if ) 
-##  interp_seq (0) entry: ( `end `if ) 
-##  interp_seq resolved: ( `end `if ) 
-? reduce_end: 'it' required, but undefined
-#   0 reduce: [Fatal , null ]
+? reduce_end: 'it' required (the 'if condition), but undefined

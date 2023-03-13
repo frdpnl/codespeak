@@ -5,3 +5,12 @@ else
 end if
 print it
 
+def t ()
+	if 2 > 0 ; 1 ; call it r
+	else
+		-1 ; call it r
+	end if
+	r
+end t
+t () ; print it
+

@@ -1,78 +1,8 @@
 > input: "def f () "
-# phrase: def f ()  ; 
-#   0   expr: def f () 
-#   0   seme: ( def f Nil ) 
-#   0  value: ( 'def 'f Nil ) 
-##  reduce_items (0) entry: ( 'def 'f Nil ) 
-##  reduce_items (0) exit: from ( 'def 'f Nil ) 
-##  reduce_items (0) ...   to ( `def 'f Nil ) 
-##  interp_seq (0) entry: ( `def 'f Nil ) 
-##  interp_seq resolved: ( `def 'f Nil ) 
-##  interp_seq reduced: ( `(f () x0 = ) ) 
-#   0 reduce: [Fun , `(f () x0 = )  ]
-#   0 env:
-# env:
-#	state: Fun 
-#	it = `(f () x0 = ) 
 > input: "if 1 ; ok ; end if"
-# phrase: if 1  ; ok  ; end if ; 
-#   0   expr: if 1 
-#   0   seme: ( if 1N ) 
-#   0  value: ( 'if 1 ) 
-##  reduce_items (0) entry: ( 'if 1 ) 
-##  reduce_items (0) exit: from ( 'if 1 ) 
-##  reduce_items (0) ...   to ( `if 1 ) 
-##  interp_seq (0) entry: ( `if 1 ) 
-#   0 reduce: [Fun , `(f () x1 = ( `if 1 ) )  ]
-#   0 env:
-# env:
-#	state: Fun 
-#	it = `(f () x1 = ( `if 1 ) ) 
-#   1   expr: ok 
-#   1   seme: ( ok ) 
-#   1  value: ( 'ok ) 
-##  reduce_items (0) entry: ( 'ok ) 
-##  reduce_items (0) exit: from ( 'ok ) 
-##  reduce_items (0) ...   to ( 'ok ) 
-##  interp_seq (0) entry: ( 'ok ) 
-#   1 reduce: [Fun , `(f () x2 = ( `if 1 ) ( 'ok ) )  ]
-#   1 env:
-# env:
-#	state: Fun 
-#	it = `(f () x2 = ( `if 1 ) ( 'ok ) ) 
-#   2   expr: end if
-#   2   seme: ( end if ) 
-#   2  value: ( 'end 'if ) 
-##  reduce_items (0) entry: ( 'end 'if ) 
-##  reduce_items (0) exit: from ( 'end 'if ) 
-##  reduce_items (0) ...   to ( `end `if ) 
-##  interp_seq (0) entry: ( `end `if ) 
-##  interp_seq resolved: ( `end `if ) 
-##  interp_seq reduced: ( `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) ) ) 
-#   2 reduce: [Fun , `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) )  ]
-#   2 env:
-# env:
-#	state: Fun 
-#	it = `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) ) 
 > input: "end f"
-# phrase: end f ; 
-#   0   expr: end f
-#   0   seme: ( end f ) 
-#   0  value: ( 'end 'f ) 
-##  reduce_items (0) entry: ( 'end 'f ) 
-##  reduce_items (0) exit: from ( 'end 'f ) 
-##  reduce_items (0) ...   to ( `end 'f ) 
-##  interp_seq (0) entry: ( `end 'f ) 
-##  interp_seq resolved: ( `end 'f ) 
-##  interp_seq reduced: ( `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) ) ) 
-#   0 reduce: [Ok , `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) )  ]
-#   0 env:
-# env:
-#	state: Ok 
-#	it = `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) ) 
-#	f = `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) ) 
 > exit
 > env:
 >	state: Ok 
->	it = `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) ) 
->	f = `(f () x3 = ( `if 1 ) ( 'ok ) ( `end `if ) ) 
+>	it = `(f ()x3= ( `if 1 ) ( 'ok ) ( `end `if ) ) 
+>	f = `(f ()x3= ( `if 1 ) ( 'ok ) ( `end `if ) ) 

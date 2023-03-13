@@ -9,6 +9,7 @@
 !_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
 !_TAG_PROGRAM_URL	https://ctags.io/	/official site/
 !_TAG_PROGRAM_VERSION	5.9.0	//
+BACKTRACK	phrase.c	/^	BACKTRACK,$/;"	e	enum:__anon2f313ef90c03	file:
 DEF	phrase.c	/^	DEF,	\/* we're processing a (multiline) function definition *\/$/;"	e	enum:__anon2f313ef90c03	file:
 Dbg	phrase.c	/^bool Dbg = false;$/;"	v	typeref:typename:bool
 EMPTYL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
@@ -16,7 +17,6 @@ ENDF	phrase.c	/^#define ENDF /;"	d	file:
 ENDIF	phrase.c	/^#define ENDIF /;"	d	file:
 ENDL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
 ERRL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
-ERROR	phrase.c	/^	ERROR,$/;"	e	enum:__anon2f313ef90c03	file:
 Env	phrase.c	/^} Env;$/;"	t	typeref:struct:Env_	file:
 Env_	phrase.c	/^typedef struct Env_ {$/;"	s	file:
 Expr	phrase.c	/^} Expr;$/;"	t	typeref:struct:__anon2f313ef90308	file:

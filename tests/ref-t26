@@ -1,59 +1,7 @@
 > input: "define f () ; 1 ; end"
-# phrase: define f ()  ; 1  ; end ; 
-#   0   expr: define f () 
-#   0   seme: ( define f Nil ) 
-#   0  value: ( 'define 'f Nil ) 
-##  reduce_items (0) entry: ( 'define 'f Nil ) 
-##  reduce_items (0) exit: from ( 'define 'f Nil ) 
-##  reduce_items (0) ...   to ( `define 'f Nil ) 
-##  interp_seq (0) entry: ( `define 'f Nil ) 
-##  interp_seq resolved: ( `define 'f Nil ) 
-##  interp_seq reduced: ( `(f () x0 = ) ) 
-#   0 reduce: [Fun , `(f () x0 = )  ]
-#   0 env:
-# env:
-#	state: Fun 
-#	it = `(f () x0 = ) 
-#   1   expr: 1 
-#   1   seme: ( 1N ) 
-#   1  value: ( 1 ) 
-##  reduce_items (0) entry: ( 1 ) 
-##  reduce_items (0) exit: from ( 1 ) 
-##  reduce_items (0) ...   to ( 1 ) 
-##  interp_seq (0) entry: ( 1 ) 
-#   1 reduce: [Fun , `(f () x1 = ( 1 ) )  ]
-#   1 env:
-# env:
-#	state: Fun 
-#	it = `(f () x1 = ( 1 ) ) 
-#   2   expr: end
-#   2   seme: ( end ) 
-#   2  value: ( 'end ) 
-##  reduce_items (0) entry: ( 'end ) 
-##  reduce_items (0) exit: from ( 'end ) 
-##  reduce_items (0) ...   to ( `end ) 
-##  interp_seq (0) entry: ( `end ) 
-#   2 reduce: [Fun , `(f () x2 = ( 1 ) ( `end ) )  ]
-#   2 env:
-# env:
-#	state: Fun 
-#	it = `(f () x2 = ( 1 ) ( `end ) ) 
 > input: "f ()"
-# phrase: f () ; 
-#   0   expr: f ()
-#   0   seme: ( f Nil ) 
-#   0  value: ( 'f Nil ) 
-##  reduce_items (0) entry: ( 'f Nil ) 
-##  reduce_items (0) exit: from ( 'f Nil ) 
-##  reduce_items (0) ...   to ( 'f Nil ) 
-##  interp_seq (0) entry: ( 'f Nil ) 
-#   0 reduce: [Fun , `(f () x3 = ( 1 ) ( `end ) ( 'f Nil ) )  ]
-#   0 env:
-# env:
-#	state: Fun 
-#	it = `(f () x3 = ( 1 ) ( `end ) ( 'f Nil ) ) 
 ? main: unexpected end of program
 > exit
 > env:
 >	state: Fun 
->	it = `(f () x3 = ( 1 ) ( `end ) ( 'f Nil ) ) 
+>	it = `(f ()x3= ( 1 ) ( `end ) ( 'f Nil ) ) 

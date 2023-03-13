@@ -6,5 +6,5 @@ def f (a,)
 	g
 end f
 
-f (-2,) ; it ; it ()
-f (3,) ; it ()
+f (-2,) ; it ; it () ; print it
+f (3,) ; it () ; print it

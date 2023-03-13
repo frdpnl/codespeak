@@ -1,5 +1,6 @@
 
 3 ; call it A
 def f (x,) ; A * x ; end f
+call 4 A
 f (-1,) ; print it
 

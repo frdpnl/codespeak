@@ -572,7 +572,7 @@ typedef enum {
 	SKIP,	/* for 'if, skip until 'else or 'endif */
 	DEF,	/* we're processing a (multiline) function definition */
 	RETURN,	/* returning from function (short circuit) */
-	ERROR,
+	BACKTRACK,
 	FATAL
 } inxs;
 
@@ -634,7 +634,10 @@ typedef union Val_ {
 
 static void
 print_v(Val *a) {
-	assert(a != NULL);
+	if (a == NULL) {
+		printf("? %s: NULL\n", __FUNCTION__);
+		return;
+	}
 	switch (a->hdr.t) {
 		case VNIL:
 			printf("Nil ");
@@ -654,7 +657,7 @@ print_v(Val *a) {
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
 			}
-			printf(") x%lu = ", a->symf.body.n);
+			printf(")x%lu= ", a->symf.body.n);
 			for (size_t i=0; i<a->symf.body.n; ++i) {
 				size_t N = 2;
 				if (i > N && i < a->symf.body.n - N) {
@@ -705,7 +708,7 @@ print_inxs(inxs s) {
 		case RETURN:
 			printf("Return ");
 			break;
-		case ERROR:
+		case BACKTRACK:
 			printf("Error ");
 			break;
 		case FATAL:
@@ -1387,8 +1390,10 @@ reduce_min(Env *e, Val *s, size_t p) {
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s: arguments not numbers\n", 
+		printf("? %s: arguments not numbers in (", 
 				__FUNCTION__);
+		print_v(s);
+		printf(")\n");
 		free_v(a);
 		free_v(b);
 		return rc;
@@ -1925,14 +1930,14 @@ reduce_end(Env *e, Val *s, size_t p) {
 	if (a->hdr.t == VSYMOP) {
 		/* rem: end if */
 		if (a->symop.v != reduce_if) {
-			printf("? %s: 'end' with wrong operator argument\n",
+			printf("? %s: 'end' with wrong operator argument (expecting 'if')\n",
 					__FUNCTION__);
 			free_v(a);
 			return (Ir) {FATAL, NULL};
 		}
 		Val *c = lookup(e, IT, false);
 		if (c == NULL) {
-			printf("? %s: 'it' required, but undefined\n",
+			printf("? %s: 'it' required (the 'if condition), but undefined\n",
 					__FUNCTION__);
 			free_v(a);
 			return (Ir) {FATAL, NULL};
@@ -1964,7 +1969,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
 			/* rem: not the function being defined, then part of the body */
 			free_v(a);
-			return (Ir) {ERROR, NULL};
+			return (Ir) {BACKTRACK, NULL};
 		}
 		/* rem: end 'fun ; add the fun symbol */
 		b = copy_v(c);
@@ -2002,14 +2007,15 @@ reduce_fun(Env *e, Val *s, size_t p) {
 		return (Ir) {FATAL, NULL};
 	}
 	if (al->hdr.t == VNIL && f->symf.param.n != 0) {
-		printf("? %s: expected argument to `%s\n", 
-				__FUNCTION__, f->symf.name);
+		printf("? %s: expected %lu argument(s) to `%s\n", 
+				__FUNCTION__, f->symf.param.n, f->symf.name);
 		free_v(al);
 		return (Ir) {FATAL, NULL};
 	}
 	if (al->hdr.t == VLST && al->lst.v.n != f->symf.param.n) {
-		printf("? %s: number of arguments to `%s mismatch\n", 
-				__FUNCTION__, f->symf.name);
+		printf("? %s: number of arguments to `%s mismatch (got %lu, expected %lu)\n", 
+				__FUNCTION__, f->symf.name,
+				al->lst.v.n, f->symf.param.n);
 		free_v(al);
 		return (Ir) {FATAL, NULL};
 	}
@@ -2074,7 +2080,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 		break;
 	}
 	if (lit == NULL) {
-		printf("? %s: 'it' from '%s' undefined\n",
+		printf("? %s: 'it' from '%s' undefined (function without body?)\n",
 				__FUNCTION__, f->symf.name);
 		free_env(le, false);
 		return (Ir) {FATAL, NULL};
@@ -2269,6 +2275,10 @@ solve_if_fun(Env *e, Val *a) {
 				a->seq.v.v[i] = c;
 				continue;
 			}
+			if (strncmp(b->sym.v, IT, 3) == 0) {
+				/* 'it is resolved at exec */
+				continue;
+			}
 			c = lookup(e, b->sym.v, false);
 			if (c != NULL && (c->hdr.t == VSYMF
 					|| c->hdr.t == VSYMOP)) {
@@ -2348,7 +2358,7 @@ exec_seq(Env *e, Val *b, bool look) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
-		if (rc.state == FATAL) {
+		if (rc.state == FATAL || rc.state == BACKTRACK) {
 			assert(rc.v == NULL);
 			return rc;
 		}
@@ -2507,19 +2517,21 @@ interp_maybe_later(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
 	Val *b = copy_v(a);
-	/* resolve symbols to operators, functions */
+	/* resolve symbols (not 'it) to operators and functions */
 	Ir rc = solve_if_fun(e, b);
 	if (rc.state == FATAL) {
 		free_v(b);
 		return rc;
 	}
 	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	/* rem: expecting end 'foo */
 	if (b->seq.v.v[0]->hdr.t == VSYMOP 
 			&& b->seq.v.v[0]->symop.v == reduce_end
-			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1) {
+			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
+			&& b->seq.v.v[1]->hdr.t == VSYM) {
 		Ir rc = interp_now(e, b, false);
-		/* not a valid end expression */
-		if (rc.state == ERROR) {
+		/* not a valid end expression after all */
+		if (rc.state == BACKTRACK) {
 			rc = interp_body(e, b, 0);
 			free_v(b);
 			return rc;
