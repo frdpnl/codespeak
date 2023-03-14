@@ -1,2 +1,2 @@
 > input: "if t ; nooooo ; end if"
-? handle_atom: unknown symbol 't'
+? interp_atom: unknown symbol 't'

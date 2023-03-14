@@ -1,0 +1,11 @@
+> input: "call 1 n"
+> input: "if n > 0 ; 0"
+> input: "else ; 1"
+> input: "end if"
+> input: "print it"
+0 
+> exit
+> env:
+>	state: Ok 
+>	n = 1 
+>	it = 0 

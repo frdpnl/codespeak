@@ -1,0 +1,10 @@
+> input: "call end newend"
+> input: "def f () ; 1 ; newend f"
+> input: "print (f ())"
+1 
+> exit
+> env:
+>	state: Ok 
+>	newend = `end 
+>	it = 1 
+>	f = `(f [1] ( 1 ) ) 

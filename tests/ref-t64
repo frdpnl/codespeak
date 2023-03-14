@@ -5,4 +5,4 @@
 > env:
 >	state: Ok 
 >	it = -1 
->	f = `(f ('a 'b )x3= ( Nil ) ( Nil ) ( 'a `- 'b ) ) 
+>	f = `(f 'a 'b [3] ( Nil ) ( Nil ) ( 'a `- 'b ) ) 

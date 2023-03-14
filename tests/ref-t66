@@ -12,4 +12,4 @@
 > env:
 >	state: Ok 
 >	it = 3 
->	f = `(f ('a )x11= ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
+>	f = `(f 'a [11] ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 

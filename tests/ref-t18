@@ -4,4 +4,4 @@
 > exit
 > env:
 >	state: Fun 
->	it = `(inc ('a )x1= ( `end ) ) 
+>	it = `(inc 'a [1] ( `end ) ) 

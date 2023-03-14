@@ -1,0 +1,7 @@
+
+
+call end newend
+def f () ; 1 ; newend f
+
+print (f ())
+

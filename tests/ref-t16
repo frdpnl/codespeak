@@ -2,5 +2,5 @@
 > exit
 > env:
 >	state: Ok 
->	it = `(inc ()x1= ( 1 ) ) 
->	inc = `(inc ()x1= ( 1 ) ) 
+>	it = `(inc [1] ( 1 ) ) 
+>	inc = `(inc [1] ( 1 ) ) 

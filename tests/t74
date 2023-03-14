@@ -1,0 +1,7 @@
+
+def f () ; 1 ; end f
+env
+call f f2
+env
+f = f2
+

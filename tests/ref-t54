@@ -1,2 +1,2 @@
 > input: "call 3 n ; n else "
-? reduce_else: 'else' syntax incorrect
+? reduce_else: `else syntax incorrect

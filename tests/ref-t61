@@ -3,4 +3,4 @@
 > exit
 > env:
 >	state: Fun 
->	it = `(f ('a 'b )x1= ( `end 3 ) ) 
+>	it = `(f 'a 'b [1] ( `end 3 ) ) 

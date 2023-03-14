@@ -1,0 +1,25 @@
+> input: "def makef (a,)"
+> input: "	def g (x,) "
+> input: "		if a = 0 ; -1 * x "
+> input: "		else ; x / a "
+> input: "		end if"
+> input: "	end g"
+> input: "	print it"
+> input: "end makef"
+> input: "makef (0,) ; call it g1 ; g1 (4,) ; print it"
+`(g 'x [5] ( `if 0 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 0 ) ( `end `if ) ) 
+-4 
+> input: "makef (3,) ; call it g2 ; g2 (4,) ; print it"
+`(g 'x [5] ( `if 3 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3 ) ( `end `if ) ) 
+1 
+> input: "makef (3.,) ; call it g3 ; g3 (4,) ; print it"
+`(g 'x [5] ( `if 3.00 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3.00 ) ( `end `if ) ) 
+1.33 
+> exit
+> env:
+>	state: Ok 
+>	it = 1.33 
+>	makef = `(makef 'a [8] ( `def 'g { 'x } ) ( `if 'a `= 0 ) ( -1 `* 'x ) ...( `end 'g ) ( `print 'it ) ) 
+>	g1 = `(g 'x [5] ( `if 0 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 0 ) ( `end `if ) ) 
+>	g2 = `(g 'x [5] ( `if 3 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3 ) ( `end `if ) ) 
+>	g3 = `(g 'x [5] ( `if 3.00 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3.00 ) ( `end `if ) ) 

@@ -3,7 +3,7 @@
 > input: "	-1"
 > input: "end if"
 > input: "print it"
-0 
+1 
 > input: "def t ()"
 > input: "	if 2 > 0 ; 1 ; call it r"
 > input: "	else"
@@ -17,4 +17,4 @@
 > env:
 >	state: Ok 
 >	it = 1 
->	t = `(t ()x8= ( `if 2 `> 0 ) ( 1 ) ( `call 'it 'r ) ...( `end `if ) ( 'r ) ) 
+>	t = `(t [8] ( `if 2 `> 0 ) ( 1 ) ( `call 'it 'r ) ...( `end `if ) ( 'r ) ) 

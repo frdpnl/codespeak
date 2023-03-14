@@ -4,4 +4,4 @@
 > env:
 >	state: Ok 
 >	it = 0 
->	dec = `(dec ('a )x1= ( 'a `- 1 ) ) 
+>	dec = `(dec 'a [1] ( 'a `- 1 ) ) 

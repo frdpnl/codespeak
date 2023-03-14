@@ -653,11 +653,10 @@ print_v(Val *a) {
 			break;
 		case VSYMF:
 			printf("`(%s ", a->symf.name);
-			printf("(");
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
 			}
-			printf(")x%lu= ", a->symf.body.n);
+			printf("[%lu] ", a->symf.body.n);
 			for (size_t i=0; i<a->symf.body.n; ++i) {
 				size_t N = 2;
 				if (i > N && i < a->symf.body.n - N) {
@@ -840,6 +839,14 @@ isequal_v(Val *a, Val *b) {
 	if (a->hdr.t == VLST) {
 		for (size_t i=0; i<a->lst.v.n; ++i) { 
 			if (!isequal_v(a->lst.v.v[i], b->lst.v.v[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+	if (a->hdr.t == VSEQ) {
+		for (size_t i=0; i<a->seq.v.n; ++i) { 
+			if (!isequal_v(a->seq.v.v[i], b->seq.v.v[i])) {
 				return false;
 			}
 		}
@@ -1821,23 +1828,27 @@ position(Val *a, List_v lv) {
 static Ir 
 reduce_else(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
-		printf("? %s: 'else' syntax incorrect\n", __FUNCTION__);
+		printf("? %s: `else syntax incorrect\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
-	Val *a = malloc(sizeof(*a));
-	a->hdr.t = VNAT;
 	if (e->state == SKIP) {
+		Val *a = malloc(sizeof(*a));
+		a->hdr.t = VNAT;
 		a->nat.v = 1;
 		upd_prefix0(s, p, a);
 		return (Ir) {OK, s};
 	}
 	if (e->state == OK) {
-		a->nat.v = 0;
-		upd_prefix0(s, p, a);
+		Val *it = lookup(e, IT, false);
+		if (it == NULL) {
+			printf("? %s: `else before `if\n", __FUNCTION__);
+			return (Ir) {FATAL, NULL};
+		} 
+		Val *b = copy_v(it);
+		upd_prefix0(s, p, b);
 		return (Ir) {SKIP, s};
 	}
-	free_v(a);
-	printf("? %s: 'else' in invalid state (%u)\n", __FUNCTION__, e->state);
+	printf("? %s: `else in invalid state (%u)\n", __FUNCTION__, e->state);
 	return (Ir) {FATAL, NULL};
 }
 static Ir 
@@ -2108,11 +2119,26 @@ reduce_return(Env *e, Val *s, size_t p) {
 	upd_prefix0(s, p, copy_v(it));
 	return (Ir) {RETURN, s};
 }
+static Ir 
+reduce_env(Env *e, Val *s, size_t p) {
+	if (!(p == 0 && s->seq.v.n == 1)) {
+		printf("? %s: `env syntax incorrect\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	print_env(e, ">");
+	Val *it = lookup(e, IT, false);
+	if (it == NULL) {
+		printf("? %s: 'it undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	upd_prefix0(s, p, copy_v(it));
+	return (Ir) {OK, s};
+}
 
 /* --------------- builtin or base function symbols -------------------- */
 
 /* user defined fun priority */
-#define FPRIO 0
+#define DEFPRIO 0
 
 typedef struct Symop_ {
 	char name[WSZ];
@@ -2121,22 +2147,25 @@ typedef struct Symop_ {
 	int arity;
 } Symop;
 
-#define NSYMS 28
+#define NSYMS 29
 Symop Syms[] = {
-	(Symop) {"rem:",  -10, reduce_rem,  -1}, /* arity: remainder of seq val */
-	(Symop) {"true?", -10, reduce_true,  0},
-	(Symop) {"false?",-10, reduce_false, 0},
-	(Symop) {"list",  -10, reduce_list, -1},
-	(Symop) {"solve",  -10, reduce_solve,  1},
-	(Symop) {"do",    -10, reduce_do,    1},
-	(Symop) {"call",  -10, reduce_call,  2},
-	(Symop) {"define",-10, reduce_def,  2},
-	(Symop) {"def",   -10, reduce_def,  2},
-	(Symop) {"return", -10, reduce_return, 0},
-	(Symop) {"end",   -10, reduce_end,  1}, /* needs to be prior to funs */
-	(Symop) {"else",  -10, reduce_else, 0},
-	(Symop) {"print", -10, reduce_print, 1},
-	/* priority FPRIO (0) is for function (user defined) */
+	(Symop) {"rem:",   -20, reduce_rem,  -1}, /* -1 arity: remainder of seq val */
+	(Symop) {"true?",  -20, reduce_true,  0},
+	(Symop) {"false?", -20, reduce_false, 0},
+	(Symop) {"list",   -20, reduce_list, -1},
+	(Symop) {"solve",  -20, reduce_solve,  1},
+	(Symop) {"do",     -20, reduce_do,    1},
+	(Symop) {"call",   -20, reduce_call,  2},
+	(Symop) {"define", -20, reduce_def,  2},
+	(Symop) {"def",    -20, reduce_def,  2},
+	(Symop) {"return", -20, reduce_return, 0},
+	(Symop) {"end",    -20, reduce_end,  1}, /* needs to be prior to user def */
+	(Symop) {"else",   -20, reduce_else, 0},
+	(Symop) {"print",  -20, reduce_print, 1},
+	(Symop) {"env",    -20, reduce_env, 0},
+	(Symop) {"=",      -10, reduce_eq,  2},
+	(Symop) {"/=",     -10, reduce_neq, 2},
+	/* priority DEFPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, reduce_mul, 2},
 	(Symop) {"/",    20, reduce_div, 2},
 	(Symop) {"+",    30, reduce_plu, 2},
@@ -2145,8 +2174,6 @@ Symop Syms[] = {
 	(Symop) {"<=",   40, reduce_leq, 2},
 	(Symop) {">",    40, reduce_gre, 2},
 	(Symop) {">=",   40, reduce_geq, 2},
-	(Symop) {"=",    40, reduce_eq,  2},
-	(Symop) {"/=",   40, reduce_neq, 2},
 	(Symop) {"~=",   40, reduce_eqv, 2},
 	(Symop) {"not",  50, reduce_not, 1},
 	(Symop) {"and",  60, reduce_and, 2},
@@ -2328,8 +2355,8 @@ exec_seq(Env *e, Val *b, bool look) {
 		for (size_t i=0; i < b->seq.v.n; ++i) {
 			c = b->seq.v.v[i];
 			if (c->hdr.t == VSYMF) {
-				if (FPRIO < hiprio) {
-					hiprio = FPRIO;
+				if (DEFPRIO < hiprio) {
+					hiprio = DEFPRIO;
 					symat = i;
 					symfound = true;
 					symtype = VSYMF;
@@ -2371,7 +2398,7 @@ exec_seq(Env *e, Val *b, bool look) {
 	return (Ir) {FATAL, NULL};
 }
 static Ir 
-handle_seq(Env *e, Val *a, bool look) {
+interp_seq(Env *e, Val *a, bool look) {
 	Ir rc;
 	Val *b = NULL;
 	for (size_t i=0; i < a->seq.v.n; ++i) {
@@ -2397,7 +2424,7 @@ handle_seq(Env *e, Val *a, bool look) {
 	return rc;
 }
 static Ir 
-handle_atom(Env *e, Val *a, bool look) {
+interp_atom(Env *e, Val *a, bool look) {
 	if (a->hdr.t == VSYM) {
 		/* resolve operators */
 		Symop *so = lookup_op(a->sym.v);
@@ -2434,7 +2461,7 @@ handle_atom(Env *e, Val *a, bool look) {
 	return (Ir) {OK, copy_v(a)};
 }
 static Ir 
-handle_lst(Env *e, Val *a, bool look) {
+interp_lst(Env *e, Val *a, bool look) {
 	Ir rc;
 	Val *b = NULL;
 	for (size_t i=0; i < a->lst.v.n; ++i) {
@@ -2456,13 +2483,13 @@ static Ir
 interp_now(Env *e, Val *a, bool look) {
 	/* returns a fresh value, 'a untouched */
 	if (isatom_v(a)) {
-		return handle_atom(e, a, look);
+		return interp_atom(e, a, look);
 	}
 	if (a->hdr.t == VLST) {
-		return handle_lst(e, a, look);
+		return interp_lst(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		return handle_seq(e, a, look);
+		return interp_seq(e, a, look);
 	}
 	printf("? %s: unknown value\n", __FUNCTION__);
 	return (Ir) {FATAL, NULL};

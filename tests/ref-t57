@@ -8,4 +8,4 @@
 >	state: Ok 
 >	n = 4 
 >	it = 3 
->	f = `(f ('a )x3= ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 
+>	f = `(f 'a [3] ( `if 'a `> 1 ) ( `print 3 ) ( `end `if ) ) 

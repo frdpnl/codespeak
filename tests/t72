@@ -1,0 +1,12 @@
+
+def makef (a,)
+	def g (x,) 
+		if a = 0 ; -1 * x 
+		else ; x / a 
+		end if
+	end g
+	print it
+end makef
+print it
+
+makef (0.,) ; call it g ; g (4,) ; print it

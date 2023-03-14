@@ -1,6 +1,6 @@
 > input: "define dec (b,) ; b - 1 ; end dec"
 > input: "print dec"
-`(dec ('b )x1= ( 'b `- 1 ) ) 
+`(dec 'b [1] ( 'b `- 1 ) ) 
 > input: "define inc (a,) "
 > input: "1 + a "
 > input: "end inc"
@@ -10,5 +10,5 @@
 > env:
 >	state: Ok 
 >	it = 2 
->	dec = `(dec ('b )x1= ( 'b `- 1 ) ) 
->	inc = `(inc ('a )x1= ( 1 `+ 'a ) ) 
+>	dec = `(dec 'b [1] ( 'b `- 1 ) ) 
+>	inc = `(inc 'a [1] ( 1 `+ 'a ) ) 
