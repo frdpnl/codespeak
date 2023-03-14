@@ -9,7 +9,7 @@ Lines are made of sequences of expressions, each separated by `;`
 
 For example:
 
-`2 * 3.; print it` displays 6
+`2 * 3.; print it` displays 6.00
 
 `it` is a builtin symbol that stores the previous expression's value
 
@@ -41,11 +41,11 @@ Whitespace separates words.
 
 `call + plus; 1 plus 3; print it` displays 4
 
-`look` evaluates its argument
-
 `call 3 p ; print p` displays p, but `call 3 p ; look p; print it` displays 3
 
 `true?` and `false?` test the special symbol `it`
+
+`env` shows symbol table
 
 ### List and Do
 
@@ -69,13 +69,21 @@ Whitespace separates words.
 
 ### Conditional
 
-`if 2 > 1 ; print correct ; end if` displays correct
+`if 2 > 1 ; print 23 ; end if` displays 23
 
-`if -3 > 3 ; print weird ; end if` doesn't display anything, rest of line is ignored, `it` is false
+`if -3 > 3 ; print -10 ; end if` doesn't display anything, rest of line is ignored, `it` is false
 
-`if false? ; print better ; end if` displays better, because `it` is false (from previous `if`)
+```
+if 2 > 1 ; 23 ; print it
+else ; 0
+end if 
+print it
+```
+displays 23 (the evaluated value of the conditional)
 
-`2 > 1 ; if true? ; print true ; end if` displays 'true
+`if false? ; print 22 ; end if` displays 22, because `it` is false (from previous `if`)
+
+`2 > 1 ; if true? ; print 1 ; end if` displays 1
 
 ### Functions
 
@@ -85,12 +93,34 @@ f (3,) ; print it
 ```
 
 ```
-define newf ()
-	define g () ; 2 ; end g
+def makef (a,)
+	def g (x,)
+		if a > 0 ; x
+		else ; -1 * x
+		end if
+	end g
 end f
-newf () ; call it two
-two ()
+makef (0,) ; call it f
+f (4) ; print it
 ```
+displays -4 
+
+```
+call 4 N
+def f (a,) ; N * a ; end f
+call 0 N
+f (3,) ; print it
+```
+displays 12
+
+```
+define f (a, b)
+	if b ~= 0 ; 0 ; return ; end if
+	a
+end f
+f (3, 0.)
+```
+displays 0 (the integer). `return` exits with last value (`it`).
 
 ### Invalid expressions
 

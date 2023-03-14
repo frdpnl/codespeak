@@ -1,0 +1,9 @@
+
+define f (a, b)
+	if b ~= 0 ; 0 ; return ; end if
+	a
+end f
+
+f (3, 1.) ; print it
+f (3, 0.) ; print it
+
