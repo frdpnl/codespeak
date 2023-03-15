@@ -1,0 +1,9 @@
+
+def r (a,) ; rem: recursion example
+	if a <= 1 ; 1
+	else ; a - 1 ; a * r (it,)
+	end if
+end r
+
+r (1,) ; print it
+r (3,) ; print it

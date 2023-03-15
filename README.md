@@ -74,7 +74,7 @@ Whitespace separates words.
 `if -3 > 3 ; print -10 ; end if` doesn't display anything, rest of line is ignored, `it` is false
 
 ```
-if 2 > 1 ; 23 ; print it
+if 2 > 1 ; 23
 else ; 0
 end if 
 print it
@@ -91,6 +91,7 @@ displays 23 (the evaluated value of the conditional)
 define f (a,) ; a * 2 ; end f
 f (3,) ; print it
 ```
+displays 6
 
 ```
 def makef (a,)
@@ -121,6 +122,16 @@ end f
 f (3, 0.)
 ```
 displays 0 (the integer). `return` exits with last value (`it`).
+
+```
+def r (a,) ; rem: recursion example
+	if a <= 1 ; 1 
+	else ; a - 1 ; a * r (it,)
+	end if
+end r
+r (3,) ; print it
+```
+displays 6
 
 ### Invalid expressions
 

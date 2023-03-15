@@ -1,0 +1,14 @@
+> input: "def r (a,) ; rem: recursion example"
+> input: "	if a <= 1 ; 1"
+> input: "	else ; a - 1 ; a * r (it,)"
+> input: "	end if"
+> input: "end r"
+> input: "r (1,) ; print it"
+1 
+> input: "r (3,) ; print it"
+6 
+> exit
+> env:
+>	state: Ok 
+>	it = 6 
+>	r = `(r 'a [7] ( `rem: 'recursion 'example ) ( `if 'a `<= 1 ) ( 1 ) ..( 'a `* 'r { 'it } ) ( `end `if ) ) 

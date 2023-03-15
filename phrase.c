@@ -1051,6 +1051,7 @@ lookup_id(Env *a, char *b, bool global, size_t *id) {
 				__FUNCTION__);
 		return NULL;
 	}
+	/* resolve in local env first */
 	for (size_t i=0; i<a->n; ++i) {
 		Symval *c = a->s[i];
 		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
@@ -2306,7 +2307,7 @@ solve_if_fun(Env *e, Val *a) {
 				/* 'it is resolved at exec */
 				continue;
 			}
-			c = lookup(e, b->sym.v, false);
+			c = lookup(e, b->sym.v, true);
 			if (c != NULL && (c->hdr.t == VSYMF
 					|| c->hdr.t == VSYMOP)) {
 				free_v(b);
