@@ -2283,7 +2283,7 @@ val_of_seme(Env *e, Sem *s) {
 /* ----- evaluation, pass 2, symbolic computation ----- */
 
 static Ir 
-solve_if_fun(Env *e, Val *a) {
+solve_fun(Env *e, Val *a) {
 	/* works on SEQ and LST */
 	assert(a->hdr.t == VSEQ || a->hdr.t == VLST);
 	Val *b = NULL;
@@ -2324,8 +2324,8 @@ exec_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
 	assert(b != NULL);
 	if (Dbg) { printf("##  %s (%d) entry: ", __FUNCTION__, look); print_v(b); printf("\n"); }
-	/* resolve symbols to operators, functions */
-	Ir rc = solve_if_fun(e, b);
+	/* resolve symbols to functions */
+	Ir rc = solve_fun(e, b);
 	if (rc.state == FATAL) {
 		return rc;
 	}
@@ -2438,22 +2438,22 @@ interp_atom(Env *e, Val *a, bool look) {
 			strncpy(b->symop.name, so->name, 1+strlen(so->name));
 			return (Ir) {OK, b};
 		}
+		/* resolve all symbols if requested */
+		if (look) {
+			Val *b = lookup(e, a->sym.v, true);
+			if (b == NULL) {
+				printf("? %s: unknown symbol '%s'\n",
+					__FUNCTION__, a->sym.v);
+				return (Ir) {FATAL, NULL};
+			} 
+			return (Ir) {OK, copy_v(b)};
+		}
 		/* resolve 'it */
 		if (strncmp(a->sym.v, IT, 3) == 0) {
 			Val *b = lookup(e, IT, false);
 			if (b == NULL) {
 				printf("? %s: 'it undefined\n",
 					__FUNCTION__);
-				return (Ir) {FATAL, NULL};
-			} 
-			return (Ir) {OK, copy_v(b)};
-		}
-		/* resolve according to the look directive */
-		if (look) {
-			Val *b = lookup(e, a->sym.v, true);
-			if (b == NULL) {
-				printf("? %s: unknown symbol '%s'\n",
-					__FUNCTION__, a->sym.v);
 				return (Ir) {FATAL, NULL};
 			} 
 			return (Ir) {OK, copy_v(b)};
@@ -2546,7 +2546,7 @@ interp_maybe_later(Env *e, Val *a) {
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
 	Val *b = copy_v(a);
 	/* resolve symbols (not 'it) to operators and functions */
-	Ir rc = solve_if_fun(e, b);
+	Ir rc = solve_fun(e, b);
 	if (rc.state == FATAL) {
 		free_v(b);
 		return rc;
@@ -2577,8 +2577,8 @@ interp_maybe_skip(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
 	Val *b = copy_v(a);
-	/* resolve symbols to operators, functions */
-	Ir rc = solve_if_fun(e, b);
+	/* resolve symbols to functions */
+	Ir rc = solve_fun(e, b);
 	if (rc.state == FATAL) {
 		free_v(b);
 		return rc;
