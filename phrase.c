@@ -1940,23 +1940,30 @@ reduce_end(Env *e, Val *s, size_t p) {
 	}
 	Val *b = NULL;
 	if (a->hdr.t == VSYMOP) {
-		/* rem: end if */
-		if (a->symop.v != reduce_if) {
-			printf("? %s: 'end' with wrong operator argument (expecting 'if')\n",
-					__FUNCTION__);
+		/* rem: end if or end loop */
+		if (a->symop.v == reduce_if) {
 			free_v(a);
-			return (Ir) {FATAL, NULL};
-		}
-		Val *c = lookup(e, IT, false);
-		if (c == NULL) {
-			printf("? %s: 'it' required (the 'if condition), but undefined\n",
-					__FUNCTION__);
+			Val *c = lookup(e, IT, false);
+			if (c == NULL) {
+				printf("? %s: 'it' required (the 'if condition), but undefined\n",
+						__FUNCTION__);
+				return (Ir) {FATAL, NULL};
+			} else {
+				b = copy_v(c);
+			}
+		} else if (a->symop.v == reduce_loop) {
 			free_v(a);
-			return (Ir) {FATAL, NULL};
+			Val *c = lookup(e, IT, false);
+			b = end_loop(e, c);
+			if (b == NULL) {
+				return (Ir) {FATAL, NULL};
+			}
 		} else {
-			b = copy_v(c);
+			printf("? %s: invalid `end argument, expecting `if or `loop\n",
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
 		}
-		free_v(a);
 	} else if (a->hdr.t == VSYM) {
 		/* rem: end function */
 		if (e->state != DEF) {
@@ -2135,6 +2142,24 @@ reduce_env(Env *e, Val *s, size_t p) {
 	upd_prefix0(s, p, copy_v(it));
 	return (Ir) {OK, s};
 }
+static Ir
+reduce_loop(Env *e, Val *s, size_t p) {
+	if (s->seq.v.n != 1) {
+		printf("? %s: syntax is just 'loop'\n",
+				__FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	Val *l = malloc(sizeof(*l));
+	assert(l != NULL && "loop NULL");
+	l->hdr.t = VSYMF;
+	strncpy(l->symf.name, "__loop__", sizeof(l->symf.name));
+	l->symf.param.n = 0;
+	l->symf.param.v = NULL;
+	l->symf.body.n = 0;
+	l->symf.body.v = NULL;
+	upd_prefix2(s, p, l);
+	return (Ir) {LOOP, s};
+}
 
 /* --------------- builtin or base function symbols -------------------- */
 
@@ -2148,7 +2173,7 @@ typedef struct Symop_ {
 	int arity;
 } Symop;
 
-#define NSYMS 29
+#define NSYMS 31
 Symop Syms[] = {
 	(Symop) {"rem:",   -20, reduce_rem,  -1}, /* -1 arity: remainder of seq val */
 	(Symop) {"true?",  -20, reduce_true,  0},
@@ -2160,6 +2185,8 @@ Symop Syms[] = {
 	(Symop) {"define", -20, reduce_def,  2},
 	(Symop) {"def",    -20, reduce_def,  2},
 	(Symop) {"return", -20, reduce_return, 0},
+	(Symop) {"loop",   -20, reduce_loop, 0},  /* loop ; end loop or stop */
+	(Symop) {"stop",   -20, reduce_stop, 0},
 	(Symop) {"end",    -20, reduce_end,  1}, /* needs to be prior to user def */
 	(Symop) {"else",   -20, reduce_else, 0},
 	(Symop) {"print",  -20, reduce_print, 1},
@@ -2605,6 +2632,46 @@ interp_maybe_skip(Env *e, Val *a) {
 	}
 	return (Ir) {SKIP, copy_v(it)};
 }
+static Ir
+interp_loop_body(Env *e, Val *s, size_t p) {
+	Val *loop = lookup(e, IT, false);
+	if (loop == NULL) {
+		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	if (loop->hdr.t != VSYMF) {
+		printf("? %s: 'it is not a loop\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	loop->symf.body = push_l(loop->symf.body, s);
+	return (Ir) {LOOP, copy_v(loop)};
+}
+static Ir
+interp_maybe_loop(Env *e, Val *a) {
+	/* returns a fresh value, 'a untouched */
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
+	Val *b = copy_v(a);
+	/* resolve symbols (not 'it) to operators and functions */
+	Ir rc = solve_fun(e, b);
+	if (rc.state == FATAL) {
+		free_v(b);
+		return rc;
+	}
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	/* rem: expecting `end `loop */
+	if (b->seq.v.v[0]->hdr.t == VSYMOP 
+			&& b->seq.v.v[0]->symop.v == reduce_end
+			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
+			&& b->seq.v.v[1]->hdr.t == VSYMOP 
+			&& b->seq.v.v[1]->symop.v == reduce_loop) {
+		Ir rc = interp_now(e, b, false);
+		free_v(b);
+		return rc;
+	}
+	rc = interp_loop_body(e, b, 0);
+	free_v(b);
+	return rc;
+}
 
 static Ir 
 interp(Env *e, Val *a) {
@@ -2612,12 +2679,14 @@ interp(Env *e, Val *a) {
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	switch (e->state) {
+		case OK:
+			return interp_now(e, a, false);
 		case DEF:
 			return interp_maybe_later(e, a);
 		case SKIP:
 			return interp_maybe_skip(e, a);
-		case OK:
-			return interp_now(e, a, false);
+		case LOOP: 
+			return interp_maybe_loop(e, a);
 		default:
 			printf("? %s: unexpected state\n", __FUNCTION__);
 			return (Ir) {FATAL, NULL};
