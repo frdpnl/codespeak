@@ -113,7 +113,7 @@ interp	phrase.c	/^interp(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_atom	phrase.c	/^interp_atom(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_body	phrase.c	/^interp_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_lst	phrase.c	/^interp_lst(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
-interp_maybe_later	phrase.c	/^interp_maybe_later(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+interp_maybe_def	phrase.c	/^interp_maybe_def(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_maybe_skip	phrase.c	/^interp_maybe_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_now	phrase.c	/^interp_now(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_ph	phrase.c	/^interp_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
@@ -213,7 +213,7 @@ seme_of_exp	phrase.c	/^seme_of_exp(Expr *a) {$/;"	f	typeref:typename:Sem *	file:
 seme_of_exp_part	phrase.c	/^seme_of_exp_part(Expr *a, size_t from, size_t tox) {$/;"	f	typeref:typename:Sem *	file:
 seq	phrase.c	/^	} seq;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90a08	file:
 seq	phrase.c	/^	} seq;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef91608	file:
-solve_if_fun	phrase.c	/^solve_if_fun(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+solve_fun	phrase.c	/^solve_fun(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 state	phrase.c	/^	inxs state;$/;"	m	struct:Env_	typeref:typename:inxs	file:
 state	phrase.c	/^	inxs state;$/;"	m	struct:__anon2f313ef90e08	typeref:typename:inxs	file:
 stored_sym	phrase.c	/^stored_sym(Env *a, Symval *b) {$/;"	f	typeref:typename:bool	file:

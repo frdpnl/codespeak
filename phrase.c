@@ -2541,7 +2541,7 @@ interp_body(Env *e, Val *s, size_t p) {
 }
 
 static Ir
-interp_maybe_later(Env *e, Val *a) {
+interp_maybe_def(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
 	Val *b = copy_v(a);
@@ -2613,7 +2613,7 @@ interp(Env *e, Val *a) {
 	assert(a != NULL && "value is null");
 	switch (e->state) {
 		case DEF:
-			return interp_maybe_later(e, a);
+			return interp_maybe_def(e, a);
 		case SKIP:
 			return interp_maybe_skip(e, a);
 		case OK:
