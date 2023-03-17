@@ -565,6 +565,8 @@ typedef struct List_v_ {
 #define IT "it"
 #define ENDF "end"
 #define ENDIF "endif"
+#define LOOPNAME "__loop__"
+#define LOOPNEST "__loop_nest__"
 
 typedef enum {
 	UNSET,
@@ -572,6 +574,8 @@ typedef enum {
 	SKIP,	/* for 'if, skip until 'else or 'endif */
 	DEF,	/* we're processing a (multiline) function definition */
 	RETURN,	/* returning from function (short circuit) */
+	LOOP,
+	STOP,
 	BACKTRACK,
 	FATAL
 } inxs;
@@ -1926,6 +1930,25 @@ reduce_def(Env *e, Val *s, size_t p) {
 	upd_prefix2(s, p, f);
 	return (Ir) {DEF, s};
 }
+static Ir
+reduce_loop(Env *e, Val *s, size_t p) {
+	/* rem: loop */
+	if (s->seq.v.n != 1) {
+		printf("? %s: `loop does not take arguments\n",
+				__FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	Val *f = malloc(sizeof(*f));
+	assert(f != NULL && "loop val NULL");
+	f->hdr.t = VSYMF;
+	strncpy(f->symf.name, LOOPNAME, sizeof(f->symf.name));
+	f->symf.param.n = 0;
+	f->symf.param.v = NULL;
+	f->symf.body.n = 0;
+	f->symf.body.v = NULL;
+	upd_prefix1(s, p, f);
+	return (Ir) {LOOP, s};
+}
 static Ir 
 reduce_end(Env *e, Val *s, size_t p) {
 	/* rem: end somefun or end if ; */
@@ -2541,6 +2564,20 @@ interp_body(Env *e, Val *s, size_t p) {
 }
 
 static Ir
+interp_loop_body(Env *e, Val *s, size_t p) {
+	Val *loop = lookup(e, IT, false);
+	if (loop == NULL) {
+		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	if (loop->hdr.t != VSYMF) {
+		printf("? %s: 'it is not a loopction\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	loop->symf.body = push_l(loop->symf.body, s);
+	return (Ir) {LOOP, copy_v(loop)};
+}
+static Ir
 interp_maybe_def(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
 	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
@@ -2572,6 +2609,52 @@ interp_maybe_def(Env *e, Val *a) {
 	return rc;
 }
 
+static Ir
+interp_maybe_loop(Env *e, Val *a) {
+	/* returns a fresh value, 'a untouched */
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
+	Val *b = copy_v(a);
+	/* resolve symbols (not 'it) to operators and functions */
+	Ir rc = solve_fun(e, b);
+	if (rc.state == FATAL) {
+		free_v(b);
+		return rc;
+	}
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	Val *lnst = lookup(e, LOOPNEST, false);
+	if (lnst == NULL) {
+		printf("? %s: `loop nest count missing\n", __FUNCTION__);
+		free_v(b);
+		return (Ir) {FATAL, NULL};
+	}
+	if (lnst->hdr.t != VNAT) {
+		printf("? %s: `loop nest count invalid\n", __FUNCTION__);
+		free_v(b);
+		return (Ir) {FATAL, NULL};
+	}
+	/* rem: handle nested loop, another `loop val */
+	if (b->seq.v.v[0]->hdr.t == VSYMOP 
+			&& b->seq.v.v[0]->symop.v == reduce_loop) {
+		++(lnst->nat.v);
+	} /* rem: expecting `end `loop */
+	else if (b->seq.v.v[0]->hdr.t == VSYMOP 
+			&& b->seq.v.v[0]->symop.v == reduce_end
+			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
+			&& b->seq.v.v[1]->hdr.t == VSYMOP 
+			&& b->seq.v.v[1]->symop.v == reduce_loop) {
+		/* end loop while in topmost loop, execute it */
+		if (lnst->nat.v == 0) {
+			Ir rc = interp_now(e, b, false);
+			free_v(b);
+			return rc;
+		}
+		--(lnst->nat.v);
+		/* then proceed to add to body */
+	}
+	rc = interp_loop_body(e, b, 0);
+	free_v(b);
+	return rc;
+}
 static Ir
 interp_maybe_skip(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
@@ -2612,6 +2695,8 @@ interp(Env *e, Val *a) {
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	switch (e->state) {
+		case LOOP:
+			return interp_maybe_loop(e, a);
 		case DEF:
 			return interp_maybe_def(e, a);
 		case SKIP:
