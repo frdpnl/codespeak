@@ -552,7 +552,7 @@ seme_of_exp(Expr *a) {
 
 /* ----- Evaluation, pass 1 ----- */
 
-typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;
+typedef enum {VNIL, VNAT, VREA, VOP, VFUN, VLOOP, VSYM, VLST, VSEQ} vtype;
 
 typedef union Val_ Val;
 
@@ -565,6 +565,8 @@ typedef struct List_v_ {
 #define IT "it"
 #define ENDF "end"
 #define ENDIF "endif"
+#define LOOPS "__loops"
+#define LOOPNEST "__loopnest"
 
 typedef enum {
 	UNSET,
@@ -573,6 +575,8 @@ typedef enum {
 	DEF,	/* we're processing a (multiline) function definition */
 	RETURN,	/* returning from function (short circuit) */
 	BACKTRACK,
+	LOOP, /* inside loop definition */
+	STOP, /* returning from loop execution */
 	FATAL
 } inxs;
 
@@ -619,6 +623,10 @@ typedef union Val_ {
 		char name[WSZ];
 	} symf;
 	struct {
+		vtype t;
+		List_v v; /* stack of loop (symf) records */
+	} loop;
+	struct {
 		stype t;
 		char v[WSZ];
 	} sym;
@@ -648,10 +656,10 @@ print_v(Val *a) {
 		case VREA:
 			printf("%.2lf ", a->rea.v);
 			break;
-		case VSYMOP:
+		case VOP:
 			printf("`%s ", a->symop.name);
 			break;
-		case VSYMF:
+		case VFUN:
 			printf("`(%s ", a->symf.name);
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				print_v(a->symf.param.v[i]);
@@ -738,9 +746,9 @@ free_v(Val *a) {
 		case VNAT:
 		case VREA:
 		case VSYM:
-		case VSYMOP: /* symop holds postate to val in Syms */
+		case VOP: /* symop holds postate to val in Syms */
 			break;
-		case VSYMF:
+		case VFUN:
 			for (size_t i=0; i<a->symf.param.n; ++i) {
 				free_v(a->symf.param.v[i]);
 			}
@@ -781,10 +789,10 @@ istrue_v(Val *a) {
 	if (a->hdr.t == VREA) {
 		return a->rea.v != 0.;
 	}
-	if (a->hdr.t == VSYMOP) {
+	if (a->hdr.t == VOP) {
 		return a->symop.v != NULL;
 	}
-	if (a->hdr.t == VSYMF) {
+	if (a->hdr.t == VFUN) {
 		return (a->symf.param.n != 0  
 				&& a->symf.body.n != 0);
 	}
@@ -813,10 +821,10 @@ isequal_v(Val *a, Val *b) {
 	if (a->hdr.t == VREA) {
 		return (a->rea.v == b->rea.v);
 	}
-	if (a->hdr.t == VSYMOP) {
+	if (a->hdr.t == VOP) {
 		return (a->symop.v == b->symop.v);
 	}
-	if (a->hdr.t == VSYMF) {
+	if (a->hdr.t == VFUN) {
 		if (strncmp(a->symf.name, b->symf.name, WSZ*sizeof(char)) != 0) {
 			return false;
 		}
@@ -878,10 +886,10 @@ isequiv_v(Val *a, Val *b) {
 	if (a->hdr.t == VREA) {
 		return (a->rea.v == b->rea.v);
 	}
-	if (a->hdr.t == VSYMOP) {
+	if (a->hdr.t == VOP) {
 		return (a->symop.v == b->symop.v);
 	}
-	if (a->hdr.t == VSYMF) {
+	if (a->hdr.t == VFUN) {
 		return (strncmp(a->symf.name, b->symf.name, WSZ*sizeof(char)) == 0);
 	}
 	if (a->hdr.t == VSYM) {
@@ -927,7 +935,7 @@ copy_v(Val *a) {
 		} else {
 			b->seq.v.v = NULL;
 		}
-	} else if (a->hdr.t == VSYMF) {
+	} else if (a->hdr.t == VFUN) {
 		if (a->symf.param.n > 0) {
 			b->symf.param.v = malloc(a->symf.param.n * sizeof(Val*));
 			for (size_t i=0; i<a->symf.param.n; ++i) {
@@ -962,6 +970,25 @@ push_l(List_v a, Val *b) {
 	}
 	++(a.n);
 	a.v = c;
+	return a;
+}
+static List_v 
+shave_l(List_v a) {
+	if (a.n == 0) {
+		return a;
+	}
+	free_v(a.v[a.n -1]);
+	if (a.n == 1) {
+		free(a.v);
+		a.v = NULL;
+	} else {
+		Val **c = malloc((a.n -1)*sizeof(Val*));
+		assert(c != NULL && "list realloc failed");
+		memmove(c, a.v, (a.n -1) * sizeof(Val*));
+		free(a.v);
+		a.v = c;
+	}
+	--(a.n);
 	return a;
 }
 static Val *
@@ -1910,7 +1937,7 @@ reduce_def(Env *e, Val *s, size_t p) {
 	}
 	Val *f = malloc(sizeof(*f));
 	assert(f != NULL && "function val NULL");
-	f->hdr.t = VSYMF;
+	f->hdr.t = VFUN;
 	strncpy(f->symf.name, fname->sym.v, sizeof(f->symf.name));
 	f->symf.param.n = 0;
 	f->symf.param.v = NULL;
@@ -1927,6 +1954,70 @@ reduce_def(Env *e, Val *s, size_t p) {
 	return (Ir) {DEF, s};
 }
 static Ir 
+exec_loop(Env *e) {
+	Val *ls = lookup(e, LOOP, false);
+	if (ls == NULL) {
+		printf("? %s: 'loop undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	if (ls->hdr.t != VLOOP) {
+		printf("? %s: 'loop of wrong type\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	if (ls->loop.v.n == 0) {
+		printf("? %s: `end `loop without loop entry\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	Val *l = ls->loop.v.v[ls->loop.v.n -1];
+	if (l->hdr.t != VFUN) {
+		printf("? %s: last 'loop invalid\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	Val *v = NULL;
+	e->state = OK;
+	while (true) {
+		for (size_t i=0; i<l->symf.body.n; ++i) {
+			v = copy_v(l->symf.body.v[i]);
+			if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n"); }
+			Ir xs = interp(e, v);
+			free_v(v);
+			if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "reduce"); print_rc(xs); printf("\n"); } 
+			e->state = xs.state;
+			if (e->state == FATAL) {
+				return (Ir) {FATAL, NULL};
+			}
+			if (e->state == STOP) {
+				/* previous interp already set 'it */
+				free_v(xs.v);
+				break;
+			}
+			Symval *it = symval(IT, xs.v);
+			free_v(xs.v);
+			if (it == NULL) {
+				return (Ir) {FATAL, NULL};
+			}
+			xs.v = NULL;
+			if (!stored_sym(e, it)) {
+				free_symval(it);
+				return (Ir) {FATAL, NULL};
+			}
+		}
+		if (e->state == STOP) {
+			break;
+		}
+	}
+	ls->loop.v = shave_l(ls->loop.v);
+	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "<loop"); print_env(e, "##"); }
+	Val *it = lookup(e, IT, false);
+	if (it == NULL) {
+		printf("? %s: 'it post loop undefined\n",
+				__FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	upd_prefix1(s, p, copy_v(it));
+	return (Ir) {OK, s};
+}
+static Ir 
 reduce_end(Env *e, Val *s, size_t p) {
 	/* rem: end somefun or end if ; */
 	if (p != 0 || s->seq.v.n != 2) {
@@ -1939,7 +2030,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 		return (Ir) {FATAL, NULL};
 	}
 	Val *b = NULL;
-	if (a->hdr.t == VSYMOP) {
+	if (a->hdr.t == VOP) {
 		/* rem: end if or end loop */
 		if (a->symop.v == reduce_if) {
 			free_v(a);
@@ -1953,9 +2044,13 @@ reduce_end(Env *e, Val *s, size_t p) {
 			}
 		} else if (a->symop.v == reduce_loop) {
 			free_v(a);
-			Val *c = lookup(e, IT, false);
-			b = end_loop(e, c);
-			if (b == NULL) {
+			if (e->state != LOOP) {
+				printf("? %s: `end `loop outside loop\n", 
+						__FUNCTION__);
+				return (Ir) {FATAL, NULL};
+			}
+			Ir rc = exec_loop(e);
+			if (rc ....
 				return (Ir) {FATAL, NULL};
 			}
 		} else {
@@ -1979,7 +2074,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 			free_v(a);
 			return (Ir) {FATAL, NULL};
 		}
-		if (c->hdr.t != VSYMF) {
+		if (c->hdr.t != VFUN) {
 			printf("? %s: 'end' argument is not a function name\n", 
 					__FUNCTION__);
 			free_v(a);
@@ -2149,15 +2244,23 @@ reduce_loop(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
+	Val *ls = lookup(e, LOOP, false);
+	if (ls == NULL) {
+		ls = malloc(sizeof(*l));
+		assert(ls != NULL && "loop stack NULL");
+		ls->v.n = 0;
+		ls->v.v = NULL;
+	}
 	Val *l = malloc(sizeof(*l));
 	assert(l != NULL && "loop NULL");
-	l->hdr.t = VSYMF;
-	strncpy(l->symf.name, "__loop__", sizeof(l->symf.name));
+	l->hdr.t = VFUN;
+	strncpy(l->symf.name, LOOP, sizeof(l->symf.name));
 	l->symf.param.n = 0;
 	l->symf.param.v = NULL;
 	l->symf.body.n = 0;
 	l->symf.body.v = NULL;
-	upd_prefix2(s, p, l);
+	ls->v = push_l(ls->v, l);
+	upd_prefix2(s, p, ls);
 	return (Ir) {LOOP, s};
 }
 
@@ -2239,8 +2342,8 @@ isatom_v(Val *a) {
 			|| a->hdr.t == VNAT 
 			|| a->hdr.t == VREA
 			|| a->hdr.t == VSYM
-			|| a->hdr.t == VSYMF
-			|| a->hdr.t == VSYMOP);
+			|| a->hdr.t == VFUN
+			|| a->hdr.t == VOP);
 }
 
 static Val *
@@ -2321,7 +2424,7 @@ solve_fun(Env *e, Val *a) {
 			Symop *so = lookup_op(b->sym.v);
 			if (so != NULL) {
 				c = malloc(sizeof(*c));
-				c->hdr.t = VSYMOP;
+				c->hdr.t = VOP;
 				c->symop.prio = so->prio;
 				c->symop.v = so->f;
 				c->symop.arity = so->arity;
@@ -2335,8 +2438,8 @@ solve_fun(Env *e, Val *a) {
 				continue;
 			}
 			c = lookup(e, b->sym.v, true);
-			if (c != NULL && (c->hdr.t == VSYMF
-					|| c->hdr.t == VSYMOP)) {
+			if (c != NULL && (c->hdr.t == VFUN
+					|| c->hdr.t == VOP)) {
 				free_v(b);
 				a->seq.v.v[i] = copy_v(c);
 				continue;
@@ -2367,7 +2470,7 @@ exec_seq(Env *e, Val *b, bool look) {
 			 * unless it's an operator of 0 arity,
 			 * then, fall through & execute it below */
 			/* (functions all have one parameter) */
-			if (!(c->hdr.t == VSYMOP && c->symop.arity == 0)) {
+			if (!(c->hdr.t == VOP && c->symop.arity == 0)) {
 				if (rc.state == UNSET) {
 					rc.state = e->state;
 				}
@@ -2382,19 +2485,19 @@ exec_seq(Env *e, Val *b, bool look) {
 		/* apply symops from left to right (for same priority symbols) */
 		for (size_t i=0; i < b->seq.v.n; ++i) {
 			c = b->seq.v.v[i];
-			if (c->hdr.t == VSYMF) {
+			if (c->hdr.t == VFUN) {
 				if (DEFPRIO < hiprio) {
 					hiprio = DEFPRIO;
 					symat = i;
 					symfound = true;
-					symtype = VSYMF;
+					symtype = VFUN;
 				}
-			} else if (c->hdr.t == VSYMOP) {
+			} else if (c->hdr.t == VOP) {
 				if (c->symop.prio < hiprio) {
 					hiprio = c->symop.prio;
 					symat = i;
 					symfound = true;
-					symtype = VSYMOP;
+					symtype = VOP;
 				}
 			} 
 		}
@@ -2404,12 +2507,12 @@ exec_seq(Env *e, Val *b, bool look) {
 			printf("\n");
 			return (Ir) {FATAL, NULL};
 		}
-		assert(symtype == VSYMF || symtype == VSYMOP);
+		assert(symtype == VFUN || symtype == VOP);
 		/* apply the symbol, returns the reduced seq */
-		if (symtype == VSYMF) {
+		if (symtype == VFUN) {
 			/* user defined function */
 			rc = reduce_fun(e, b, symat);
-		} else if (symtype == VSYMOP) {
+		} else if (symtype == VOP) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
@@ -2458,7 +2561,7 @@ interp_atom(Env *e, Val *a, bool look) {
 		Symop *so = lookup_op(a->sym.v);
 		if (so != NULL) {
 			Val *b = malloc(sizeof(*b));
-			b->hdr.t = VSYMOP;
+			b->hdr.t = VOP;
 			b->symop.prio = so->prio;
 			b->symop.v = so->f;
 			b->symop.arity = so->arity;
@@ -2530,7 +2633,7 @@ interp_body(Env *e, Val *s, size_t p) {
 		printf("? %s: 'it' required, yet undefined\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
-	if (fun->hdr.t != VSYMF) {
+	if (fun->hdr.t != VFUN) {
 		printf("? %s: 'it' is not a function\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
@@ -2580,7 +2683,7 @@ interp_maybe_later(Env *e, Val *a) {
 	}
 	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
 	/* rem: expecting end 'foo */
-	if (b->seq.v.v[0]->hdr.t == VSYMOP 
+	if (b->seq.v.v[0]->hdr.t == VOP 
 			&& b->seq.v.v[0]->symop.v == reduce_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
 			&& b->seq.v.v[1]->hdr.t == VSYM) {
@@ -2611,12 +2714,12 @@ interp_maybe_skip(Env *e, Val *a) {
 		return rc;
 	}
 	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
-	bool an_endif = b->seq.v.v[0]->hdr.t == VSYMOP 
+	bool an_endif = b->seq.v.v[0]->hdr.t == VOP 
 			&& b->seq.v.v[0]->symop.v == reduce_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
-			&& b->seq.v.v[1]->hdr.t == VSYMOP 
+			&& b->seq.v.v[1]->hdr.t == VOP 
 			&& b->seq.v.v[1]->symop.v == reduce_if ;
-	bool an_else = b->seq.v.v[0]->hdr.t == VSYMOP 
+	bool an_else = b->seq.v.v[0]->hdr.t == VOP 
 			&& b->seq.v.v[0]->symop.v == reduce_else ;
 	if (an_endif || an_else) {
 		Ir rc = interp_now(e, b, false);
@@ -2634,16 +2737,18 @@ interp_maybe_skip(Env *e, Val *a) {
 }
 static Ir
 interp_loop_body(Env *e, Val *s, size_t p) {
-	Val *loop = lookup(e, IT, false);
+	Val *loop = lookup(e, LOOP, false);
 	if (loop == NULL) {
-		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
+		printf("? %s: 'loop required, yet undefined\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
-	if (loop->hdr.t != VSYMF) {
-		printf("? %s: 'it is not a loop\n", __FUNCTION__);
+	if (loop->hdr.t != VLOOP) {
+		printf("? %s: 'loop is not a loop\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
-	loop->symf.body = push_l(loop->symf.body, s);
+	/* retrieve the last loop on stack */
+	Val *last = loop->v.v[loop->v.n - 1];
+	last->symf.body = push_l(last->symf.body, s);
 	return (Ir) {LOOP, copy_v(loop)};
 }
 static Ir
@@ -2658,11 +2763,26 @@ interp_maybe_loop(Env *e, Val *a) {
 		return rc;
 	}
 	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
-	/* rem: expecting `end `loop */
-	if (b->seq.v.v[0]->hdr.t == VSYMOP 
+	Val *nl = lookup(e, LOOPNEST, false);
+	if (nl == NULL) {
+		printf("? %s: nested `loop without count\n", __FUNCTION__);
+		free_v(b);
+		return (Ir) {FATAL, NULL};
+	}
+	if (nl->hdr.t != VNAT) {
+		printf("? %s: nested `loop counter invalid\n", __FUNCTION__);
+		free_v(b);
+		return (Ir) {FATAL, NULL};
+	}
+	/* rem: nested `loop */
+	if (b->seq.v.v[0]->hdr.t == VOP 
+			&& b->seq.v.v[0]->symop.v == reduce_loop) {
+		++(nl->nat.v);
+	} /* `end `loop */ 
+	else if (b->seq.v.v[0]->hdr.t == VOP 
 			&& b->seq.v.v[0]->symop.v == reduce_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
-			&& b->seq.v.v[1]->hdr.t == VSYMOP 
+			&& b->seq.v.v[1]->hdr.t == VOP 
 			&& b->seq.v.v[1]->symop.v == reduce_loop) {
 		Ir rc = interp_now(e, b, false);
 		free_v(b);
