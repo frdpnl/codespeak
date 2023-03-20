@@ -26,6 +26,9 @@ IT	phrase.c	/^#define IT /;"	d	file:
 Ir	phrase.c	/^} Ir;		\/* return type for reduce *\/$/;"	t	typeref:struct:__anon2f313ef90e08	file:
 LEFT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 LINE	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91803	file:
+LOOP	phrase.c	/^	LOOP,$/;"	e	enum:__anon2f313ef90c03	file:
+LOOPNAME	phrase.c	/^#define LOOPNAME /;"	d	file:
+LOOPNEST	phrase.c	/^#define LOOPNEST /;"	d	file:
 List	phrase.c	/^} List;$/;"	t	typeref:struct:List_	file:
 List_	phrase.c	/^typedef struct List_ {$/;"	s	file:
 List_v	phrase.c	/^} List_v;$/;"	t	typeref:struct:List_v_	file:
@@ -44,6 +47,7 @@ SNIL	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	e
 SREA	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SSEQ	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SSYM	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
+STOP	phrase.c	/^	STOP,$/;"	e	enum:__anon2f313ef90c03	file:
 STR	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 Sem	phrase.c	/^typedef union Sem_ Sem;$/;"	t	typeref:union:Sem_	file:
 Sem	phrase.c	/^} Sem;$/;"	t	typeref:union:Sem_	file:
@@ -96,6 +100,7 @@ arity	phrase.c	/^		int arity;$/;"	m	struct:Val_::__anon2f313ef91208	typeref:type
 arity	phrase.c	/^	int arity;$/;"	m	struct:Symop_	typeref:typename:int	file:
 body	phrase.c	/^		List_v body;$/;"	m	struct:Val_::__anon2f313ef91308	typeref:typename:List_v	file:
 copy_v	phrase.c	/^copy_v(Val *a) {$/;"	f	typeref:typename:Val *	file:
+exec_loop	phrase.c	/^exec_loop(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 exec_seq	phrase.c	/^exec_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ir	file:
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/;"	f	typeref:typename:Expr *	file:
 expr	phrase.c	/^expr() {$/;"	f	typeref:typename:Expr *	file:
@@ -112,8 +117,11 @@ infixed	phrase.c	/^infixed(size_t p, size_t n) {$/;"	f	typeref:typename:bool	fil
 interp	phrase.c	/^interp(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_atom	phrase.c	/^interp_atom(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_body	phrase.c	/^interp_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
+interp_loop	phrase.c	/^interp_loop(Env *e, Val *s) {$/;"	f	typeref:typename:Ir	file:
+interp_loop_body	phrase.c	/^interp_loop_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 interp_lst	phrase.c	/^interp_lst(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_maybe_def	phrase.c	/^interp_maybe_def(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
+interp_maybe_loop	phrase.c	/^interp_maybe_loop(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_maybe_skip	phrase.c	/^interp_maybe_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 interp_now	phrase.c	/^interp_now(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ir	file:
 interp_ph	phrase.c	/^interp_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
@@ -188,6 +196,7 @@ reduce_infix_arg	phrase.c	/^reduce_infix_arg(Env *e, Val *s, size_t p, Val **pa,
 reduce_leq	phrase.c	/^reduce_leq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_les	phrase.c	/^reduce_les(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_list	phrase.c	/^reduce_list(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
+reduce_loop	phrase.c	/^reduce_loop(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_min	phrase.c	/^reduce_min(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_mul	phrase.c	/^reduce_mul(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_neq	phrase.c	/^reduce_neq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:

@@ -1946,12 +1946,54 @@ reduce_loop(Env *e, Val *s, size_t p) {
 	f->symf.param.v = NULL;
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
-	upd_prefix1(s, p, f);
+	upd_prefix0(s, p, f);
 	return (Ir) {LOOP, s};
+}
+static Ir
+exec_loop(Env *e, Val *a) {
+	/* returns fresh value */
+	Val *loop = lookup(e, IT, false);
+	if (loop == NULL) {
+		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	if (loop->hdr.t != VSYMF) {
+		printf("? %s: 'it is not a loop function\n", __FUNCTION__);
+		return (Ir) {FATAL, NULL};
+	}
+	Val *v;
+	for (size_t i=0; i<loop->symf.body.n; ++i) {
+		v = copy_v(loop->symf.body.v[i]);
+		if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n"); }
+		Ir xs = interp(le, v);
+		free_v(v);
+		if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "reduce"); print_rc(xs); printf("\n"); } 
+		le->state = xs.state;
+		if (le->state == FATAL) {
+			free_env(le, false);
+			return (Ir) {FATAL, NULL};
+		}
+		Symval *it = symval(IT, xs.v);
+		free_v(xs.v);
+		if (it == NULL) {
+			free_env(le, false);
+			return (Ir) {FATAL, NULL};
+		}
+		xs.v = NULL;
+		if (!stored_sym(le, it)) {
+			free_symval(it);
+			free_env(le, false);
+			return (Ir) {FATAL, NULL};
+		}
+		if (le->state == RETURN) {
+			break;
+		}
+	}
+	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "local"); print_env(le, "##"); }
 }
 static Ir 
 reduce_end(Env *e, Val *s, size_t p) {
-	/* rem: end somefun or end if ; */
+	/* rem: end somefun or end if or end loop ; */
 	if (p != 0 || s->seq.v.n != 2) {
 		printf("? %s: invalid 'end', expecting argument\n",
 				__FUNCTION__);
@@ -1964,22 +2006,23 @@ reduce_end(Env *e, Val *s, size_t p) {
 	Val *b = NULL;
 	if (a->hdr.t == VSYMOP) {
 		/* rem: end if */
-		if (a->symop.v != reduce_if) {
-			printf("? %s: 'end' with wrong operator argument (expecting 'if')\n",
-					__FUNCTION__);
+		if (a->symop.v == reduce_if || a->symop.v == reduce_loop) {
+			Val *c = lookup(e, IT, false);
+			if (c == NULL) {
+				printf("? %s: 'it required (the `if condition or `loop), but undefined\n",
+						__FUNCTION__);
+				free_v(a);
+				return (Ir) {FATAL, NULL};
+			} else {
+				b = copy_v(c);
+			}
 			free_v(a);
-			return (Ir) {FATAL, NULL};
-		}
-		Val *c = lookup(e, IT, false);
-		if (c == NULL) {
-			printf("? %s: 'it' required (the 'if condition), but undefined\n",
-					__FUNCTION__);
-			free_v(a);
-			return (Ir) {FATAL, NULL};
 		} else {
-			b = copy_v(c);
+			printf("? %s: 'end' with wrong operator argument (expecting `if or `loop)\n",
+					__FUNCTION__);
+			free_v(a);
+			return (Ir) {FATAL, NULL};
 		}
-		free_v(a);
 	} else if (a->hdr.t == VSYM) {
 		/* rem: end function */
 		if (e->state != DEF) {
@@ -2422,6 +2465,69 @@ exec_seq(Env *e, Val *b, bool look) {
 	return (Ir) {FATAL, NULL};
 }
 static Ir 
+interp_loop(Env *e, Val *s) {
+	/* rem: loop execution */
+	/* setup local env */
+	Env *le = malloc(sizeof(*le));
+	assert(le != NULL);
+	le->state = OK;
+	le->n = 0;
+	le->s = NULL;
+	le->parent = e;
+	/* interp each val in body, like reduce_fun, interp_ph: TODO refactor it all :) */
+	Val *v;
+	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, ">loop"); }
+	while (true) {
+		for (size_t i=0; i<f->symf.body.n; ++i) {
+			v = copy_v(f->symf.body.v[i]);
+			Ir xs = interp(le, v);
+			free_v(v);
+			le->state = xs.state;
+			if (le->state == FATAL) {
+				free_env(le, false);
+				return (Ir) {FATAL, NULL};
+			}
+			Symval *it = symval(IT, xs.v);
+			free_v(xs.v);
+			if (it == NULL) {
+				free_env(le, false);
+				return (Ir) {FATAL, NULL};
+			}
+			xs.v = NULL;
+			if (!stored_sym(le, it)) {
+				free_symval(it);
+				free_env(le, false);
+				return (Ir) {FATAL, NULL};
+			}
+			if (le->state == STOP) {
+				break;
+			}
+		}
+		if (le->state == STOP) {
+			break;
+		}
+	}
+	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "<loop"); print_env(le, "##"); }
+	/* return local (function's) 'it to caller */
+	char *sym = IT;
+	Val *lit = NULL;
+	while ((lit = lookup(le, sym, false)) != NULL) {
+		if (lit->hdr.t == VSYM) {
+			sym = lit->sym.v;
+			continue;
+		}
+		break;
+	}
+	if (lit == NULL) {
+		printf("? %s: 'it' from '%s' undefined (function without body?)\n",
+				__FUNCTION__, f->symf.name);
+		free_env(le, false);
+		return (Ir) {FATAL, NULL};
+	}
+	free_env(le, false);
+	return (Ir) {OK, copy_v(lit)};
+}
+static Ir 
 interp_seq(Env *e, Val *a, bool look) {
 	Ir rc;
 	Val *b = NULL;
@@ -2571,7 +2677,7 @@ interp_loop_body(Env *e, Val *s, size_t p) {
 		return (Ir) {FATAL, NULL};
 	}
 	if (loop->hdr.t != VSYMF) {
-		printf("? %s: 'it is not a loopction\n", __FUNCTION__);
+		printf("? %s: 'it is not a loop function\n", __FUNCTION__);
 		return (Ir) {FATAL, NULL};
 	}
 	loop->symf.body = push_l(loop->symf.body, s);
@@ -2847,9 +2953,16 @@ interp_ph(Env *env, Phrase *a) {
 		if (Dbg) { printf("# %3lu %6s: ", i, "value"); print_v(v); printf("\n"); }
 		Ir xs = interp(env, v);
 		free_v(v);
-		if (Dbg) { printf("# %3lu %6s: ", i, "reduce"); print_rc(xs); printf("\n"); }
+		if (Dbg) { printf("# %3lu %6s: ", i, "nterp"); print_rc(xs); printf("\n"); }
 		if (xs.state == FATAL) {
 			return false;
+		}
+		/* if this val-seq ends a loop, execute it now */
+		if (env->state == LOOP && xs.state == OK) {
+			Ir lxs = interp_loop(e, xs.v);
+			free_v(xs.v);
+			xs.v = lxs.v;
+			xs.state = lxs.state;
 		}
 		env->state = xs.state;
 		Symval *it = symval(IT, xs.v);
@@ -2857,7 +2970,6 @@ interp_ph(Env *env, Phrase *a) {
 		if (it == NULL) {
 			return false;
 		}
-		xs.v = NULL;
 		if (!stored_sym(env, it)) {
 			free_symval(it);
 			return false;
