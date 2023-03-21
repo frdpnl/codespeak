@@ -1,0 +1,9 @@
+
+call 10 n
+loop  
+	print n
+	n - 1
+	call it n
+	if n = 0 ; print 10 ; stop ; end if
+end loop
+

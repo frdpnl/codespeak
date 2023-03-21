@@ -1,0 +1,14 @@
+> input: "call 1 n"
+> input: "loop  "
+> input: "	if n = 0 ; 10 ; stop ; end if"
+> input: "	print n"
+> input: "	n - 1"
+> input: "	call it n"
+> input: "end loop"
+1 
+> exit
+> env:
+>	state: Ok 
+>	__loop_nest__ = 0 
+>	n = 0 
+>	it = 10 
