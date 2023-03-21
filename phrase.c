@@ -2461,7 +2461,7 @@ interp_loop(Env *e, Val *s) {
 	le->parent = e;
 	/* interp each val in body, like reduce_fun, interp_ph: TODO refactor it all :) */
 	Val *v;
-	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, ">loop"); }
+	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, ">"); }
 	while (true) {
 		for (size_t i=0; i<s->symf.body.n; ++i) {
 			v = copy_v(s->symf.body.v[i]);
@@ -2492,7 +2492,7 @@ interp_loop(Env *e, Val *s) {
 			break;
 		}
 	}
-	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "<loop"); print_env(le, "##"); }
+	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "<"); print_env(le, "##"); }
 	/* return local (function's) 'it to caller */
 	char *sym = IT;
 	Val *lit = NULL;
@@ -2504,7 +2504,7 @@ interp_loop(Env *e, Val *s) {
 		break;
 	}
 	if (lit == NULL) {
-		printf("? %s: 'it from '%s' undefined (function without body?)\n",
+		printf("? %s: 'it from '%s' undefined\n",
 				__FUNCTION__, s->symf.name);
 		free_env(le, false);
 		return (Ir) {FATAL, NULL};
