@@ -9,6 +9,7 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = 2 
 >	dec = `(dec 'b [1] ( 'b `- 1 ) ) 
 >	inc = `(inc 'a [1] ( 1 `+ 'a ) ) 

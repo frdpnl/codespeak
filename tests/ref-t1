@@ -4,5 +4,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = 1 
 >	p = 6.00 

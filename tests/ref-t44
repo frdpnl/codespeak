@@ -12,6 +12,7 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = 2 
 >	f = `(f 'a [3] ( `def 'g Nil ) ( 2 ) ( `end 'g ) ) 
 >	f3 = `(g [1] ( 2 ) ) 

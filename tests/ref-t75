@@ -9,5 +9,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = 0 
 >	f = `(f 'a 'b [5] ( `if 'b `~= 0 ) ( 0 ) ( `return ) ( `end `if ) ( 'a ) ) 

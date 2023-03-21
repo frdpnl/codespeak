@@ -4,5 +4,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = `(f [3] ( `if 1 ) ( 'ok ) ( `end `if ) ) 
 >	f = `(f [3] ( `if 1 ) ( 'ok ) ( `end `if ) ) 

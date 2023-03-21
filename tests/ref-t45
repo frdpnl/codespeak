@@ -6,6 +6,7 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = -3 
 >	A = 4 
 >	f = `(f 'x [1] ( 3 `* 'x ) ) 

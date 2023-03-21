@@ -16,5 +16,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = 1 
 >	t = `(t [8] ( `if 2 `> 0 ) ( 1 ) ( `call 'it 'r ) ...( `end `if ) ( 'r ) ) 

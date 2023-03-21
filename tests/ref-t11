@@ -11,6 +11,7 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	correct = 1 
 >	it = 0 
 >	true = 1 

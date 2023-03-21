@@ -2,12 +2,14 @@
 > input: "env"
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = `(f [1] ( 1 ) ) 
 >	f = `(f [1] ( 1 ) ) 
 > input: "call f f2"
 > input: "env"
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = `(f [1] ( 1 ) ) 
 >	f = `(f [1] ( 1 ) ) 
 >	f2 = `(f [1] ( 1 ) ) 
@@ -15,6 +17,7 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = 1 
 >	f = `(f [1] ( 1 ) ) 
 >	f2 = `(f [1] ( 1 ) ) 

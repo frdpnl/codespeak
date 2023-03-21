@@ -7,5 +7,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	n = 1 
 >	it = 0 

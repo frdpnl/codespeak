@@ -1973,7 +1973,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 		if (a->symop.v == reduce_if || a->symop.v == reduce_loop) {
 			Val *c = lookup(e, IT, false);
 			if (c == NULL) {
-				printf("? %s: 'it required (the `if condition or `loop), but undefined\n",
+				printf("? %s: 'it undefined, missing `if or `loop?\n",
 						__FUNCTION__);
 				free_v(a);
 				return (Ir) {FATAL, NULL};

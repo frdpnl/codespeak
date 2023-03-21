@@ -4,5 +4,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = -1 
 >	f = `(f 'a 'b [3] ( Nil ) ( Nil ) ( 'a `- 'b ) ) 

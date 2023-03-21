@@ -1,2 +1,2 @@
 > input: "end do"
-? reduce_end: 'end' with wrong operator argument (expecting 'if')
+? reduce_end: 'end' with wrong operator argument (expecting `if or `loop)

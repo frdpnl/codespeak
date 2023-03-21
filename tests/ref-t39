@@ -1,2 +1,2 @@
 > input: "end if"
-? reduce_end: 'it' required (the 'if condition), but undefined
+? reduce_end: 'it undefined, missing `if or `loop?

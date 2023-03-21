@@ -3,5 +3,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = `(inc 'a [0] ) 
 >	inc = `(inc 'a [0] ) 

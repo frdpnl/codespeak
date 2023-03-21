@@ -3,5 +3,6 @@
 > exit
 > env:
 >	state: Ok 
+>	__loop_nest__ = 0 
 >	it = 3 
 >	op = `* 
