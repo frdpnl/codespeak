@@ -34,7 +34,6 @@ List_	phrase.c	/^typedef struct List_ {$/;"	s	file:
 List_v	phrase.c	/^} List_v;$/;"	t	typeref:struct:List_v_	file:
 List_v_	phrase.c	/^typedef struct List_v_ {$/;"	s	file:
 Lrc	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	t	typeref:enum:__anon2f313ef91803	file:
-NSYMS	phrase.c	/^#define NSYMS /;"	d	file:
 OK	phrase.c	/^	OK,$/;"	e	enum:__anon2f313ef90c03	file:
 Phrase	phrase.c	/^} Phrase;$/;"	t	typeref:struct:__anon2f313ef91708	file:
 RETURN	phrase.c	/^	RETURN,	\/* returning from function (short circuit) *\/$/;"	e	enum:__anon2f313ef90c03	file:
@@ -47,7 +46,7 @@ SNIL	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	e
 SREA	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SSEQ	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SSYM	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
-STOP	phrase.c	/^	STOP,$/;"	e	enum:__anon2f313ef90c03	file:
+STOP	phrase.c	/^	STOP, \/* interrupt loop *\/$/;"	e	enum:__anon2f313ef90c03	file:
 STR	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 Sem	phrase.c	/^typedef union Sem_ Sem;$/;"	t	typeref:union:Sem_	file:
 Sem	phrase.c	/^} Sem;$/;"	t	typeref:union:Sem_	file:
@@ -100,7 +99,6 @@ arity	phrase.c	/^		int arity;$/;"	m	struct:Val_::__anon2f313ef91208	typeref:type
 arity	phrase.c	/^	int arity;$/;"	m	struct:Symop_	typeref:typename:int	file:
 body	phrase.c	/^		List_v body;$/;"	m	struct:Val_::__anon2f313ef91308	typeref:typename:List_v	file:
 copy_v	phrase.c	/^copy_v(Val *a) {$/;"	f	typeref:typename:Val *	file:
-exec_loop	phrase.c	/^exec_loop(Env *e, Val *a) {$/;"	f	typeref:typename:Ir	file:
 exec_seq	phrase.c	/^exec_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ir	file:
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/;"	f	typeref:typename:Expr *	file:
 expr	phrase.c	/^expr() {$/;"	f	typeref:typename:Expr *	file:
@@ -210,6 +208,7 @@ reduce_print	phrase.c	/^reduce_print(Env *e, Val *s, size_t p) {$/;"	f	typeref:t
 reduce_rem	phrase.c	/^reduce_rem(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_return	phrase.c	/^reduce_return(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_solve	phrase.c	/^reduce_solve(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
+reduce_stop	phrase.c	/^reduce_stop(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 reduce_true	phrase.c	/^reduce_true(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ir	file:
 s	phrase.c	/^	Sem *s;$/;"	m	struct:List_	typeref:typename:Sem *	file:
 s	phrase.c	/^	Symval **s;$/;"	m	struct:Env_	typeref:typename:Symval **	file:
