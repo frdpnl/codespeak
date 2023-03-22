@@ -1938,6 +1938,7 @@ reduce_def(Env *e, Val *s, size_t p) {
 }
 static Ir
 reduce_loop(Env *e, Val *s, size_t p) {
+	if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "entry"); print_v(s); printf("\n"); }
 	/* rem: loop */
 	if (s->seq.v.n != 1) {
 		printf("? %s: `loop does not take arguments\n",
@@ -1957,6 +1958,7 @@ reduce_loop(Env *e, Val *s, size_t p) {
 }
 static Ir 
 reduce_end(Env *e, Val *s, size_t p) {
+	if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "entry"); print_v(s); printf("\n"); }
 	/* rem: end somefun or end if or end loop ; */
 	if (p != 0 || s->seq.v.n != 2) {
 		printf("? %s: invalid 'end', expecting argument\n",
@@ -2089,20 +2091,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 		Ir xs = interp(le, v);
 		free_v(v);
 		if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "reduce"); print_rc(xs); printf("\n"); } 
-		le->state = xs.state;
 		if (le->state == FATAL) {
-			free_env(le, false);
-			return (Ir) {FATAL, NULL};
-		}
-		Symval *it = symval(IT, xs.v);
-		free_v(xs.v);
-		if (it == NULL) {
-			free_env(le, false);
-			return (Ir) {FATAL, NULL};
-		}
-		xs.v = NULL;
-		if (!stored_sym(le, it)) {
-			free_symval(it);
 			free_env(le, false);
 			return (Ir) {FATAL, NULL};
 		}
@@ -2454,18 +2443,7 @@ interp_loop(Env *e, Val *s) {
 			v = copy_v(s->symf.body.v[i]);
 			Ir xs = interp(e, v);
 			free_v(v);
-			e->state = xs.state;
 			if (e->state == FATAL) {
-				return (Ir) {FATAL, NULL};
-			}
-			Symval *it = symval(IT, xs.v);
-			free_v(xs.v);
-			if (it == NULL) {
-				return (Ir) {FATAL, NULL};
-			}
-			xs.v = NULL;
-			if (!stored_sym(e, it)) {
-				free_symval(it);
 				return (Ir) {FATAL, NULL};
 			}
 			if (e->state == STOP) {
@@ -2685,12 +2663,12 @@ interp_maybe_loop(Env *e, Val *a) {
 	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
 	Val *lnst = lookup(e, LOOPNEST, false);
 	if (lnst == NULL) {
-		printf("? %s: `loop nest count missing\n", __FUNCTION__);
+		printf("? %s: nested loop count missing\n", __FUNCTION__);
 		free_v(b);
 		return (Ir) {FATAL, NULL};
 	}
 	if (lnst->hdr.t != VNAT) {
-		printf("? %s: `loop nest count invalid\n", __FUNCTION__);
+		printf("? %s: nested loop count invalid\n", __FUNCTION__);
 		free_v(b);
 		return (Ir) {FATAL, NULL};
 	}
@@ -2706,7 +2684,7 @@ interp_maybe_loop(Env *e, Val *a) {
 			&& b->seq.v.v[1]->symop.v == reduce_loop) {
 		/* end loop while in topmost loop, execute it */
 		if (lnst->nat.v == 0) {
-			Ir rc = interp_now(e, b, false);
+			Ir rc = interp(e, b);
 			free_v(b);
 			return rc;
 		}
@@ -2753,23 +2731,51 @@ interp_maybe_skip(Env *e, Val *a) {
 
 static Ir 
 interp(Env *e, Val *a) {
+	if (Dbg) { printf("## %s: entry\n", __FUNCTION__); print_env(e, "##"); }
 	/* returns a fresh value, 'a untouched */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
+	Ir rc;
 	switch (e->state) {
 		case LOOP:
-			return interp_maybe_loop(e, a);
+			rc = interp_maybe_loop(e, a);
+			/* if ended a loop, execute it now */
+			if (rc.state == OK) {
+				e->state = OK;
+				Ir lrc = interp_loop(e, rc.v);
+				free_v(rc.v);
+				rc = lrc;
+			}
+			break;
 		case DEF:
-			return interp_maybe_def(e, a);
+			rc = interp_maybe_def(e, a);
+			break;
 		case SKIP:
-			return interp_maybe_skip(e, a);
+			rc = interp_maybe_skip(e, a);
+			break;
 		case OK:
-			return interp_now(e, a, false);
+			rc = interp_now(e, a, false);
+			break;
 		default:
 			printf("? %s: unexpected state\n", __FUNCTION__);
 			return (Ir) {FATAL, NULL};
 	}
-	return (Ir) {FATAL, NULL};
+	if (Dbg) { printf("## %s: interp'd rc=", __FUNCTION__); print_rc(rc); printf("\n");}
+	if (rc.state == FATAL) {
+		return rc;
+	}
+	e->state = rc.state;
+	Symval *it = symval(IT, rc.v);
+	free_v(rc.v);
+	if (it == NULL) {
+		return (Ir) {FATAL, NULL};
+	}
+	if (!stored_sym(e, it)) {
+		free_symval(it);
+		return (Ir) {FATAL, NULL};
+	}
+	if (Dbg) { printf("## %s: exit\n", __FUNCTION__); print_env(e, "##"); }
+	return (Ir) {e->state, copy_v(it)};
 }
 
 /* ------------ Phrase, a line, a list of expressions --------- */
@@ -2886,10 +2892,10 @@ phrase_of_str(char *a) {
 
 static bool
 interp_ph(Env *env, Phrase *a) {
+	/* interpret a line, for later line-specific behaviour */
 	assert(env != NULL && "environment null");
 	assert(a != NULL && "phrase null");
 	for (size_t i=0; i<a->n; ++i) {
-		if (Dbg) { printf("# %3lu %6s: %s\n", i, "expr", a->x[i]); }
 		Expr *ex = exp_of_words(a->x[i]);
 		if (ex == NULL) {
 			return false;
@@ -2899,7 +2905,6 @@ interp_ph(Env *env, Phrase *a) {
 		if (sm == NULL) {
 			return false;
 		}
-		if (Dbg) { printf("# %3lu %6s: ", i, "seme"); print_s(sm); printf("\n"); }
 		Val *v = val_of_seme(env, sm);
 		free_s(sm);
 		free(sm);
@@ -2909,29 +2914,10 @@ interp_ph(Env *env, Phrase *a) {
 		if (Dbg) { printf("# %3lu %6s: ", i, "value"); print_v(v); printf("\n"); }
 		Ir xs = interp(env, v);
 		free_v(v);
-		if (Dbg) { printf("# %3lu %6s: ", i, "nterp"); print_rc(xs); printf("\n"); }
+		if (Dbg) { printf("# %3lu %6s: ", i, "interp"); print_rc(xs); printf("\n"); }
 		if (xs.state == FATAL) {
 			return false;
 		}
-		/* if this val-seq ends a loop, execute it now */
-		if (env->state == LOOP && xs.state == OK) {
-			env->state = OK;
-			Ir lxs = interp_loop(env, xs.v);
-			free_v(xs.v);
-			xs.v = lxs.v;
-			xs.state = lxs.state;
-		}
-		env->state = xs.state;
-		Symval *it = symval(IT, xs.v);
-		free_v(xs.v);
-		if (it == NULL) {
-			return false;
-		}
-		if (!stored_sym(env, it)) {
-			free_symval(it);
-			return false;
-		}
-		if (Dbg) { printf("# %3lu env:\n", i); print_env(env, "#"); }
 	}
 	return true;
 }
