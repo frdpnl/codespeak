@@ -41,7 +41,7 @@ Whitespace separates words.
 
 `call + plus; 1 plus 3; print it` displays 4
 
-`call 3 p ; print p` displays p, but `call 3 p ; look p; print it` displays 3
+`call 3 p ; print p` displays p, but `call 3 p ; solve p; print it` displays 3
 
 `true?` and `false?` test the special symbol `it`
 
@@ -81,9 +81,21 @@ print it
 ```
 displays 23 (the evaluated value of the conditional)
 
-`if false? ; print 22 ; end if` displays 22, because `it` is false (from previous `if`)
+`if false? ; print 22 ; end if` displays nothing, because `it` is true (from previous `if`)
 
 `2 > 1 ; if true? ; print 1 ; end if` displays 1
+
+### Loop
+
+```
+call 2 n
+loop
+	if n = 0 ; 42 ; stop ; end if
+	n - 1 ; call it n;
+end loop
+print it
+```
+displays 42 (the last value from `loop)
 
 ### Functions
 

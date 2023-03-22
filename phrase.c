@@ -2998,7 +2998,8 @@ main(int argc, char **argv) {
 					printf("? %s: unexpected end of program\n",
 							__FUNCTION__);
 				}
-				printf("> exit\n"); print_env(e, ">");
+				print_env(e, ">");
+				printf("> bye!\n");
 				free_env(e, true);
 				return EXIT_SUCCESS;
 			case EMPTYL:
