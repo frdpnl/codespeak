@@ -97,6 +97,24 @@ print it
 ```
 displays 42 (the last value from `loop)
 
+```
+rem: nested loop
+call 1 n
+loop  
+	print n
+	if n = 0 ; print 10 ; stop ; end if
+	call 1 p
+	loop
+		print p
+		if p = 0 ; print -10 ; stop ; end if
+		p - 1 ; call it p;
+	end loop
+	n - 1 ; call it n
+end loop
+```
+displays following successive values: 1, 1, 0, -10, 0, 10
+
+
 ### Functions
 
 ```
