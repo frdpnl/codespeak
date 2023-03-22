@@ -4,6 +4,6 @@
 > exit
 > env:
 >	state: Skip 
->	__loop_nest__ = 0 
+>	__nested_loops__ = 0 
 >	n = 3 
->	it = 3 
+>	__it__ = 3 

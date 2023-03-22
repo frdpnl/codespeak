@@ -4,5 +4,5 @@
 > exit
 > env:
 >	state: Fun 
->	__loop_nest__ = 0 
->	it = `(inc 'a [1] ( `end ) ) 
+>	__nested_loops__ = 0 
+>	__it__ = `(inc 'a [1] ( `end ) ) 

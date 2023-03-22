@@ -5,6 +5,6 @@
 > exit
 > env:
 >	state: Ok 
->	__loop_nest__ = 0 
->	it = 3 
+>	__nested_loops__ = 0 
+>	__it__ = 3 
 >	f = `(f 'a 'b [1] ( 'a `+ 'b ) ) 

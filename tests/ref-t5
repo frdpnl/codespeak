@@ -6,7 +6,7 @@
 > exit
 > env:
 >	state: Ok 
->	__loop_nest__ = 0 
->	it = 1 
+>	__nested_loops__ = 0 
+>	__it__ = 1 
 >	n = 3.00 
 >	A = { 1.00 `+ 2 } 

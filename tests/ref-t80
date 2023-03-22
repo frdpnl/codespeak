@@ -1,0 +1,23 @@
+> input: "call 5 n"
+> input: "call 0 sum"
+> input: "loop  "
+> input: "	if n = 0 ; stop ; end if"
+> input: "	n + sum ; call it sum"
+> input: "	n - 1 ; call it n"
+> input: "end loop"
+> input: "env"
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	n = 0 
+>	__it__ = 1 
+>	sum = 15 
+> input: "print sum"
+15 
+> exit
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	n = 0 
+>	__it__ = 15 
+>	sum = 15 

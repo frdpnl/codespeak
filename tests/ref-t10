@@ -3,5 +3,5 @@
 > exit
 > env:
 >	state: Ok 
->	__loop_nest__ = 0 
->	it = 0 
+>	__nested_loops__ = 0 
+>	__it__ = 0 

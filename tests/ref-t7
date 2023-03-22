@@ -2,6 +2,6 @@
 > exit
 > env:
 >	state: Ok 
->	__loop_nest__ = 0 
+>	__nested_loops__ = 0 
 >	op+ = `+ 
->	it = 4 
+>	__it__ = 4 

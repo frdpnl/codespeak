@@ -5,7 +5,7 @@
 > exit
 > env:
 >	state: Ok 
->	__loop_nest__ = 0 
+>	__nested_loops__ = 0 
 >	newend = `end 
->	it = 1 
+>	__it__ = 1 
 >	f = `(f [1] ( 1 ) ) 

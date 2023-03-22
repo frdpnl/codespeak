@@ -4,8 +4,8 @@
 > exit
 > env:
 >	state: Ok 
->	__loop_nest__ = 0 
->	it = 8.00 
+>	__nested_loops__ = 0 
+>	__it__ = 8.00 
 >	op1 = `* 
 >	op2 = `* 
 >	op3 = `* 

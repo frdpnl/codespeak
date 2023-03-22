@@ -1,0 +1,10 @@
+
+call 5 n
+call 0 sum
+loop  
+	if n = 0 ; sum ; stop ; end if
+	n + sum ; call it sum
+	n - 1 ; call it n
+end loop
+call it sum
+

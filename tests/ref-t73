@@ -18,8 +18,8 @@
 > exit
 > env:
 >	state: Ok 
->	__loop_nest__ = 0 
->	it = 1.33 
+>	__nested_loops__ = 0 
+>	__it__ = 1.33 
 >	makef = `(makef 'a [8] ( `def 'g { 'x } ) ( `if 'a `= 0 ) ( -1 `* 'x ) ...( `end 'g ) ( `print 'it ) ) 
 >	g1 = `(g 'x [5] ( `if 0 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 0 ) ( `end `if ) ) 
 >	g2 = `(g 'x [5] ( `if 3 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3 ) ( `end `if ) ) 
