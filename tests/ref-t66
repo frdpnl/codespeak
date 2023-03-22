@@ -8,9 +8,9 @@
 2 
 > input: "f (3,) ; it () ; print it"
 3 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 3 
 >	f = `(f 'a [11] ( `if 'a `> 0 ) ( `def 'g Nil ) ( 'a ) ......( `end `if ) ( 'g ) ) 
+> bye!

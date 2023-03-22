@@ -4,9 +4,9 @@
 > input: "	3"
 > input: "end f"
 > input: "f (1, 2) ; it = 3"
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 1 
 >	f = `(f 'a 'b [3] ( 1 ) ( 2 ) ( 3 ) ) 
+> bye!

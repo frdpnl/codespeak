@@ -1,7 +1,6 @@
 > input: "* ; call it op1; call op1 op2; call op2 op3"
 > input: "2, op3, 4. ; do it; print it"
 8.00 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
@@ -9,3 +8,4 @@
 >	op1 = `* 
 >	op2 = `* 
 >	op3 = `* 
+> bye!

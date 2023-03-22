@@ -1,9 +1,9 @@
 > input: "list a b"
 > input: "def f it ; () ; () ; a - b ; end f "
 > input: "f (1, 2)"
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = -1 
 >	f = `(f 'a 'b [3] ( Nil ) ( Nil ) ( 'a `- 'b ) ) 
+> bye!

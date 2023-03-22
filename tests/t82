@@ -1,0 +1,16 @@
+
+call 1 n
+loop  
+	env
+	print n
+	if n = 0 ; print 10 ; stop ; end if
+	call 1 p
+	loop
+		env
+		print p
+		if p = 0 ; print -10 ; stop ; end if
+		p - 1 ; call it p;
+	end loop
+	n - 1 ; call it n
+end loop
+

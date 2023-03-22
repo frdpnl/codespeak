@@ -2,8 +2,8 @@
 > input: "end if"
 > input: "if ()"
 ? main: unexpected end of program
-> exit
 > env:
 >	state: Skip 
 >	__nested_loops__ = 0 
 >	__it__ = 0 
+> bye!

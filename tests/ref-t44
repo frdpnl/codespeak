@@ -9,7 +9,6 @@
 `(g [1] ( 2 ) ) 
 > input: "it () ; print it"
 2 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
@@ -17,3 +16,4 @@
 >	f = `(f 'a [3] ( `def 'g Nil ) ( 2 ) ( `end 'g ) ) 
 >	f3 = `(g [1] ( 2 ) ) 
 >	f4 = `(g [1] ( 2 ) ) 
+> bye!

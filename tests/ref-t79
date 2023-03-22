@@ -16,10 +16,10 @@
 2 
 1 
 10 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	n = 0 
 >	__it__ = 10 
 >	ni = 10 
+> bye!

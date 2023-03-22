@@ -1,0 +1,50 @@
+> input: "call 1 n"
+> input: "loop  "
+> input: "	env"
+> input: "	print n"
+> input: "	if n = 0 ; print 10 ; stop ; end if"
+> input: "	call 1 p"
+> input: "	loop"
+> input: "		env"
+> input: "		print p"
+> input: "		if p = 0 ; print -10 ; stop ; end if"
+> input: "		p - 1 ; call it p;"
+> input: "	end loop"
+> input: "	n - 1 ; call it n"
+> input: "end loop"
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	n = 1 
+>	__it__ = `(__loop__ [19] ( `env ) ( `print 'n ) ( `if 'n `= 0 ) ..............( 'n `- 1 ) ( `call 'it 'n ) ) 
+1 
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	n = 1 
+>	__it__ = `(__loop__ [8] ( `env ) ( `print 'p ) ( `if 'p `= 0 ) ...( 'p `- 1 ) ( `call 'it 'p ) ) 
+>	p = 1 
+1 
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	n = 1 
+>	__it__ = 0 
+>	p = 0 
+0 
+-10 
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	n = 0 
+>	__it__ = 0 
+>	p = 0 
+0 
+10 
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	n = 0 
+>	__it__ = 10 
+>	p = 0 
+> bye!

@@ -1,7 +1,7 @@
 > input: "def f (a,b) ; end 3"
 ? main: unexpected end of program
-> exit
 > env:
 >	state: Fun 
 >	__nested_loops__ = 0 
 >	__it__ = `(f 'a 'b [1] ( `end 3 ) ) 
+> bye!

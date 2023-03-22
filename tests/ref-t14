@@ -3,8 +3,8 @@
 1 
 > input: "if true? ; print it ; rem: again"
 1 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 1 
+> bye!

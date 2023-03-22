@@ -1,8 +1,8 @@
 > input: "* ; call it op; 1, op, 3; do it; print it"
 3 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 3 
 >	op = `* 
+> bye!

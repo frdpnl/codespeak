@@ -15,7 +15,6 @@
 > input: "makef (3.,) ; call it g3 ; g3 (4,) ; print it"
 `(g 'x [5] ( `if 3.00 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3.00 ) ( `end `if ) ) 
 1.33 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
@@ -24,3 +23,4 @@
 >	g1 = `(g 'x [5] ( `if 0 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 0 ) ( `end `if ) ) 
 >	g2 = `(g 'x [5] ( `if 3 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3 ) ( `end `if ) ) 
 >	g3 = `(g 'x [5] ( `if 3.00 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 3.00 ) ( `end `if ) ) 
+> bye!

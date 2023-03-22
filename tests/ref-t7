@@ -1,7 +1,7 @@
 > input: "call + op+ ; 1 op+ 3"
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	op+ = `+ 
 >	__it__ = 4 
+> bye!

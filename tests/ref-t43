@@ -1,9 +1,9 @@
 > input: "def f () "
 > input: "if 1 ; ok ; end if"
 > input: "end f"
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = `(f [3] ( `if 1 ) ( 'ok ) ( `end `if ) ) 
 >	f = `(f [3] ( `if 1 ) ( 'ok ) ( `end `if ) ) 
+> bye!

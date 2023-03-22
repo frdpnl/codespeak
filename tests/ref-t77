@@ -6,9 +6,9 @@
 > input: "	call it n"
 > input: "end loop"
 1 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	n = 0 
 >	__it__ = 10 
+> bye!

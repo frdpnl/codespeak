@@ -9,9 +9,9 @@
 1 
 > input: "makef (3.,) ; it (4,) ; print it"
 1.33 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 1.33 
 >	makef = `(makef 'a [9] ( `if 'a `= 0 ) ( `def 'g { 'x } ) ( -1 `* 'x ) ....( `end 'g ) ( `end `if ) ) 
+> bye!

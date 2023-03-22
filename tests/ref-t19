@@ -1,8 +1,8 @@
 > input: "define inc (a,) "
 > input: "end define"
 ? main: unexpected end of program
-> exit
 > env:
 >	state: Fun 
 >	__nested_loops__ = 0 
 >	__it__ = `(inc 'a [1] ( `end `define ) ) 
+> bye!

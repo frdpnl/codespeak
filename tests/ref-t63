@@ -2,9 +2,9 @@
 > input: "f (1, 2)"
 > input: "print it"
 3 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 3 
 >	f = `(f 'a 'b [1] ( 'a `+ 'b ) ) 
+> bye!

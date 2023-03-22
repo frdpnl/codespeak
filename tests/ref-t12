@@ -1,7 +1,7 @@
 > input: "call, 23, n; do it;"
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 23 
 >	n = 23 
+> bye!

@@ -2,10 +2,10 @@
 > input: "def f () ; 1 ; newend f"
 > input: "print (f ())"
 1 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	newend = `end 
 >	__it__ = 1 
 >	f = `(f [1] ( 1 ) ) 
+> bye!

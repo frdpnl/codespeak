@@ -11,8 +11,8 @@
 > input: "end if"
 > input: "print 5"
 5 
-> exit
 > env:
 >	state: Ok 
 >	__nested_loops__ = 0 
 >	__it__ = 5 
+> bye!
