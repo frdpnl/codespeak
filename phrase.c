@@ -2071,6 +2071,20 @@ reduce_fun(Env *e, Val *s, size_t p) {
 	le->n = 0;
 	le->s = NULL;
 	le->parent = e;
+	Val *lnst = malloc(sizeof(*lnst));
+	lnst->hdr.t = VNAT;
+	lnst->nat.v = 0;
+	Symval *lv = symval(LOOPNEST, lnst);
+	free_v(lnst);
+	if (lv == NULL) {
+		free_env(le, false);
+		return (Ires) {FATAL, NULL};
+	}
+	if (!stored_sym(le, lv)) {
+		free_symval(lv);
+		free_env(le, false);
+		return (Ires) {FATAL, NULL};
+	}
 	if (al->hdr.t == VLST) {
 		/* add symval for each param, value is al's */
 		for (size_t i=0; i<f->symf.param.n; ++i) {

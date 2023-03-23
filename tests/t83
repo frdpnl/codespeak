@@ -1,0 +1,12 @@
+
+def sum (a,)
+	call 0 tot
+	loop  
+		if a = 0 ; stop ; end if
+		a + tot ; call it tot
+		a - 1 ; call it a
+	end loop
+	tot
+end sum
+
+sum (5,) ; print it

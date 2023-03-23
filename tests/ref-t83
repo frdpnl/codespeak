@@ -1,0 +1,17 @@
+> input: "def sum (a,)"
+> input: "	call 0 tot"
+> input: "	loop  "
+> input: "		if a = 0 ; stop ; end if"
+> input: "		a + tot ; call it tot"
+> input: "		a - 1 ; call it a"
+> input: "	end loop"
+> input: "	tot"
+> input: "end sum"
+> input: "sum (5,) ; print it"
+15 
+> env:
+>	state: Ok 
+>	__nested_loops__ = 0 
+>	__it__ = 15 
+>	sum = `(sum 'a [11] ( `call 0 'tot ) ( `loop ) ( `if 'a `= 0 ) ......( `end `loop ) ( 'tot ) ) 
+> bye!
