@@ -11,8 +11,8 @@
 2 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 2 
+>	__nested_loops__ = 0 
 >	f = `(f 'a [3] ( `def 'g Nil ) ( 2 ) ( `end 'g ) ) 
 >	f3 = `(g [1] ( 2 ) ) 
 >	f4 = `(g [1] ( 2 ) ) 

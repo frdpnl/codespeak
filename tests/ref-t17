@@ -2,7 +2,7 @@
 > input: "end inc"
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = `(inc 'a [0] ) 
+>	__nested_loops__ = 0 
 >	inc = `(inc 'a [0] ) 
 > bye!

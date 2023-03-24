@@ -3,7 +3,7 @@
 > input: "end f"
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = `(f [3] ( `if 1 ) ( 'ok ) ( `end `if ) ) 
+>	__nested_loops__ = 0 
 >	f = `(f [3] ( `if 1 ) ( 'ok ) ( `end `if ) ) 
 > bye!

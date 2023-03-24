@@ -2,6 +2,6 @@
 > input: "-11 > -1. ;  true? > false? ;"
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 0 
+>	__nested_loops__ = 0 
 > bye!

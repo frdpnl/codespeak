@@ -4,8 +4,8 @@
 1 
 > env:
 >	state: Ok 
+>	__it__ = 1 
 >	__nested_loops__ = 0 
 >	newend = `end 
->	__it__ = 1 
 >	f = `(f [1] ( 1 ) ) 
 > bye!

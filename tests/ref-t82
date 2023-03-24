@@ -14,37 +14,37 @@
 > input: "end loop"
 > env:
 >	state: Ok 
+>	__it__ = `(__loop__ [19] ( `env ) ( `print 'n ) ( `if 'n `= 0 ) ..............( 'n `- 1 ) ( `call 'it 'n ) ) 
 >	__nested_loops__ = 0 
 >	n = 1 
->	__it__ = `(__loop__ [19] ( `env ) ( `print 'n ) ( `if 'n `= 0 ) ..............( 'n `- 1 ) ( `call 'it 'n ) ) 
 1 
 > env:
 >	state: Ok 
+>	__it__ = `(__loop__ [8] ( `env ) ( `print 'p ) ( `if 'p `= 0 ) ...( 'p `- 1 ) ( `call 'it 'p ) ) 
 >	__nested_loops__ = 0 
 >	n = 1 
->	__it__ = `(__loop__ [8] ( `env ) ( `print 'p ) ( `if 'p `= 0 ) ...( 'p `- 1 ) ( `call 'it 'p ) ) 
 >	p = 1 
 1 
 > env:
 >	state: Ok 
+>	__it__ = 0 
 >	__nested_loops__ = 0 
 >	n = 1 
->	__it__ = 0 
 >	p = 0 
 0 
 -10 
 > env:
 >	state: Ok 
+>	__it__ = 0 
 >	__nested_loops__ = 0 
 >	n = 0 
->	__it__ = 0 
 >	p = 0 
 0 
 10 
 > env:
 >	state: Ok 
+>	__it__ = 10 
 >	__nested_loops__ = 0 
 >	n = 0 
->	__it__ = 10 
 >	p = 0 
 > bye!

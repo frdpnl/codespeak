@@ -10,9 +10,9 @@
 > input: "4. > 2 ; if false? ; print false ; end if"
 > env:
 >	state: Ok 
+>	__it__ = 0 
 >	__nested_loops__ = 0 
 >	correct = 1 
->	__it__ = 0 
 >	true = 1 
 >	false = 0 
 > bye!

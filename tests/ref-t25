@@ -13,6 +13,6 @@
 5 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 5 
+>	__nested_loops__ = 0 
 > bye!

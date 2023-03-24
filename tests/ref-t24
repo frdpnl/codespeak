@@ -9,8 +9,8 @@
 1 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 1 
+>	__nested_loops__ = 0 
 >	a = 3 
 >	b = 4 
 > bye!

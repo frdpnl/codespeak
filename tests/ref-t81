@@ -8,8 +8,8 @@
 > input: "call it sum"
 > env:
 >	state: Ok 
+>	__it__ = 15 
 >	__nested_loops__ = 0 
 >	n = 0 
->	__it__ = 15 
 >	sum = 15 
 > bye!

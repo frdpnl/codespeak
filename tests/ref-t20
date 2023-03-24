@@ -2,7 +2,7 @@
 > input: "dec (1,)"
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 0 
+>	__nested_loops__ = 0 
 >	dec = `(dec 'a [1] ( 'a `- 1 ) ) 
 > bye!

@@ -1,6 +1,6 @@
 > input: "2"
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 2 
+>	__nested_loops__ = 0 
 > bye!

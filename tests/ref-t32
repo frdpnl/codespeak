@@ -4,7 +4,7 @@
 > input: "f (1, 2)"
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 1 
+>	__nested_loops__ = 0 
 >	f = `(f 'a 'b [1] ( 1 ) ) 
 > bye!

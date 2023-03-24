@@ -15,7 +15,7 @@
 1 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 1 
+>	__nested_loops__ = 0 
 >	t = `(t [8] ( `if 2 `> 0 ) ( 1 ) ( `call 'it 'r ) ...( `end `if ) ( 'r ) ) 
 > bye!

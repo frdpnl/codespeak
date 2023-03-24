@@ -3,8 +3,8 @@
 8.00 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 8.00 
+>	__nested_loops__ = 0 
 >	op1 = `* 
 >	op2 = `* 
 >	op3 = `* 

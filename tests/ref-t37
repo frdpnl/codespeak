@@ -8,6 +8,6 @@
 > input: "finally"
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 'finally 
+>	__nested_loops__ = 0 
 > bye!

@@ -9,7 +9,7 @@
 6 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 6 
+>	__nested_loops__ = 0 
 >	r = `(r 'a [7] ( `rem: 'recursion 'example ) ( `if 'a `<= 1 ) ( 1 ) ..( 'a `* 'r { 'it } ) ( `end `if ) ) 
 > bye!

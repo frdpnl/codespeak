@@ -6,8 +6,8 @@
 -2 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = -2 
+>	__nested_loops__ = 0 
 >	a* = `(a* 'a [3] ( `def 'f { 'x } ) ( 'a `* 'x ) ( `end 'f ) ) 
 >	opposite = `(f 'x [1] ( -1 `* 'x ) ) 
 > bye!

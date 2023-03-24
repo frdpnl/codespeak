@@ -11,7 +11,7 @@
 1.33 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 1.33 
+>	__nested_loops__ = 0 
 >	makef = `(makef 'a [9] ( `if 'a `= 0 ) ( `def 'g { 'x } ) ( -1 `* 'x ) ....( `end 'g ) ( `end `if ) ) 
 > bye!

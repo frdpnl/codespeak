@@ -5,7 +5,7 @@
 8 
 > env:
 >	state: Ok 
->	__nested_loops__ = 0 
 >	__it__ = 8 
+>	__nested_loops__ = 0 
 >	n = 4 
 > bye!

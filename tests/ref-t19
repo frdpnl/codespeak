@@ -3,6 +3,6 @@
 ? main: unexpected end of program
 > env:
 >	state: Fun 
->	__nested_loops__ = 0 
 >	__it__ = `(inc 'a [1] ( `end `define ) ) 
+>	__nested_loops__ = 0 
 > bye!

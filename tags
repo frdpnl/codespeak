@@ -57,14 +57,14 @@ Symop_	phrase.c	/^typedef struct Symop_ {$/;"	s	file:
 Syms	phrase.c	/^Symop Syms[] = {$/;"	v	typeref:typename:Symop[]
 Symval	phrase.c	/^} Symval;$/;"	t	typeref:struct:__anon2f313ef90d08	file:
 UNSET	phrase.c	/^	UNSET,$/;"	e	enum:__anon2f313ef90c03	file:
-VLST	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
-VNAT	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
-VNIL	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
-VREA	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
-VSEQ	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
-VSYM	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
-VSYMF	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
-VSYMOP	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VFUN	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VLST	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VNAT	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VNIL	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VOPE	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VREA	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VSEQ	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
+VSYM	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
 Val	phrase.c	/^typedef union Val_ Val;$/;"	t	typeref:union:Val_	file:
 Val	phrase.c	/^} Val;$/;"	t	typeref:union:Val_	file:
 Val_	phrase.c	/^typedef union Val_ {$/;"	u	file:
@@ -81,7 +81,7 @@ __anon2f313ef90708	phrase.c	/^	struct {$/;"	s	union:Sem_	file:
 __anon2f313ef90808	phrase.c	/^	struct {$/;"	s	union:Sem_	file:
 __anon2f313ef90908	phrase.c	/^	struct {$/;"	s	union:Sem_	file:
 __anon2f313ef90a08	phrase.c	/^	struct {$/;"	s	union:Sem_	file:
-__anon2f313ef90b03	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	g	file:
+__anon2f313ef90b03	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	g	file:
 __anon2f313ef90c03	phrase.c	/^typedef enum {$/;"	g	file:
 __anon2f313ef90d08	phrase.c	/^typedef struct {$/;"	s	file:
 __anon2f313ef90e08	phrase.c	/^typedef struct {$/;"	s	file:
@@ -151,6 +151,7 @@ name	phrase.c	/^	char name[WSZ];$/;"	m	struct:Symop_	typeref:typename:char[]	fil
 name	phrase.c	/^	char name[WSZ];$/;"	m	struct:__anon2f313ef90d08	typeref:typename:char[]	file:
 nat	phrase.c	/^	} nat;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90608	file:
 nat	phrase.c	/^	} nat;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef91008	file:
+new_env	phrase.c	/^new_env(Env *parent) {$/;"	f	typeref:typename:Env *
 param	phrase.c	/^		List_v param;$/;"	m	struct:Val_::__anon2f313ef91308	typeref:typename:List_v	file:
 parent	phrase.c	/^	struct Env_ *parent;$/;"	m	struct:Env_	typeref:struct:Env_ *	file:
 phrase	phrase.c	/^phrase() {$/;"	f	typeref:typename:Phrase *	file:
@@ -269,7 +270,7 @@ v	phrase.c	/^	Val *v;$/;"	m	struct:__anon2f313ef90d08	typeref:typename:Val *	fil
 v	phrase.c	/^	Val *v;$/;"	m	struct:__anon2f313ef90e08	typeref:typename:Val *	file:
 v	phrase.c	/^	char v[WSZ]; \/* wasteful, but limited *\/$/;"	m	struct:__anon2f313ef90208	typeref:typename:char[]	file:
 val_of_seme	phrase.c	/^val_of_seme(Env *e, Sem *s) {$/;"	f	typeref:typename:Val *	file:
-vtype	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VSYMOP, VSYMF, VSYM, VLST, VSEQ} vtype;$/;"	t	typeref:enum:__anon2f313ef90b03	file:
+vtype	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	t	typeref:enum:__anon2f313ef90b03	file:
 w	phrase.c	/^	Word *w;$/;"	m	struct:__anon2f313ef90308	typeref:typename:Word *	file:
 word	phrase.c	/^word(wtype a) {$/;"	f	typeref:typename:Word *	file:
 word_str	phrase.c	/^word_str(char *a, size_t n) {$/;"	f	typeref:typename:Word *	file:
