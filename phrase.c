@@ -638,7 +638,7 @@ typedef union Val_ {
 } Val;
 
 static void
-print_v(Val *a) {
+print_v(Val *a, bool abr) {
 	if (a == NULL) {
 		printf("? %s: NULL\n", __FUNCTION__);
 		return;
@@ -657,9 +657,13 @@ print_v(Val *a) {
 			printf("`%s ", a->symop.name);
 			break;
 		case VFUN:
+			if (abr) {
+				printf("`%s ", a->symf.name);
+				break;
+			}
 			printf("`(%s ", a->symf.name);
 			for (size_t i=0; i<a->symf.param.n; ++i) {
-				print_v(a->symf.param.v[i]);
+				print_v(a->symf.param.v[i], abr);
 			}
 			printf("[%lu] ", a->symf.body.n);
 			for (size_t i=0; i<a->symf.body.n; ++i) {
@@ -667,7 +671,7 @@ print_v(Val *a) {
 				if (i > N && i < a->symf.body.n - N) {
 					printf(".");
 				} else {
-					print_v(a->symf.body.v[i]);
+					print_v(a->symf.body.v[i], abr);
 				}
 			}
 			printf(") ");
@@ -677,15 +681,23 @@ print_v(Val *a) {
 			break;
 		case VLST:
 			printf("{ ");
+			if (abr) {
+				printf("x%lu } ", a->lst.v.n);
+				break;
+			}
 			for (size_t i=0; i<a->lst.v.n; ++i) {
-				print_v(a->lst.v.v[i]);
+				print_v(a->lst.v.v[i], abr);
 			}
 			printf("} ");
 			break;
 		case VSEQ:
 			printf("( ");
+			if (abr) {
+				printf("x%lu ) ", a->seq.v.n);
+				break;
+			}
 			for (size_t i=0; i<a->seq.v.n; ++i) {
-				print_v(a->seq.v.v[i]);
+				print_v(a->seq.v.v[i], abr);
 			}
 			printf(") ");
 			break;
@@ -732,7 +744,7 @@ print_rc(Ires a) {
 	print_xint(a.state);
 	printf(", ");
 	if (a.v != NULL) {
-		print_v(a.v);
+		print_v(a.v, false);
 	} else {
 		printf("null");
 	}
@@ -997,7 +1009,7 @@ static void
 print_symval(Symval *a) {
 	assert(a != NULL);
 	printf("%s = ", a->name);
-	print_v(a->v);
+	print_v(a->v, false);
 }
 static void
 print_env(Env *a, const char *col1) {
@@ -1411,7 +1423,7 @@ reduce_min(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers in (", 
 				__FUNCTION__);
-		print_v(s);
+		print_v(s, false);
 		printf(")\n");
 		free_v(a);
 		free_v(b);
@@ -1681,7 +1693,7 @@ reduce_print(Env *e, Val *s, size_t p) {
 	if (!reduce_prefix1_arg(e, s, p, &a, true)) {
 		return rc;
 	}
-	print_v(a);
+	print_v(a, false);
 	printf("\n");
 	upd_prefix1(s, p, a);
 	rc = (Ires) {OK, s};
@@ -1747,8 +1759,9 @@ reduce_call(Env *e, Val *s, size_t p) {
 		return (Ires) {FATAL, NULL};
 	}
 	if (b->hdr.t != VSYM) {
-		printf("? %s: 2nd argument is not a symbol\n", 
+		printf("? %s: 2nd argument is not a symbol, got ", 
 				__FUNCTION__);
+		print_v(b, true); printf("\n");
 		free_v(a);
 		free_v(b);
 		return (Ires) {FATAL, NULL};
@@ -1895,8 +1908,9 @@ reduce_def(Env *e, Val *s, size_t p) {
 		return (Ires) {FATAL, NULL};
 	}
 	if (fname->hdr.t != VSYM) {
-		printf("? %s: expecting symbol for function name\n",
+		printf("? %s: expecting symbol for function name, got ",
 				__FUNCTION__);
+		print_v(fname, true); printf("\n");
 		free_v(fname);
 		free_v(fparam);
 		return (Ires) {FATAL, NULL};
@@ -1939,7 +1953,7 @@ reduce_def(Env *e, Val *s, size_t p) {
 }
 static Ires
 reduce_loop(Env *e, Val *s, size_t p) {
-	if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "entry"); print_v(s); printf("\n"); }
+	if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "entry"); print_v(s,false); printf("\n"); }
 	/* rem: loop */
 	if (s->seq.v.n != 1) {
 		printf("? %s: `loop does not take arguments\n",
@@ -1959,7 +1973,7 @@ reduce_loop(Env *e, Val *s, size_t p) {
 }
 static Ires 
 reduce_end(Env *e, Val *s, size_t p) {
-	if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "entry"); print_v(s); printf("\n"); }
+	if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "entry"); print_v(s, false); printf("\n"); }
 	/* rem: end somefun or end if or end loop ; */
 	if (p != 0 || s->seq.v.n != 2) {
 		printf("? %s: invalid 'end', expecting argument\n",
@@ -2127,7 +2141,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 	Val *v;
 	for (size_t i=0; i<f->symf.body.n; ++i) {
 		v = copy_v(f->symf.body.v[i]);
-		if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "value"); print_v(v); printf("\n"); }
+		if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "value"); print_v(v,false); printf("\n"); }
 		xint xs = interp(le, v);
 		free_v(v);
 		if (Dbg) { printf("##  %s %5s: ", __FUNCTION__, "reduce"); print_xint(xs); printf("\n"); } 
@@ -2398,13 +2412,13 @@ static Ires
 exec_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
 	assert(b != NULL);
-	if (Dbg) { printf("##  %s (%d) entry: ", __FUNCTION__, look); print_v(b); printf("\n"); }
+	if (Dbg) { printf("##  %s (%d) entry: ", __FUNCTION__, look); print_v(b,false); printf("\n"); }
 	/* resolve symbols to functions */
 	Ires rc = solve_fun(e, b);
 	if (rc.state == FATAL) {
 		return rc;
 	}
-	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b,false); printf("\n"); }
 	rc = (Ires) {UNSET, NULL};
 	Val *c;
 	while (b->seq.v.n > 0) {
@@ -2448,7 +2462,7 @@ exec_seq(Env *e, Val *b, bool look) {
 		}
 		if (!symfound) { 
 			printf("? %s: sequence without function ",__FUNCTION__);
-			print_v(b);
+			print_v(b, true);
 			printf("\n");
 			return (Ires) {FATAL, NULL};
 		}
@@ -2465,7 +2479,7 @@ exec_seq(Env *e, Val *b, bool look) {
 			assert(rc.v == NULL);
 			return rc;
 		}
-		if (Dbg) { printf("##  %s reduced: ", __FUNCTION__); print_v(b); printf("\n"); }
+		if (Dbg) { printf("##  %s reduced: ", __FUNCTION__); print_v(b,false); printf("\n"); }
 		b = rc.v;
 		/* rc.state set by the reduce_*() */
 	}
@@ -2523,7 +2537,7 @@ interp_seq(Env *e, Val *a, bool look) {
 		return (Ires) {OK, b};
 	}
 	rc = exec_seq(e, b, look);
-	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(rc.v); printf("\n"); }
+	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(rc.v,false); printf("\n"); }
 	free_v(b);
 	return rc;
 }
@@ -2579,7 +2593,7 @@ interp_lst(Env *e, Val *a, bool look) {
 		b = push_v(VLST, b, rc.v);
 		free_v(rc.v);
 	}
-	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(b); printf("\n"); }
+	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(b, false); printf("\n"); }
 	return (Ires) {OK, b};
 }
 
@@ -2660,7 +2674,7 @@ interp_loop_body(Env *e, Val *s, size_t p) {
 static Ires
 interp_maybe_def(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
-	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a, false); printf("\n"); }
 	Val *b = copy_v(a);
 	/* resolve symbols (not 'it) to operators and functions */
 	Ires rc = solve_fun(e, b);
@@ -2668,7 +2682,7 @@ interp_maybe_def(Env *e, Val *a) {
 		free_v(b);
 		return rc;
 	}
-	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b, false); printf("\n"); }
 	/* rem: expecting end 'foo */
 	if (b->seq.v.v[0]->hdr.t == VOPE 
 			&& b->seq.v.v[0]->symop.v == reduce_end
@@ -2692,7 +2706,7 @@ interp_maybe_def(Env *e, Val *a) {
 static Ires
 interp_maybe_loop(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
-	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a, false); printf("\n"); }
 	Val *b = copy_v(a);
 	/* resolve symbols (not 'it) to operators and functions */
 	Ires rc = solve_fun(e, b);
@@ -2700,7 +2714,7 @@ interp_maybe_loop(Env *e, Val *a) {
 		free_v(b);
 		return rc;
 	}
-	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b, false); printf("\n"); }
 	Val *lnst = lookup(e, LOOPNEST, false);
 	if (lnst == NULL) {
 		printf("? %s: nested loop count missing\n", __FUNCTION__);
@@ -2738,7 +2752,7 @@ interp_maybe_loop(Env *e, Val *a) {
 static Ires
 interp_maybe_skip(Env *e, Val *a) {
 	/* returns a fresh value, 'a untouched */
-	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a); printf("\n"); }
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(a, false); printf("\n"); }
 	Val *b = copy_v(a);
 	/* resolve symbols to functions */
 	Ires rc = solve_fun(e, b);
@@ -2746,7 +2760,7 @@ interp_maybe_skip(Env *e, Val *a) {
 		free_v(b);
 		return rc;
 	}
-	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b); printf("\n"); }
+	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(b, false); printf("\n"); }
 	bool an_endif = b->seq.v.v[0]->hdr.t == VOPE 
 			&& b->seq.v.v[0]->symop.v == reduce_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
@@ -2952,7 +2966,7 @@ interp_ph(Env *env, Phrase *a) {
 		if (v == NULL) {
 			return false;
 		}
-		if (Dbg) { printf("# %3lu %6s: ", i, "value"); print_v(v); printf("\n"); }
+		if (Dbg) { printf("# %3lu %6s: ", i, "value"); print_v(v, false); printf("\n"); }
 		xint xs = interp(env, v);
 		free_v(v);
 		if (Dbg) { printf("# %3lu %6s: ", i, "interp"); print_xint(xs); printf("\n"); }
