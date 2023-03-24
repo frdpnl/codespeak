@@ -1,0 +1,8 @@
+
+call -10 tot
+
+def sum (a,)
+	call a tot
+end sum
+sum (10,)
+

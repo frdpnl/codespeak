@@ -1,0 +1,6 @@
+> input: "call -10 tot"
+> input: "def sum (a,)"
+> input: "	call a tot"
+> input: "end sum"
+> input: "sum (10,)"
+? reduce_call: 2nd argument is not a symbol
