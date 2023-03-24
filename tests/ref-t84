@@ -3,4 +3,4 @@
 > input: "	call a tot"
 > input: "end sum"
 > input: "sum (10,)"
-? reduce_call: 2nd argument is not a symbol
+? reduce_call: 2nd argument is not a symbol, got -10 
