@@ -2730,13 +2730,13 @@ interp_maybe_loop(Env *e, Val *a) {
 	if (b->seq.v.v[0]->hdr.t == VOPE 
 			&& b->seq.v.v[0]->symop.v == reduce_loop) {
 		++(lnst->nat.v);
-	} /* rem: expecting `end `loop */
+	} /* rem: `end `loop ? */
 	else if (b->seq.v.v[0]->hdr.t == VOPE 
 			&& b->seq.v.v[0]->symop.v == reduce_end
 			&& b->seq.v.v[0]->symop.arity == b->seq.v.n -1
 			&& b->seq.v.v[1]->hdr.t == VOPE 
 			&& b->seq.v.v[1]->symop.v == reduce_loop) {
-		/* end loop while in topmost loop, execute it */
+		/* `end `loop while in topmost loop, execute this */
 		if (lnst->nat.v == 0) {
 			Ires rc = interp_now(e, b, false);
 			free_v(b);
