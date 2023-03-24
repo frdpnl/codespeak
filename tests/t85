@@ -1,0 +1,9 @@
+
+call 2 n
+loop 
+	def f (a,) ; a ; end f
+	if n = 0 ; stop ; end if
+	call (n - 1) n;
+	env
+end loop
+
