@@ -2797,14 +2797,14 @@ interp_maybe_skip(Env *e, Val *a) {
 static xint 
 interp(Env *e, Val *a) {
 	/* updates env's state, updates 'it, returns state */
-	if (Dbg) { printf("## %s: entry\n", __FUNCTION__); print_env(e, "##"); }
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
+	if (Dbg) { printf("## %s: entry\n", __FUNCTION__); print_env(e, "##"); }
 	Ires rc;
 	switch (e->state) {
 		case LOOP:
 			rc = interp_maybe_loop(e, a);
-			/* if ended a loop, execute it now */
+			/* if ended a loop (OK state), execute it now */
 			if (rc.state == OK) {
 				e->state = OK;
 				Ires lrc = interp_loop(e, rc.v);
