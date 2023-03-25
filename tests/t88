@@ -1,0 +1,4 @@
+
+def f (a,b) ; a * b ; end f
+list f list 2 3.0 ; do it
+f, list, 2, 3.0 ; do it

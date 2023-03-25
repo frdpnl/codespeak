@@ -131,8 +131,8 @@ def makef (a,)
 		end if
 	end g
 end f
-makef (0,) ; call it f
-f (4) ; print it
+makef (0,) ; call it f-
+f- (4,) ; print it
 ```
 displays -4 
 
@@ -162,6 +162,15 @@ end r
 r (3,) ; print it
 ```
 displays 6
+
+```
+rem: operator precedence example
+def f (a,b) ; a * b ; end f
+f list 2 3 ; print it
+list f list 2 3.0 ; do it ; print it
+f, list, -2, 3 ; do it ; print it
+```
+displays 6, 6.0 and -6
 
 ### Invalid expressions
 
