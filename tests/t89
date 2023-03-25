@@ -1,4 +1,21 @@
 
-def f (a,b) ; a * b ; end f
-list f list 2 3.0 ; do it
-f, list, 2, 3.0 ; do it
+rem: recursive logistic equation
+def lgc (x,r,n)
+	if n <= 1 
+		r * x * (1 - x) 
+		return
+	end if
+	lgc (x, r, (n - 1)) ; call it y
+	r * y * (1 - y) 
+end lgc
+
+call .6 x0
+lgc (x0, 3.2, 1) ; print it
+lgc (x0, 3.2, 5) ; print it
+lgc (x0, 3.2, 6) ; print it
+lgc (x0, 3.2, 7) ; print it
+lgc (x0, 3.2, 8) ; print it
+lgc (x0, 3.2, 20) ; print it
+lgc (x0, 3.2, 21) ; print it
+lgc (x0, 3.2, 40) ; print it
+lgc (x0, 3.2, 41) ; print it

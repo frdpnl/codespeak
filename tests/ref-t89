@@ -1,9 +1,35 @@
-> input: "def f (a,b) ; a * b ; end f"
-> input: "list f list 2 3.0 ; do it"
-> input: "f, list, 2, 3.0 ; do it"
+> input: "rem: recursive logistic equation"
+> input: "def lgc (x,r,n)"
+> input: "	if n <= 1 "
+> input: "		r * x * (1 - x) "
+> input: "		return"
+> input: "	end if"
+> input: "	lgc (x, r, (n - 1)) ; call it y"
+> input: "	r * y * (1 - y) "
+> input: "end lgc"
+> input: "call .6 x0"
+> input: "lgc (x0, 3.2, 1) ; print it"
+0.77 
+> input: "lgc (x0, 3.2, 5) ; print it"
+0.79 
+> input: "lgc (x0, 3.2, 6) ; print it"
+0.52 
+> input: "lgc (x0, 3.2, 7) ; print it"
+0.80 
+> input: "lgc (x0, 3.2, 8) ; print it"
+0.52 
+> input: "lgc (x0, 3.2, 20) ; print it"
+0.51 
+> input: "lgc (x0, 3.2, 21) ; print it"
+0.80 
+> input: "lgc (x0, 3.2, 40) ; print it"
+0.51 
+> input: "lgc (x0, 3.2, 41) ; print it"
+0.80 
 > env:
 >	state: Ok 
->	__it__ = 6.00 
+>	__it__ = 0.80 
 >	__nested_loops__ = 0 
->	f = `(f 'a 'b [1] ( 'a `* 'b ) ) 
+>	lgc = `(lgc 'x 'r 'n [7] ( `if 'n `<= 1 ) ( 'r `* 'x `* ( 1 '- 'x ) ) ( `return ) ..( `call 'it 'y ) ( 'r `* 'y `* ( 1 '- 'y ) ) ) 
+>	x0 = 0.60 
 > bye!
