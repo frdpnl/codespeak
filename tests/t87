@@ -1,0 +1,9 @@
+
+list call 3 n ; do it ; print it
+
+call list L
+call do D
+L L 1 + 2 ; D it ; D it ; print it
+
+def f (a,b) ; a + b ; end f
+f L 1 2 ; print it

@@ -1,0 +1,18 @@
+> input: "list call 3 n ; do it ; print it"
+3 
+> input: "call list L"
+> input: "call do D"
+> input: "L L 1 + 2 ; D it ; D it ; print it"
+3 
+> input: "def f (a,b) ; a + b ; end f"
+> input: "f L 1 2 ; print it"
+3 
+> env:
+>	state: Ok 
+>	__it__ = 3 
+>	__nested_loops__ = 0 
+>	n = 3 
+>	L = `list 
+>	D = `do 
+>	f = `(f 'a 'b [1] ( 'a `+ 'b ) ) 
+> bye!
