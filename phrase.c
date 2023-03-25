@@ -2247,22 +2247,22 @@ typedef struct Symop_ {
 } Symop;
 
 Symop Syms[] = {
-	(Symop) {"rem:",   -100, reduce_rem,  -1}, /* -1 arity: remainder of seq val */
-	(Symop) {"end",    -60, reduce_end,  1}, /* needs to be prior to loop, if, ufun */
-	(Symop) {"list",   -50, reduce_list, -1},
-	(Symop) {"call",   -40, reduce_call,  2},
-	(Symop) {"print",  -30, reduce_print, 1}, 
-	(Symop) {"true?",  -30, reduce_true,  0},
-	(Symop) {"false?", -30, reduce_false, 0},
-	(Symop) {"else",   -30, reduce_else, 0},
-	(Symop) {"return", -30, reduce_return, 0},
-	(Symop) {"loop",   -30, reduce_loop, 0},
-	(Symop) {"stop",   -30, reduce_stop, 0},
-	(Symop) {"env",    -30, reduce_env, 0},
-	(Symop) {"solve",  -20, reduce_solve,  1},
-	(Symop) {"do",     -20, reduce_do,    1},
+	(Symop) {"call",   -20, reduce_call,  2},
 	(Symop) {"define", -20, reduce_def,  2},
 	(Symop) {"def",    -20, reduce_def,  2},
+	(Symop) {"do",     -20, reduce_do,    1},
+	(Symop) {"else",   -20, reduce_else, 0},
+	(Symop) {"end",    -20, reduce_end,  1}, /* needs to be prior to loop, if, ufun */
+	(Symop) {"env",    -20, reduce_env, 0},
+	(Symop) {"list",   -20, reduce_list, -1},
+	(Symop) {"loop",   -20, reduce_loop, 0},
+	(Symop) {"print",  -20, reduce_print, 1}, 
+	(Symop) {"rem:",   -20, reduce_rem,  -1}, /* -1 arity: remainder of seq val */
+	(Symop) {"return", -20, reduce_return, 0},
+	(Symop) {"stop",   -20, reduce_stop, 0},
+	(Symop) {"solve",  -20, reduce_solve,  1},
+	(Symop) {"true?",  -20, reduce_true,  0},
+	(Symop) {"false?", -20, reduce_false, 0},
 	/* priority DEFPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, reduce_mul, 2},
 	(Symop) {"/",    20, reduce_div, 2},
