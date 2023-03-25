@@ -640,7 +640,7 @@ typedef union Val_ {
 static void
 print_v(Val *a, bool abr) {
 	if (a == NULL) {
-		printf("? %s: NULL\n", __FUNCTION__);
+		printf("\n? %s: NULL\n", __FUNCTION__);
 		return;
 	}
 	switch (a->hdr.t) {
@@ -1252,8 +1252,14 @@ reduce_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, boo
 }
 static bool
 reduce_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
-	Val *a;
-	a = malloc(sizeof(*a));
+	/* if no arguments then fail */
+	if (p == s->seq.v.n -1) {
+		printf("? %s: arguments expected for ", __FUNCTION__);
+		print_v(s->seq.v.v[p], true);
+		printf("\n");
+		return false;
+	}
+	Val *a = malloc(sizeof(*a));
 	a->hdr.t = VSEQ;  /* because we copy arguments, we keep the seq type */
 	a->seq.v.n = s->seq.v.n -p-1; 
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
@@ -1878,6 +1884,11 @@ reduce_else(Env *e, Val *s, size_t p) {
 }
 static Ires 
 reduce_rem(Env *e, Val *s, size_t p) {
+	if (p != 0) {
+		printf("? %s: `rem syntax invalid, needs to be 1st\n",
+				__FUNCTION__);
+		return (Ires) {FATAL, NULL};
+	}
 	Ires rc;
 	Val *b;
 	Val *a = lookup(e, ITNAME, false);
@@ -2236,29 +2247,29 @@ typedef struct Symop_ {
 } Symop;
 
 Symop Syms[] = {
-	(Symop) {"rem:",   -20, reduce_rem,  -1}, /* -1 arity: remainder of seq val */
-	(Symop) {"true?",  -20, reduce_true,  0},
-	(Symop) {"false?", -20, reduce_false, 0},
-	(Symop) {"list",   -20, reduce_list, -1},
+	(Symop) {"rem:",   -100, reduce_rem,  -1}, /* -1 arity: remainder of seq val */
+	(Symop) {"end",    -60, reduce_end,  1}, /* needs to be prior to loop, if, ufun */
+	(Symop) {"list",   -50, reduce_list, -1},
+	(Symop) {"call",   -40, reduce_call,  2},
+	(Symop) {"print",  -30, reduce_print, 1}, 
+	(Symop) {"true?",  -30, reduce_true,  0},
+	(Symop) {"false?", -30, reduce_false, 0},
+	(Symop) {"else",   -30, reduce_else, 0},
+	(Symop) {"return", -30, reduce_return, 0},
+	(Symop) {"loop",   -30, reduce_loop, 0},
+	(Symop) {"stop",   -30, reduce_stop, 0},
+	(Symop) {"env",    -30, reduce_env, 0},
 	(Symop) {"solve",  -20, reduce_solve,  1},
 	(Symop) {"do",     -20, reduce_do,    1},
-	(Symop) {"call",   -20, reduce_call,  2},
 	(Symop) {"define", -20, reduce_def,  2},
 	(Symop) {"def",    -20, reduce_def,  2},
-	(Symop) {"return", -20, reduce_return, 0},
-	(Symop) {"loop",   -20, reduce_loop, 0},
-	(Symop) {"stop",   -20, reduce_stop, 0},
-	(Symop) {"end",    -20, reduce_end,  1}, /* needs to be prior to user def */
-	(Symop) {"else",   -20, reduce_else, 0},
-	(Symop) {"print",  -20, reduce_print, 1},
-	(Symop) {"env",    -20, reduce_env, 0},
-	(Symop) {"=",      -10, reduce_eq,  2},
-	(Symop) {"/=",     -10, reduce_neq, 2},
 	/* priority DEFPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, reduce_mul, 2},
 	(Symop) {"/",    20, reduce_div, 2},
 	(Symop) {"+",    30, reduce_plu, 2},
 	(Symop) {"-",    30, reduce_min, 2},
+	(Symop) {"=",    40, reduce_eq,  2},
+	(Symop) {"/=",   40, reduce_neq, 2},
 	(Symop) {"<",    40, reduce_les, 2},
 	(Symop) {"<=",   40, reduce_leq, 2},
 	(Symop) {">",    40, reduce_gre, 2},
@@ -2266,8 +2277,8 @@ Symop Syms[] = {
 	(Symop) {"~=",   40, reduce_eqv, 2},
 	(Symop) {"not",  50, reduce_not, 1},
 	(Symop) {"and",  60, reduce_and, 2},
-	(Symop) {"or",   60, reduce_or,  2},
-	(Symop) {"if",  100, reduce_if,  1},
+	(Symop) {"or",   70, reduce_or,  2},
+	(Symop) {"if",   80, reduce_if,  1},
 	(Symop) {"", 0, reduce_false, -1},
 };
 static int
@@ -2479,9 +2490,9 @@ exec_seq(Env *e, Val *b, bool look) {
 			assert(rc.v == NULL);
 			return rc;
 		}
-		if (Dbg) { printf("##  %s reduced: ", __FUNCTION__); print_v(b,false); printf("\n"); }
 		b = rc.v;
 		/* rc.state set by the reduce_*() */
+		if (Dbg) { printf("##  %s reduced: ", __FUNCTION__); print_v(b,false); printf("\n"); }
 	}
 	/* empty seq after reduction? */
 	printf("? %s: sequence empty\n",__FUNCTION__);

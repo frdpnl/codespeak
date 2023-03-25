@@ -14,10 +14,4 @@
 >	f = `(f [1] ( 1 ) ) 
 >	f2 = `(f [1] ( 1 ) ) 
 > input: "f = f2"
-> env:
->	state: Ok 
->	__it__ = 1 
->	__nested_loops__ = 0 
->	f = `(f [1] ( 1 ) ) 
->	f2 = `(f [1] ( 1 ) ) 
-> bye!
+? reduce_fun: argument to `f not a list or '()'
