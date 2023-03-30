@@ -132,7 +132,7 @@ isnat	phrase.c	/^isnat(Word *a) {$/;"	f	typeref:typename:Sem *	file:
 isrea	phrase.c	/^isrea(Word *a) {$/;"	f	typeref:typename:Sem *	file:
 issym	phrase.c	/^issym(Word *a) {$/;"	f	typeref:typename:Sem *	file:
 istrue_v	phrase.c	/^istrue_v(Val *a) {$/;"	f	typeref:typename:bool	file:
-lookup	phrase.c	/^lookup(Env *a, char *b, bool global) {$/;"	f	typeref:typename:Val *	file:
+lookup	phrase.c	/^lookup(Env *a, char *b, bool global, bool iterate) {$/;"	f	typeref:typename:Val *	file:
 lookup_id	phrase.c	/^lookup_id(Env *a, char *b, bool global, size_t *id) {$/;"	f	typeref:typename:Symval *	file:
 lookup_op	phrase.c	/^lookup_op(char *a) {$/;"	f	typeref:typename:Symop *	file:
 lst	phrase.c	/^	} lst;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90908	file:

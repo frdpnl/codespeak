@@ -1077,7 +1077,7 @@ lookup_id(Env *a, char *b, bool global, size_t *id) {
 	/* resolve in local env first */
 	for (size_t i=0; i<a->n; ++i) {
 		Symval *c = a->s[i];
-		if (strncmp(c->name, b, WSZ*sizeof(char)) == 0) {
+		if (strncmp(c->name, b, sizeof(c->name)) == 0) {
 			if (id != NULL) {
 				*id = i;
 			}
@@ -1090,12 +1090,22 @@ lookup_id(Env *a, char *b, bool global, size_t *id) {
 	return NULL;
 }
 static Val *
-lookup(Env *a, char *b, bool global) {
+lookup(Env *a, char *b, bool global, bool iterate) {
 	assert(a != NULL && "env null");
 	assert((b != NULL && strlen(b) != 0) && "symbol name null");
 	Symval *sv = lookup_id(a, b, global, NULL);
 	if (sv == NULL) {
 		return NULL;
+	}
+	if (iterate) {
+		Val *c = sv->v; 
+		while (c->hdr.t == VSYM) {
+			sv = lookup_id(a, c->sym.v, global, NULL);
+			if (sv == NULL) {
+				return NULL;
+			}
+			c = sv->v;
+		}
 	}
 	return sv->v;
 }
@@ -1104,7 +1114,7 @@ static bool
 added_sym(Env *a, Symval *b, bool err) {
 	assert(a != NULL && "environment null");
 	assert(b != NULL && "symbol null");
-	if (lookup(a, b->name, false) != NULL) {
+	if (lookup(a, b->name, false, false) != NULL) {
 		if (err) {
 			printf("? %s: symbol already defined (%s)\n",
 					__FUNCTION__, b->name);
@@ -1188,28 +1198,18 @@ reduce_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool 
 				__FUNCTION__);
 		return false;
 	}
-	Val *a = s->seq.v.v[p-1];
-	if (looka && a->hdr.t == VSYM) {
-		Val *la = lookup(e, a->sym.v, true);
-		if (la == NULL) {
-			printf("? %s: left argument unknown '%s\n", 
-					__FUNCTION__, a->sym.v);
-			return false;
-		}
-		a = la;
+	Ires rc = interp_now(e, s->seq.v.v[p-1], looka);
+	if (rc.state != OK) {
+		return false;
 	}
-	Val *b = s->seq.v.v[p+1];
-	if (lookb && b->hdr.t == VSYM) {
-		Val *lb = lookup(e, b->sym.v, true);
-		if (lb == NULL) {
-			printf("? %s: right argument unknown '%s\n", 
-					__FUNCTION__, b->sym.v);
-			return false;
-		}
-		b = lb;
+	*pa = rc.v;
+	rc = interp_now(e, s->seq.v.v[p+1], lookb);
+	if (rc.state != OK) {
+		free_v(*pa);
+		*pa = NULL;
+		return false;
 	}
-	*pa = copy_v(a);
-	*pb = copy_v(b);
+	*pb = rc.v;
 	return true;
 }
 static bool
@@ -1220,17 +1220,11 @@ reduce_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 				__FUNCTION__);
 		return false;
 	}
-	Val *a = s->seq.v.v[p+1];
-	if (looka && a->hdr.t == VSYM) {
-		Val *la = lookup(e, a->sym.v, true);
-		if (la == NULL) {
-			printf("? %s: argument unknown '%s\n", 
-					__FUNCTION__, a->sym.v);
-			return false;
-		}
-		a = la;
+	Ires rc = interp_now(e, s->seq.v.v[p+1], looka);
+	if (rc.state != OK) {
+		return false;
 	}
-	*pa = copy_v(a);
+	*pa = rc.v;
 	return true;
 }
 static bool
@@ -1241,28 +1235,18 @@ reduce_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, boo
 				__FUNCTION__);
 		return false;
 	}
-	Val *a = s->seq.v.v[p+1];
-	if (looka && a->hdr.t == VSYM) {
-		Val *la = lookup(e, a->sym.v, true);
-		if (la == NULL) {
-			printf("? %s: 1st argument unknown '%s\n", 
-					__FUNCTION__, a->sym.v);
-			return false;
-		}
-		a = la;
+	Ires rc = interp_now(e, s->seq.v.v[p+1], looka);
+	if (rc.state != OK) {
+		return false;
 	}
-	Val *b = s->seq.v.v[p+2];
-	if (lookb && b->hdr.t == VSYM) {
-		Val *lb = lookup(e, b->sym.v, true);
-		if (lb == NULL) {
-			printf("? %s: 2nd argument unknown '%s\n", 
-					__FUNCTION__, b->sym.v);
-			return false;
-		}
-		b = lb;
+	*pa = rc.v;
+	rc = interp_now(e, s->seq.v.v[p+2], lookb);
+	if (rc.state != OK) {
+		free_v(*pa);
+		*pa = NULL;
+		return false;
 	}
-	*pa = copy_v(a);
-	*pb = copy_v(b);
+	*pb = rc.v;
 	return true;
 }
 static bool
@@ -1278,19 +1262,17 @@ reduce_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	a->hdr.t = VSEQ;
 	a->seq.v.n = s->seq.v.n -p-1; 
 	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
+	Ires rc;
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		Val *b = s->seq.v.v[i];
-		if (looka && b->hdr.t == VSYM) {
-			Val *lb = lookup(e, b->sym.v, true);
-			if (lb == NULL) {
-				free_v(a);
-				printf("? %s: %luth argument unknown '%s\n", 
-						__FUNCTION__, i, b->sym.v);
-				return false;
-			}
-			b = lb;
+		Val *si = s->seq.v.v[i];
+		rc = interp_now(e, si, looka);
+		if (rc.state != OK) {
+			free_v(a);
+			printf("? %s: %luth argument unknown\n", 
+					__FUNCTION__, i);
+			return false;
 		}
-		a->seq.v.v[i-p-1] = copy_v(b);
+		a->seq.v.v[i-p-1] = rc.v;
 	}
 	*pa = a;
 	return true;
@@ -1447,10 +1429,10 @@ reduce_min(Env *e, Val *s, size_t p) {
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
-		printf("? %s: arguments not numbers in (", 
+		printf("? %s: arguments not numbers in \"", 
 				__FUNCTION__);
 		print_v(s, false);
-		printf(")\n");
+		printf("\"\n");
 		free_v(a);
 		free_v(b);
 		return rc;
@@ -1743,7 +1725,7 @@ reduce_do(Env *e, Val *s, size_t p) {
 		return (Ires) {FATAL, NULL};
 	}
 	if (a->hdr.t == VSYM) {
-		Val *b = lookup(e, a->sym.v, false);
+		Val *b = lookup(e, a->sym.v, false, true);
 		if (b == NULL) {
 			printf("? %s: argument symbol undefined (%s)\n", 
 					__FUNCTION__, a->sym.v);
@@ -1809,7 +1791,7 @@ reduce_call(Env *e, Val *s, size_t p) {
 static Ires 
 reduce_true(Env *e, Val *s, size_t p) {
 	Val *a;
-	a = lookup(e, ITNAME, false);
+	a = lookup(e, ITNAME, false, false);
 	if (a == NULL) {
 		printf("? %s: 'it undefined\n", 
 				__FUNCTION__);
@@ -1825,7 +1807,7 @@ reduce_true(Env *e, Val *s, size_t p) {
 static Ires 
 reduce_false(Env *e, Val *s, size_t p) {
 	Val *a;
-	a = lookup(e, ITNAME, false);
+	a = lookup(e, ITNAME, false, false);
 	if (a == NULL) {
 		printf("? %s: 'it undefined\n", 
 				__FUNCTION__);
@@ -1890,7 +1872,7 @@ reduce_else(Env *e, Val *s, size_t p) {
 		return (Ires) {OK, s};
 	}
 	if (e->state == OK) {
-		Val *it = lookup(e, ITNAME, false);
+		Val *it = lookup(e, ITNAME, false, false);
 		if (it == NULL) {
 			printf("? %s: `else before `if\n", __FUNCTION__);
 			return (Ires) {FATAL, NULL};
@@ -1911,7 +1893,7 @@ reduce_rem(Env *e, Val *s, size_t p) {
 	}
 	Ires rc;
 	Val *b;
-	Val *a = lookup(e, ITNAME, false);
+	Val *a = lookup(e, ITNAME, false, false);
 	if (a == NULL) {
 		b = malloc(sizeof(*b));
 		assert(b != NULL);
@@ -1968,16 +1950,19 @@ reduce_def(Env *e, Val *s, size_t p) {
 	assert(f != NULL && "function val NULL");
 	f->hdr.t = VFUN;
 	strncpy(f->symf.name, fname->sym.v, sizeof(f->symf.name));
+	/* TODO replace with simple memcpy */
 	f->symf.param.n = 0;
 	f->symf.param.v = NULL;
 	if (fparam->hdr.t == VLST) {
 		for (size_t i=0; i<fparam->lst.v.n; ++i) {
 			f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
 		}
-	} 
+	}
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
 	free_v(fname);
+	/* we used all items in fparam for f, so do not free them */
+	fparam->lst.v.n = 0;
 	free_v(fparam);
 	upd_prefix2(s, p, f);
 	return (Ires) {DEF, s};
@@ -2019,7 +2004,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 	if (a->hdr.t == VOPE) {
 		/* rem: end if */
 		if (a->symop.v == reduce_if || a->symop.v == reduce_loop) {
-			Val *c = lookup(e, ITNAME, false);
+			Val *c = lookup(e, ITNAME, false, false);
 			if (c == NULL) {
 				printf("? %s: 'it undefined, missing `if or `loop?\n",
 						__FUNCTION__);
@@ -2043,7 +2028,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 			free_v(a);
 			return (Ires) {FATAL, NULL};
 		}
-		Val *c = lookup(e, ITNAME, false);
+		Val *c = lookup(e, ITNAME, false, false);
 		if (c == NULL) {
 			printf("? %s: 'it' required, yet undefined\n", 
 					__FUNCTION__);
@@ -2187,14 +2172,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "done"); print_env(le, "##"); }
 	/* return local (function's) 'it to caller */
 	char *sym = ITNAME;
-	Val *lit = NULL;
-	while ((lit = lookup(le, sym, false)) != NULL) {
-		if (lit->hdr.t == VSYM) {
-			sym = lit->sym.v;
-			continue;
-		}
-		break;
-	}
+	Val *lit = lookup(le, sym, false, true);
 	if (lit == NULL) {
 		printf("? %s: 'it from '%s undefined\n",
 				__FUNCTION__, f->symf.name);
@@ -2216,7 +2194,7 @@ reduce_return(Env *e, Val *s, size_t p) {
 		printf("? %s: 'return' outside function\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
-	Val *it = lookup(e, ITNAME, false);
+	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it' undefined\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2230,7 +2208,7 @@ reduce_stop(Env *e, Val *s, size_t p) {
 		printf("? %s: `stop syntax incorrect\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
-	Val *it = lookup(e, ITNAME, false);
+	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it undefined (`stop return value)\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2245,7 +2223,7 @@ reduce_env(Env *e, Val *s, size_t p) {
 		return (Ires) {FATAL, NULL};
 	}
 	print_env(e, ">");
-	Val *it = lookup(e, ITNAME, false);
+	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2425,7 +2403,7 @@ solve_fun(Env *e, Val *a) {
 				/* 'it is resolved at exec */
 				continue;
 			}
-			c = lookup(e, b->sym.v, true);
+			c = lookup(e, b->sym.v, true, true);
 			if (c != NULL && (c->hdr.t == VFUN
 					|| c->hdr.t == VOPE)) {
 				free_v(b);
@@ -2530,7 +2508,7 @@ interp_loop(Env *e, Val *s) {
 	}
 	if (Dbg) { printf("##  %s %5s:\n", __FUNCTION__, "<"); print_env(e, "##"); }
 	/* return local (function's) 'it to caller */
-	Val *it = lookup(e, ITNAME, false);
+	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it from loop undefined\n",
 				__FUNCTION__);
@@ -2584,7 +2562,7 @@ interp_atom(Env *e, Val *a, bool look) {
 		}
 		/* resolve all symbols if requested */
 		if (look) {
-			Val *b = lookup(e, a->sym.v, true);
+			Val *b = lookup(e, a->sym.v, true, look);
 			if (b == NULL) {
 				printf("? %s: unknown symbol '%s'\n",
 					__FUNCTION__, a->sym.v);
@@ -2594,7 +2572,7 @@ interp_atom(Env *e, Val *a, bool look) {
 		}
 		/* resolve 'it */
 		if (strncmp(a->sym.v, IT, sizeof(a->sym.v)) == 0) {
-			Val *b = lookup(e, ITNAME, false);
+			Val *b = lookup(e, ITNAME, false, false);
 			if (b == NULL) {
 				printf("? %s: 'it undefined\n",
 					__FUNCTION__);
@@ -2602,7 +2580,7 @@ interp_atom(Env *e, Val *a, bool look) {
 			} 
 			return (Ires) {OK, copy_v(b)};
 		}
-		Val *b = lookup(e, a->sym.v, true);
+		Val *b = lookup(e, a->sym.v, true, true);
 		if (b != NULL && (b->hdr.t == VFUN
 				|| b->hdr.t == VOPE)) {
 			return (Ires) {OK, copy_v(b)};
@@ -2646,7 +2624,7 @@ interp_now(Env *e, Val *a, bool look) {
 
 static Ires
 interp_body(Env *e, Val *s, size_t p) {
-	Val *fun = lookup(e, ITNAME, false);
+	Val *fun = lookup(e, ITNAME, false, false);
 	if (fun == NULL) {
 		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2676,7 +2654,7 @@ interp_body(Env *e, Val *s, size_t p) {
 		if (id != -1) {
 			continue;
 		}
-		Val *fv = lookup(e, c->sym.v, true);
+		Val *fv = lookup(e, c->sym.v, true, false);
 		/* unknown sym, can be normal, determined in function or operator */
 		if (fv == NULL) {
 			continue;
@@ -2691,7 +2669,7 @@ interp_body(Env *e, Val *s, size_t p) {
 
 static Ires
 interp_loop_body(Env *e, Val *s, size_t p) {
-	Val *loop = lookup(e, ITNAME, false);
+	Val *loop = lookup(e, ITNAME, false, false);
 	if (loop == NULL) {
 		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2741,7 +2719,7 @@ interp_maybe_loop(Env *e, Val *a) {
 		return rc;
 	}
 	if (Dbg) { printf("##  %s resolved: ", __FUNCTION__); print_v(a, false); printf("\n"); }
-	Val *lnst = lookup(e, LOOPNEST, false);
+	Val *lnst = lookup(e, LOOPNEST, false, false);
 	if (lnst == NULL) {
 		printf("? %s: nested loop count missing\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2793,7 +2771,7 @@ interp_maybe_skip(Env *e, Val *a) {
 		return rc;
 	}
 	/* default: skip val */
-	Val *it = lookup(e, ITNAME, false);
+	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
