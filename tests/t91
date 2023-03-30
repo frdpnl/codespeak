@@ -1,0 +1,23 @@
+
+rem: recursive logistic equation
+def lgc (x,r,n)
+	if n <= 1 
+		r * x * (1 - x) 
+		return
+	end if
+	lgc (x, r, (n - 1)) ; call it y
+	r * y * (1 - y) 
+end lgc
+
+call 0.2 x0
+
+lgc (x0, 3.2, 40) ; call it A
+
+def make-lgc (r,)
+	def f (x, n) ; lgc (x, r, n) ; end f
+end make-lgc
+
+make-lgc (3.2,) ; call it lgc32
+lgc32 (x0, 38) ; call it B
+
+A = B ; print it
