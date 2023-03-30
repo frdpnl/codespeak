@@ -1961,7 +1961,7 @@ reduce_def(Env *e, Val *s, size_t p) {
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
 	free_v(fname);
-	/* we used all items in fparam for f, so do not free them */
+	/* we used all items in fparam for f, so do not free them in free_v */
 	fparam->lst.v.n = 0;
 	free_v(fparam);
 	upd_prefix2(s, p, f);
@@ -2543,7 +2543,6 @@ interp_seq(Env *e, Val *a, bool look) {
 		b->seq.v.n = 0;
 	}
 	free_v(b);
-	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(rc.v,false); printf("\n"); }
 	return rc;
 }
 static Ires 
@@ -2622,48 +2621,60 @@ interp_now(Env *e, Val *a, bool look) {
 	return (Ires) {FATAL, NULL};
 }
 
+static void 
+update_freesym(Env *e, Val *fun, Val *s) {
+	Val *c, *fv = NULL;
+	for (size_t i=0; i<s->seq.v.n; ++i) {
+		c = s->seq.v.v[i];
+		if (c->hdr.t == VSYM) {
+			/* 'it resolved later, at fun execution */
+			if (strncmp(c->sym.v, IT, sizeof(c->sym.v)) == 0) {
+				continue;
+			}
+			/* skip recursive call */
+			if (strncmp(c->sym.v, fun->symf.name, sizeof(c->sym.v)) == 0) {
+				continue;
+			}
+			/* ignore function parameters */
+			int id = position(c, fun->symf.param);
+			if (id != -1) {
+				continue;
+			}
+			Val *l = lookup(e, c->sym.v, true, false);
+			/* unknown sym, can be normal, determined in function or operator */
+			if (l == NULL) {
+				continue;
+			}
+			/* closure: replace sym with value from env */
+			fv = copy_v(l);
+		} else if (c->hdr.t == VSEQ || c->hdr.t == VLST) {
+			update_freesym(e, fun, c);
+			fv = copy_v(c);
+		} else {
+			continue;
+		}
+		free_v(c);
+		s->seq.v.v[i] = fv;
+	}
+}
+
 static Ires
 interp_body(Env *e, Val *s, size_t p) {
+	if (Dbg) { printf("##  %s entry: ", __FUNCTION__); print_v(s, false); printf("\n"); }
 	Val *fun = lookup(e, ITNAME, false, false);
 	if (fun == NULL) {
-		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
+		printf("? %s: 'it undefined\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
 	if (fun->hdr.t != VFUN) {
-		printf("? %s: 'it is not a function\n", __FUNCTION__);
+		printf("? %s: no function under definition\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
 	Val *fret = copy_v(fun);
-	/* closure: replace free symbols with env value */
-	for (size_t i=0; i<s->seq.v.n; ++i) {
-		Val *c = s->seq.v.v[i];
-		/* we're only concerned with symbols */
-		if (c->hdr.t != VSYM) {
-			continue;
-		}
-		/* 'it resolved later, at fun execution */
-		if (strncmp(c->sym.v, IT, sizeof(c->sym.v)) == 0) {
-			continue;
-		}
-		/* skip recursive call */
-		if (strncmp(c->sym.v, fun->symf.name, sizeof(c->sym.v)) == 0) {
-			continue;
-		}
-		/* ignore function parameters */
-		int id = position(c, fun->symf.param);
-		if (id != -1) {
-			continue;
-		}
-		Val *fv = lookup(e, c->sym.v, true, false);
-		/* unknown sym, can be normal, determined in function or operator */
-		if (fv == NULL) {
-			continue;
-		}
-		/* closure: replace sym with value from env */
-		free_v(c);
-		s->seq.v.v[i] = copy_v(fv);
-	}
+	/* replace free symbols with env value: */
+	update_freesym(e, fun, s);
 	fret->symf.body = push_l(fret->symf.body, copy_v(s));
+	if (Dbg) { printf("##  %s exit: ", __FUNCTION__); print_v(s, false); printf("\n"); }
 	return (Ires) {DEF, fret};
 }
 

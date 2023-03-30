@@ -253,6 +253,7 @@ upd_prefix1	phrase.c	/^upd_prefix1(Val *s, size_t p, Val *a) {$/;"	f	typeref:typ
 upd_prefix2	phrase.c	/^upd_prefix2(Val *s, size_t p, Val *a) {$/;"	f	typeref:typename:void	file:
 upd_prefixall	phrase.c	/^upd_prefixall(Val *s, size_t p, Val *a) {$/;"	f	typeref:typename:void	file:
 upd_prefixk	phrase.c	/^upd_prefixk(Val *s, size_t p, Val *a, size_t k) {$/;"	f	typeref:typename:void	file:
+update_freesym	phrase.c	/^update_freesym(Env *e, Val *fun, Val *s) {$/;"	f	typeref:typename:void	file:
 upded_sym	phrase.c	/^upded_sym(Env *a, Symval *b, bool err) {$/;"	f	typeref:typename:bool	file:
 v	phrase.c	/^		Ires (*v)(Env *e, Val *s, size_t p);$/;"	m	struct:Val_::__anon2f313ef91208	typeref:typename:Ires (*)(Env * e,Val * s,size_t p)	file:
 v	phrase.c	/^		List v;$/;"	m	struct:Sem_::__anon2f313ef90908	typeref:typename:List	file:
