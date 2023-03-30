@@ -1,3 +1,2 @@
 > input: "n; call it p "
-? interp_atom: unknown symbol 'n'
-? reduce_prefix2_arg: 1st argument is null
+? interp_atom: unknown symbol 'n

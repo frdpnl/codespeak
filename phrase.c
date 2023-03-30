@@ -2564,7 +2564,7 @@ interp_atom(Env *e, Val *a, bool look) {
 		if (look) {
 			Val *b = lookup(e, a->sym.v, true, look);
 			if (b == NULL) {
-				printf("? %s: unknown symbol '%s'\n",
+				printf("? %s: unknown symbol '%s\n",
 					__FUNCTION__, a->sym.v);
 				return (Ires) {FATAL, NULL};
 			} 
