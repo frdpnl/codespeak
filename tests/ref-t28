@@ -2,8 +2,7 @@
 > input: "f ()"
 > input: "define g () ; end g"
 > input: "g ()"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = Nil 
 > __nested_loops__ = 0 
 > f = 

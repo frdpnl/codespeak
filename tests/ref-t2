@@ -1,8 +1,7 @@
 > input: "3; call it p; call 4 p; p; print it; solve it; print it"
 4 
 4 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 4 
 > __nested_loops__ = 0 
 > p = 4 

@@ -1,7 +1,6 @@
 > input: "def f () ; 1 ; end f"
 > input: "env"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 
 > `f () [1]:
 >    ( 1 ) 
@@ -11,8 +10,7 @@
 >    ( 1 ) 
 > input: "call f f2"
 > input: "env"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 
 > `f () [1]:
 >    ( 1 ) 

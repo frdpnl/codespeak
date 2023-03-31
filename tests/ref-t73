@@ -33,8 +33,7 @@
     ( 'x `/ 3.00 ) 
     ( `end `if ) 
 1.33 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 1.33 
 > __nested_loops__ = 0 
 > makef = 

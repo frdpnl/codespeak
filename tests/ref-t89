@@ -26,8 +26,7 @@
 0.51 
 > input: "lgc (x0, 3.2, 41) ; print it"
 0.80 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 0.80 
 > __nested_loops__ = 0 
 > lgc = 

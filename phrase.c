@@ -660,7 +660,7 @@ printx_v(Val *a, bool abr, const char *pfx) {
 			break;
 		case VFUN:
 			if (abr) {
-				printf("`%s ", a->symf.name);
+				printf("%s`%s ", pfx, a->symf.name);
 				break;
 			}
 			printf("\n%s `%s (", pfx, a->symf.name);
@@ -685,24 +685,24 @@ printx_v(Val *a, bool abr, const char *pfx) {
 			printf("'%s ", a->sym.v);
 			break;
 		case VLST:
-			printf("{ ");
 			if (abr) {
-				printf("x%lu } ", a->lst.v.n);
+				printf("%s{ x%lu } ", pfx, a->lst.v.n);
 				break;
 			}
+			printf("%s{ ", pfx);
 			for (size_t i=0; i<a->lst.v.n; ++i) {
-				print_v(a->lst.v.v[i], abr);
+				printx_v(a->lst.v.v[i], abr, pfx);
 			}
 			printf("} ");
 			break;
 		case VSEQ:
-			printf("( ");
 			if (abr) {
-				printf("x%lu ) ", a->seq.v.n);
+				printf("%s( x%lu ) ", pfx, a->seq.v.n);
 				break;
 			}
+			printf("%s( ", pfx);
 			for (size_t i=0; i<a->seq.v.n; ++i) {
-				print_v(a->seq.v.v[i], abr);
+				printx_v(a->seq.v.v[i], abr, pfx);
 			}
 			printf(") ");
 			break;
@@ -1023,15 +1023,15 @@ print_symval(Symval *a, const char *pfx) {
 static void
 print_env(Env *a, const char *col1) {
 	assert(a != NULL);
-	printf("%s env:\n", col1);
-	printf("%s state: ", col1); print_xint(a->state); printf("\n");
+	printf("%s env: ", col1);
+	printf("state = "); print_xint(a->state); printf("\n");
 	for (size_t i=0; i<a->n; ++i) {
 		printf("%s ", col1);
 		print_symval(a->s[i], col1);
 		printf("\n");
 	}
 	if (a->parent) {
-		printf("%s parent\n", col1);
+		printf("%s parent ", col1);
 		print_env(a->parent, col1);
 	}
 }
@@ -2501,7 +2501,7 @@ static Ires
 interp_loop(Env *e, Val *s) {
 	/* rem: loop execution */
 	Val *v;
-	if (Dbg) { printf("#\t  %s %5s:\n", __FUNCTION__, ">"); }
+	if (Dbg) { printf("#\t  %s entry:\n", __FUNCTION__); }
 	while (e->state != STOP) {
 		for (size_t i=0; i<s->symf.body.n; ++i) {
 			v = copy_v(s->symf.body.v[i]);
@@ -2515,8 +2515,7 @@ interp_loop(Env *e, Val *s) {
 			}
 		}
 	}
-	if (Dbg) { printf("#\t  %s %5s:\n", __FUNCTION__, "<"); print_env(e, "#\t"); }
-	/* return local (function's) 'it to caller */
+	if (Dbg) { printf("#\t  %s end:\n", __FUNCTION__); print_env(e, "#\t"); }
 	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it from loop undefined\n",

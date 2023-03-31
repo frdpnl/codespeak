@@ -6,16 +6,14 @@
 > input: "	n - 1 ; call it n"
 > input: "end loop"
 > input: "env"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 1 
 > __nested_loops__ = 0 
 > n = 0 
 > sum = 15 
 > input: "print sum"
 15 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 15 
 > __nested_loops__ = 0 
 > n = 0 

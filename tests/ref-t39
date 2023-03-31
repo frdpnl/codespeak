@@ -1,6 +1,5 @@
 > input: "end if"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = Nil 
 > __nested_loops__ = 0 
 > bye!

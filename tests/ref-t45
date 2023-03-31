@@ -3,8 +3,7 @@
 > input: "call 4 A"
 > input: "f (-1,) ; print it"
 -3 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = -3 
 > __nested_loops__ = 0 
 > A = 4 

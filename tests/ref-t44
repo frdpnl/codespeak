@@ -11,8 +11,7 @@
     ( 2 ) 
 > input: "it () ; print it"
 2 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 2 
 > __nested_loops__ = 0 
 > f = 

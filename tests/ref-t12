@@ -1,6 +1,5 @@
 > input: "call, 23, n; do it;"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 23 
 > __nested_loops__ = 0 
 > n = 23 

@@ -1,7 +1,6 @@
 > input: "define inc (a,) "
 > input: "end inc"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 
 > `inc ('a ) [0]:
 > __nested_loops__ = 0 

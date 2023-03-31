@@ -6,8 +6,7 @@
 3 
 > input: "f (3, 0.) ; print it"
 0 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 0 
 > __nested_loops__ = 0 
 > f = 

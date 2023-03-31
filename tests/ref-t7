@@ -1,6 +1,5 @@
 > input: "call + op+ ; 1 op+ 3"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 4 
 > __nested_loops__ = 0 
 > op+ = `+ 

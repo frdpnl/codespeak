@@ -12,8 +12,7 @@
 > input: "	end loop"
 > input: "	n - 1 ; call it n"
 > input: "end loop"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 
 > `__loop__ () [19]:
 >    ( `env ) 
@@ -25,8 +24,7 @@
 > __nested_loops__ = 0 
 > n = 1 
 1 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 
 > `__loop__ () [8]:
 >    ( `env ) 
@@ -39,24 +37,21 @@
 > n = 1 
 > p = 1 
 1 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 0 
 > __nested_loops__ = 0 
 > n = 1 
 > p = 0 
 0 
 -10 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 0 
 > __nested_loops__ = 0 
 > n = 0 
 > p = 0 
 0 
 10 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 10 
 > __nested_loops__ = 0 
 > n = 0 

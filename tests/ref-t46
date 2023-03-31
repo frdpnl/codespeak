@@ -4,8 +4,7 @@
 > input: "a* (-1,) ; call it opposite"
 > input: "opposite (2,) ; print it"
 -2 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = -2 
 > __nested_loops__ = 0 
 > a* = 

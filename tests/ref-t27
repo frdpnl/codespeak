@@ -1,8 +1,7 @@
 > input: "define f () ; 1 ; end f"
 > input: "f () ; print it"
 1 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 1 
 > __nested_loops__ = 0 
 > f = 

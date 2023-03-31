@@ -1,8 +1,7 @@
 > input: "2 * 3.; call it   p ; p, ~=,6; print it ; do it ; print it"
 { 6.00 `~= 6 } 
 1 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 1 
 > __nested_loops__ = 0 
 > p = 6.00 

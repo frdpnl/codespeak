@@ -3,8 +3,7 @@
 4 
 > input: "print (n * 2)"
 8 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 8 
 > __nested_loops__ = 0 
 > n = 4 

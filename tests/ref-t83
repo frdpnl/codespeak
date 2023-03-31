@@ -9,8 +9,7 @@
 > input: "end sum"
 > input: "sum (5,) ; print it"
 15 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 15 
 > __nested_loops__ = 0 
 > sum = 

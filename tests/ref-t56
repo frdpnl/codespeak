@@ -1,8 +1,7 @@
 > input: "call 3 n "
 > input: "else ;  print 1"
 ? main: unexpected end of program
-> env:
-> state: Skip 
+> env: state = Skip 
 > __it__ = 3 
 > __nested_loops__ = 0 
 > n = 3 

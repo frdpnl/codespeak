@@ -1,8 +1,7 @@
 > input: "define inc (a,) "
 > input: "end "
 ? main: unexpected end of program
-> env:
-> state: Fun 
+> env: state = Fun 
 > __it__ = 
 > `inc ('a ) [1]:
 >    ( `end ) 

@@ -6,8 +6,7 @@
 > input: "print really?!"
 > input: "end if"
 > input: "finally"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 'finally 
 > __nested_loops__ = 0 
 > bye!

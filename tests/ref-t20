@@ -1,7 +1,6 @@
 > input: "define dec (a,) ; a - 1 ; end dec"
 > input: "dec (1,)"
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 0 
 > __nested_loops__ = 0 
 > dec = 

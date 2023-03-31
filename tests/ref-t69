@@ -4,8 +4,7 @@
 > input: "end if"
 > input: "print it"
 0 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 0 
 > __nested_loops__ = 0 
 > n = 1 

@@ -1,8 +1,7 @@
 > input: "def f (a,b) ; "
 > input: "	end g"
 ? main: unexpected end of program
-> env:
-> state: Fun 
+> env: state = Fun 
 > __it__ = 
 > `f ('a 'b ) [1]:
 >    ( `end 'g ) 

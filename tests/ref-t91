@@ -16,8 +16,7 @@
 > input: "lgc32 (x0, 38) ; call it B"
 > input: "A = B ; print it"
 1 
-> env:
-> state: Ok 
+> env: state = Ok 
 > __it__ = 1 
 > __nested_loops__ = 0 
 > lgc = 
