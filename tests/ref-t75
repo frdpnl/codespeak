@@ -7,8 +7,14 @@
 > input: "f (3, 0.) ; print it"
 0 
 > env:
->	state: Ok 
->	__it__ = 0 
->	__nested_loops__ = 0 
->	f = `(f 'a 'b [5] ( `if 'b `~= 0 ) ( 0 ) ( `return ) ( `end `if ) ( 'a ) ) 
+> state: Ok 
+> __it__ = 0 
+> __nested_loops__ = 0 
+> f = 
+> `f ('a 'b ) [5]:
+>    ( `if 'b `~= 0 ) 
+>    ( 0 ) 
+>    ( `return ) 
+>    ( `end `if ) 
+>    ( 'a ) 
 > bye!

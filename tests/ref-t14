@@ -4,7 +4,7 @@
 > input: "if true? ; print it ; rem: again"
 1 
 > env:
->	state: Ok 
->	__it__ = 1 
->	__nested_loops__ = 0 
+> state: Ok 
+> __it__ = 1 
+> __nested_loops__ = 0 
 > bye!

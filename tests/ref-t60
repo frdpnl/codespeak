@@ -2,7 +2,9 @@
 > input: "	end g"
 ? main: unexpected end of program
 > env:
->	state: Fun 
->	__it__ = `(f 'a 'b [1] ( `end 'g ) ) 
->	__nested_loops__ = 0 
+> state: Fun 
+> __it__ = 
+> `f ('a 'b ) [1]:
+>    ( `end 'g ) 
+> __nested_loops__ = 0 
 > bye!

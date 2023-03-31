@@ -7,9 +7,9 @@
 > input: "end loop"
 > input: "call it sum"
 > env:
->	state: Ok 
->	__it__ = 15 
->	__nested_loops__ = 0 
->	n = 0 
->	sum = 15 
+> state: Ok 
+> __it__ = 15 
+> __nested_loops__ = 0 
+> n = 0 
+> sum = 15 
 > bye!

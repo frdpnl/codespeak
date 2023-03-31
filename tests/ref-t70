@@ -3,9 +3,11 @@
 > input: "print (f ())"
 1 
 > env:
->	state: Ok 
->	__it__ = 1 
->	__nested_loops__ = 0 
->	newend = `end 
->	f = `(f [1] ( 1 ) ) 
+> state: Ok 
+> __it__ = 1 
+> __nested_loops__ = 0 
+> newend = `end 
+> f = 
+> `f () [1]:
+>    ( 1 ) 
 > bye!

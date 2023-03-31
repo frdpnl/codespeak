@@ -8,8 +8,15 @@
 > input: "r (3,) ; print it"
 6 
 > env:
->	state: Ok 
->	__it__ = 6 
->	__nested_loops__ = 0 
->	r = `(r 'a [7] ( `rem: 'recursion 'example ) ( `if 'a `<= 1 ) ( 1 ) ..( 'a `* 'r { 'it } ) ( `end `if ) ) 
+> state: Ok 
+> __it__ = 6 
+> __nested_loops__ = 0 
+> r = 
+> `r ('a ) [7]:
+>    ( `rem: 'recursion 'example ) 
+>    ( `if 'a `<= 1 ) 
+>    ( 1 ) 
+>    ..
+>    ( 'a `* 'r { 'it } ) 
+>    ( `end `if ) 
 > bye!

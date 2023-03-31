@@ -3,7 +3,7 @@
 > input: "if ()"
 ? main: unexpected end of program
 > env:
->	state: Skip 
->	__it__ = 0 
->	__nested_loops__ = 0 
+> state: Skip 
+> __it__ = 0 
+> __nested_loops__ = 0 
 > bye!

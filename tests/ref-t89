@@ -27,9 +27,16 @@
 > input: "lgc (x0, 3.2, 41) ; print it"
 0.80 
 > env:
->	state: Ok 
->	__it__ = 0.80 
->	__nested_loops__ = 0 
->	lgc = `(lgc 'x 'r 'n [7] ( `if 'n `<= 1 ) ( 'r `* 'x `* ( 1 '- 'x ) ) ( `return ) ..( `call 'it 'y ) ( 'r `* 'y `* ( 1 '- 'y ) ) ) 
->	x0 = 0.60 
+> state: Ok 
+> __it__ = 0.80 
+> __nested_loops__ = 0 
+> lgc = 
+> `lgc ('x 'r 'n ) [7]:
+>    ( `if 'n `<= 1 ) 
+>    ( 'r `* 'x `* ( 1 '- 'x ) ) 
+>    ( `return ) 
+>    ..
+>    ( `call 'it 'y ) 
+>    ( 'r `* 'y `* ( 1 '- 'y ) ) 
+> x0 = 0.60 
 > bye!

@@ -3,9 +3,12 @@
 > input: "define g () ; end g"
 > input: "g ()"
 > env:
->	state: Ok 
->	__it__ = Nil 
->	__nested_loops__ = 0 
->	f = `(f [1] ( Nil ) ) 
->	g = `(g [0] ) 
+> state: Ok 
+> __it__ = Nil 
+> __nested_loops__ = 0 
+> f = 
+> `f () [1]:
+>    ( Nil ) 
+> g = 
+> `g () [0]:
 > bye!

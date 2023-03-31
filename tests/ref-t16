@@ -1,7 +1,11 @@
 > input: "define inc ()  ; 1 ; end inc"
 > env:
->	state: Ok 
->	__it__ = `(inc [1] ( 1 ) ) 
->	__nested_loops__ = 0 
->	inc = `(inc [1] ( 1 ) ) 
+> state: Ok 
+> __it__ = 
+> `inc () [1]:
+>    ( 1 ) 
+> __nested_loops__ = 0 
+> inc = 
+> `inc () [1]:
+>    ( 1 ) 
 > bye!

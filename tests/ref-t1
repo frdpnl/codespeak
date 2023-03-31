@@ -2,8 +2,8 @@
 { 6.00 `~= 6 } 
 1 
 > env:
->	state: Ok 
->	__it__ = 1 
->	__nested_loops__ = 0 
->	p = 6.00 
+> state: Ok 
+> __it__ = 1 
+> __nested_loops__ = 0 
+> p = 6.00 
 > bye!

@@ -163,9 +163,10 @@ print_env	phrase.c	/^print_env(Env *a, const char *col1) {$/;"	f	typeref:typenam
 print_ph	phrase.c	/^print_ph(Phrase *a) {$/;"	f	typeref:typename:void	file:
 print_rc	phrase.c	/^print_rc(Ires a) {$/;"	f	typeref:typename:void	file:
 print_s	phrase.c	/^print_s(Sem *a) {$/;"	f	typeref:typename:void	file:
-print_symval	phrase.c	/^print_symval(Symval *a) {$/;"	f	typeref:typename:void	file:
+print_symval	phrase.c	/^print_symval(Symval *a, const char *pfx) {$/;"	f	typeref:typename:void	file:
 print_v	phrase.c	/^print_v(Val *a, bool abr) {$/;"	f	typeref:typename:void	file:
 print_xint	phrase.c	/^print_xint(xint s) {$/;"	f	typeref:typename:void	file:
+printx_v	phrase.c	/^printx_v(Val *a, bool abr, const char *pfx) {$/;"	f	typeref:typename:void	file:
 prio	phrase.c	/^		int prio;$/;"	m	struct:Val_::__anon2f313ef91208	typeref:typename:int	file:
 prio	phrase.c	/^	int prio;$/;"	m	struct:Symop_	typeref:typename:int	file:
 push_l	phrase.c	/^push_l(List_v a, Val *b) {$/;"	f	typeref:typename:List_v	file:

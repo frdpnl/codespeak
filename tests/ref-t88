@@ -2,8 +2,10 @@
 > input: "list f list 2 3.0 ; do it"
 > input: "f, list, 2, 3.0 ; do it"
 > env:
->	state: Ok 
->	__it__ = 6.00 
->	__nested_loops__ = 0 
->	f = `(f 'a 'b [1] ( 'a `* 'b ) ) 
+> state: Ok 
+> __it__ = 6.00 
+> __nested_loops__ = 0 
+> f = 
+> `f ('a 'b ) [1]:
+>    ( 'a `* 'b ) 
 > bye!

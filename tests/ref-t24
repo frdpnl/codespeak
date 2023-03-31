@@ -8,9 +8,9 @@
 > input: "if false? ; print it ; end if"
 1 
 > env:
->	state: Ok 
->	__it__ = 1 
->	__nested_loops__ = 0 
->	a = 3 
->	b = 4 
+> state: Ok 
+> __it__ = 1 
+> __nested_loops__ = 0 
+> a = 3 
+> b = 4 
 > bye!

@@ -10,8 +10,15 @@
 > input: "sum (5,) ; print it"
 15 
 > env:
->	state: Ok 
->	__it__ = 15 
->	__nested_loops__ = 0 
->	sum = `(sum 'a [11] ( `call 0 'tot ) ( `loop ) ( `if 'a `= 0 ) ......( `end `loop ) ( 'tot ) ) 
+> state: Ok 
+> __it__ = 15 
+> __nested_loops__ = 0 
+> sum = 
+> `sum ('a ) [11]:
+>    ( `call 0 'tot ) 
+>    ( `loop ) 
+>    ( `if 'a `= 0 ) 
+>    ......
+>    ( `end `loop ) 
+>    ( 'tot ) 
 > bye!

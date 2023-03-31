@@ -2,8 +2,12 @@
 > input: "def f it ; () ; () ; a - b ; end f "
 > input: "f (1, 2)"
 > env:
->	state: Ok 
->	__it__ = -1 
->	__nested_loops__ = 0 
->	f = `(f 'a 'b [3] ( Nil ) ( Nil ) ( 'a `- 'b ) ) 
+> state: Ok 
+> __it__ = -1 
+> __nested_loops__ = 0 
+> f = 
+> `f ('a 'b ) [3]:
+>    ( Nil ) 
+>    ( Nil ) 
+>    ( 'a `- 'b ) 
 > bye!

@@ -1,15 +1,21 @@
 > input: "define dec (b,) ; b - 1 ; end dec"
 > input: "print dec"
-`(dec 'b [1] ( 'b `- 1 ) ) 
+
+ `dec ('b ) [1]:
+    ( 'b `- 1 ) 
 > input: "define inc (a,) "
 > input: "1 + a "
 > input: "end inc"
 > input: "1 * 2; print it"
 2 
 > env:
->	state: Ok 
->	__it__ = 2 
->	__nested_loops__ = 0 
->	dec = `(dec 'b [1] ( 'b `- 1 ) ) 
->	inc = `(inc 'a [1] ( 1 `+ 'a ) ) 
+> state: Ok 
+> __it__ = 2 
+> __nested_loops__ = 0 
+> dec = 
+> `dec ('b ) [1]:
+>    ( 'b `- 1 ) 
+> inc = 
+> `inc ('a ) [1]:
+>    ( 1 `+ 'a ) 
 > bye!

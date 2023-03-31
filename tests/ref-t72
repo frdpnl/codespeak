@@ -7,7 +7,20 @@
 > input: "	print it"
 > input: "end makef"
 > input: "print it"
-`(makef 'a [8] ( `def 'g { 'x } ) ( `if 'a `= 0 ) ( -1 `* 'x ) ...( `end 'g ) ( `print 'it ) ) 
+
+ `makef ('a ) [8]:
+    ( `def 'g { 'x } ) 
+    ( `if 'a `= 0 ) 
+    ( -1 `* 'x ) 
+    ...
+    ( `end 'g ) 
+    ( `print 'it ) 
 > input: "makef (0.,) ; call it g ; g (4,) ; print it"
-`(g 'x [5] ( `if 0.00 `= 0 ) ( -1 `* 'x ) ( `else ) ( 'x `/ 0.00 ) ( `end `if ) ) 
+
+ `g ('x ) [5]:
+    ( `if 0.00 `= 0 ) 
+    ( -1 `* 'x ) 
+    ( `else ) 
+    ( 'x `/ 0.00 ) 
+    ( `end `if ) 
 ? reduce_div: division by 0

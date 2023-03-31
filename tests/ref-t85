@@ -6,9 +6,11 @@
 > input: "	env"
 > input: "end loop"
 > env:
->	state: Ok 
->	__it__ = 1 
->	__nested_loops__ = 0 
->	n = 1 
->	f = `(f 'a [1] ( 'a ) ) 
+> state: Ok 
+> __it__ = 1 
+> __nested_loops__ = 0 
+> n = 1 
+> f = 
+> `f ('a ) [1]:
+>    ( 'a ) 
 ? reduce_def: expecting symbol for function name, got `f 

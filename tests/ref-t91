@@ -17,13 +17,40 @@
 > input: "A = B ; print it"
 1 
 > env:
->	state: Ok 
->	__it__ = 1 
->	__nested_loops__ = 0 
->	lgc = `(lgc 'x 'r 'n [7] ( `if 'n `<= 1 ) ( 'r `* 'x `* ( 1 '- 'x ) ) ( `return ) ..( `call 'it 'y ) ( 'r `* 'y `* ( 1 '- 'y ) ) ) 
->	x0 = 0.20 
->	A = 0.80 
->	make-lgc = `(make-lgc 'r [3] ( `def 'f { 'x 'n } ) ( `(lgc 'x 'r 'n [7] ( `if 'n `<= 1 ) ( 'r `* 'x `* ( 1 '- 'x ) ) ( `return ) ..( `call 'it 'y ) ( 'r `* 'y `* ( 1 '- 'y ) ) ) { 'x 'r 'n } ) ( `end 'f ) ) 
->	lgc32 = `(f 'x 'n [1] ( `(lgc 'x 'r 'n [7] ( `if 'n `<= 1 ) ( 'r `* 'x `* ( 1 '- 'x ) ) ( `return ) ..( `call 'it 'y ) ( 'r `* 'y `* ( 1 '- 'y ) ) ) { 'x 3.20 'n } ) ) 
->	B = 0.80 
+> state: Ok 
+> __it__ = 1 
+> __nested_loops__ = 0 
+> lgc = 
+> `lgc ('x 'r 'n ) [7]:
+>    ( `if 'n `<= 1 ) 
+>    ( 'r `* 'x `* ( 1 '- 'x ) ) 
+>    ( `return ) 
+>    ..
+>    ( `call 'it 'y ) 
+>    ( 'r `* 'y `* ( 1 '- 'y ) ) 
+> x0 = 0.20 
+> A = 0.80 
+> make-lgc = 
+> `make-lgc ('r ) [3]:
+>    ( `def 'f { 'x 'n } ) 
+>    ( 
+ `lgc ('x 'r 'n ) [7]:
+    ( `if 'n `<= 1 ) 
+    ( 'r `* 'x `* ( 1 '- 'x ) ) 
+    ( `return ) 
+    ..
+    ( `call 'it 'y ) 
+    ( 'r `* 'y `* ( 1 '- 'y ) ) { 'x 'r 'n } ) 
+>    ( `end 'f ) 
+> lgc32 = 
+> `f ('x 'n ) [1]:
+>    ( 
+ `lgc ('x 'r 'n ) [7]:
+    ( `if 'n `<= 1 ) 
+    ( 'r `* 'x `* ( 1 '- 'x ) ) 
+    ( `return ) 
+    ..
+    ( `call 'it 'y ) 
+    ( 'r `* 'y `* ( 1 '- 'y ) ) { 'x 3.20 'n } ) 
+> B = 0.80 
 > bye!

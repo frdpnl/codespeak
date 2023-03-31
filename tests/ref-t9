@@ -2,10 +2,10 @@
 > input: "2, op3, 4. ; do it; print it"
 8.00 
 > env:
->	state: Ok 
->	__it__ = 8.00 
->	__nested_loops__ = 0 
->	op1 = `* 
->	op2 = `* 
->	op3 = `* 
+> state: Ok 
+> __it__ = 8.00 
+> __nested_loops__ = 0 
+> op1 = `* 
+> op2 = `* 
+> op3 = `* 
 > bye!

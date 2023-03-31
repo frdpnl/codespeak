@@ -4,9 +4,11 @@
 > input: "f (-1,) ; print it"
 -3 
 > env:
->	state: Ok 
->	__it__ = -3 
->	__nested_loops__ = 0 
->	A = 4 
->	f = `(f 'x [1] ( 3 `* 'x ) ) 
+> state: Ok 
+> __it__ = -3 
+> __nested_loops__ = 0 
+> A = 4 
+> f = 
+> `f ('x ) [1]:
+>    ( 3 `* 'x ) 
 > bye!

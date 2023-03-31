@@ -3,8 +3,10 @@
 > input: "print it"
 3 
 > env:
->	state: Ok 
->	__it__ = 3 
->	__nested_loops__ = 0 
->	f = `(f 'a 'b [1] ( 'a `+ 'b ) ) 
+> state: Ok 
+> __it__ = 3 
+> __nested_loops__ = 0 
+> f = 
+> `f ('a 'b ) [1]:
+>    ( 'a `+ 'b ) 
 > bye!

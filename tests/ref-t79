@@ -17,9 +17,9 @@
 1 
 10 
 > env:
->	state: Ok 
->	__it__ = 10 
->	__nested_loops__ = 0 
->	n = 0 
->	ni = 10 
+> state: Ok 
+> __it__ = 10 
+> __nested_loops__ = 0 
+> n = 0 
+> ni = 10 
 > bye!

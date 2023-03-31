@@ -5,8 +5,8 @@
 > input: "print it"
 0 
 > env:
->	state: Ok 
->	__it__ = 0 
->	__nested_loops__ = 0 
->	n = 1 
+> state: Ok 
+> __it__ = 0 
+> __nested_loops__ = 0 
+> n = 1 
 > bye!
