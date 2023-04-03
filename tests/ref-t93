@@ -1,0 +1,27 @@
+> input: "call 2 n"
+> input: "loop"
+> input: "	print n"
+> input: "	if n = 0 ; stop ; end if"
+> input: "	call 2 p"
+> input: "	loop"
+> input: "		print p"
+> input: "		if p = 0 ; stop ; end if"
+> input: "		p - 1 ; call it p"
+> input: "	end loop"
+> input: "	n - 1 ; call it n"
+> input: "end loop"
+2 
+2 
+1 
+0 
+1 
+2 
+1 
+0 
+0 
+> env: state = Ok 
+> __it__ = 1 
+> __nested_loops__ = 0 
+> n = 0 
+> p = 0 
+> bye!
