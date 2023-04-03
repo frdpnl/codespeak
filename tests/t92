@@ -1,0 +1,15 @@
+
+def f (a,n)
+	if n = 0 ; 1 ; return ; end if
+	call a p
+	loop
+		if n = 1 ; p ; return ; end if
+		a * p ; call it p
+		n - 1 ; call it n
+	end loop
+	rem: never reached ; -1 * p
+end f
+
+f (2,0) ; print it
+f (2,4) ; print it
+

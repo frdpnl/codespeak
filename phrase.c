@@ -2195,17 +2195,17 @@ reduce_fun(Env *e, Val *s, size_t p) {
 static Ires 
 reduce_return(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
-		printf("? %s: 'return' syntax incorrect\n", __FUNCTION__);
+		printf("? %s: `return syntax incorrect\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
 	/* return only from a function call */
 	if (e->parent == NULL) {
-		printf("? %s: 'return' outside function\n", __FUNCTION__);
+		printf("? %s: `return outside function\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
-	Val *it = lookup(e, ITNAME, false, false);
+	Val *it = lookup(e, ITNAME, false, true);
 	if (it == NULL) {
-		printf("? %s: 'it' undefined\n", __FUNCTION__);
+		printf("? %s: 'it undefined\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
 	upd_prefix0(s, p, copy_v(it));
@@ -2501,14 +2501,18 @@ static Ires
 interp_loop(Env *e, Val *s) {
 	/* rem: loop execution */
 	Val *v;
+	xint xs = OK;
 	if (Dbg) { printf("#\t  %s entry:\n", __FUNCTION__); }
-	while (e->state != STOP) {
+	while (!(xs == STOP || xs == RETURN)) {
 		for (size_t i=0; i<s->symf.body.n; ++i) {
 			v = copy_v(s->symf.body.v[i]);
-			xint xs = interp(e, v);
+			xs = interp(e, v);
 			free_v(v);
 			if (xs == FATAL) {
 				return (Ires) {FATAL, NULL};
+			}
+			if (xs == RETURN) {
+				break;
 			}
 			if (xs == STOP) {
 				break;
@@ -2522,7 +2526,10 @@ interp_loop(Env *e, Val *s) {
 				__FUNCTION__);
 		return (Ires) {FATAL, NULL};
 	}
-	return (Ires) {OK, copy_v(it)};
+	if (xs == STOP) {
+		xs = OK;
+	}
+	return (Ires) {xs, copy_v(it)};
 }
 static Ires 
 interp_seq(Env *e, Val *a, bool look) {
@@ -2827,7 +2834,7 @@ interp(Env *e, Val *a) {
 			break;
 		default:
 			printf("? %s: unexpected state\n", __FUNCTION__);
-			return (xint) FATAL;
+			rc = (Ires) {FATAL, NULL};
 	}
 	if (Dbg) { printf("#\t %s: interp'd status ", __FUNCTION__); print_xint(rc.state); printf("\n");}
 	if (rc.state == FATAL) {

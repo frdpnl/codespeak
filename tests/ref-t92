@@ -1,0 +1,26 @@
+> input: "def f (a,n)"
+> input: "	if n = 0 ; 1 ; return ; end if"
+> input: "	call a p"
+> input: "	loop"
+> input: "		if n = 1 ; p ; return ; end if"
+> input: "		a * p ; call it p"
+> input: "		n - 1 ; call it n"
+> input: "	end loop"
+> input: "	rem: never reached ; -1 * p"
+> input: "end f"
+> input: "f (2,0) ; print it"
+1 
+> input: "f (2,4) ; print it"
+16 
+> env: state = Ok 
+> __it__ = 16 
+> __nested_loops__ = 0 
+> f = 
+> `f ('a 'n ) [17]:
+>    ( `if 'n `= 0 ) 
+>    ( 1 ) 
+>    ( `return ) 
+>    ............
+>    ( `rem: 'never 'reached ) 
+>    ( -1 `* 'p ) 
+> bye!
