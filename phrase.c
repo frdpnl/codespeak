@@ -584,7 +584,8 @@ typedef enum {
 typedef enum {
 	OK,
 	NOP, /* nothing done, yet not an error */
-	ERR
+	ERR,
+	BACKTRACK
 } rc;
 
 typedef struct {
@@ -2435,21 +2436,19 @@ reduce_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
 	assert(b != NULL);
 	if (Dbg) { printf("#\t  %s (%d) entry: ", __FUNCTION__, look); printx_v(b,false,"#\t"); printf("\n"); }
-	Ires rc = (Ires) {UNSET, NULL};
+	Ires rc = (Ires) {NOP, NULL};
 	Val *c;
 	while (b->seq.v.n > 0) {
-		/* stop condition: seq reduces to single element */
+		/* stop condition: seq reduced to single element */
 		if (b->seq.v.n == 1) {
-			c = b->seq.v.v[0];
-			/* loop ends, return the reduced-to value, 
+			/* reduction loop ends, return the reduced seq,
 			 * unless it's an operator of 0 arity,
 			 * then, fall through & execute it below */
-			/* (functions all have one parameter) */
+			/* (user functions all have one parameter) */
+			c = b->seq.v.v[0]; /* shorthand */
 			if (!(c->hdr.t == VOPE && c->symop.arity == 0)) {
-				if (rc.state == UNSET) {
-					rc.state = e->state;
-				}
 				rc.v = b;
+				assert(rc.code == OK || rc.code == NOP);
 				return rc;
 			}
 		}
@@ -2480,7 +2479,7 @@ reduce_seq(Env *e, Val *b, bool look) {
 			printf("? %s: sequence without function ",__FUNCTION__);
 			print_v(b, true);
 			printf("\n");
-			return (Ires) {FATAL, NULL};
+			return (Ires) {ERR, NULL};
 		}
 		assert(symtype == VFUN || symtype == VOPE);
 		/* apply the symbol, returns the reduced seq */
@@ -2491,17 +2490,17 @@ reduce_seq(Env *e, Val *b, bool look) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
-		if (rc.state == FATAL || rc.state == BACKTRACK) {
+		if (rc.code == ERR || rc.code == BACKTRACK) {
 			assert(rc.v == NULL);
 			return rc;
 		}
 		b = rc.v; // TODO needed?
-		/* rc.state set by the reduce_*() */
+		/* rc.code set by the reduce_*() */
 		if (Dbg) { printf("#\t  %s reduced: ", __FUNCTION__); printx_v(b,false,"#\t"); printf("\n"); }
 	}
 	/* empty seq after reduction? */
 	printf("? %s: sequence empty\n",__FUNCTION__);
-	return (Ires) {FATAL, NULL};
+	return (Ires) {ERR, NULL};
 }
 static Ires 
 eval_loop(Env *e, Val *s) {
@@ -2542,25 +2541,29 @@ eval_seq(Env *e, Val *a, bool look) {
 	if (a->seq.v.n == 0) {
 		Val *b = malloc(sizeof(*b));
 		b->hdr.t = VNIL;
+		free_v(a);
 		return (Ires) {OK, b};
 	}
 	Ires rc;
+	/* resolve all functions to prepare for reduction: */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		rc = eval_norm(e, a->seq.v.v[i], look);
-		if (rc.code == ERR) {
+		if (rc.code != OK) {
 			return rc;
 		}
-		if (rc.code == OK) {
-			a->seq.v.v[i] = rc.v;
-		}
-		/* NOP leaves a..[i] unchanged */
+		a->seq.v.v[i] = rc.v;
 	}
 	rc = reduce_seq(e, a, look);
-	if (rc.v != NULL) {
-		rc.v = b->seq.v.v[0];
-		b->seq.v.n = 0;
+	if (rc.code == ERR || rc.code == BACKTRACK) {
+		rc.v = a;
+		return rc;
+	} 
+	if (rc.code == OK || rc.code == NOP) {
+		rc.v = a->seq.v.v[0]; /* steal single seq item */
+		a->seq.v.n = 0;
+		free_v(a);
+		rc.v = OK;
 	}
-	free_v(b);
 	return rc;
 }
 static Ires 
@@ -2597,7 +2600,7 @@ eval_sym(Env *e, Val *a, bool look) {
 		} 
 		return (Ires) {OK, copy_v(b)};
 	}
-	/* resolve symbol if points to function: */
+	/* resolve symbol if it points to function: */
 	Val *b = lookup(e, a->sym.v, true, true);
 	if (b != NULL && (b->hdr.t == VFUN
 			|| b->hdr.t == VOPE)) {
@@ -2625,33 +2628,31 @@ eval_lst(Env *e, Val *a, bool look) {
 
 static Ires 
 eval_norm(Env *e, Val *a, bool look) {
-	/* returns 'a or new val, then 'a freed */
+	/* returns 'a, or a new val and free 'a */
+	Ires r = {OK, a};
 	if (a->hdr.t == VSYM) {
-		Ires r = eval_sym(e, a, look);
+		r = eval_sym(e, a, look);
 		if (r.code == OK) {
+			/* r.v holds new val */
 			free_v(a);
 		} else if (r.code == ERR) {
+			/* r.v typically holds NULL */
 			r.v = a;
 		} else if (r.code == NOP) {
+			/* r.v holds 'a */
 			r.code = OK;
 		}
 		return r;
-	}
-	if (a->hdr.t == VLST) {
-		return eval_lst(e, a, look);
 	}
 	if (a->hdr.t == VSEQ) {
-		Ires rc = eval_seq(e, a, look);
+		r = eval_seq(e, a, look);
 		if (r.code == ERR) {
 			r.v = a;
-		} else if (r.code == NOP) {
-			r.code = OK;
 		}
-		/* OK will have freed 'a */
+		/* if OK then 'a already freed */
 		return r;
 	}
-	printf("? %s: unknown value\n", __FUNCTION__);
-	return (Ires) {FATAL, NULL};
+	return r;
 }
 
 static void 
