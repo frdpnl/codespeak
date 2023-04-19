@@ -755,9 +755,26 @@ print_istate(istate s) {
 	}
 }
 static void
+print_code(rc s) {
+	switch (s) {
+		case OK:
+			printf("Ok ");
+			break;
+		case NOP:
+			printf("Nop ");
+			break;
+		case BACKTRACK:
+			printf("Backtrack ");
+			break;
+		case ERR:
+			printf("Fatal ");
+			break;
+	}
+}
+static void
 print_rc(Ires a) {
 	printf("[");
-	print_istate(a.state);
+	print_code(a.code);
 	printf(", ");
 	if (a.v != NULL) {
 		print_v(a.v, false);
@@ -1191,8 +1208,8 @@ stored_sym(Env *a, Symval *b) {
  */
 
 static Ires eval_norm(Env *e, Val *a, bool look);
-static Ires eval_sym(Env *e, Val *a, bool look);
-static Ires eval_lst(Env *e, Val *a, bool look);
+static Ires solve_sym(Env *e, Val *a, bool look);
+static Ires solve_lst(Env *e, Val *a, bool look);
 static istate eval(Env *e, Val *a);
 
 static bool 
@@ -1238,12 +1255,8 @@ set_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = eval_sym(e, s->seq.v.v[p+1], looka);
-	if (rc.code == NOP) {
-		*pa = copy_v(s->seq.v.v[p+1]);
-		return true;
-	}
-	if (rc.code != OK) {
+	Ires rc = solve_sym(e, s->seq.v.v[p+1], looka);
+	if (rc.code != OK && rc.code != NOP) {
 		return false;
 	}
 	*pa = rc.v;
@@ -2138,20 +2151,17 @@ reduce_fun(Env *e, Val *s, size_t p) {
 	if (!(al->hdr.t == VLST || al->hdr.t == VNIL)) {
 		printf("? %s: argument to `%s not a list or '()'\n", 
 				__FUNCTION__, f->symf.name);
-		free_v(al);
 		return (Ires) {ERR, NULL};
 	}
 	if (al->hdr.t == VNIL && f->symf.param.n != 0) {
 		printf("? %s: expected %lu argument(s) to `%s\n", 
 				__FUNCTION__, f->symf.param.n, f->symf.name);
-		free_v(al);
 		return (Ires) {ERR, NULL};
 	}
 	if (al->hdr.t == VLST && al->lst.v.n != f->symf.param.n) {
 		printf("? %s: number of arguments to `%s mismatch (got %lu, expected %lu)\n", 
 				__FUNCTION__, f->symf.name,
 				al->lst.v.n, f->symf.param.n);
-		free_v(al);
 		return (Ires) {ERR, NULL};
 	}
 	/* setup local env */
@@ -2159,25 +2169,23 @@ reduce_fun(Env *e, Val *s, size_t p) {
 	if (le == NULL) {
 		printf("? %s: local env creation failed\n",
 				__FUNCTION__);
-		free_v(al);
 		return (Ires) {ERR, NULL};
 	}
 	if (al->hdr.t == VLST) {
-		Ires rc = eval_lst(le, al, looka);
-		if (rc.code != OK) 
+		Ires rc = solve_lst(le, al, true); /* true: solve all sym. macros? */
+		if (rc.code != OK) {
+			return rc;
+		}
 		/* add symval for each param, value is al's */
 		for (size_t i=0; i<f->symf.param.n; ++i) {
-			Symval *sv = symval(f->symf.param.v[i]->sym.v, bl->lst.v.v[i]);
+			Symval *sv = symval(f->symf.param.v[i]->sym.v, al->lst.v.v[i]);
 			if (!stored_sym(le, sv)) {
 				free_symval(sv);
-				free_v(bl);
 				free_env(le, false);
 				return (Ires) {ERR, NULL};
 			}
 		}
-		free_v(bl);
 	}
-	free_v(al);
 	/* reduce each expression in body, like eval_ph: */
 	Val *v;
 	for (size_t i=0; i<f->symf.body.n; ++i) {
@@ -2546,7 +2554,7 @@ eval_loop(Env *e, Val *s) {
 	return (Ires) {xs, copy_v(it)};
 }
 static Ires 
-eval_seq(Env *e, Val *a, bool look) {
+solve_seq(Env *e, Val *a, bool look) {
 	if (a->seq.v.n == 0) {
 		Val *b = malloc(sizeof(*b));
 		b->hdr.t = VNIL;
@@ -2554,10 +2562,11 @@ eval_seq(Env *e, Val *a, bool look) {
 		return (Ires) {OK, b};
 	}
 	Ires rc;
-	/* resolve all functions to prepare for reduction: */
+	/* resolve all syms to functions to prepare for reduction: */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		rc = eval_norm(e, a->seq.v.v[i], look);
-		if (rc.code != OK) {
+		if (rc.code != OK && rc.code != NOP) {
+			rc.v = a;
 			return rc;
 		}
 		a->seq.v.v[i] = rc.v;
@@ -2576,7 +2585,7 @@ eval_seq(Env *e, Val *a, bool look) {
 	return rc;
 }
 static Ires 
-eval_sym(Env *e, Val *a, bool look) {
+solve_sym(Env *e, Val *a, bool look) {
 	assert(a->hdr.t == VSYM);
 	/* resolve operators */
 	Symop *so = lookup_op(a->sym.v);
@@ -2618,11 +2627,11 @@ eval_sym(Env *e, Val *a, bool look) {
 	return (Ires) {NOP, a};
 }
 static Ires 
-eval_lst(Env *e, Val *a, bool look) {
+solve_lst(Env *e, Val *a, bool look) {
 	Ires rc;
 	for (size_t i=0; i < a->lst.v.n; ++i) {
 		rc = eval_norm(e, a->seq.v.v[i], look);
-		if (rc.code != OK) {
+		if (!(rc.code == OK || rc.code == NOP)) {
 			return (Ires) {ERR, NULL};
 		}
 		a->seq.v.v[i] = rc.v;
@@ -2633,10 +2642,10 @@ eval_lst(Env *e, Val *a, bool look) {
 
 static Ires 
 eval_norm(Env *e, Val *a, bool look) {
-	/* returns 'a, or a new val and free 'a */
+	/* returns 'a, or a new val and frees 'a */
 	Ires r = {OK, a};
 	if (a->hdr.t == VSYM) {
-		r = eval_sym(e, a, look);
+		r = solve_sym(e, a, look);
 		if (r.code == OK) {
 			/* r.v holds new val */
 			free_v(a);
@@ -2650,12 +2659,7 @@ eval_norm(Env *e, Val *a, bool look) {
 		return r;
 	}
 	if (a->hdr.t == VSEQ) {
-		r = eval_seq(e, a, look);
-		if (r.code == ERR) {
-			r.v = a;
-		}
-		/* if OK then 'a already freed */
-		return r;
+		return solve_seq(e, a, look);
 	}
 	return r;
 }
@@ -2858,26 +2862,26 @@ eval(Env *e, Val *a) {
 			break;
 		default:
 			printf("? %s: invalid state\n", __FUNCTION__);
-			rc = (Ires) {FATAL, NULL};
+			rc = (Ires) {ERR, NULL};
 	}
-	if (Dbg) { printf("#\t %s: eval'd status ", __FUNCTION__); print_istate(rc.state); printf("\n");}
+	if (Dbg) { printf("#\t %s: eval'd code ", __FUNCTION__); print_code(rc.code); printf("\n");}
 	if (rc.code == ERR) {
-		assert(rc.v == NULL);
-		return (istate) FATAL;
+		e->state = FATAL;
+		return e->state;
 	}
-	/* TODO replace assignment with proper processing: */
-	e->state = rc.state;
 	Symval *it = symval(ITNAME, rc.v);
 	free_v(rc.v);
 	if (it == NULL) {
-		return (istate) FATAL;
+		e->state = FATAL;
+		return e->state;
 	}
 	if (!stored_sym(e, it)) {
 		free_symval(it);
-		return (istate) FATAL;
+		e->state = FATAL;
+		return e->state;
 	}
 	if (Dbg) { printf("#\t %s: exit\n", __FUNCTION__); print_env(e, "#\t"); }
-	return (istate) e->state;
+	return e->state;
 }
 
 /* ------------ Phrase, a line, a list of expressions --------- */
