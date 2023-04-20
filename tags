@@ -48,7 +48,6 @@ Phrase	phrase.c	/^} Phrase;$/;"	t	typeref:struct:__anon2f313ef91808	file:
 RET	phrase.c	/^	RET,$/;"	e	enum:__anon2f313ef90d03	file:
 RETURN	phrase.c	/^	RETURN,	\/* returning from function (short circuit) *\/$/;"	e	enum:__anon2f313ef90c03	file:
 RIGHT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
-Reduce_seq	phrase.c	/^Reduce_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ires	file:
 SEP	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 SKIP	phrase.c	/^	SKIP,$/;"	e	enum:__anon2f313ef90d03	file:
 SLST	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
@@ -218,6 +217,7 @@ rc	phrase.c	/^} rc;$/;"	t	typeref:enum:__anon2f313ef90d03	file:
 rea	phrase.c	/^	} rea;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90708	file:
 rea	phrase.c	/^	} rea;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef91208	file:
 readline	phrase.c	/^readline(char **S) {$/;"	f	typeref:typename:Lrc	file:
+reduce_seq	phrase.c	/^reduce_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ires	file:
 s	phrase.c	/^	Sem *s;$/;"	m	struct:List_	typeref:typename:Sem *	file:
 s	phrase.c	/^	Symval **s;$/;"	m	struct:Env_	typeref:typename:Symval **	file:
 sem_nat	phrase.c	/^sem_nat(long long a) {$/;"	f	typeref:typename:Sem *	file:

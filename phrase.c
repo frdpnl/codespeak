@@ -2464,7 +2464,7 @@ solve_fun(Env *e, Val *a) {
 }
 
 static Ires 
-Reduce_seq(Env *e, Val *b, bool look) {
+reduce_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
 	assert(b != NULL);
 	if (Dbg) { printf("#\t  %s (%d) entry: ", __FUNCTION__, look); printx_v(b,false,"#\t"); printf("\n"); }
@@ -2518,6 +2518,7 @@ Reduce_seq(Env *e, Val *b, bool look) {
 		if (symtype == VFUN) {
 			/* user defined function */
 			rc = apply_fun(e, b, symat);
+			assert(rc.code == OK || rc.code == FAIL);
 		} else if (symtype == VOPE) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
@@ -2584,7 +2585,7 @@ solve_seq(Env *e, Val *a, bool look) {
 		}
 		a->seq.v.v[i] = rc.v;
 	}
-	rc = Reduce_seq(e, a, look);
+	rc = reduce_seq(e, a, look);
 	if (rc.code == OK || rc.code == NOP) {
 		rc.v = a->seq.v.v[0]; /* steal single seq item */
 		a->seq.v.n = 0;
