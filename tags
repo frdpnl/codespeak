@@ -9,28 +9,31 @@
 !_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
 !_TAG_PROGRAM_URL	https://ctags.io/	/official site/
 !_TAG_PROGRAM_VERSION	5.9.0	//
-BACKTRACK	phrase.c	/^	BACKTRACK$/;"	e	enum:__anon2f313ef90d03	file:
+BACK	phrase.c	/^	BACK,$/;"	e	enum:__anon2f313ef90d03	file:
 BACKTRACK	phrase.c	/^	BACKTRACK,$/;"	e	enum:__anon2f313ef90c03	file:
+DEF	phrase.c	/^	DEF,$/;"	e	enum:__anon2f313ef90d03	file:
 Dbg	phrase.c	/^bool Dbg = false;$/;"	v	typeref:typename:bool
 EMPTYL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91903	file:
 ENDF	phrase.c	/^#define ENDF /;"	d	file:
 ENDIF	phrase.c	/^#define ENDIF /;"	d	file:
 ENDL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91903	file:
-ERR	phrase.c	/^	ERR,$/;"	e	enum:__anon2f313ef90d03	file:
 ERRL	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91903	file:
 Env	phrase.c	/^} Env;$/;"	t	typeref:struct:Env_	file:
 Env_	phrase.c	/^typedef struct Env_ {$/;"	s	file:
 Expr	phrase.c	/^} Expr;$/;"	t	typeref:struct:__anon2f313ef90308	file:
-FATAL	phrase.c	/^	FATAL$/;"	e	enum:__anon2f313ef90c03	file:
+FAIL	phrase.c	/^	FAIL,$/;"	e	enum:__anon2f313ef90d03	file:
+FATAL	phrase.c	/^	FATAL,$/;"	e	enum:__anon2f313ef90c03	file:
 FUNDEF	phrase.c	/^	FUNDEF,	\/* we're processing a (multiline) function definition *\/$/;"	e	enum:__anon2f313ef90c03	file:
 FUNDEFPRIO	phrase.c	/^#define FUNDEFPRIO /;"	d	file:
 IFSKIP	phrase.c	/^	IFSKIP,	\/* for 'if, skip until 'else or 'endif *\/$/;"	e	enum:__anon2f313ef90c03	file:
+INT	phrase.c	/^	INT$/;"	e	enum:__anon2f313ef90d03	file:
 IT	phrase.c	/^#define IT /;"	d	file:
 ITNAME	phrase.c	/^#define ITNAME /;"	d	file:
 Ires	phrase.c	/^} Ires;		\/* return type for reduce *\/$/;"	t	typeref:struct:__anon2f313ef90f08	file:
 LEFT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 LINE	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	e	enum:__anon2f313ef91903	file:
-LOOP	phrase.c	/^	LOOP,$/;"	e	enum:__anon2f313ef90c03	file:
+LOOP	phrase.c	/^	LOOP,$/;"	e	enum:__anon2f313ef90d03	file:
+LOOPDEF	phrase.c	/^	LOOPDEF,$/;"	e	enum:__anon2f313ef90c03	file:
 LOOPNAME	phrase.c	/^#define LOOPNAME /;"	d	file:
 LOOPNEST	phrase.c	/^#define LOOPNEST /;"	d	file:
 List	phrase.c	/^} List;$/;"	t	typeref:struct:List_	file:
@@ -38,20 +41,22 @@ List_	phrase.c	/^typedef struct List_ {$/;"	s	file:
 List_v	phrase.c	/^} List_v;$/;"	t	typeref:struct:List_v_	file:
 List_v_	phrase.c	/^typedef struct List_v_ {$/;"	s	file:
 Lrc	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	t	typeref:enum:__anon2f313ef91903	file:
-NOP	phrase.c	/^	NOP, \/* nothing done, yet not an error *\/$/;"	e	enum:__anon2f313ef90d03	file:
+NOP	phrase.c	/^	NOP,$/;"	e	enum:__anon2f313ef90d03	file:
 NORM	phrase.c	/^	NORM,$/;"	e	enum:__anon2f313ef90c03	file:
 OK	phrase.c	/^	OK,$/;"	e	enum:__anon2f313ef90d03	file:
 Phrase	phrase.c	/^} Phrase;$/;"	t	typeref:struct:__anon2f313ef91808	file:
+RET	phrase.c	/^	RET,$/;"	e	enum:__anon2f313ef90d03	file:
 RETURN	phrase.c	/^	RETURN,	\/* returning from function (short circuit) *\/$/;"	e	enum:__anon2f313ef90c03	file:
 RIGHT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 SEP	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
+SKIP	phrase.c	/^	SKIP,$/;"	e	enum:__anon2f313ef90d03	file:
 SLST	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SNAT	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SNIL	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SREA	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SSEQ	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
 SSYM	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
-STOP	phrase.c	/^	STOP, \/* interrupt loop *\/$/;"	e	enum:__anon2f313ef90c03	file:
+STOP	phrase.c	/^	STOP	\/* interrupt loop *\/$/;"	e	enum:__anon2f313ef90c03	file:
 STR	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 Sem	phrase.c	/^typedef union Sem_ Sem;$/;"	t	typeref:union:Sem_	file:
 Sem	phrase.c	/^} Sem;$/;"	t	typeref:union:Sem_	file:
@@ -60,7 +65,6 @@ Symop	phrase.c	/^} Symop;$/;"	t	typeref:struct:Symop_	file:
 Symop_	phrase.c	/^typedef struct Symop_ {$/;"	s	file:
 Syms	phrase.c	/^Symop Syms[] = {$/;"	v	typeref:typename:Symop[]
 Symval	phrase.c	/^} Symval;$/;"	t	typeref:struct:__anon2f313ef90e08	file:
-UNSET	phrase.c	/^	UNSET,$/;"	e	enum:__anon2f313ef90c03	file:
 VFUN	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
 VLST	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
 VNAT	phrase.c	/^typedef enum {VNIL, VNAT, VREA, VOPE, VFUN, VSYM, VLST, VSEQ} vtype;$/;"	e	enum:__anon2f313ef90b03	file:
