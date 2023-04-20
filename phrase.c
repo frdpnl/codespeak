@@ -586,8 +586,8 @@ typedef enum {
 	NOP,
 	SKIP,
 	DEF,
-	RET,
 	BACK,
+	RET,
 	LOOP,
 	INT
 } rc;
@@ -1374,7 +1374,7 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 }
 
 static Ires 
-reduce_mul(Env *e, Val *s, size_t p) {
+op_mul(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1404,7 +1404,7 @@ reduce_mul(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_div(Env *e, Val *s, size_t p) {
+op_div(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1442,7 +1442,7 @@ reduce_div(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires
-reduce_plu(Env *e, Val *s, size_t p) {
+op_plu(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1472,7 +1472,7 @@ reduce_plu(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_min(Env *e, Val *s, size_t p) {
+op_min(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1504,7 +1504,7 @@ reduce_min(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires
-reduce_les(Env *e, Val *s, size_t p) {
+op_les(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1536,7 +1536,7 @@ reduce_les(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires
-reduce_leq(Env *e, Val *s, size_t p) {
+op_leq(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1568,7 +1568,7 @@ reduce_leq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_gre(Env *e, Val *s, size_t p) {
+op_gre(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1600,7 +1600,7 @@ reduce_gre(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_geq(Env *e, Val *s, size_t p) {
+op_geq(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1632,7 +1632,7 @@ reduce_geq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_eq(Env *e, Val *s, size_t p) {
+op_eq(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1649,7 +1649,7 @@ reduce_eq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_neq(Env *e, Val *s, size_t p) {
+op_neq(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1666,7 +1666,7 @@ reduce_neq(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_eqv(Env *e, Val *s, size_t p) {
+op_eqv(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1683,7 +1683,7 @@ reduce_eqv(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_and(Env *e, Val *s, size_t p) {
+op_and(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1705,7 +1705,7 @@ reduce_and(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_or(Env *e, Val *s, size_t p) {
+op_or(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
@@ -1727,7 +1727,7 @@ reduce_or(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_not(Env *e, Val *s, size_t p) {
+op_not(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
@@ -1746,7 +1746,7 @@ reduce_not(Env *e, Val *s, size_t p) {
 }
 
 static Ires 
-reduce_print(Env *e, Val *s, size_t p) {
+op_print(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
@@ -1759,7 +1759,7 @@ reduce_print(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_solve(Env *e, Val *s, size_t p) {
+op_solve(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FATAL, NULL};
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
@@ -1770,7 +1770,7 @@ reduce_solve(Env *e, Val *s, size_t p) {
 	return rc;
 }
 static Ires 
-reduce_do(Env *e, Val *s, size_t p) {
+op_do(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, false)) {
 		return (Ires) {FATAL, NULL};
@@ -1802,7 +1802,7 @@ reduce_do(Env *e, Val *s, size_t p) {
 	return (Ires) {rc.state, s};
 }
 static Ires 
-reduce_list(Env *e, Val *s, size_t p) {
+op_list(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!set_prefixn_arg(e, s, p, &a, false)) {
 		return (Ires) {FATAL, NULL};
@@ -1812,7 +1812,7 @@ reduce_list(Env *e, Val *s, size_t p) {
 	return (Ires) {NORM, s};
 }
 static Ires 
-reduce_call(Env *e, Val *s, size_t p) {
+op_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_prefix2_arg(e, s, p, &a, true, &b, false)) {
 		return (Ires) {FATAL, NULL};
@@ -1840,7 +1840,7 @@ reduce_call(Env *e, Val *s, size_t p) {
 	return (Ires) {NORM, s};
 }
 static Ires 
-reduce_true(Env *e, Val *s, size_t p) {
+op_true(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, ITNAME, false, false);
 	if (a == NULL) {
@@ -1856,7 +1856,7 @@ reduce_true(Env *e, Val *s, size_t p) {
 	return (Ires) {NORM, s};
 }
 static Ires 
-reduce_false(Env *e, Val *s, size_t p) {
+op_false(Env *e, Val *s, size_t p) {
 	Val *a;
 	a = lookup(e, ITNAME, false, false);
 	if (a == NULL) {
@@ -1872,7 +1872,7 @@ reduce_false(Env *e, Val *s, size_t p) {
 	return (Ires) {NORM, s};
 }
 static Ires 
-reduce_if(Env *e, Val *s, size_t p) {
+op_if(Env *e, Val *s, size_t p) {
 	if (p != 0 || p != s->seq.v.n - 2) {
 		printf("? %s: 'if' sequence invalid\n",
 				__FUNCTION__);
@@ -1910,7 +1910,7 @@ position(Val *a, List_v lv) {
 }
 
 static Ires 
-reduce_else(Env *e, Val *s, size_t p) {
+op_else(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `else syntax incorrect\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -1936,7 +1936,7 @@ reduce_else(Env *e, Val *s, size_t p) {
 	return (Ires) {FATAL, NULL};
 }
 static Ires 
-reduce_rem(Env *e, Val *s, size_t p) {
+op_rem(Env *e, Val *s, size_t p) {
 	if (p != 0) {
 		printf("? %s: `rem syntax invalid, needs to be 1st\n",
 				__FUNCTION__);
@@ -1960,7 +1960,7 @@ reduce_rem(Env *e, Val *s, size_t p) {
 
 /* --- reduce function definition --- */
 static Ires
-reduce_def(Env *e, Val *s, size_t p) {
+op_def(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) or define foo () ; */
 	if (s->seq.v.n != 3 || p != 0) {
 		printf("? %s: incorrect number of arguments to 'define'\n",
@@ -2019,7 +2019,7 @@ reduce_def(Env *e, Val *s, size_t p) {
 	return (Ires) {FUNDEF, s};
 }
 static Ires
-reduce_loop(Env *e, Val *s, size_t p) {
+op_loop(Env *e, Val *s, size_t p) {
 	if (Dbg) { printf("#\t  %s %5s: ", __FUNCTION__, "entry"); printx_v(s,false,"#\t"); printf("\n"); }
 	/* rem: loop */
 	if (s->seq.v.n != 1) {
@@ -2039,7 +2039,7 @@ reduce_loop(Env *e, Val *s, size_t p) {
 	return (Ires) {LOOPDEF, s};
 }
 static Ires 
-reduce_end(Env *e, Val *s, size_t p) {
+op_end(Env *e, Val *s, size_t p) {
 	if (Dbg) { printf("#\t  %s %5s: ", __FUNCTION__, "entry"); printx_v(s, false, "#\t"); printf("\n"); }
 	/* rem: end somefun or end if or end loop ; */
 	if (p != 0 || s->seq.v.n != 2) {
@@ -2054,7 +2054,7 @@ reduce_end(Env *e, Val *s, size_t p) {
 	Val *b = NULL;
 	if (a->hdr.t == VOPE) {
 		/* rem: end if */
-		if (a->symop.v == reduce_if || a->symop.v == reduce_loop) {
+		if (a->symop.v == op_if || a->symop.v == op_loop) {
 			Val *c = lookup(e, ITNAME, false, false);
 			if (c == NULL) {
 				printf("? %s: 'it undefined, missing `if or `loop?\n",
@@ -2155,42 +2155,42 @@ new_env(Env *parent) {
 }
 
 static Ires 
-reduce_fun(Env *e, Val *s, size_t p) {
+apply_fun(Env *e, Val *s, size_t p) {
 	/* rem: ... foo (1, 2) or foo () ... */
 	Val *al;
 	Val *f = s->seq.v.v[p];
 	if (!set_prefix1_arg(e, s, p, &al, true)) {
 		printf("? %s: invalid argument to `%s\n", 
 				__FUNCTION__, f->symf.name);
-		return (Ires) {FAIL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (!(al->hdr.t == VLST || al->hdr.t == VNIL)) {
 		printf("? %s: argument to `%s not a list or '()'\n", 
 				__FUNCTION__, f->symf.name);
-		return (Ires) {FAIL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VNIL && f->symf.param.n != 0) {
 		printf("? %s: expected %lu argument(s) to `%s\n", 
 				__FUNCTION__, f->symf.param.n, f->symf.name);
-		return (Ires) {FAIL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VLST && al->lst.v.n != f->symf.param.n) {
 		printf("? %s: number of arguments to `%s mismatch (got %lu, expected %lu)\n", 
 				__FUNCTION__, f->symf.name,
 				al->lst.v.n, f->symf.param.n);
-		return (Ires) {FAIL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	/* setup local env */
 	Env *le = new_env(e);
 	if (le == NULL) {
 		printf("? %s: local env creation failed\n",
 				__FUNCTION__);
-		return (Ires) {FAIL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VLST) {
 		Ires rc = solve_lst(le, al, true); /* true: solve all sym. macros? */
 		if (rc.code != OK) {
-			return rc;
+			return (Ires) {FAIL, s};
 		}
 		/* add symval for each param, value is al's */
 		for (size_t i=0; i<f->symf.param.n; ++i) {
@@ -2198,7 +2198,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 			if (!stored_sym(le, sv)) {
 				free_symval(sv);
 				free_env(le, false);
-				return (Ires) {FAIL, NULL};
+				return (Ires) {FAIL, s};
 			}
 		}
 	}
@@ -2211,7 +2211,7 @@ reduce_fun(Env *e, Val *s, size_t p) {
 		if (Dbg) { printf("#\t  %s %5s: ", __FUNCTION__, "reduce"); print_istate(xs); printf("\n"); } 
 		if (xs == FATAL) {
 			free_env(le, false);
-			return (Ires) {FAIL, NULL};
+			return (Ires) {FAIL, s};
 		}
 		if (xs == RETURN) {
 			break;
@@ -2222,17 +2222,17 @@ reduce_fun(Env *e, Val *s, size_t p) {
 	char *sym = ITNAME;
 	Val *lit = lookup(le, sym, false, true);
 	if (lit == NULL) {
-		printf("? %s: 'it from '%s undefined\n",
+		printf("? %s: 'it from `%s undefined\n",
 				__FUNCTION__, f->symf.name);
 		free_env(le, false);
-		return (Ires) {FAIL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	upd_prefix1(s, p, copy_v(lit));
 	free_env(le, false);
 	return (Ires) {OK, s};
 }
 static Ires 
-reduce_return(Env *e, Val *s, size_t p) {
+op_return(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `return syntax incorrect\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2251,7 +2251,7 @@ reduce_return(Env *e, Val *s, size_t p) {
 	return (Ires) {RETURN, s};
 }
 static Ires 
-reduce_stop(Env *e, Val *s, size_t p) {
+op_stop(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `stop syntax incorrect\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2265,7 +2265,7 @@ reduce_stop(Env *e, Val *s, size_t p) {
 	return (Ires) {STOP, s};
 }
 static Ires 
-reduce_env(Env *e, Val *s, size_t p) {
+op_env(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `env syntax incorrect\n", __FUNCTION__);
 		return (Ires) {FATAL, NULL};
@@ -2293,39 +2293,39 @@ typedef struct Symop_ {
 } Symop;
 
 Symop Syms[] = {
-	(Symop) {"call",   -20, reduce_call,  2},
-	(Symop) {"define", -20, reduce_def,  2},
-	(Symop) {"def",    -20, reduce_def,  2},
-	(Symop) {"do",     -20, reduce_do,    1},
-	(Symop) {"else",   -20, reduce_else, 0},
-	(Symop) {"end",    -20, reduce_end,  1}, /* needs to be prior to loop, if, ufun */
-	(Symop) {"env",    -20, reduce_env, 0},
-	(Symop) {"list",   -20, reduce_list, -1},
-	(Symop) {"loop",   -20, reduce_loop, 0},
-	(Symop) {"print",  -20, reduce_print, 1}, 
-	(Symop) {"rem:",   -20, reduce_rem,  -1}, /* -1 arity: remainder of seq val */
-	(Symop) {"return", -20, reduce_return, 0},
-	(Symop) {"stop",   -20, reduce_stop, 0},
-	(Symop) {"solve",  -20, reduce_solve,  1},
-	(Symop) {"true?",  -20, reduce_true,  0},
-	(Symop) {"false?", -20, reduce_false, 0},
+	(Symop) {"call",   -20, op_call,  2},
+	(Symop) {"define", -20, op_def,  2},
+	(Symop) {"def",    -20, op_def,  2},
+	(Symop) {"do",     -20, op_do,    1},
+	(Symop) {"else",   -20, op_else, 0},
+	(Symop) {"end",    -20, op_end,  1}, /* needs to be prior to loop, if, ufun */
+	(Symop) {"env",    -20, op_env, 0},
+	(Symop) {"list",   -20, op_list, -1},
+	(Symop) {"loop",   -20, op_loop, 0},
+	(Symop) {"print",  -20, op_print, 1}, 
+	(Symop) {"rem:",   -20, op_rem,  -1}, /* -1 arity: remainder of seq val */
+	(Symop) {"return", -20, op_return, 0},
+	(Symop) {"stop",   -20, op_stop, 0},
+	(Symop) {"solve",  -20, op_solve,  1},
+	(Symop) {"true?",  -20, op_true,  0},
+	(Symop) {"false?", -20, op_false, 0},
 	/* priority FUNDEFPRIO (0) is for function (user defined) */
-	(Symop) {"*",    20, reduce_mul, 2},
-	(Symop) {"/",    20, reduce_div, 2},
-	(Symop) {"+",    30, reduce_plu, 2},
-	(Symop) {"-",    30, reduce_min, 2},
-	(Symop) {"=",    40, reduce_eq,  2},
-	(Symop) {"/=",   40, reduce_neq, 2},
-	(Symop) {"<",    40, reduce_les, 2},
-	(Symop) {"<=",   40, reduce_leq, 2},
-	(Symop) {">",    40, reduce_gre, 2},
-	(Symop) {">=",   40, reduce_geq, 2},
-	(Symop) {"~=",   40, reduce_eqv, 2},
-	(Symop) {"not",  50, reduce_not, 1},
-	(Symop) {"and",  60, reduce_and, 2},
-	(Symop) {"or",   70, reduce_or,  2},
-	(Symop) {"if",   80, reduce_if,  1},
-	(Symop) {"", 0, reduce_false, -1},
+	(Symop) {"*",    20, op_mul, 2},
+	(Symop) {"/",    20, op_div, 2},
+	(Symop) {"+",    30, op_plu, 2},
+	(Symop) {"-",    30, op_min, 2},
+	(Symop) {"=",    40, op_eq,  2},
+	(Symop) {"/=",   40, op_neq, 2},
+	(Symop) {"<",    40, op_les, 2},
+	(Symop) {"<=",   40, op_leq, 2},
+	(Symop) {">",    40, op_gre, 2},
+	(Symop) {">=",   40, op_geq, 2},
+	(Symop) {"~=",   40, op_eqv, 2},
+	(Symop) {"not",  50, op_not, 1},
+	(Symop) {"and",  60, op_and, 2},
+	(Symop) {"or",   70, op_or,  2},
+	(Symop) {"if",   80, op_if,  1},
+	(Symop) {"", 0, op_false, -1},
 };
 static int
 minprio() {
@@ -2464,11 +2464,11 @@ solve_fun(Env *e, Val *a) {
 }
 
 static Ires 
-reduce_seq(Env *e, Val *b, bool look) {
+Reduce_seq(Env *e, Val *b, bool look) {
 	/* symbol application: consumes the seq, until 1 item left */
 	assert(b != NULL);
 	if (Dbg) { printf("#\t  %s (%d) entry: ", __FUNCTION__, look); printx_v(b,false,"#\t"); printf("\n"); }
-	Ires rc = (Ires) {NOP, NULL};
+	Ires rc = (Ires) {NOP, b};
 	Val *c;
 	while (b->seq.v.n > 0) {
 		/* stop condition: seq reduced to single element */
@@ -2511,28 +2511,27 @@ reduce_seq(Env *e, Val *b, bool look) {
 			printf("? %s: sequence without function ",__FUNCTION__);
 			print_v(b, true);
 			printf("\n");
-			return (Ires) {FAIL, NULL};
+			return (Ires) {FAIL, b};
 		}
 		assert(symtype == VFUN || symtype == VOPE);
 		/* apply the symbol, returns the reduced seq */
 		if (symtype == VFUN) {
 			/* user defined function */
-			rc = reduce_fun(e, b, symat);
+			rc = apply_fun(e, b, symat);
 		} else if (symtype == VOPE) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
-		if (rc.code == FAIL || rc.code == BACK) {
-			assert(rc.v == NULL);
+		if (!(rc.code == OK && rc.code == NOP)) {
 			return rc;
 		}
 		b = rc.v; // TODO needed?
-		/* rc.code set by the reduce_*() */
+		/* rc.code set by the op_*() */
 		if (Dbg) { printf("#\t  %s reduced: ", __FUNCTION__); printx_v(b,false,"#\t"); printf("\n"); }
 	}
 	/* empty seq after reduction? */
 	printf("? %s: sequence empty\n",__FUNCTION__);
-	return (Ires) {FAIL, NULL};
+	return (Ires) {FAIL, b};
 }
 static Ires 
 eval_loop(Env *e, Val *s) {
@@ -2580,17 +2579,12 @@ solve_seq(Env *e, Val *a, bool look) {
 	/* resolve all syms to functions to prepare for reduction: */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
 		rc = eval_norm(e, a->seq.v.v[i], look);
-		if (rc.code != OK && rc.code != NOP) {
-			rc.v = a;
+		if (!(rc.code == OK || rc.code == NOP)) {
 			return rc;
 		}
 		a->seq.v.v[i] = rc.v;
 	}
-	rc = reduce_seq(e, a, look);
-	if (rc.code == FAIL || rc.code == BACK) {
-		rc.v = a;
-		return rc;
-	} 
+	rc = Reduce_seq(e, a, look);
 	if (rc.code == OK || rc.code == NOP) {
 		rc.v = a->seq.v.v[0]; /* steal single seq item */
 		a->seq.v.n = 0;
@@ -2662,10 +2656,9 @@ eval_norm(Env *e, Val *a, bool look) {
 	if (a->hdr.t == VSYM) {
 		r = solve_sym(e, a, look);
 		if (r.code == OK) {
-			/* r.v holds new val */
+			/* r.v holds a new val */
 			free_v(a);
 		} else if (r.code == NOP) {
-			/* r.v holds 'a */
 			r.code = OK;
 		}
 		return r;
@@ -2760,7 +2753,7 @@ eval_maybe_def(Env *e, Val *a) {
 	if (Dbg) { printf("#\t  %s resolved: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	/* rem: expecting end 'foo */
 	if (a->seq.v.v[0]->hdr.t == VOPE 
-			&& a->seq.v.v[0]->symop.v == reduce_end
+			&& a->seq.v.v[0]->symop.v == op_end
 			&& a->seq.v.v[0]->symop.arity == a->seq.v.n -1
 			&& a->seq.v.v[1]->hdr.t == VSYM) {
 		Ires rc = eval_norm(e, a, false);
@@ -2796,14 +2789,14 @@ eval_maybe_loop(Env *e, Val *a) {
 	}
 	/* rem: handle nested loop, another `loop val */
 	if (a->seq.v.v[0]->hdr.t == VOPE 
-			&& a->seq.v.v[0]->symop.v == reduce_loop) {
+			&& a->seq.v.v[0]->symop.v == op_loop) {
 		++(lnst->nat.v);
 	} /* rem: `end `loop ? */
 	else if (a->seq.v.v[0]->hdr.t == VOPE 
-			&& a->seq.v.v[0]->symop.v == reduce_end
+			&& a->seq.v.v[0]->symop.v == op_end
 			&& a->seq.v.v[0]->symop.arity == a->seq.v.n -1
 			&& a->seq.v.v[1]->hdr.t == VOPE 
-			&& a->seq.v.v[1]->symop.v == reduce_loop) {
+			&& a->seq.v.v[1]->symop.v == op_loop) {
 		/* `end `loop while in topmost loop, execute this */
 		if (lnst->nat.v == 0) {
 			Ires rc = eval_norm(e, a, false);
@@ -2826,12 +2819,12 @@ eval_maybe_skip(Env *e, Val *a) {
 	}
 	if (Dbg) { printf("#\t  %s resolved: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	bool an_endif = a->seq.v.v[0]->hdr.t == VOPE 
-			&& a->seq.v.v[0]->symop.v == reduce_end
+			&& a->seq.v.v[0]->symop.v == op_end
 			&& a->seq.v.v[0]->symop.arity == a->seq.v.n -1
 			&& a->seq.v.v[1]->hdr.t == VOPE 
-			&& a->seq.v.v[1]->symop.v == reduce_if ;
+			&& a->seq.v.v[1]->symop.v == op_if ;
 	bool an_else = a->seq.v.v[0]->hdr.t == VOPE 
-			&& a->seq.v.v[0]->symop.v == reduce_else ;
+			&& a->seq.v.v[0]->symop.v == op_else ;
 	if (an_endif || an_else) {
 		Ires rc = eval_norm(e, a, false);
 		return rc;

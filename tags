@@ -48,6 +48,7 @@ Phrase	phrase.c	/^} Phrase;$/;"	t	typeref:struct:__anon2f313ef91808	file:
 RET	phrase.c	/^	RET,$/;"	e	enum:__anon2f313ef90d03	file:
 RETURN	phrase.c	/^	RETURN,	\/* returning from function (short circuit) *\/$/;"	e	enum:__anon2f313ef90c03	file:
 RIGHT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
+Reduce_seq	phrase.c	/^Reduce_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ires	file:
 SEP	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 SKIP	phrase.c	/^	SKIP,$/;"	e	enum:__anon2f313ef90d03	file:
 SLST	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
@@ -105,6 +106,7 @@ __anon2f313ef91708	phrase.c	/^	struct {$/;"	s	union:Val_	file:
 __anon2f313ef91808	phrase.c	/^typedef struct {$/;"	s	file:
 __anon2f313ef91903	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	g	file:
 added_sym	phrase.c	/^added_sym(Env *a, Symval *b, bool err) {$/;"	f	typeref:typename:bool	file:
+apply_fun	phrase.c	/^apply_fun(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
 arity	phrase.c	/^		int arity;$/;"	m	struct:Val_::__anon2f313ef91308	typeref:typename:int	file:
 arity	phrase.c	/^	int arity;$/;"	m	struct:Symop_	typeref:typename:int	file:
 body	phrase.c	/^		List_v body;$/;"	m	struct:Val_::__anon2f313ef91408	typeref:typename:List_v	file:
@@ -159,6 +161,36 @@ name	phrase.c	/^	char name[WSZ];$/;"	m	struct:__anon2f313ef90e08	typeref:typenam
 nat	phrase.c	/^	} nat;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90608	file:
 nat	phrase.c	/^	} nat;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef91108	file:
 new_env	phrase.c	/^new_env(Env *parent) {$/;"	f	typeref:typename:Env *
+op_and	phrase.c	/^op_and(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_call	phrase.c	/^op_call(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_def	phrase.c	/^op_def(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_div	phrase.c	/^op_div(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_do	phrase.c	/^op_do(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_else	phrase.c	/^op_else(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_end	phrase.c	/^op_end(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_env	phrase.c	/^op_env(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_eq	phrase.c	/^op_eq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_eqv	phrase.c	/^op_eqv(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_false	phrase.c	/^op_false(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_geq	phrase.c	/^op_geq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_gre	phrase.c	/^op_gre(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_if	phrase.c	/^op_if(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_leq	phrase.c	/^op_leq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_les	phrase.c	/^op_les(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_list	phrase.c	/^op_list(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_loop	phrase.c	/^op_loop(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_min	phrase.c	/^op_min(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_mul	phrase.c	/^op_mul(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_neq	phrase.c	/^op_neq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_not	phrase.c	/^op_not(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_or	phrase.c	/^op_or(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_plu	phrase.c	/^op_plu(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_print	phrase.c	/^op_print(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_rem	phrase.c	/^op_rem(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_return	phrase.c	/^op_return(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_solve	phrase.c	/^op_solve(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_stop	phrase.c	/^op_stop(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+op_true	phrase.c	/^op_true(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
 param	phrase.c	/^		List_v param;$/;"	m	struct:Val_::__anon2f313ef91408	typeref:typename:List_v	file:
 parent	phrase.c	/^	struct Env_ *parent;$/;"	m	struct:Env_	typeref:struct:Env_ *	file:
 phrase	phrase.c	/^phrase() {$/;"	f	typeref:typename:Phrase *	file:
@@ -186,38 +218,6 @@ rc	phrase.c	/^} rc;$/;"	t	typeref:enum:__anon2f313ef90d03	file:
 rea	phrase.c	/^	} rea;$/;"	m	union:Sem_	typeref:struct:Sem_::__anon2f313ef90708	file:
 rea	phrase.c	/^	} rea;$/;"	m	union:Val_	typeref:struct:Val_::__anon2f313ef91208	file:
 readline	phrase.c	/^readline(char **S) {$/;"	f	typeref:typename:Lrc	file:
-reduce_and	phrase.c	/^reduce_and(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_call	phrase.c	/^reduce_call(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_def	phrase.c	/^reduce_def(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_div	phrase.c	/^reduce_div(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_do	phrase.c	/^reduce_do(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_else	phrase.c	/^reduce_else(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_end	phrase.c	/^reduce_end(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_env	phrase.c	/^reduce_env(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_eq	phrase.c	/^reduce_eq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_eqv	phrase.c	/^reduce_eqv(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_false	phrase.c	/^reduce_false(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_fun	phrase.c	/^reduce_fun(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_geq	phrase.c	/^reduce_geq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_gre	phrase.c	/^reduce_gre(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_if	phrase.c	/^reduce_if(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_leq	phrase.c	/^reduce_leq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_les	phrase.c	/^reduce_les(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_list	phrase.c	/^reduce_list(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_loop	phrase.c	/^reduce_loop(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_min	phrase.c	/^reduce_min(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_mul	phrase.c	/^reduce_mul(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_neq	phrase.c	/^reduce_neq(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_not	phrase.c	/^reduce_not(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_or	phrase.c	/^reduce_or(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_plu	phrase.c	/^reduce_plu(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_print	phrase.c	/^reduce_print(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_rem	phrase.c	/^reduce_rem(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_return	phrase.c	/^reduce_return(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_seq	phrase.c	/^reduce_seq(Env *e, Val *b, bool look) {$/;"	f	typeref:typename:Ires	file:
-reduce_solve	phrase.c	/^reduce_solve(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_stop	phrase.c	/^reduce_stop(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
-reduce_true	phrase.c	/^reduce_true(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
 s	phrase.c	/^	Sem *s;$/;"	m	struct:List_	typeref:typename:Sem *	file:
 s	phrase.c	/^	Symval **s;$/;"	m	struct:Env_	typeref:typename:Symval **	file:
 sem_nat	phrase.c	/^sem_nat(long long a) {$/;"	f	typeref:typename:Sem *	file:
