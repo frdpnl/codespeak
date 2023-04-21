@@ -1214,7 +1214,7 @@ stored_sym(Env *a, Symval *b) {
 /* -------- operation symbol definitions ------------
  * Reduce interface:
  * reduce or modify the input sequence, but do not free seq
- * 1. work off copies of arguments
+ * 1. work off pointers to arguments
  * 2. produce a fresh value (can be one of the copies)
  * 3. replace operation application with that fresh value
  * (delete previous values in the expression, add new one)
@@ -1226,7 +1226,7 @@ stored_sym(Env *a, Symval *b) {
 static Ires eval_norm(Env *e, Val *a, bool look);
 static Ires solve_sym(Env *e, Val *a, bool look);
 static Ires solve_lst(Env *e, Val *a, bool look);
-static istate eval(Env *e, Val *a);
+static bool transition(Env *e, Val *a);
 
 static bool 
 infixed(size_t p, size_t n) {
@@ -1249,14 +1249,13 @@ set_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool loo
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = eval_norm(e, s->seq.v.v[p-1], looka);
-	if (rc.state != NORM) {
+	Ires rc = solve_sym(e, s->seq.v.v[p-1], looka);
+	if (rc.code != OK && rc.code != NOP) {
 		return false;
 	}
 	*pa = rc.v;
-	rc = eval_norm(e, s->seq.v.v[p+1], lookb);
-	if (rc.state != NORM) {
-		free_v(*pa);
+	rc = solve_sym(e, s->seq.v.v[p+1], lookb);
+	if (rc.code != OK && rc.code != NOP) {
 		*pa = NULL;
 		return false;
 	}
@@ -1286,14 +1285,13 @@ set_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool l
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = eval_norm(e, s->seq.v.v[p+1], looka);
-	if (rc.state != NORM) {
+	Ires rc = solve_sym(e, s->seq.v.v[p+1], looka);
+	if (rc.code != OK && rc.code != NOP) {
 		return false;
 	}
 	*pa = rc.v;
-	rc = eval_norm(e, s->seq.v.v[p+2], lookb);
-	if (rc.state != NORM) {
-		free_v(*pa);
+	rc = solve_sym(e, s->seq.v.v[p+2], lookb);
+	if (rc.code != OK && rc.code != NOP) {
 		*pa = NULL;
 		return false;
 	}
@@ -1309,32 +1307,27 @@ set_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 		printf("\n");
 		return false;
 	}
-	Val *a = malloc(sizeof(*a));
-	a->hdr.t = VSEQ;
-	a->seq.v.n = s->seq.v.n -p-1; 
-	a->seq.v.v = malloc((a->seq.v.n) * sizeof(Val*));
 	Ires rc;
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
 		Val *si = s->seq.v.v[i];
-		rc = eval_norm(e, si, looka);
-		if (rc.state != NORM) {
-			free_v(a);
+		rc = solve_sym(e, si, looka);
+		if (rc.code != OK && rc.code != NOP) {
 			printf("? %s: %luth argument unknown\n", 
 					__FUNCTION__, i);
 			return false;
 		}
-		a->seq.v.v[i-p-1] = rc.v;
+		si = rc.v;
 	}
-	*pa = a;
+	*pa = s+(p+1);
 	return true;
 }
 static void
 upd_infix(Val *s, size_t p, Val *a) {
+	s->seq.v.v[p-1] = copy_v(a);
 	/* consumed 2 seq items */
 	for (size_t i=p-1; i < s->seq.v.n && i < p+2; ++i) {
 		free_v(s->seq.v.v[i]);
 	}
-	s->seq.v.v[p-1] = a;
 	for (size_t i=p+2; i < s->seq.v.n; ++i) {
 		s->seq.v.v[i-2] = s->seq.v.v[i];
 	}
@@ -1342,11 +1335,11 @@ upd_infix(Val *s, size_t p, Val *a) {
 }
 static void
 upd_prefixk(Val *s, size_t p, Val *a, size_t k) {
+	s->seq.v.v[p] = copy_v(a);
 	/* consume k+1 seq item */
 	for (size_t i=p; i < s->seq.v.n && i < p+k+1; ++i) {
 		free_v(s->seq.v.v[i]);
 	}
-	s->seq.v.v[p] = a;
 	for (size_t i=p+k+1; i < s->seq.v.n; ++i) {
 		s->seq.v.v[i-k] = s->seq.v.v[i];
 	}
@@ -1375,7 +1368,7 @@ upd_prefixall(Val *s, size_t p, Val *a) {
 
 static Ires 
 op_mul(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1384,8 +1377,6 @@ op_mul(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1398,14 +1389,13 @@ op_mul(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v *= b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_div(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1414,16 +1404,12 @@ op_div(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if ((b->hdr.t == VNAT && b->nat.v == 0) 
 			|| (b->hdr.t == VREA && b->rea.v == 0.)) {
 		printf("? %s: division by 0\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1436,14 +1422,13 @@ op_div(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v /= b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires
 op_plu(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1452,8 +1437,6 @@ op_plu(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1466,14 +1449,13 @@ op_plu(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v += b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_min(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1484,8 +1466,6 @@ op_min(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		print_v(s, false);
 		printf("\"\n");
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1498,14 +1478,13 @@ op_min(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v -= b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires
 op_les(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1515,8 +1494,6 @@ op_les(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1530,14 +1507,13 @@ op_les(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v < b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires
 op_leq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1547,8 +1523,6 @@ op_leq(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1562,14 +1536,13 @@ op_leq(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v <= b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_gre(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1579,8 +1552,6 @@ op_gre(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1594,14 +1565,13 @@ op_gre(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v > b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_geq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1611,8 +1581,6 @@ op_geq(Env *e, Val *s, size_t p) {
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	if (a->hdr.t == VNAT && b->hdr.t == VNAT) {
@@ -1626,65 +1594,61 @@ op_geq(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v >= b->rea.v;
 	}
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_eq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	bool c = isequal_v(a, b);
 	free_v(a);
-	free_v(b);
-	Val *d = malloc(sizeof(Val));
-	d->hdr.t = VNAT;
-	d->nat.v = c ? 1 : 0;
-	upd_infix(s, p, d);
-	rc = (Ires) {NORM, s};
+	a = malloc(sizeof(*a));
+	a->hdr.t = VNAT;
+	a->nat.v = c ? 1 : 0;
+	upd_infix(s, p, a);
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_neq(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	bool c = isequal_v(a, b);
 	free_v(a);
-	free_v(b);
-	Val *d = malloc(sizeof(Val));
-	d->hdr.t = VNAT;
-	d->nat.v = c ? 0 : 1;
-	upd_infix(s, p, d);
-	rc = (Ires) {NORM, s};
+	a = malloc(sizeof(*a));
+	a->hdr.t = VNAT;
+	a->nat.v = c ? 0 : 1;
+	upd_infix(s, p, a);
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_eqv(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
 	bool c = isequiv_v(a, b);
 	free_v(a);
-	free_v(b);
-	Val *d = malloc(sizeof(Val));
-	d->hdr.t = VNAT;
-	d->nat.v = c ? 1 : 0;
-	upd_infix(s, p, d);
-	rc = (Ires) {NORM, s};
+	a = malloc(sizeof(*a));
+	a->hdr.t = VNAT;
+	a->nat.v = c ? 1 : 0;
+	upd_infix(s, p, a);
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_and(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1692,21 +1656,18 @@ op_and(Env *e, Val *s, size_t p) {
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
 		printf("? %s: arguments not natural numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	a->nat.v = (a->nat.v == 0 ? 0 : 1);
 	b->nat.v = (b->nat.v == 0 ? 0 : 1);
 	a->nat.v = a->nat.v && b->nat.v;
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_or(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a, *b;
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
@@ -1714,21 +1675,18 @@ op_or(Env *e, Val *s, size_t p) {
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
 		printf("? %s: arguments not natural numbers\n", 
 				__FUNCTION__);
-		free_v(a);
-		free_v(b);
 		return rc;
 	}
 	a->nat.v = (a->nat.v == 0 ? 0 : 1);
 	b->nat.v = (b->nat.v == 0 ? 0 : 1);
 	a->nat.v = a->nat.v || b->nat.v;
-	free_v(b);
 	upd_infix(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_not(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
 		return rc;
@@ -1736,18 +1694,17 @@ op_not(Env *e, Val *s, size_t p) {
 	if ((a->hdr.t != VNAT)) {
 		printf("? %s: argument not natural number (boolean)\n", 
 				__FUNCTION__);
-		free_v(a);
 		return rc;
 	}
 	a->nat.v = (a->nat.v == 0 ? 1 : 0);
 	upd_prefix1(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 
 static Ires 
 op_print(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
 		return rc;
@@ -1755,89 +1712,82 @@ op_print(Env *e, Val *s, size_t p) {
 	print_v(a, false);
 	printf("\n");
 	upd_prefix1(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_solve(Env *e, Val *s, size_t p) {
-	Ires rc = (Ires) {FATAL, NULL};
+	Ires rc = (Ires) {FAIL, s};
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
 		return rc;
 	}
 	upd_prefix1(s, p, a);
-	rc = (Ires) {NORM, s};
+	rc = (Ires) {OK, s};
 	return rc;
 }
 static Ires 
 op_do(Env *e, Val *s, size_t p) {
 	Val *a;
-	if (!set_prefix1_arg(e, s, p, &a, false)) {
-		return (Ires) {FATAL, NULL};
+	if (!set_prefix1_arg(e, s, p, &a, true)) {
+		return (Ires) {FAIL, s};
 	}
+	/* replaced with argument true above
 	if (a->hdr.t == VSYM) {
 		Val *b = lookup(e, a->sym.v, false, true);
 		if (b == NULL) {
 			printf("? %s: argument symbol undefined (%s)\n", 
 					__FUNCTION__, a->sym.v);
-			free_v(a);
-			return (Ires) {FATAL, NULL};
+			return (Ires) {FAIL, s};
 		}
 		free_v(a);
 		a = copy_v(b);
-	}
+	}*/
 	if (a->hdr.t != VLST) {
 		printf("? %s: argument not a list\n", 
 				__FUNCTION__);
-		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	a->hdr.t = VSEQ;
 	Ires rc = eval_norm(e, a, false);
-	free_v(a);
-	if (rc.state == FATAL) {
+	if (rc.code == FAIL) {
 		return rc;
 	}
 	upd_prefix1(s, p, rc.v);
-	return (Ires) {rc.state, s};
+	return (Ires) {rc.code, s};
 }
 static Ires 
 op_list(Env *e, Val *s, size_t p) {
 	Val *a;
 	if (!set_prefixn_arg(e, s, p, &a, false)) {
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	a->hdr.t = VLST;
 	upd_prefixall(s, p, a);
-	return (Ires) {NORM, s};
+	return (Ires) {OK, s};
 }
 static Ires 
 op_call(Env *e, Val *s, size_t p) {
 	Val *a, *b;
 	if (!set_prefix2_arg(e, s, p, &a, true, &b, false)) {
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (b->hdr.t != VSYM) {
 		printf("? %s: 2nd argument is not a symbol, got ", 
 				__FUNCTION__);
 		print_v(b, true); printf("\n");
-		free_v(a);
-		free_v(b);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Symval *sv = symval(b->sym.v, a);
-	free_v(b);
 	if (sv == NULL) {
-		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (!stored_sym(e, sv)) {
 		free_symval(sv);
-		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	upd_prefix2(s, p, a);
-	return (Ires) {NORM, s};
+	return (Ires) {OK, s};
 }
 static Ires 
 op_true(Env *e, Val *s, size_t p) {
@@ -1846,14 +1796,15 @@ op_true(Env *e, Val *s, size_t p) {
 	if (a == NULL) {
 		printf("? %s: 'it undefined\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
-	Val *b = malloc(sizeof(*b));
-	assert(b != NULL);
-	b->hdr.t = VNAT;
-	b->nat.v = istrue_v(a);
-	upd_prefix0(s, p, b);
-	return (Ires) {NORM, s};
+	bool c = istrue_v(a);
+	free_v(a);
+	a = malloc(sizeof(*a));
+	a->hdr.t = VNAT;
+	a->nat.v = c;
+	upd_prefix0(s, p, a);
+	return (Ires) {OK, s};
 }
 static Ires 
 op_false(Env *e, Val *s, size_t p) {
@@ -1862,41 +1813,41 @@ op_false(Env *e, Val *s, size_t p) {
 	if (a == NULL) {
 		printf("? %s: 'it undefined\n", 
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
-	Val *b = malloc(sizeof(*b));
-	assert(b != NULL);
-	b->hdr.t = VNAT;
-	b->nat.v = !istrue_v(a);
-	upd_prefix0(s, p, b);
-	return (Ires) {NORM, s};
+	bool c = !istrue_v(a);
+	free_v(a);
+	a = malloc(sizeof(*a));
+	a->hdr.t = VNAT;
+	a->nat.v = c;
+	upd_prefix0(s, p, a);
+	return (Ires) {OK, s};
 }
 static Ires 
 op_if(Env *e, Val *s, size_t p) {
 	if (p != 0 || p != s->seq.v.n - 2) {
 		printf("? %s: 'if' sequence invalid\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
-	Val *b = malloc(sizeof(*b));
-	assert(b != NULL);
-	b->hdr.t = VNAT;
-	Ires rc;
-	if (istrue_v(a)) {
-		b->nat.v = 1;
-		rc.state = NORM;
-	} else {
-		b->nat.v = 0;
-		rc.state = IFSKIP;
-	} 
+	bool c = istrue_v(a);
 	free_v(a);
-	upd_prefix1(s, p, b);
-	rc.v = s;
-	return rc;
+	a = malloc(sizeof(*a));
+	a->hdr.t = VNAT;
+	Ires rc;
+	if (c) {
+		a->nat.v = 1;
+		rc.code = OK;
+	} else {
+		a->nat.v = 0;
+		rc.code = SKIP;
+	} 
+	upd_prefix1(s, p, a);
+	return (Ires) {rc.code, s};
 }
 
 static int  
@@ -1913,92 +1864,79 @@ static Ires
 op_else(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `else syntax incorrect\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (e->state == IFSKIP) {
 		Val *a = malloc(sizeof(*a));
 		a->hdr.t = VNAT;
 		a->nat.v = 1;
 		upd_prefix0(s, p, a);
-		return (Ires) {NORM, s};
+		free_v(a); /* upd copies a */
+		return (Ires) {OK, s};
 	}
 	if (e->state == NORM) {
 		Val *it = lookup(e, ITNAME, false, false);
 		if (it == NULL) {
 			printf("? %s: `else before `if\n", __FUNCTION__);
-			return (Ires) {FATAL, NULL};
+			return (Ires) {FAIL, s};
 		} 
-		Val *b = copy_v(it);
-		upd_prefix0(s, p, b);
-		return (Ires) {IFSKIP, s};
+		upd_prefix0(s, p, it);
+		return (Ires) {SKIP, s};
 	}
 	printf("? %s: `else in invalid state (%u)\n", __FUNCTION__, e->state);
-	return (Ires) {FATAL, NULL};
+	return (Ires) {FAIL, s};
 }
 static Ires 
 op_rem(Env *e, Val *s, size_t p) {
 	if (p != 0) {
 		printf("? %s: `rem syntax invalid, needs to be 1st\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
-	Ires rc;
-	Val *b;
 	Val *a = lookup(e, ITNAME, false, false);
 	if (a == NULL) {
-		b = malloc(sizeof(*b));
-		assert(b != NULL);
+		Val *b = malloc(sizeof(*b));
 		b->hdr.t = VNIL;
+		upd_prefixall(s, p, b);
+		free_v(b);
 	} else {
-		b = copy_v(a);
+		upd_prefixall(s, p, a);
 	}
-	upd_prefixall(s, p, b);
-	rc.state = NORM;
-	rc.v = s;
-	return rc;
+	return (Ires) {OK, s};
 }
-
-/* --- reduce function definition --- */
 static Ires
 op_def(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) or define foo () ; */
 	if (s->seq.v.n != 3 || p != 0) {
-		printf("? %s: incorrect number of arguments to 'define'\n",
+		printf("? %s: incorrect syntax for `define'\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *fname, *fparam;
 	if (!set_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (fname->hdr.t != VSYM) {
 		printf("? %s: expecting symbol for function name, got ",
 				__FUNCTION__);
 		print_v(fname, true); printf("\n");
-		free_v(fname);
-		free_v(fparam);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (!(fparam->hdr.t == VLST || fparam->hdr.t == VNIL)) {
 		printf("? %s: expecting list or '()' for function parameters\n",
 				__FUNCTION__);
-		free_v(fname);
-		free_v(fparam);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (fparam->hdr.t == VLST) {
 		for (size_t i=0; i < fparam->lst.v.n; ++i) {
 			if (fparam->lst.v.v[i]->hdr.t != VSYM) {
 				printf("? %s: expecting symbol for function parameter\n",
 						__FUNCTION__);
-				free_v(fname);
-				free_v(fparam);
-				return (Ires) {FATAL, NULL};
+				return (Ires) {FAIL, s};
 			}
 		}
 	}
 	Val *f = malloc(sizeof(*f));
-	assert(f != NULL && "function val NULL");
 	f->hdr.t = VFUN;
 	strncpy(f->symf.name, fname->sym.v, sizeof(f->symf.name));
 	/* TODO replace with simple memcpy */
@@ -2006,17 +1944,14 @@ op_def(Env *e, Val *s, size_t p) {
 	f->symf.param.v = NULL;
 	if (fparam->hdr.t == VLST) {
 		for (size_t i=0; i<fparam->lst.v.n; ++i) {
-			f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
+			f->symf.param = push_l(f->symf.param, copy_v(fparam->lst.v.v[i]));
 		}
 	}
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
-	free_v(fname);
-	/* we used all items in fparam for f, so do not free them in free_v */
-	fparam->lst.v.n = 0;
-	free_v(fparam);
 	upd_prefix2(s, p, f);
-	return (Ires) {FUNDEF, s};
+	free_v(f);
+	return (Ires) {DEF, s};
 }
 static Ires
 op_loop(Env *e, Val *s, size_t p) {
@@ -2025,10 +1960,9 @@ op_loop(Env *e, Val *s, size_t p) {
 	if (s->seq.v.n != 1) {
 		printf("? %s: `loop does not take arguments\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *f = malloc(sizeof(*f));
-	assert(f != NULL && "loop val NULL");
 	f->hdr.t = VFUN;
 	strncpy(f->symf.name, LOOPNAME, sizeof(f->symf.name));
 	f->symf.param.n = 0;
@@ -2036,40 +1970,38 @@ op_loop(Env *e, Val *s, size_t p) {
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
 	upd_prefix0(s, p, f);
-	return (Ires) {LOOPDEF, s};
+	free_v(f);
+	return (Ires) {LOOP, s};
 }
 static Ires 
 op_end(Env *e, Val *s, size_t p) {
 	if (Dbg) { printf("#\t  %s %5s: ", __FUNCTION__, "entry"); printx_v(s, false, "#\t"); printf("\n"); }
 	/* rem: end somefun or end if or end loop ; */
 	if (p != 0 || s->seq.v.n != 2) {
-		printf("? %s: invalid 'end', expecting argument\n",
+		printf("? %s: invalid syntax for `end, expecting an argument\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *a;
 	if (!set_prefix1_arg(e, s, p, &a, false)) {
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *b = NULL;
 	if (a->hdr.t == VOPE) {
-		/* rem: end if */
+		/* rem: end if or end loop */
 		if (a->symop.v == op_if || a->symop.v == op_loop) {
 			Val *c = lookup(e, ITNAME, false, false);
 			if (c == NULL) {
 				printf("? %s: 'it undefined, missing `if or `loop?\n",
 						__FUNCTION__);
-				free_v(a);
-				return (Ires) {FATAL, NULL};
+				return (Ires) {FAIL, s};
 			} else {
 				b = copy_v(c);
 			}
-			free_v(a);
 		} else {
 			printf("? %s: 'end' with wrong operator argument (expecting `if or `loop)\n",
 					__FUNCTION__);
-			free_v(a);
-			return (Ires) {FATAL, NULL};
+			return (Ires) {FAIL, s};
 		}
 	} else if (a->hdr.t == VSYM) {
 		/* rem: end function */
@@ -2077,20 +2009,20 @@ op_end(Env *e, Val *s, size_t p) {
 			printf("? %s: 'end' outside function definition\n", 
 					__FUNCTION__);
 			free_v(a);
-			return (Ires) {FATAL, NULL};
+			return (Ires) {FAIL, s};
 		}
 		Val *c = lookup(e, ITNAME, false, false);
 		if (c == NULL) {
 			printf("? %s: 'it' required, yet undefined\n", 
 					__FUNCTION__);
 			free_v(a);
-			return (Ires) {FATAL, NULL};
+			return (Ires) {FAIL, s};
 		}
 		if (c->hdr.t != VFUN) {
 			printf("? %s: 'end' argument is not a function name\n", 
 					__FUNCTION__);
 			free_v(a);
-			return (Ires) {FATAL, NULL};
+			return (Ires) {FAIL, s};
 		}
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
 			/* rem: not the function being defined, then part of the body */
@@ -2103,17 +2035,17 @@ op_end(Env *e, Val *s, size_t p) {
 		if (!stored_sym(e, sv)) {
 			free_symval(sv);
 			free_v(a);
-			return (Ires) {FATAL, NULL};
+			return (Ires) {FAIL, s};
 		}
 		free_v(a);
 	} else {
 		printf("? %s: 'end' with wrong argument type\n",
 				__FUNCTION__);
 		free_v(a);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	upd_prefix1(s, p, b);
-	return (Ires) {NORM, s};
+	return (Ires) {OK, s};
 }
 /* --- reduce (user) function application --- */
 Env *
@@ -2192,7 +2124,7 @@ apply_fun(Env *e, Val *s, size_t p) {
 		if (rc.code != OK) {
 			return (Ires) {FAIL, s};
 		}
-		/* add symval for each param, value is al's */
+		/* add parameters in local env, value is al's */
 		for (size_t i=0; i<f->symf.param.n; ++i) {
 			Symval *sv = symval(f->symf.param.v[i]->sym.v, al->lst.v.v[i]);
 			if (!stored_sym(le, sv)) {
@@ -2204,16 +2136,17 @@ apply_fun(Env *e, Val *s, size_t p) {
 	}
 	/* reduce each expression in body, like eval_ph: */
 	Val *v;
+	bool t; /* transition successful */
 	for (size_t i=0; i<f->symf.body.n; ++i) {
 		v = copy_v(f->symf.body.v[i]);
 		if (Dbg) { printf("#\t  %s %5s: ", __FUNCTION__, "value"); printx_v(v,false,"#\t"); printf("\n"); }
-		istate xs = eval(le, v);
-		if (Dbg) { printf("#\t  %s %5s: ", __FUNCTION__, "reduce"); print_istate(xs); printf("\n"); } 
-		if (xs == FATAL) {
+		t = transition(le, v); /* consumes v */
+		if (Dbg) { printf("#\t  %s %5s: ", __FUNCTION__, "reduce"); print_istate(le->state); printf("\n"); } 
+		if (!t) {
 			free_env(le, false);
 			return (Ires) {FAIL, s};
 		}
-		if (xs == RETURN) {
+		if (le->state == RETURN) {
 			break;
 		}
 	}
@@ -2235,17 +2168,17 @@ static Ires
 op_return(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `return syntax incorrect\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	/* return only from a function call */
 	if (e->parent == NULL) {
 		printf("? %s: `return outside function\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *it = lookup(e, ITNAME, false, true);
 	if (it == NULL) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	upd_prefix0(s, p, copy_v(it));
 	return (Ires) {RETURN, s};
@@ -2254,12 +2187,12 @@ static Ires
 op_stop(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `stop syntax incorrect\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it undefined (`stop return value)\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	upd_prefix0(s, p, copy_v(it));
 	return (Ires) {STOP, s};
@@ -2268,16 +2201,16 @@ static Ires
 op_env(Env *e, Val *s, size_t p) {
 	if (!(p == 0 && s->seq.v.n == 1)) {
 		printf("? %s: `env syntax incorrect\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	print_env(e, ">");
 	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	upd_prefix0(s, p, copy_v(it));
-	return (Ires) {NORM, s};
+	return (Ires) {OK, s};
 }
 
 /* --------------- builtin or base function symbols -------------------- */
@@ -2460,7 +2393,7 @@ solve_fun(Env *e, Val *a) {
 			}
 		}
 	}
-	return (Ires) {NORM, a};
+	return (Ires) {OK, a};
 }
 
 static Ires 
@@ -2477,7 +2410,7 @@ reduce_seq(Env *e, Val *b, bool look) {
 			 * unless it's an operator of 0 arity,
 			 * then, fall through & execute it below */
 			/* (user functions all have one parameter) */
-			c = b->seq.v.v[0]; /* shorthand */
+			c = b->seq.v.v[0]; 
 			if (!(c->hdr.t == VOPE && c->symop.arity == 0)) {
 				rc.v = b;
 				assert(rc.code == OK || rc.code == NOP);
@@ -2531,27 +2464,27 @@ reduce_seq(Env *e, Val *b, bool look) {
 		if (Dbg) { printf("#\t  %s reduced: ", __FUNCTION__); printx_v(b,false,"#\t"); printf("\n"); }
 	}
 	/* empty seq after reduction? */
-	printf("? %s: sequence empty\n",__FUNCTION__);
+	printf("? %s: sequence unexpectedly empty\n",__FUNCTION__);
 	return (Ires) {FAIL, b};
 }
 static Ires 
 eval_loop(Env *e, Val *s) {
 	/* rem: loop execution */
 	Val *v;
-	istate xs = NORM;
+	bool t;
 	if (Dbg) { printf("#\t  %s entry:\n", __FUNCTION__); }
-	while (!(xs == STOP || xs == RETURN)) {
+	while (!(e->state == STOP || e->state == RETURN)) {
 		for (size_t i=0; i<s->symf.body.n; ++i) {
 			v = copy_v(s->symf.body.v[i]);
-			xs = eval(e, v);
+			t = transition(e, v);
 			free_v(v);
-			if (xs == FATAL) {
-				return (Ires) {FATAL, NULL};
+			if (!t) {
+				return (Ires) {FATAL, s};
 			}
-			if (xs == RETURN) {
+			if (e->state == RETURN) {
 				break;
 			}
-			if (xs == STOP) {
+			if (e->state == STOP) {
 				break;
 			}
 		}
@@ -2561,12 +2494,12 @@ eval_loop(Env *e, Val *s) {
 	if (it == NULL) {
 		printf("? %s: 'it from loop undefined\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FATAL, s};
 	}
-	if (xs == STOP) {
-		xs = NORM;
+	if (e->state == STOP) {
+		e->state = NORM;
 	}
-	return (Ires) {xs, copy_v(it)};
+	return (Ires) {e->state, copy_v(it)};
 }
 static Ires 
 solve_seq(Env *e, Val *a, bool look) {
@@ -2713,11 +2646,11 @@ eval_body(Env *e, Val *s, size_t p) {
 	Val *fun = lookup(e, ITNAME, false, false);
 	if (fun == NULL) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (fun->hdr.t != VFUN) {
 		printf("? %s: no function under definition\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *fret = copy_v(fun);
 	/* replace free symbols with env value: */
@@ -2732,11 +2665,11 @@ eval_loop_body(Env *e, Val *s, size_t p) {
 	Val *loop = lookup(e, ITNAME, false, false);
 	if (loop == NULL) {
 		printf("? %s: 'it required, yet undefined\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (loop->hdr.t != VFUN) {
 		printf("? %s: 'it is not a loop function\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	Val *lret = copy_v(loop);
 	lret->symf.body = push_l(lret->symf.body, copy_v(s));
@@ -2782,11 +2715,11 @@ eval_maybe_loop(Env *e, Val *a) {
 	Val *lnst = lookup(e, LOOPNEST, false, false);
 	if (lnst == NULL) {
 		printf("? %s: nested loop count missing\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	if (lnst->hdr.t != VNAT) {
 		printf("? %s: nested loop count invalid\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	/* rem: handle nested loop, another `loop val */
 	if (a->seq.v.v[0]->hdr.t == VOPE 
@@ -2834,14 +2767,16 @@ eval_maybe_skip(Env *e, Val *a) {
 	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
-		return (Ires) {FATAL, NULL};
+		return (Ires) {FAIL, s};
 	}
 	return (Ires) {IFSKIP, copy_v(it)};
 }
 
-static istate 
-eval(Env *e, Val *a) {
-	/* frees 'a, updates env's state, sets 'it, returns state */
+static bool  
+transition(Env *e, Val *a) {
+	/* a's execution updates env 'e.
+	 * frees 'a, updates env's state, sets 'it, returns success indicator
+	 */
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (Dbg) { printf("#\t %s: entry\n", __FUNCTION__); print_env(e, "#\t"); }
@@ -2868,14 +2803,15 @@ eval(Env *e, Val *a) {
 			break;
 		default:
 			printf("? %s: invalid state\n", __FUNCTION__);
-			rc = (Ires) {FAIL, a};
+			e->state = FATAL;
+			return false;
 	}
 	if (Dbg) { printf("#\t %s: eval'd code ", __FUNCTION__); print_code(rc.code); printf("\n");}
 	switch (rc.code) {
 		case FAIL:
 			e->state = FATAL;
 			free_v(rc.v);
-			return e->state;
+			return false;
 		case OK:
 		case NOP:
 			e->state = NORM;
@@ -2899,24 +2835,24 @@ eval(Env *e, Val *a) {
 			e->state = STOP;
 			break;
 		default:
-			printf("? %s: invalid code\n", __FUNCTION__);
+			printf("? %s: invalid eval code\n", __FUNCTION__);
 			e->state = FATAL;
 			free_v(rc.v);
-			return e->state;
+			return false;
 	}
 	Symval *it = symval(ITNAME, rc.v);
 	free_v(rc.v);
 	if (it == NULL) {
 		e->state = FATAL;
-		return e->state;
+		return false;
 	}
 	if (!stored_sym(e, it)) {
 		free_symval(it);
 		e->state = FATAL;
-		return e->state;
+		return false;
 	}
 	if (Dbg) { printf("#\t %s: exit\n", __FUNCTION__); print_env(e, "#\t"); }
-	return e->state;
+	return true;
 }
 
 /* ------------ Phrase, a line, a list of expressions --------- */
@@ -3033,7 +2969,7 @@ phrase_of_str(char *a) {
 
 static bool
 eval_ph(Env *env, Phrase *a) {
-	/* evalret a line, for later line-specific behaviour */
+	/* evaluate by line, for later line-specific behaviour */
 	assert(env != NULL && "environment null");
 	assert(a != NULL && "phrase null");
 	for (size_t i=0; i<a->n; ++i) {
@@ -3053,9 +2989,9 @@ eval_ph(Env *env, Phrase *a) {
 			return false;
 		}
 		if (Dbg) { printf("# %3lu %6s: ", i, "value"); printx_v(v,false,"#\t"); printf("\n"); }
-		istate xs = eval(env, v);
-		if (Dbg) { printf("# %3lu %6s: ", i, "eval"); print_istate(xs); printf("\n"); }
-		if (xs == FATAL) {
+		bool t = transition(env, v);
+		if (Dbg) { printf("# %3lu %6s: ", i, "eval"); print_istate(env->state); printf("\n"); }
+		if (!t) {
 			return false;
 		}
 	}

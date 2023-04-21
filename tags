@@ -111,7 +111,6 @@ arity	phrase.c	/^	int arity;$/;"	m	struct:Symop_	typeref:typename:int	file:
 body	phrase.c	/^		List_v body;$/;"	m	struct:Val_::__anon2f313ef91408	typeref:typename:List_v	file:
 code	phrase.c	/^	rc code;$/;"	m	struct:__anon2f313ef90f08	typeref:typename:rc	file:
 copy_v	phrase.c	/^copy_v(Val *a) {$/;"	f	typeref:typename:Val *	file:
-eval	phrase.c	/^eval(Env *e, Val *a) {$/;"	f	typeref:typename:istate	file:
 eval_body	phrase.c	/^eval_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
 eval_loop	phrase.c	/^eval_loop(Env *e, Val *s) {$/;"	f	typeref:typename:Ires	file:
 eval_loop_body	phrase.c	/^eval_loop_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
@@ -260,6 +259,7 @@ t	phrase.c	/^		vtype t;$/;"	m	struct:Val_::__anon2f313ef91408	typeref:typename:v
 t	phrase.c	/^		vtype t;$/;"	m	struct:Val_::__anon2f313ef91608	typeref:typename:vtype	file:
 t	phrase.c	/^		vtype t;$/;"	m	struct:Val_::__anon2f313ef91708	typeref:typename:vtype	file:
 t	phrase.c	/^	wtype t;$/;"	m	struct:__anon2f313ef90208	typeref:typename:wtype	file:
+transition	phrase.c	/^transition(Env *e, Val *a) {$/;"	f	typeref:typename:bool	file:
 upd_infix	phrase.c	/^upd_infix(Val *s, size_t p, Val *a) {$/;"	f	typeref:typename:void	file:
 upd_prefix0	phrase.c	/^upd_prefix0(Val *s, size_t p, Val *a) {$/;"	f	typeref:typename:void	file:
 upd_prefix1	phrase.c	/^upd_prefix1(Val *s, size_t p, Val *a) {$/;"	f	typeref:typename:void	file:
