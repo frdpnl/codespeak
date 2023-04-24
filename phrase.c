@@ -1256,6 +1256,7 @@ set_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool loo
 	*pa = rc.v;
 	rc = solve_sym(e, s->seq.v.v[p+1], lookb);
 	if (rc.code != OK && rc.code != NOP) {
+		free_v(*pa);
 		*pa = NULL;
 		return false;
 	}
@@ -1292,6 +1293,7 @@ set_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool l
 	*pa = rc.v;
 	rc = solve_sym(e, s->seq.v.v[p+2], lookb);
 	if (rc.code != OK && rc.code != NOP) {
+		free_v(*pa);
 		*pa = NULL;
 		return false;
 	}
@@ -1308,26 +1310,27 @@ set_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 		return false;
 	}
 	Ires rc;
+	Val *b = NULL;
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		Val *si = s->seq.v.v[i];
-		rc = solve_sym(e, si, looka);
+		rc = solve_sym(e, s->seq.v.v[i], looka);
 		if (rc.code != OK && rc.code != NOP) {
 			printf("? %s: %luth argument unknown\n", 
 					__FUNCTION__, i);
+			free_v(b);
 			return false;
 		}
-		si = rc.v;
+		b = push_v(VSEQ, b, rc.v);
 	}
-	*pa = s+(p+1);
+	*pa = b;
 	return true;
 }
 static void
 upd_infix(Val *s, size_t p, Val *a) {
-	s->seq.v.v[p-1] = copy_v(a);
 	/* consumed 2 seq items */
 	for (size_t i=p-1; i < s->seq.v.n && i < p+2; ++i) {
 		free_v(s->seq.v.v[i]);
 	}
+	s->seq.v.v[p-1] = a;
 	for (size_t i=p+2; i < s->seq.v.n; ++i) {
 		s->seq.v.v[i-2] = s->seq.v.v[i];
 	}
@@ -1335,11 +1338,11 @@ upd_infix(Val *s, size_t p, Val *a) {
 }
 static void
 upd_prefixk(Val *s, size_t p, Val *a, size_t k) {
-	s->seq.v.v[p] = copy_v(a);
 	/* consume k+1 seq item */
 	for (size_t i=p; i < s->seq.v.n && i < p+k+1; ++i) {
 		free_v(s->seq.v.v[i]);
 	}
+	s->seq.v.v[p] = a;
 	for (size_t i=p+k+1; i < s->seq.v.n; ++i) {
 		s->seq.v.v[i-k] = s->seq.v.v[i];
 	}
@@ -1375,6 +1378,8 @@ op_mul(Env *e, Val *s, size_t p) {
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a); 
+		free_v(b);
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1389,6 +1394,7 @@ op_mul(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v *= b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1402,12 +1408,16 @@ op_div(Env *e, Val *s, size_t p) {
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
 		return rc;
 	}
 	if ((b->hdr.t == VNAT && b->nat.v == 0) 
 			|| (b->hdr.t == VREA && b->rea.v == 0.)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: division by 0\n", 
 				__FUNCTION__);
 		return rc;
@@ -1422,6 +1432,7 @@ op_div(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v /= b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1435,6 +1446,8 @@ op_plu(Env *e, Val *s, size_t p) {
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1449,6 +1462,7 @@ op_plu(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v += b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1462,6 +1476,8 @@ op_min(Env *e, Val *s, size_t p) {
 	}
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not numbers in \"", 
 				__FUNCTION__);
 		print_v(s, false);
@@ -1478,6 +1494,7 @@ op_min(Env *e, Val *s, size_t p) {
 	} else if (a->hdr.t == VREA && b->hdr.t == VREA) {
 		a->rea.v -= b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1492,6 +1509,8 @@ op_les(Env *e, Val *s, size_t p) {
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1507,6 +1526,7 @@ op_les(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v < b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1521,6 +1541,8 @@ op_leq(Env *e, Val *s, size_t p) {
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1536,6 +1558,7 @@ op_leq(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v <= b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1550,6 +1573,8 @@ op_gre(Env *e, Val *s, size_t p) {
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1565,6 +1590,7 @@ op_gre(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v > b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1579,6 +1605,8 @@ op_geq(Env *e, Val *s, size_t p) {
 	/* to be expanded to other types */
 	if ((a->hdr.t != VNAT && a->hdr.t != VREA)
 			|| (b->hdr.t != VNAT && b->hdr.t != VREA)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1594,6 +1622,7 @@ op_geq(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = a->rea.v >= b->rea.v;
 	}
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1605,12 +1634,12 @@ op_eq(Env *e, Val *s, size_t p) {
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
-	bool c = isequal_v(a, b);
+	Val *c = malloc(sizeof(*c));
+	c->hdr.t = VNAT;
+	c->nat.v = isequal_v(a, b) ? 1 : 0;
 	free_v(a);
-	a = malloc(sizeof(*a));
-	a->hdr.t = VNAT;
-	a->nat.v = c ? 1 : 0;
-	upd_infix(s, p, a);
+	free_v(b);
+	upd_infix(s, p, c);
 	rc = (Ires) {OK, s};
 	return rc;
 }
@@ -1621,12 +1650,12 @@ op_neq(Env *e, Val *s, size_t p) {
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
-	bool c = isequal_v(a, b);
+	Val *c = malloc(sizeof(*c));
+	c->hdr.t = VNAT;
+	c->nat.v = isequal_v(a, b) ? 0 : 1;
 	free_v(a);
-	a = malloc(sizeof(*a));
-	a->hdr.t = VNAT;
-	a->nat.v = c ? 0 : 1;
-	upd_infix(s, p, a);
+	free_v(b);
+	upd_infix(s, p, c);
 	rc = (Ires) {OK, s};
 	return rc;
 }
@@ -1637,12 +1666,12 @@ op_eqv(Env *e, Val *s, size_t p) {
 	if (!set_infix_arg(e, s, p, &a, true, &b, true)) {
 		return rc;
 	}
-	bool c = isequiv_v(a, b);
+	Val *c = malloc(sizeof(*c));
+	c->hdr.t = VNAT;
+	c->nat.v = isequiv_v(a, b) ? 1 : 0;
 	free_v(a);
-	a = malloc(sizeof(*a));
-	a->hdr.t = VNAT;
-	a->nat.v = c ? 1 : 0;
-	upd_infix(s, p, a);
+	free_v(b);
+	upd_infix(s, p, c);
 	rc = (Ires) {OK, s};
 	return rc;
 }
@@ -1654,6 +1683,8 @@ op_and(Env *e, Val *s, size_t p) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not natural numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1661,6 +1692,7 @@ op_and(Env *e, Val *s, size_t p) {
 	a->nat.v = (a->nat.v == 0 ? 0 : 1);
 	b->nat.v = (b->nat.v == 0 ? 0 : 1);
 	a->nat.v = a->nat.v && b->nat.v;
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1673,6 +1705,8 @@ op_or(Env *e, Val *s, size_t p) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT) || (b->hdr.t != VNAT)) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: arguments not natural numbers\n", 
 				__FUNCTION__);
 		return rc;
@@ -1680,6 +1714,7 @@ op_or(Env *e, Val *s, size_t p) {
 	a->nat.v = (a->nat.v == 0 ? 0 : 1);
 	b->nat.v = (b->nat.v == 0 ? 0 : 1);
 	a->nat.v = a->nat.v || b->nat.v;
+	free_v(b);
 	upd_infix(s, p, a);
 	rc = (Ires) {OK, s};
 	return rc;
@@ -1692,6 +1727,7 @@ op_not(Env *e, Val *s, size_t p) {
 		return rc;
 	}
 	if ((a->hdr.t != VNAT)) {
+		free_v(a);
 		printf("? %s: argument not natural number (boolean)\n", 
 				__FUNCTION__);
 		return rc;
@@ -1719,6 +1755,7 @@ static Ires
 op_solve(Env *e, Val *s, size_t p) {
 	Ires rc = (Ires) {FAIL, s};
 	Val *a;
+	/* true flag below does the job: */
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
 		return rc;
 	}
@@ -1744,6 +1781,7 @@ op_do(Env *e, Val *s, size_t p) {
 		a = copy_v(b);
 	}*/
 	if (a->hdr.t != VLST) {
+		free_v(a);
 		printf("? %s: argument not a list\n", 
 				__FUNCTION__);
 		return (Ires) {FAIL, s};
@@ -1773,17 +1811,22 @@ op_call(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	if (b->hdr.t != VSYM) {
+		free_v(a);
+		free_v(b);
 		printf("? %s: 2nd argument is not a symbol, got ", 
 				__FUNCTION__);
 		print_v(b, true); printf("\n");
 		return (Ires) {FAIL, s};
 	}
 	Symval *sv = symval(b->sym.v, a);
+	free_v(b);
 	if (sv == NULL) {
+		free_v(a);
 		return (Ires) {FAIL, s};
 	}
 	if (!stored_sym(e, sv)) {
 		free_symval(sv);
+		free_v(a);
 		return (Ires) {FAIL, s};
 	}
 	upd_prefix2(s, p, a);
@@ -1798,12 +1841,10 @@ op_true(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		return (Ires) {FAIL, s};
 	}
-	bool c = istrue_v(a);
-	free_v(a);
-	a = malloc(sizeof(*a));
-	a->hdr.t = VNAT;
-	a->nat.v = c;
-	upd_prefix0(s, p, a);
+	Val *b = malloc(sizeof(*b));
+	b->hdr.t = VNAT;
+	b->nat.v = istrue_v(a);
+	upd_prefix0(s, p, b);
 	return (Ires) {OK, s};
 }
 static Ires 
@@ -1815,12 +1856,10 @@ op_false(Env *e, Val *s, size_t p) {
 				__FUNCTION__);
 		return (Ires) {FAIL, s};
 	}
-	bool c = !istrue_v(a);
-	free_v(a);
-	a = malloc(sizeof(*a));
-	a->hdr.t = VNAT;
-	a->nat.v = c;
-	upd_prefix0(s, p, a);
+	Val *b = malloc(sizeof(*b));
+	b->hdr.t = VNAT;
+	b->nat.v = !istrue_v(a);
+	upd_prefix0(s, p, b);
 	return (Ires) {OK, s};
 }
 static Ires 
@@ -1871,7 +1910,6 @@ op_else(Env *e, Val *s, size_t p) {
 		a->hdr.t = VNAT;
 		a->nat.v = 1;
 		upd_prefix0(s, p, a);
-		free_v(a); /* upd copies a */
 		return (Ires) {OK, s};
 	}
 	if (e->state == NORM) {
@@ -1880,10 +1918,12 @@ op_else(Env *e, Val *s, size_t p) {
 			printf("? %s: `else before `if\n", __FUNCTION__);
 			return (Ires) {FAIL, s};
 		} 
-		upd_prefix0(s, p, it);
+		upd_prefix0(s, p, copy_v(it));
 		return (Ires) {SKIP, s};
 	}
-	printf("? %s: `else in invalid state (%u)\n", __FUNCTION__, e->state);
+	printf("? %s: `else in invalid state ( ", __FUNCTION__);
+	print_istate(e->state);
+	printf(")\n");
 	return (Ires) {FAIL, s};
 }
 static Ires 
@@ -1898,9 +1938,8 @@ op_rem(Env *e, Val *s, size_t p) {
 		Val *b = malloc(sizeof(*b));
 		b->hdr.t = VNIL;
 		upd_prefixall(s, p, b);
-		free_v(b);
 	} else {
-		upd_prefixall(s, p, a);
+		upd_prefixall(s, p, copy_v(a));
 	}
 	return (Ires) {OK, s};
 }
@@ -1908,7 +1947,7 @@ static Ires
 op_def(Env *e, Val *s, size_t p) {
 	/* rem: define foo (a, b) or define foo () ; */
 	if (s->seq.v.n != 3 || p != 0) {
-		printf("? %s: incorrect syntax for `define'\n",
+		printf("? %s: incorrect syntax for `define (expecting: def name list)\n",
 				__FUNCTION__);
 		return (Ires) {FAIL, s};
 	}
@@ -1920,11 +1959,15 @@ op_def(Env *e, Val *s, size_t p) {
 		printf("? %s: expecting symbol for function name, got ",
 				__FUNCTION__);
 		print_v(fname, true); printf("\n");
+		free_v(fname);
+		free_v(fparam);
 		return (Ires) {FAIL, s};
 	}
 	if (!(fparam->hdr.t == VLST || fparam->hdr.t == VNIL)) {
 		printf("? %s: expecting list or '()' for function parameters\n",
 				__FUNCTION__);
+		free_v(fname);
+		free_v(fparam);
 		return (Ires) {FAIL, s};
 	}
 	if (fparam->hdr.t == VLST) {
@@ -1932,6 +1975,8 @@ op_def(Env *e, Val *s, size_t p) {
 			if (fparam->lst.v.v[i]->hdr.t != VSYM) {
 				printf("? %s: expecting symbol for function parameter\n",
 						__FUNCTION__);
+				free_v(fname);
+				free_v(fparam);
 				return (Ires) {FAIL, s};
 			}
 		}
@@ -1944,13 +1989,14 @@ op_def(Env *e, Val *s, size_t p) {
 	f->symf.param.v = NULL;
 	if (fparam->hdr.t == VLST) {
 		for (size_t i=0; i<fparam->lst.v.n; ++i) {
-			f->symf.param = push_l(f->symf.param, copy_v(fparam->lst.v.v[i]));
+			f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
 		}
 	}
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
+	free_v(fname);
+	free_v(fparam);
 	upd_prefix2(s, p, f);
-	free_v(f);
 	return (Ires) {DEF, s};
 }
 static Ires
@@ -1970,7 +2016,6 @@ op_loop(Env *e, Val *s, size_t p) {
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
 	upd_prefix0(s, p, f);
-	free_v(f);
 	return (Ires) {LOOP, s};
 }
 static Ires 
@@ -1994,32 +2039,33 @@ op_end(Env *e, Val *s, size_t p) {
 			if (c == NULL) {
 				printf("? %s: 'it undefined, missing `if or `loop?\n",
 						__FUNCTION__);
+				free_v(a);
 				return (Ires) {FAIL, s};
-			} else {
-				b = copy_v(c);
-			}
+			} 
+			b = copy_v(c);
 		} else {
-			printf("? %s: 'end' with wrong operator argument (expecting `if or `loop)\n",
+			printf("? %s: `end with wrong operator argument (expecting `if or `loop)\n",
 					__FUNCTION__);
+			free_v(a);
 			return (Ires) {FAIL, s};
 		}
 	} else if (a->hdr.t == VSYM) {
-		/* rem: end function */
+		/* rem: end function ? */
 		if (e->state != FUNDEF) {
-			printf("? %s: 'end' outside function definition\n", 
+			printf("? %s: `end outside function definition\n", 
 					__FUNCTION__);
 			free_v(a);
 			return (Ires) {FAIL, s};
 		}
 		Val *c = lookup(e, ITNAME, false, false);
 		if (c == NULL) {
-			printf("? %s: 'it' required, yet undefined\n", 
+			printf("? %s: 'it missing\n", 
 					__FUNCTION__);
 			free_v(a);
 			return (Ires) {FAIL, s};
 		}
 		if (c->hdr.t != VFUN) {
-			printf("? %s: 'end' argument is not a function name\n", 
+			printf("? %s: `end argument is not a function\n", 
 					__FUNCTION__);
 			free_v(a);
 			return (Ires) {FAIL, s};
@@ -2027,16 +2073,16 @@ op_end(Env *e, Val *s, size_t p) {
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
 			/* rem: not the function being defined, then part of the body */
 			free_v(a);
-			return (Ires) {BACKTRACK, NULL};
+			return (Ires) {BACK, s};
 		}
-		/* rem: end 'fun ; add the fun symbol */
-		b = copy_v(c);
-		Symval *sv = symval(b->symf.name, b);
+		/* rem: end 'fun : add the fun symbol */
+		Symval *sv = symval(c->symf.name, c);
 		if (!stored_sym(e, sv)) {
 			free_symval(sv);
 			free_v(a);
 			return (Ires) {FAIL, s};
 		}
+		b = copy_v(c);
 		free_v(a);
 	} else {
 		printf("? %s: 'end' with wrong argument type\n",
@@ -2099,17 +2145,20 @@ apply_fun(Env *e, Val *s, size_t p) {
 	if (!(al->hdr.t == VLST || al->hdr.t == VNIL)) {
 		printf("? %s: argument to `%s not a list or '()'\n", 
 				__FUNCTION__, f->symf.name);
+		free_v(al);
 		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VNIL && f->symf.param.n != 0) {
 		printf("? %s: expected %lu argument(s) to `%s\n", 
 				__FUNCTION__, f->symf.param.n, f->symf.name);
+		free_v(al);
 		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VLST && al->lst.v.n != f->symf.param.n) {
 		printf("? %s: number of arguments to `%s mismatch (got %lu, expected %lu)\n", 
 				__FUNCTION__, f->symf.name,
 				al->lst.v.n, f->symf.param.n);
+		free_v(al);
 		return (Ires) {FAIL, s};
 	}
 	/* setup local env */
@@ -2117,11 +2166,13 @@ apply_fun(Env *e, Val *s, size_t p) {
 	if (le == NULL) {
 		printf("? %s: local env creation failed\n",
 				__FUNCTION__);
+		free_v(al);
 		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VLST) {
 		Ires rc = solve_lst(le, al, true); /* true: solve all sym. macros? */
 		if (rc.code != OK) {
+			free_v(al);
 			return (Ires) {FAIL, s};
 		}
 		/* add parameters in local env, value is al's */
@@ -2130,10 +2181,12 @@ apply_fun(Env *e, Val *s, size_t p) {
 			if (!stored_sym(le, sv)) {
 				free_symval(sv);
 				free_env(le, false);
+				free_v(al);
 				return (Ires) {FAIL, s};
 			}
 		}
 	}
+	free_v(al);
 	/* reduce each expression in body, like eval_ph: */
 	Val *v;
 	bool t; /* transition successful */
@@ -2567,7 +2620,7 @@ solve_sym(Env *e, Val *a, bool look) {
 			|| b->hdr.t == VOPE)) {
 		return (Ires) {OK, copy_v(b)};
 	}
-	return (Ires) {NOP, a};
+	return (Ires) {NOP, copy_v(a)};
 }
 static Ires 
 solve_lst(Env *e, Val *a, bool look) {
@@ -2585,16 +2638,14 @@ solve_lst(Env *e, Val *a, bool look) {
 
 static Ires 
 eval_norm(Env *e, Val *a, bool look) {
-	/* returns 'a, or a new val and frees 'a */
+	/* returns a new val and frees 'a */
 	Ires r = {OK, a};
 	if (a->hdr.t == VSYM) {
 		r = solve_sym(e, a, look);
-		if (r.code == OK) {
-			/* r.v holds a new val */
+		if (r.code == OK || rc.code == NOP) {
 			free_v(a);
-		} else if (r.code == NOP) {
 			r.code = OK;
-		}
+		} 
 		return r;
 	}
 	if (a->hdr.t == VSEQ) {
