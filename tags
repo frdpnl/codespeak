@@ -42,12 +42,12 @@ List_v	phrase.c	/^} List_v;$/;"	t	typeref:struct:List_v_	file:
 List_v_	phrase.c	/^typedef struct List_v_ {$/;"	s	file:
 Lrc	phrase.c	/^typedef enum {LINE, EMPTYL, ENDL, ERRL} Lrc;$/;"	t	typeref:enum:__anon2f313ef91903	file:
 NOP	phrase.c	/^	NOP,$/;"	e	enum:__anon2f313ef90d03	file:
-NORM	phrase.c	/^	NORM,$/;"	e	enum:__anon2f313ef90c03	file:
 OK	phrase.c	/^	OK,$/;"	e	enum:__anon2f313ef90d03	file:
 Phrase	phrase.c	/^} Phrase;$/;"	t	typeref:struct:__anon2f313ef91808	file:
 RET	phrase.c	/^	RET,$/;"	e	enum:__anon2f313ef90d03	file:
 RETURN	phrase.c	/^	RETURN,	\/* returning from function (short circuit) *\/$/;"	e	enum:__anon2f313ef90c03	file:
 RIGHT	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
+RUN	phrase.c	/^	RUN,$/;"	e	enum:__anon2f313ef90c03	file:
 SEP	phrase.c	/^typedef enum { SEP, LEFT, RIGHT, STR } wtype;  $/;"	e	enum:__anon2f313ef90103	file:
 SKIP	phrase.c	/^	SKIP,$/;"	e	enum:__anon2f313ef90d03	file:
 SLST	phrase.c	/^typedef enum {SNIL, SNAT, SREA, SSYM, SLST, SSEQ} stype;$/;"	e	enum:__anon2f313ef90403	file:
@@ -117,8 +117,8 @@ eval_loop_body	phrase.c	/^eval_loop_body(Env *e, Val *s, size_t p) {$/;"	f	typer
 eval_maybe_def	phrase.c	/^eval_maybe_def(Env *e, Val *a) {$/;"	f	typeref:typename:Ires	file:
 eval_maybe_loop	phrase.c	/^eval_maybe_loop(Env *e, Val *a) {$/;"	f	typeref:typename:Ires	file:
 eval_maybe_skip	phrase.c	/^eval_maybe_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ires	file:
-eval_norm	phrase.c	/^eval_norm(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ires	file:
 eval_ph	phrase.c	/^eval_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
+eval_run	phrase.c	/^eval_run(Env *e, Val *a, bool look) {$/;"	f	typeref:typename:Ires	file:
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/;"	f	typeref:typename:Expr *	file:
 expr	phrase.c	/^expr() {$/;"	f	typeref:typename:Expr *	file:
 f	phrase.c	/^	Ires (*f)(Env *e, Val *s, size_t p);$/;"	m	struct:Symop_	typeref:typename:Ires (*)(Env * e,Val * s,size_t p)	file:

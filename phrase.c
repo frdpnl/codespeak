@@ -571,7 +571,7 @@ typedef struct List_v_ {
 
 typedef enum {
 	FATAL,
-	NORM,
+	RUN,
 	IFSKIP,	/* for 'if, skip until 'else or 'endif */
 	FUNDEF,	/* we're processing a (multiline) function definition */
 	BACKTRACK,
@@ -729,7 +729,7 @@ print_v(Val *a, bool abr) {
 static void
 print_istate(istate s) {
 	switch (s) {
-		case NORM:
+		case RUN:
 			printf("Ok ");
 			break;
 		case IFSKIP:
@@ -1223,7 +1223,7 @@ stored_sym(Env *a, Symval *b) {
  * Interpreter returns a single val, not a seq.
  */
 
-static Ires eval_norm(Env *e, Val *a, bool look);
+static Ires eval_run(Env *e, Val *a, bool look);
 static Ires solve_sym(Env *e, Val *a, bool look);
 static Ires solve_lst(Env *e, Val *a, bool look);
 static bool transition(Env *e, Val *a);
@@ -1787,7 +1787,7 @@ op_do(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	a->hdr.t = VSEQ;
-	Ires rc = eval_norm(e, a, false);
+	Ires rc = eval_run(e, a, false);
 	if (rc.code == FAIL) {
 		return rc;
 	}
@@ -1912,7 +1912,7 @@ op_else(Env *e, Val *s, size_t p) {
 		upd_prefix0(s, p, a);
 		return (Ires) {OK, s};
 	}
-	if (e->state == NORM) {
+	if (e->state == RUN) {
 		Val *it = lookup(e, ITNAME, false, false);
 		if (it == NULL) {
 			printf("? %s: `else before `if\n", __FUNCTION__);
@@ -1924,7 +1924,7 @@ op_else(Env *e, Val *s, size_t p) {
 	printf("? %s: `else in invalid state ( ", __FUNCTION__);
 	print_istate(e->state);
 	printf(")\n");
-	return (Ires) {FAIL, s};
+	return (Ires) {NOP, s};
 }
 static Ires 
 op_rem(Env *e, Val *s, size_t p) {
@@ -2075,17 +2075,16 @@ op_end(Env *e, Val *s, size_t p) {
 			free_v(a);
 			return (Ires) {BACK, s};
 		}
+		free_v(a);
 		/* rem: end 'fun : add the fun symbol */
 		Symval *sv = symval(c->symf.name, c);
 		if (!stored_sym(e, sv)) {
 			free_symval(sv);
-			free_v(a);
 			return (Ires) {FAIL, s};
 		}
 		b = copy_v(c);
-		free_v(a);
 	} else {
-		printf("? %s: 'end' with wrong argument type\n",
+		printf("? %s: `end with wrong argument type\n",
 				__FUNCTION__);
 		free_v(a);
 		return (Ires) {FAIL, s};
@@ -2098,7 +2097,7 @@ Env *
 new_env(Env *parent) {
 	Env *e = malloc(sizeof(*e));
 	assert(e != NULL);
-	e->state = NORM;
+	e->state = RUN;
 	e->n = 0;
 	e->s = NULL;
 	e->parent = parent;
@@ -2180,8 +2179,8 @@ apply_fun(Env *e, Val *s, size_t p) {
 			Symval *sv = symval(f->symf.param.v[i]->sym.v, al->lst.v.v[i]);
 			if (!stored_sym(le, sv)) {
 				free_symval(sv);
-				free_env(le, false);
 				free_v(al);
+				free_env(le, false);
 				return (Ires) {FAIL, s};
 			}
 		}
@@ -2234,7 +2233,7 @@ op_return(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	upd_prefix0(s, p, copy_v(it));
-	return (Ires) {RETURN, s};
+	return (Ires) {RET, s};
 }
 static Ires 
 op_stop(Env *e, Val *s, size_t p) {
@@ -2248,7 +2247,7 @@ op_stop(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	upd_prefix0(s, p, copy_v(it));
-	return (Ires) {STOP, s};
+	return (Ires) {INT, s};
 }
 static Ires 
 op_env(Env *e, Val *s, size_t p) {
@@ -2263,7 +2262,7 @@ op_env(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	upd_prefix0(s, p, copy_v(it));
-	return (Ires) {OK, s};
+	return (Ires) {OK, s}; /* TODO: optim, return NOP, NULL */
 }
 
 /* --------------- builtin or base function symbols -------------------- */
@@ -2279,22 +2278,22 @@ typedef struct Symop_ {
 } Symop;
 
 Symop Syms[] = {
-	(Symop) {"call",   -20, op_call,  2},
-	(Symop) {"define", -20, op_def,  2},
-	(Symop) {"def",    -20, op_def,  2},
-	(Symop) {"do",     -20, op_do,    1},
-	(Symop) {"else",   -20, op_else, 0},
-	(Symop) {"end",    -20, op_end,  1}, /* needs to be prior to loop, if, ufun */
-	(Symop) {"env",    -20, op_env, 0},
-	(Symop) {"list",   -20, op_list, -1},
-	(Symop) {"loop",   -20, op_loop, 0},
-	(Symop) {"print",  -20, op_print, 1}, 
-	(Symop) {"rem:",   -20, op_rem,  -1}, /* -1 arity: remainder of seq val */
+	(Symop) {"call",   -20, op_call,   2},
+	(Symop) {"define", -20, op_def,    2},
+	(Symop) {"def",    -20, op_def,    2},
+	(Symop) {"do",     -20, op_do,     1},
+	(Symop) {"else",   -20, op_else,   0},
+	(Symop) {"end",    -20, op_end,    1}, /* needs to be prior to loop, if, ufun */
+	(Symop) {"env",    -20, op_env,    0},
+	(Symop) {"list",   -20, op_list,  -1},
+	(Symop) {"loop",   -20, op_loop,   0},
+	(Symop) {"print",  -20, op_print,  1}, 
+	(Symop) {"rem:",   -20, op_rem,   -1}, /* -1 arity: remainder of seq val */
 	(Symop) {"return", -20, op_return, 0},
-	(Symop) {"stop",   -20, op_stop, 0},
+	(Symop) {"stop",   -20, op_stop,   0},
 	(Symop) {"solve",  -20, op_solve,  1},
-	(Symop) {"true?",  -20, op_true,  0},
-	(Symop) {"false?", -20, op_false, 0},
+	(Symop) {"true?",  -20, op_true,   0},
+	(Symop) {"false?", -20, op_false,  0},
 	/* priority FUNDEFPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, op_mul, 2},
 	(Symop) {"/",    20, op_div, 2},
@@ -2311,7 +2310,7 @@ Symop Syms[] = {
 	(Symop) {"and",  60, op_and, 2},
 	(Symop) {"or",   70, op_or,  2},
 	(Symop) {"if",   80, op_if,  1},
-	(Symop) {"", 0, op_false, -1},
+	(Symop) {"",      0, op_false, -1},
 };
 static int
 minprio() {
@@ -2550,7 +2549,7 @@ eval_loop(Env *e, Val *s) {
 		return (Ires) {FATAL, s};
 	}
 	if (e->state == STOP) {
-		e->state = NORM;
+		e->state = RUN;
 	}
 	return (Ires) {e->state, copy_v(it)};
 }
@@ -2565,7 +2564,7 @@ solve_seq(Env *e, Val *a, bool look) {
 	Ires rc;
 	/* resolve all syms to functions to prepare for reduction: */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		rc = eval_norm(e, a->seq.v.v[i], look);
+		rc = eval_run(e, a->seq.v.v[i], look);
 		if (!(rc.code == OK || rc.code == NOP)) {
 			return rc;
 		}
@@ -2573,7 +2572,7 @@ solve_seq(Env *e, Val *a, bool look) {
 	}
 	rc = reduce_seq(e, a, look);
 	if (rc.code == OK || rc.code == NOP) {
-		rc.v = a->seq.v.v[0]; /* steal single seq item */
+		rc.v = a->seq.v.v[0]; /* steal single seq item left */
 		a->seq.v.n = 0;
 		free_v(a);
 		rc.code = OK;
@@ -2626,7 +2625,7 @@ static Ires
 solve_lst(Env *e, Val *a, bool look) {
 	Ires rc;
 	for (size_t i=0; i < a->lst.v.n; ++i) {
-		rc = eval_norm(e, a->seq.v.v[i], look);
+		rc = eval_run(e, a->seq.v.v[i], look);
 		if (!(rc.code == OK || rc.code == NOP)) {
 			return (Ires) {FAIL, a};
 		}
@@ -2637,9 +2636,9 @@ solve_lst(Env *e, Val *a, bool look) {
 }
 
 static Ires 
-eval_norm(Env *e, Val *a, bool look) {
-	/* returns a new val and frees 'a */
-	Ires r = {OK, a};
+eval_run(Env *e, Val *a, bool look) {
+	/* returns a val, if successful, it's new and frees 'a */
+	Ires r = {NOP, NULL};
 	if (a->hdr.t == VSYM) {
 		r = solve_sym(e, a, look);
 		if (r.code == OK || rc.code == NOP) {
@@ -2741,7 +2740,7 @@ eval_maybe_def(Env *e, Val *a) {
 			&& a->seq.v.v[0]->symop.v == op_end
 			&& a->seq.v.v[0]->symop.arity == a->seq.v.n -1
 			&& a->seq.v.v[1]->hdr.t == VSYM) {
-		Ires rc = eval_norm(e, a, false);
+		Ires rc = eval_run(e, a, false);
 		/* not a valid end 'fun expression after all, add to body instead */
 		if (rc.state == BACKTRACK) {
 			rc = eval_body(e, a, 0);
@@ -2784,7 +2783,7 @@ eval_maybe_loop(Env *e, Val *a) {
 			&& a->seq.v.v[1]->symop.v == op_loop) {
 		/* `end `loop while in topmost loop, execute this */
 		if (lnst->nat.v == 0) {
-			Ires rc = eval_norm(e, a, false);
+			Ires rc = eval_run(e, a, false);
 			return rc;
 		}
 		--(lnst->nat.v);
@@ -2795,11 +2794,11 @@ eval_maybe_loop(Env *e, Val *a) {
 }
 static Ires
 eval_maybe_skip(Env *e, Val *a) {
-	/* returns a fresh value, 'a untouched */
+	/* returns a new val and frees 'a */
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
-	/* resolve symbols to functions */
-	Ires rc = solve_fun(e, a);
-	if (rc.state == FATAL) {
+	Ires rc = solve_lst(e, a, false); /* works off seq too */
+	if (rc.code != OK) {
+		rc.code = FAIL;
 		return rc;
 	}
 	if (Dbg) { printf("#\t  %s resolved: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
@@ -2811,7 +2810,7 @@ eval_maybe_skip(Env *e, Val *a) {
 	bool an_else = a->seq.v.v[0]->hdr.t == VOPE 
 			&& a->seq.v.v[0]->symop.v == op_else ;
 	if (an_endif || an_else) {
-		Ires rc = eval_norm(e, a, false);
+		Ires rc = eval_run(e, a, false);
 		return rc;
 	}
 	/* default: skip val */
@@ -2820,7 +2819,7 @@ eval_maybe_skip(Env *e, Val *a) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
 		return (Ires) {FAIL, s};
 	}
-	return (Ires) {IFSKIP, copy_v(it)};
+	return (Ires) {SKIP, copy_v(it)};
 }
 
 static bool  
@@ -2831,16 +2830,17 @@ transition(Env *e, Val *a) {
 	assert(e != NULL && "env is null");
 	assert(a != NULL && "value is null");
 	if (Dbg) { printf("#\t %s: entry\n", __FUNCTION__); print_env(e, "#\t"); }
+	/* do something (with a) */
 	Ires rc;
 	switch (e->state) {
-		case NORM:
-			rc = eval_norm(e, a, false);
+		case RUN:
+			rc = eval_run(e, a, false);
 			break;
 		case LOOPDEF:
 			rc = eval_maybe_loop(e, a);
-			/* if ended a loop (NORM state), execute it now */
+			/* if ended a loop (RUN state), execute it now */
 			if (rc.code == OK) {
-				e->state = NORM;
+				e->state = RUN;
 				Ires lrc = eval_loop(e, rc.v);
 				free_v(rc.v);
 				rc = lrc;
@@ -2858,39 +2858,50 @@ transition(Env *e, Val *a) {
 			return false;
 	}
 	if (Dbg) { printf("#\t %s: eval'd code ", __FUNCTION__); print_code(rc.code); printf("\n");}
+	/* transition state */
 	switch (rc.code) {
 		case FAIL:
 			e->state = FATAL;
 			free_v(rc.v);
-			return false;
-		case OK:
+			break;
 		case NOP:
-			e->state = NORM;
+			break;
+		case OK:
+			if (e->state == IFSKIP) {
+				e->state = RUN;
+			}
 			break;
 		case SKIP:
+			assert(e->state == RUN && "skip outside run");
 			e->state = IFSKIP;
 			break;
 		case DEF:
+			assert(e->state == RUN && "define outside run");
 			e->state = FUNDEF;
 			break;
 		case RET:
-			e->state = RETURN;
+			assert(e->state == RUN && "return outside run");
 			break;
 		case BACK:
-			e->state = BACKTRACK;
+			assert(e->state == FUNDEF && "backtrack outside fundef");
 			break;
 		case LOOP:
+			assert(e->state == RUN && "loop outside run");
 			e->state = LOOPDEF;
 			break;
 		case INT:
-			e->state = STOP;
+			assert(e->state == RUN && "int outside run");
 			break;
 		default:
-			printf("? %s: invalid eval code\n", __FUNCTION__);
+			printf("? %s: invalid evaluation\n", __FUNCTION__);
 			e->state = FATAL;
 			free_v(rc.v);
-			return false;
 	}
+	/* react to transition */
+	if (e->state == FATAL) {
+		return false;
+	}
+	/* update env, with 'it */
 	Symval *it = symval(ITNAME, rc.v);
 	free_v(rc.v);
 	if (it == NULL) {
@@ -3100,7 +3111,7 @@ main(int argc, char **argv) {
 				free_env(e, true);
 				return EXIT_FAILURE;
 			case ENDL:
-				if (e->state != NORM) {
+				if (e->state != RUN) {
 					printf("? %s: unexpected end of program\n",
 							__FUNCTION__);
 				}
