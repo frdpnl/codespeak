@@ -111,7 +111,7 @@ arity	phrase.c	/^	int arity;$/;"	m	struct:Symop_	typeref:typename:int	file:
 body	phrase.c	/^		List_v body;$/;"	m	struct:Val_::__anon2f313ef91408	typeref:typename:List_v	file:
 code	phrase.c	/^	rc code;$/;"	m	struct:__anon2f313ef90f08	typeref:typename:rc	file:
 copy_v	phrase.c	/^copy_v(Val *a) {$/;"	f	typeref:typename:Val *	file:
-eval_body	phrase.c	/^eval_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
+eval_fun_body	phrase.c	/^eval_fun_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
 eval_loop	phrase.c	/^eval_loop(Env *e, Val *s) {$/;"	f	typeref:typename:Ires	file:
 eval_loop_body	phrase.c	/^eval_loop_body(Env *e, Val *s, size_t p) {$/;"	f	typeref:typename:Ires	file:
 eval_maybe_def	phrase.c	/^eval_maybe_def(Env *e, Val *a) {$/;"	f	typeref:typename:Ires	file:

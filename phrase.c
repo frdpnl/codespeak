@@ -1924,7 +1924,7 @@ op_else(Env *e, Val *s, size_t p) {
 	printf("? %s: `else in invalid state ( ", __FUNCTION__);
 	print_istate(e->state);
 	printf(")\n");
-	return (Ires) {NOP, s};
+	return (Ires) {FAIL, s};
 }
 static Ires 
 op_rem(Env *e, Val *s, size_t p) {
@@ -2522,36 +2522,51 @@ reduce_seq(Env *e, Val *b, bool look) {
 static Ires 
 eval_loop(Env *e, Val *s) {
 	/* rem: loop execution */
+	if (Dbg) { printf("#\t  %s entry:\n", __FUNCTION__); }
+	Env *le = new_env(e);
+	if (le == NULL) {
+		printf("? %s: loop env creation failed\n",
+				__FUNCTION__);
+		return (Ires) {FAIL, s};
+	}
 	Val *v;
 	bool t;
-	if (Dbg) { printf("#\t  %s entry:\n", __FUNCTION__); }
-	while (!(e->state == STOP || e->state == RETURN)) {
+	while (!(le->state == STOP || le->state == RETURN)) {
 		for (size_t i=0; i<s->symf.body.n; ++i) {
 			v = copy_v(s->symf.body.v[i]);
-			t = transition(e, v);
-			free_v(v);
+			t = transition(le, v);  /* consumes v */
 			if (!t) {
-				return (Ires) {FATAL, s};
+				free_env(le, false);
+				return (Ires) {FAIL, s};
 			}
-			if (e->state == RETURN) {
+			if (le->state == RETURN) {
 				break;
 			}
-			if (e->state == STOP) {
+			if (le->state == STOP) {
 				break;
 			}
 		}
 	}
-	if (Dbg) { printf("#\t  %s end:\n", __FUNCTION__); print_env(e, "#\t"); }
-	Val *it = lookup(e, ITNAME, false, false);
-	if (it == NULL) {
+	if (Dbg) { printf("#\t  %s end:\n", __FUNCTION__); print_env(le, "#\t"); }
+	Val *lit = lookup(le, ITNAME, false, false);
+	if (lit == NULL) {
 		printf("? %s: 'it from loop undefined\n",
 				__FUNCTION__);
-		return (Ires) {FATAL, s};
+		free_env(le, false);
+		return (Ires) {FAIL, s};
 	}
-	if (e->state == STOP) {
-		e->state = RUN;
+	if (le->state == RETURN) {
+		free_env(le, false);
+		free_v(s);
+		return (Ires) {RET, copy_v(lit)};
 	}
-	return (Ires) {e->state, copy_v(it)};
+	if (le->state == STOP) {
+		free_env(le, false);
+		free_v(s);
+		return (Ires) {OK, copy_v(lit)};
+	}
+	free_env(le, false);
+	return (Ires) {FAIL, s};
 }
 static Ires 
 solve_seq(Env *e, Val *a, bool look) {
@@ -2572,10 +2587,10 @@ solve_seq(Env *e, Val *a, bool look) {
 	}
 	rc = reduce_seq(e, a, look);
 	if (rc.code == OK || rc.code == NOP) {
+		rc.code = OK;
 		rc.v = a->seq.v.v[0]; /* steal single seq item left */
 		a->seq.v.n = 0;
 		free_v(a);
-		rc.code = OK;
 	}
 	return rc;
 }
@@ -2637,11 +2652,11 @@ solve_lst(Env *e, Val *a, bool look) {
 
 static Ires 
 eval_run(Env *e, Val *a, bool look) {
-	/* returns a val, if successful, it's new and frees 'a */
+	/* returns a val, if successful, it's new and freed 'a */
 	Ires r = {NOP, NULL};
 	if (a->hdr.t == VSYM) {
 		r = solve_sym(e, a, look);
-		if (r.code == OK || rc.code == NOP) {
+		if (r.code == OK || r.code == NOP) {
 			free_v(a);
 			r.code = OK;
 		} 
@@ -2691,7 +2706,7 @@ update_freesym(Env *e, Val *fun, Val *s) {
 }
 
 static Ires
-eval_body(Env *e, Val *s, size_t p) {
+eval_fun_body(Env *e, Val *s, size_t p) {
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(s, false,"#\t"); printf("\n"); }
 	Val *fun = lookup(e, ITNAME, false, false);
 	if (fun == NULL) {
@@ -2704,10 +2719,10 @@ eval_body(Env *e, Val *s, size_t p) {
 	}
 	Val *fret = copy_v(fun);
 	/* replace free symbols with env value: */
-	update_freesym(e, fun, s);
-	fret->symf.body = push_l(fret->symf.body, copy_v(s));
+	update_freesym(e, fret, s);
+	fret->symf.body = push_l(fret->symf.body, s);
 	if (Dbg) { printf("#\t  %s exit: ", __FUNCTION__); printx_v(s,false,"#\t"); printf("\n"); }
-	return (Ires) {FUNDEF, fret};
+	return (Ires) {OK, fret};
 }
 
 static Ires
@@ -2718,20 +2733,21 @@ eval_loop_body(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	if (loop->hdr.t != VFUN) {
-		printf("? %s: 'it is not a loop function\n", __FUNCTION__);
+		printf("? %s: 'it is not a `loop function\n", __FUNCTION__);
 		return (Ires) {FAIL, s};
 	}
 	Val *lret = copy_v(loop);
-	lret->symf.body = push_l(lret->symf.body, copy_v(s));
-	return (Ires) {LOOPDEF, lret};
+	lret->symf.body = push_l(lret->symf.body, s);
+	return (Ires) {OK, lret};
 }
 static Ires
 eval_maybe_def(Env *e, Val *a) {
-	/* returns a fresh value, 'a untouched */
+	/* returns a val, if new, freed 'a */
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	/* resolve symbols (not 'it) to operators and functions */
-	Ires rc = solve_fun(e, a);
-	if (rc.state == FATAL) {
+	Ires rc = solve_lst(e, a, false); /* works off seq too */
+	if (rc.code != OK) {
+		rc.code = FAIL;
 		return rc;
 	}
 	if (Dbg) { printf("#\t  %s resolved: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
@@ -2741,35 +2757,39 @@ eval_maybe_def(Env *e, Val *a) {
 			&& a->seq.v.v[0]->symop.arity == a->seq.v.n -1
 			&& a->seq.v.v[1]->hdr.t == VSYM) {
 		Ires rc = eval_run(e, a, false);
-		/* not a valid end 'fun expression after all, add to body instead */
-		if (rc.state == BACKTRACK) {
-			rc = eval_body(e, a, 0);
+		/* if an end 'fun: */
+		if (rc.code != BACK) {
 			return rc;
 		}
-		return rc;
 	}
-	rc = eval_body(e, a, 0);
+	/* default: add to body instead */
+	rc = eval_fun_body(e, a, 0);
+	if (rc.code == OK) {
+		/* distinguish from OK above in end 'fun :*/
+		rc.code = DEF;
+	}
 	return rc;
 }
 
 static Ires
 eval_maybe_loop(Env *e, Val *a) {
-	/* returns a fresh value, 'a untouched */
+	/* returns a val, if new, freed 'a */
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	/* resolve symbols (not 'it) to operators and functions */
-	Ires rc = solve_fun(e, a);
-	if (rc.state == FATAL) {
+	Ires rc = solve_lst(e, a, false); /* works off seq too */
+	if (rc.code != OK) {
+		rc.code = FAIL;
 		return rc;
 	}
 	if (Dbg) { printf("#\t  %s resolved: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	Val *lnst = lookup(e, LOOPNEST, false, false);
 	if (lnst == NULL) {
 		printf("? %s: nested loop count missing\n", __FUNCTION__);
-		return (Ires) {FAIL, s};
+		return (Ires) {FAIL, a};
 	}
 	if (lnst->hdr.t != VNAT) {
 		printf("? %s: nested loop count invalid\n", __FUNCTION__);
-		return (Ires) {FAIL, s};
+		return (Ires) {FAIL, a};
 	}
 	/* rem: handle nested loop, another `loop val */
 	if (a->seq.v.v[0]->hdr.t == VOPE 
@@ -2790,11 +2810,15 @@ eval_maybe_loop(Env *e, Val *a) {
 		/* then proceed to add to body */
 	}
 	rc = eval_loop_body(e, a, 0);
+	if (rc.code == OK) {
+		/* distinguish from eval_run above: */
+		rc.code = LOOP;
+	}
 	return rc;
 }
 static Ires
 eval_maybe_skip(Env *e, Val *a) {
-	/* returns a new val and frees 'a */
+	/* returns a val, if new, freed 'a */
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	Ires rc = solve_lst(e, a, false); /* works off seq too */
 	if (rc.code != OK) {
@@ -2813,13 +2837,14 @@ eval_maybe_skip(Env *e, Val *a) {
 		Ires rc = eval_run(e, a, false);
 		return rc;
 	}
-	/* default: skip val */
+	/* default: skip */
 	Val *it = lookup(e, ITNAME, false, false);
 	if (it == NULL) {
 		printf("? %s: 'it undefined\n", __FUNCTION__);
-		return (Ires) {FAIL, s};
+		return (Ires) {FAIL, a};
 	}
-	return (Ires) {SKIP, copy_v(it)};
+	free_v(a);
+	return (Ires) {NOP, copy_v(it)};
 }
 
 static bool  
@@ -2833,17 +2858,15 @@ transition(Env *e, Val *a) {
 	/* do something (with a) */
 	Ires rc;
 	switch (e->state) {
+		/* following eval_*() must keep only one val alloc'd */
 		case RUN:
 			rc = eval_run(e, a, false);
 			break;
 		case LOOPDEF:
 			rc = eval_maybe_loop(e, a);
-			/* if ended a loop (RUN state), execute it now */
+			/* if ended a loop definition, execute it now */
 			if (rc.code == OK) {
-				e->state = RUN;
-				Ires lrc = eval_loop(e, rc.v);
-				free_v(rc.v);
-				rc = lrc;
+				rc = eval_loop(e, rc.v);
 			}
 			break;
 		case FUNDEF:
@@ -2864,36 +2887,33 @@ transition(Env *e, Val *a) {
 			e->state = FATAL;
 			free_v(rc.v);
 			break;
-		case NOP:
+		case NOP: /* did nothing */
 			break;
-		case OK:
-			if (e->state == IFSKIP) {
+		case OK: /* did something */
+			if (e->state == IFSKIP 
+					|| e->state == FUNDEF 
+					|| e->state == LOOPDEF) {
 				e->state = RUN;
 			}
 			break;
 		case SKIP:
-			assert(e->state == RUN && "skip outside run");
 			e->state = IFSKIP;
 			break;
 		case DEF:
-			assert(e->state == RUN && "define outside run");
 			e->state = FUNDEF;
 			break;
 		case RET:
-			assert(e->state == RUN && "return outside run");
-			break;
-		case BACK:
-			assert(e->state == FUNDEF && "backtrack outside fundef");
+			e->state = RETURN;
 			break;
 		case LOOP:
-			assert(e->state == RUN && "loop outside run");
 			e->state = LOOPDEF;
 			break;
 		case INT:
-			assert(e->state == RUN && "int outside run");
+			e->state = STOP;
 			break;
 		default:
-			printf("? %s: invalid evaluation\n", __FUNCTION__);
+			/* BACK is invalid for example */
+			printf("? %s: invalid evaluation code\n", __FUNCTION__);
 			e->state = FATAL;
 			free_v(rc.v);
 	}
