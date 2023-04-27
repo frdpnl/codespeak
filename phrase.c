@@ -1770,17 +1770,6 @@ op_do(Env *e, Val *s, size_t p) {
 	if (!set_prefix1_arg(e, s, p, &a, true)) {
 		return (Ires) {FAIL, s};
 	}
-	/* replaced with argument true above
-	if (a->hdr.t == VSYM) {
-		Val *b = lookup(e, a->sym.v, false, true);
-		if (b == NULL) {
-			printf("? %s: argument symbol undefined (%s)\n", 
-					__FUNCTION__, a->sym.v);
-			return (Ires) {FAIL, s};
-		}
-		free_v(a);
-		a = copy_v(b);
-	}*/
 	if (a->hdr.t != VLST) {
 		free_v(a);
 		printf("? %s: argument not a list\n", 
@@ -1865,8 +1854,8 @@ op_false(Env *e, Val *s, size_t p) {
 }
 static Ires 
 op_if(Env *e, Val *s, size_t p) {
-	if (p != 0 || p != s->seq.v.n - 2) {
-		printf("? %s: 'if' sequence invalid\n",
+	if (!(p == 0 && p == s->seq.v.n - 2)) {
+		printf("? %s: `if invalid syntax\n",
 				__FUNCTION__);
 		return (Ires) {FAIL, s};
 	}
@@ -2467,7 +2456,6 @@ reduce_seq(Env *e, Val *b, bool look) {
 			c = b->seq.v.v[0]; 
 			if (!(c->hdr.t == VOPE && c->symop.arity == 0)) {
 				rc.v = b;
-				assert(rc.code == OK || rc.code == NOP);
 				return rc;
 			}
 		}
@@ -2510,10 +2498,10 @@ reduce_seq(Env *e, Val *b, bool look) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
-		if (!(rc.code == OK || rc.code == NOP)) {
+		if (rc.code != FAIL) {
 			return rc;
 		}
-		b = rc.v; // TODO needed?
+		// b = rc.v; // TODO needed?
 		/* rc.code set by the op_*() */
 		if (Dbg) { printf("#\t  %s reduced: ", __FUNCTION__); printx_v(b,false,""); printf("\n"); }
 	}
@@ -2588,12 +2576,12 @@ solve_seq(Env *e, Val *a, bool look) {
 		a->seq.v.v[i] = rc.v;
 	}
 	rc = reduce_seq(e, a, look);
-	if (rc.code == OK || rc.code == NOP) {
-		rc.code = OK;
-		rc.v = a->seq.v.v[0]; /* steal single seq item left */
-		a->seq.v.n = 0;
-		free_v(a);
-	}
+	if (rc.code == FAIL) {
+		return rc;
+	} 
+	rc.v = a->seq.v.v[0]; /* steal single seq item left */
+	a->seq.v.n = 0;
+	free_v(a);
 	return rc;
 }
 static Ires
