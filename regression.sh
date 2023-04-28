@@ -8,6 +8,8 @@ for t in $(ls $TDIR/t*); do
 	diff $OUT $REF
 	if [ $? != 0 ]; then 
 		echo "$t FAILED"
+	else
+		echo "$t ok"
 	fi
 done
 

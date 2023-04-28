@@ -1,5 +1,5 @@
 
 2 * 2 ; call it n ; if n - 1 > n * 2 ; print wrong ; end if
-if false? ; print n * 2
+if false? ; print n * 2 ; print it
 print (n * 2)
 
