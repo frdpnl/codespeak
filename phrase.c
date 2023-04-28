@@ -2293,12 +2293,13 @@ Symop Syms[] = {
 	(Symop) {"solve",  -20, op_solve,  1},
 	(Symop) {"true?",  -20, op_true,   0},
 	(Symop) {"false?", -20, op_false,  0},
+	(Symop) {"=",      -10, op_eq,  2},
 	/* priority FUNDEFPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, op_mul, 2},
 	(Symop) {"/",    20, op_div, 2},
 	(Symop) {"+",    30, op_plu, 2},
 	(Symop) {"-",    30, op_min, 2},
-	(Symop) {"=",    40, op_eq,  2},
+	/* (Symop) {"=",    40, op_eq,  2}, */
 	(Symop) {"/=",   40, op_neq, 2},
 	(Symop) {"<",    40, op_les, 2},
 	(Symop) {"<=",   40, op_leq, 2},
