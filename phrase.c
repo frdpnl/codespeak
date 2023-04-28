@@ -2034,6 +2034,7 @@ op_end(Env *e, Val *s, size_t p) {
 				free_v(a);
 				return (Ires) {FAIL, s};
 			} 
+			free_v(a);
 			b = copy_v(c);
 		} else {
 			printf("? %s: `end with wrong operator argument (expecting `if or `loop)\n",
