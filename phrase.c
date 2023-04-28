@@ -1974,18 +1974,20 @@ op_def(Env *e, Val *s, size_t p) {
 	Val *f = malloc(sizeof(*f));
 	f->hdr.t = VFUN;
 	strncpy(f->symf.name, fname->sym.v, sizeof(f->symf.name));
+	free_v(fname);
 	/* TODO replace with simple memcpy */
 	f->symf.param.n = 0;
 	f->symf.param.v = NULL;
 	if (fparam->hdr.t == VLST) {
 		for (size_t i=0; i<fparam->lst.v.n; ++i) {
+			/* steal fparam items: */
 			f->symf.param = push_l(f->symf.param, fparam->lst.v.v[i]);
 		}
 	}
+	fparam->lst.v.n = 0;
+	free_v(fparam);
 	f->symf.body.n = 0;
 	f->symf.body.v = NULL;
-	free_v(fname);
-	free_v(fparam);
 	upd_prefix2(s, p, f);
 	return (Ires) {DEF, s};
 }
@@ -2079,7 +2081,6 @@ op_end(Env *e, Val *s, size_t p) {
 		free_v(a);
 		return (Ires) {FAIL, s};
 	}
-	free_v(a);
 	upd_prefix1(s, p, b);
 	return (Ires) {OK, s};
 }
@@ -2498,10 +2499,9 @@ reduce_seq(Env *e, Val *b, bool look) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
-		if (rc.code != FAIL) {
+		if (rc.code == FAIL) {
 			return rc;
 		}
-		// b = rc.v; // TODO needed?
 		/* rc.code set by the op_*() */
 		if (Dbg) { printf("#\t  %s reduced: ", __FUNCTION__); printx_v(b,false,""); printf("\n"); }
 	}
@@ -2610,6 +2610,11 @@ solve_sym(Env *e, Val *a, bool look) {
 		Val *b = lookup(e, a->sym.v, true, look);
 		if (b == NULL) {
 			printf("? %s: unknown symbol '%s\n",
+				__FUNCTION__, a->sym.v);
+			return (Ires) {FAIL, a};
+		} 
+		if (isequal_v(a, b)) {
+			printf("? %s: cyclic definition '%s\n",
 				__FUNCTION__, a->sym.v);
 			return (Ires) {FAIL, a};
 		} 
