@@ -1808,7 +1808,7 @@ op_call(Env *e, Val *s, size_t p) {
 	if (b->hdr.t != VSYM) {
 		free_v(a);
 		free_v(b);
-		printf("? %s: 2nd argument is not a symbol, got ", 
+		printf("? %s: name argument is not a symbol, got ", 
 				__FUNCTION__);
 		print_v(b, true); printf("\n");
 		return (Ires) {FAIL, s};
@@ -1947,7 +1947,7 @@ op_def(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	Val *fname, *fparam;
-	if (!set_prefix2_arg(e, s, p, &fname, false, &fparam, false)) {
+	if (!set_prefix2_arg(e, s, p, &fname, false, &fparam, true)) {
 		return (Ires) {FAIL, s};
 	}
 	if (fname->hdr.t != VSYM) {
@@ -2566,7 +2566,7 @@ eval_loop(Env *e, Val *s) {
 	return (Ires) {FAIL, s};
 }
 static Ires 
-solve_seq(Env *e, Val *a, bool look, bool lookit) {
+solve_seq(Env *e, Val *a, bool lookall, bool lookit) {
 	if (a->seq.v.n == 0) {
 		Val *b = malloc(sizeof(*b));
 		b->hdr.t = VNIL;
@@ -2576,7 +2576,7 @@ solve_seq(Env *e, Val *a, bool look, bool lookit) {
 	Ires rc;
 	/* resolve all syms to functions to prepare for reduction: */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		rc = eval_run(e, a->seq.v.v[i], look, lookit);
+		rc = eval_run(e, a->seq.v.v[i], lookall, lookit);
 		if (!(rc.code == OK || rc.code == NOP)) {
 			return rc;
 		}
@@ -2614,7 +2614,7 @@ solve_sym(Env *e, Val *a, bool lookall, bool lookit) {
 	}
 	/* resolve all symbols if requested */
 	if (lookall) {
-		Val *b = lookup(e, a->sym.v, true, lookall);
+		Val *b = lookup(e, a->sym.v, true, true);
 		if (b == NULL) {
 			printf("? %s: unknown symbol '%s\n",
 				__FUNCTION__, a->sym.v);
@@ -2657,11 +2657,11 @@ solve_lst(Env *e, Val *a, bool look, bool lookit) {
 }
 
 static Ires 
-eval_run(Env *e, Val *a, bool look, bool lookit) {
-	/* returns a val, if successful, it's new and freed 'a */
+eval_run(Env *e, Val *a, bool lookall, bool lookit) {
+	/* returns a val, if successful: it's new and freed 'a */
 	Ires r = {NOP, a};
 	if (a->hdr.t == VSYM) {
-		r = solve_sym(e, a, look, lookit);
+		r = solve_sym(e, a, lookall, lookit);
 		if (r.code == OK || r.code == NOP) {
 			free_v(a);
 			r.code = OK;
@@ -2669,7 +2669,7 @@ eval_run(Env *e, Val *a, bool look, bool lookit) {
 		return r;
 	}
 	if (a->hdr.t == VSEQ) {
-		return solve_seq(e, a, look, lookit);
+		return solve_seq(e, a, lookall, lookit);
 	}
 	return r;
 }

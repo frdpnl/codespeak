@@ -119,7 +119,7 @@ eval_maybe_def	phrase.c	/^eval_maybe_def(Env *e, Val *a) {$/;"	f	typeref:typenam
 eval_maybe_loop	phrase.c	/^eval_maybe_loop(Env *e, Val *a) {$/;"	f	typeref:typename:Ires	file:
 eval_maybe_skip	phrase.c	/^eval_maybe_skip(Env *e, Val *a) {$/;"	f	typeref:typename:Ires	file:
 eval_ph	phrase.c	/^eval_ph(Env *env, Phrase *a) {$/;"	f	typeref:typename:bool	file:
-eval_run	phrase.c	/^eval_run(Env *e, Val *a, bool look, bool lookit) {$/;"	f	typeref:typename:Ires	file:
+eval_run	phrase.c	/^eval_run(Env *e, Val *a, bool lookall, bool lookit) {$/;"	f	typeref:typename:Ires	file:
 exp_of_words	phrase.c	/^exp_of_words(char *a) {$/;"	f	typeref:typename:Expr *	file:
 expr	phrase.c	/^expr() {$/;"	f	typeref:typename:Expr *	file:
 f	phrase.c	/^	Ires (*f)(Env *e, Val *s, size_t p);$/;"	m	struct:Symop_	typeref:typename:Ires (*)(Env * e,Val * s,size_t p)	file:
@@ -235,7 +235,7 @@ set_prefix2_arg	phrase.c	/^set_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, b
 set_prefixn_arg	phrase.c	/^set_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {$/;"	f	typeref:typename:bool	file:
 solve_fun	phrase.c	/^solve_fun(Env *e, Val *a) {$/;"	f	typeref:typename:Ires	file:
 solve_lst	phrase.c	/^solve_lst(Env *e, Val *a, bool look, bool lookit) {$/;"	f	typeref:typename:Ires	file:
-solve_seq	phrase.c	/^solve_seq(Env *e, Val *a, bool look, bool lookit) {$/;"	f	typeref:typename:Ires	file:
+solve_seq	phrase.c	/^solve_seq(Env *e, Val *a, bool lookall, bool lookit) {$/;"	f	typeref:typename:Ires	file:
 solve_sym	phrase.c	/^solve_sym(Env *e, Val *a, bool lookall, bool lookit) {$/;"	f	typeref:typename:Ires	file:
 state	phrase.c	/^	istate state;$/;"	m	struct:Env_	typeref:typename:istate	file:
 stored_sym	phrase.c	/^stored_sym(Env *a, Symval *b) {$/;"	f	typeref:typename:bool	file:
