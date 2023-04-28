@@ -1153,6 +1153,11 @@ lookup(Env *a, char *b, bool global, bool iterate) {
 			if (sv == NULL) {
 				return NULL;
 			}
+			if (isequal_v(sv->v, c)) {
+				printf("? %s: cyclic definition for '%s\n",
+						__FUNCTION__, c->sym.v);
+				return NULL;
+			}
 			c = sv->v;
 		}
 	}
@@ -1223,10 +1228,10 @@ stored_sym(Env *a, Symval *b) {
  * Interpreter returns a single val, not a seq.
  */
 
-static Ires eval_run(Env *e, Val *a, bool look);
-static Ires solve_sym(Env *e, Val *a, bool look);
-static Ires copy_solve(Env *e, Val *a, bool look);
-static Ires solve_lst(Env *e, Val *a, bool look);
+static Ires eval_run(Env *e, Val *a, bool look, bool lookit);
+static Ires solve_sym(Env *e, Val *a, bool look, bool lookit);
+static Ires copy_solve(Env *e, Val *a, bool lookall, bool lookit);
+static Ires solve_lst(Env *e, Val *a, bool look, bool lookit);
 static bool transition(Env *e, Val *a);
 
 static bool 
@@ -1250,12 +1255,12 @@ set_infix_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool loo
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = copy_solve(e, s->seq.v.v[p-1], looka);
+	Ires rc = copy_solve(e, s->seq.v.v[p-1], looka, true);
 	if (rc.code != OK && rc.code != NOP) {
 		return false;
 	}
 	*pa = rc.v;
-	rc = copy_solve(e, s->seq.v.v[p+1], lookb);
+	rc = copy_solve(e, s->seq.v.v[p+1], lookb, true);
 	if (rc.code != OK && rc.code != NOP) {
 		free_v(*pa);
 		*pa = NULL;
@@ -1272,7 +1277,7 @@ set_prefix1_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = copy_solve(e, s->seq.v.v[p+1], looka);
+	Ires rc = copy_solve(e, s->seq.v.v[p+1], looka, true);
 	if (rc.code != OK && rc.code != NOP) {
 		return false;
 	}
@@ -1287,12 +1292,12 @@ set_prefix2_arg(Env *e, Val *s, size_t p, Val **pa, bool looka, Val **pb, bool l
 				__FUNCTION__);
 		return false;
 	}
-	Ires rc = copy_solve(e, s->seq.v.v[p+1], looka);
+	Ires rc = copy_solve(e, s->seq.v.v[p+1], looka, true);
 	if (rc.code != OK && rc.code != NOP) {
 		return false;
 	}
 	*pa = rc.v;
-	rc = copy_solve(e, s->seq.v.v[p+2], lookb);
+	rc = copy_solve(e, s->seq.v.v[p+2], lookb, true);
 	if (rc.code != OK && rc.code != NOP) {
 		free_v(*pa);
 		*pa = NULL;
@@ -1313,7 +1318,7 @@ set_prefixn_arg(Env *e, Val *s, size_t p, Val **pa, bool looka) {
 	Ires rc;
 	Val *b = NULL;
 	for (size_t i=p+1; i < s->seq.v.n; ++i) {
-		rc = copy_solve(e, s->seq.v.v[i], looka);
+		rc = copy_solve(e, s->seq.v.v[i], looka, true);
 		if (rc.code != OK && rc.code != NOP) {
 			printf("? %s: %luth argument unknown\n", 
 					__FUNCTION__, i);
@@ -1777,7 +1782,7 @@ op_do(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	a->hdr.t = VSEQ;
-	Ires rc = eval_run(e, a, false);
+	Ires rc = eval_run(e, a, false, true);
 	if (rc.code == FAIL) {
 		return rc;
 	}
@@ -2061,6 +2066,7 @@ op_end(Env *e, Val *s, size_t p) {
 			printf("? %s: `end argument is not a function\n", 
 					__FUNCTION__);
 			free_v(a);
+			// should be BACK
 			return (Ires) {FAIL, s};
 		}
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
@@ -2162,7 +2168,7 @@ apply_fun(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VLST) {
-		Ires rc = solve_lst(le, al, true); /* true: solve all sym. macros? */
+		Ires rc = solve_lst(le, al, true, true);
 		if (rc.code != OK) {
 			free_v(al);
 			return (Ires) {FAIL, s};
@@ -2442,10 +2448,10 @@ solve_fun(Env *e, Val *a) {
 }
 
 static Ires 
-reduce_seq(Env *e, Val *b, bool look) {
+reduce_seq(Env *e, Val *b) {
 	/* symbol application: consumes the seq, until 1 item left */
 	assert(b != NULL);
-	if (Dbg) { printf("#\t  %s (%d) entry: ", __FUNCTION__, look); printx_v(b,false,""); printf("\n"); }
+	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(b,false,""); printf("\n"); }
 	Ires rc = (Ires) {NOP, b};
 	Val *c;
 	while (b->seq.v.n > 0) {
@@ -2500,7 +2506,7 @@ reduce_seq(Env *e, Val *b, bool look) {
 			/* builtin operator */
 			rc = b->seq.v.v[symat]->symop.v(e, b, symat);
 		}
-		if (rc.code == FAIL) {
+		if (rc.code == FAIL || rc.code == BACK) {
 			return rc;
 		}
 		/* rc.code set by the op_*() */
@@ -2560,7 +2566,7 @@ eval_loop(Env *e, Val *s) {
 	return (Ires) {FAIL, s};
 }
 static Ires 
-solve_seq(Env *e, Val *a, bool look) {
+solve_seq(Env *e, Val *a, bool look, bool lookit) {
 	if (a->seq.v.n == 0) {
 		Val *b = malloc(sizeof(*b));
 		b->hdr.t = VNIL;
@@ -2570,14 +2576,14 @@ solve_seq(Env *e, Val *a, bool look) {
 	Ires rc;
 	/* resolve all syms to functions to prepare for reduction: */
 	for (size_t i=0; i < a->seq.v.n; ++i) {
-		rc = eval_run(e, a->seq.v.v[i], look);
+		rc = eval_run(e, a->seq.v.v[i], look, lookit);
 		if (!(rc.code == OK || rc.code == NOP)) {
 			return rc;
 		}
 		a->seq.v.v[i] = rc.v;
 	}
-	rc = reduce_seq(e, a, look);
-	if (rc.code == FAIL) {
+	rc = reduce_seq(e, a);
+	if (rc.code == FAIL || rc.code == BACK) {
 		return rc;
 	} 
 	rc.v = a->seq.v.v[0]; /* steal single seq item left */
@@ -2586,14 +2592,14 @@ solve_seq(Env *e, Val *a, bool look) {
 	return rc;
 }
 static Ires
-copy_solve(Env *e, Val *a, bool look) {
+copy_solve(Env *e, Val *a, bool lookall, bool lookit) {
 	if (a->hdr.t == VSYM) {
-		return solve_sym(e, a, look);
+		return solve_sym(e, a, lookall, lookit);
 	} 
 	return (Ires) {NOP, copy_v(a)};
 }
 static Ires 
-solve_sym(Env *e, Val *a, bool look) {
+solve_sym(Env *e, Val *a, bool lookall, bool lookit) {
 	assert(a->hdr.t == VSYM);
 	/* resolve operators */
 	Symop *so = lookup_op(a->sym.v);
@@ -2607,29 +2613,26 @@ solve_sym(Env *e, Val *a, bool look) {
 		return (Ires) {OK, b};
 	}
 	/* resolve all symbols if requested */
-	if (look) {
-		Val *b = lookup(e, a->sym.v, true, look);
+	if (lookall) {
+		Val *b = lookup(e, a->sym.v, true, lookall);
 		if (b == NULL) {
 			printf("? %s: unknown symbol '%s\n",
-				__FUNCTION__, a->sym.v);
-			return (Ires) {FAIL, a};
-		} 
-		if (isequal_v(a, b)) {
-			printf("? %s: cyclic definition '%s\n",
 				__FUNCTION__, a->sym.v);
 			return (Ires) {FAIL, a};
 		} 
 		return (Ires) {OK, copy_v(b)};
 	}
 	/* resolve 'it */
-	if (strncmp(a->sym.v, IT, sizeof(a->sym.v)) == 0) {
-		Val *b = lookup(e, ITNAME, false, false);
-		if (b == NULL) {
-			printf("? %s: 'it undefined\n",
-				__FUNCTION__);
-			return (Ires) {FAIL, a};
-		} 
-		return (Ires) {OK, copy_v(b)};
+	if (lookit) {
+		if (strncmp(a->sym.v, IT, sizeof(a->sym.v)) == 0) {
+			Val *b = lookup(e, ITNAME, false, false);
+			if (b == NULL) {
+				printf("? %s: 'it undefined\n",
+					__FUNCTION__);
+				return (Ires) {FAIL, a};
+			} 
+			return (Ires) {OK, copy_v(b)};
+		}
 	}
 	/* resolve symbol if it points to function: */
 	Val *b = lookup(e, a->sym.v, true, true);
@@ -2640,10 +2643,10 @@ solve_sym(Env *e, Val *a, bool look) {
 	return (Ires) {NOP, copy_v(a)};
 }
 static Ires 
-solve_lst(Env *e, Val *a, bool look) {
+solve_lst(Env *e, Val *a, bool look, bool lookit) {
 	Ires rc;
 	for (size_t i=0; i < a->lst.v.n; ++i) {
-		rc = eval_run(e, a->seq.v.v[i], look);
+		rc = eval_run(e, a->seq.v.v[i], look, lookit);
 		if (!(rc.code == OK || rc.code == NOP)) {
 			return (Ires) {FAIL, a};
 		}
@@ -2654,11 +2657,11 @@ solve_lst(Env *e, Val *a, bool look) {
 }
 
 static Ires 
-eval_run(Env *e, Val *a, bool look) {
+eval_run(Env *e, Val *a, bool look, bool lookit) {
 	/* returns a val, if successful, it's new and freed 'a */
 	Ires r = {NOP, a};
 	if (a->hdr.t == VSYM) {
-		r = solve_sym(e, a, look);
+		r = solve_sym(e, a, look, lookit);
 		if (r.code == OK || r.code == NOP) {
 			free_v(a);
 			r.code = OK;
@@ -2666,7 +2669,7 @@ eval_run(Env *e, Val *a, bool look) {
 		return r;
 	}
 	if (a->hdr.t == VSEQ) {
-		return solve_seq(e, a, look);
+		return solve_seq(e, a, look, lookit);
 	}
 	return r;
 }
@@ -2748,7 +2751,7 @@ eval_maybe_def(Env *e, Val *a) {
 	/* returns a val, if new, freed 'a */
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	/* resolve symbols (not 'it) to operators and functions */
-	Ires rc = solve_lst(e, a, false); /* works off seq too */
+	Ires rc = solve_lst(e, a, false, false);
 	if (rc.code != OK) {
 		rc.code = FAIL;
 		return rc;
@@ -2759,7 +2762,7 @@ eval_maybe_def(Env *e, Val *a) {
 			&& a->seq.v.v[0]->symop.v == op_end
 			&& a->seq.v.v[0]->symop.arity == a->seq.v.n -1
 			&& a->seq.v.v[1]->hdr.t == VSYM) {
-		Ires rc = eval_run(e, a, false);
+		Ires rc = eval_run(e, a, false, false);
 		/* if an end 'fun: */
 		if (rc.code != BACK) {
 			return rc;
@@ -2779,7 +2782,7 @@ eval_maybe_loop(Env *e, Val *a) {
 	/* returns a val, if new, freed 'a */
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
 	/* resolve symbols (not 'it) to operators and functions */
-	Ires rc = solve_lst(e, a, false); /* works off seq too */
+	Ires rc = solve_lst(e, a, false, false);
 	if (rc.code != OK) {
 		rc.code = FAIL;
 		return rc;
@@ -2806,7 +2809,7 @@ eval_maybe_loop(Env *e, Val *a) {
 			&& a->seq.v.v[1]->symop.v == op_loop) {
 		/* `end `loop while in topmost loop, execute this */
 		if (lnst->nat.v == 0) {
-			Ires rc = eval_run(e, a, false);
+			Ires rc = eval_run(e, a, false, false);
 			return rc;
 		}
 		--(lnst->nat.v);
@@ -2823,7 +2826,7 @@ static Ires
 eval_maybe_skip(Env *e, Val *a) {
 	/* returns a val, if new, freed 'a */
 	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(a,false,"#\t"); printf("\n"); }
-	Ires rc = solve_lst(e, a, false); /* works off seq too */
+	Ires rc = solve_lst(e, a, false, true);
 	if (rc.code != OK) {
 		rc.code = FAIL;
 		return rc;
@@ -2837,7 +2840,7 @@ eval_maybe_skip(Env *e, Val *a) {
 	bool an_else = a->seq.v.v[0]->hdr.t == VOPE 
 			&& a->seq.v.v[0]->symop.v == op_else ;
 	if (an_endif || an_else) {
-		Ires rc = eval_run(e, a, false);
+		Ires rc = eval_run(e, a, false, false);
 		return rc;
 	}
 	/* default: skip */
@@ -2863,7 +2866,7 @@ transition(Env *e, Val *a) {
 	switch (e->state) {
 		/* following eval_*() must keep only one val alloc'd */
 		case RUN:
-			rc = eval_run(e, a, false);
+			rc = eval_run(e, a, false, true);
 			break;
 		case LOOPDEF:
 			rc = eval_maybe_loop(e, a);
