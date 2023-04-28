@@ -1058,7 +1058,7 @@ static void
 print_symval(Symval *a, const char *pfx) {
 	assert(a != NULL);
 	printf("%s = ", a->name);
-	printx_v(a->v, false, "");
+	printx_v(a->v, false, pfx);
 }
 static void
 print_env(Env *a, const char *col1) {
