@@ -1071,7 +1071,7 @@ print_env(Env *a, const char *col1) {
 		printf("\n");
 	}
 	if (a->parent) {
-		printf("%s parent ", col1);
+		printf("%s parent\n", col1);
 		print_env(a->parent, col1);
 	}
 }
@@ -2168,7 +2168,7 @@ apply_fun(Env *e, Val *s, size_t p) {
 		return (Ires) {FAIL, s};
 	}
 	if (al->hdr.t == VLST) {
-		Ires rc = solve_lst(le, al, true, true);
+		Ires rc = solve_lst(e, al, true, true);
 		if (rc.code != OK) {
 			free_v(al);
 			return (Ires) {FAIL, s};
@@ -2294,18 +2294,18 @@ Symop Syms[] = {
 	(Symop) {"true?",  -20, op_true,   0},
 	(Symop) {"false?", -20, op_false,  0},
 	(Symop) {"=",      -10, op_eq,  2},
+	(Symop) {"/=",     -10, op_neq, 2},
+	(Symop) {"<",    40, op_les, 2},
+	(Symop) {"<=",   40, op_leq, 2},
+	(Symop) {">",    40, op_gre, 2},
+	(Symop) {">=",   40, op_geq, 2},
+	(Symop) {"~=",   40, op_eqv, 2},
 	/* priority FUNDEFPRIO (0) is for function (user defined) */
 	(Symop) {"*",    20, op_mul, 2},
 	(Symop) {"/",    20, op_div, 2},
 	(Symop) {"+",    30, op_plu, 2},
 	(Symop) {"-",    30, op_min, 2},
 	/* (Symop) {"=",    40, op_eq,  2}, */
-	(Symop) {"/=",   40, op_neq, 2},
-	(Symop) {"<",    40, op_les, 2},
-	(Symop) {"<=",   40, op_leq, 2},
-	(Symop) {">",    40, op_gre, 2},
-	(Symop) {">=",   40, op_geq, 2},
-	(Symop) {"~=",   40, op_eqv, 2},
 	(Symop) {"not",  50, op_not, 1},
 	(Symop) {"and",  60, op_and, 2},
 	(Symop) {"or",   70, op_or,  2},
@@ -2452,7 +2452,7 @@ static Ires
 reduce_seq(Env *e, Val *b) {
 	/* symbol application: consumes the seq, until 1 item left */
 	assert(b != NULL);
-	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(b,false,""); printf("\n"); }
+	if (Dbg) { printf("#\t  %s entry: ", __FUNCTION__); printx_v(b,false,"#\t"); printf("\n"); }
 	Ires rc = (Ires) {NOP, b};
 	Val *c;
 	while (b->seq.v.n > 0) {
@@ -2613,8 +2613,19 @@ solve_sym(Env *e, Val *a, bool lookall, bool lookit) {
 		strncpy(b->symop.name, so->name, 1+strlen(so->name));
 		return (Ires) {OK, b};
 	}
-	/* resolve all symbols if requested */
-	if (lookall) {
+	bool isit = strncmp(a->sym.v, IT, sizeof(a->sym.v)) == 0;
+	/* resolve 'it */
+	if (isit && lookit) {
+		Val *b = lookup(e, ITNAME, false, false);
+		if (b == NULL) {
+			printf("? %s: 'it undefined\n",
+				__FUNCTION__);
+			return (Ires) {FAIL, a};
+		} 
+		return (Ires) {OK, copy_v(b)};
+	}
+	/* resolve all symbols (except 'it), if requested */
+	if ((!isit) && lookall) {
 		Val *b = lookup(e, a->sym.v, true, true);
 		if (b == NULL) {
 			printf("? %s: unknown symbol '%s\n",
@@ -2622,18 +2633,6 @@ solve_sym(Env *e, Val *a, bool lookall, bool lookit) {
 			return (Ires) {FAIL, a};
 		} 
 		return (Ires) {OK, copy_v(b)};
-	}
-	/* resolve 'it */
-	if (lookit) {
-		if (strncmp(a->sym.v, IT, sizeof(a->sym.v)) == 0) {
-			Val *b = lookup(e, ITNAME, false, false);
-			if (b == NULL) {
-				printf("? %s: 'it undefined\n",
-					__FUNCTION__);
-				return (Ires) {FAIL, a};
-			} 
-			return (Ires) {OK, copy_v(b)};
-		}
 	}
 	/* resolve symbol if it points to function: */
 	Val *b = lookup(e, a->sym.v, true, true);
@@ -2644,10 +2643,14 @@ solve_sym(Env *e, Val *a, bool lookall, bool lookit) {
 	return (Ires) {NOP, copy_v(a)};
 }
 static Ires 
-solve_lst(Env *e, Val *a, bool look, bool lookit) {
+solve_lst(Env *e, Val *a, bool lookall, bool lookit) {
+	if (Dbg) { 
+		printf("#\t  %s entry: (all=%d, it=%d) ", __FUNCTION__, lookall, lookit); 
+		printx_v(a, false,"#\t"); printf("\n"); 
+	}
 	Ires rc;
 	for (size_t i=0; i < a->lst.v.n; ++i) {
-		rc = eval_run(e, a->seq.v.v[i], look, lookit);
+		rc = eval_run(e, a->seq.v.v[i], lookall, lookit);
 		if (!(rc.code == OK || rc.code == NOP)) {
 			return (Ires) {FAIL, a};
 		}
