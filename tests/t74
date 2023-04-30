@@ -1,7 +1,9 @@
 
 def f () ; 1 ; end f
-env
 call f f2
-env
-f = f2
-
+f = f2 ; print it
+f = f2 = f ; print it
+f /= f2 ; print it
+not f = f2 ; print it
+(f ()) = (f2 ()) ; print it
+f () = f2 () ; print it

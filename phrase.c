@@ -2554,14 +2554,16 @@ eval_loop(Env *e, Val *s) {
 		return (Ires) {FAIL, s};
 	}
 	if (le->state == RETURN) {
+		Ires rc = {RET, copy_v(lit)};
 		free_env(le, false);
 		free_v(s);
-		return (Ires) {RET, copy_v(lit)};
+		return rc;
 	}
 	if (le->state == STOP) {
+		Ires rc = {OK, copy_v(lit)};
 		free_env(le, false);
 		free_v(s);
-		return (Ires) {OK, copy_v(lit)};
+		return rc;
 	}
 	free_env(le, false);
 	return (Ires) {FAIL, s};

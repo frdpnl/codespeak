@@ -1,0 +1,12 @@
+
+def makef (a,)
+	def g (x,)
+		if a = 0 ; -1 * x
+		else ; x / a
+	end g
+	rem: def g last so returned
+end makef
+
+makef (0,) ; call it f0 ; it (4,) ; print it
+makef (3,) ; it (4,) ; print it
+makef (3.,) ; it (4,) ; print it
