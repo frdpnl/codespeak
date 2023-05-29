@@ -1196,7 +1196,7 @@ upded_sym(Env *a, Symval *b, bool err) {
 	Symval *c = lookup_id(a, b->name, false, &id);
 	if (c == NULL) {
 		if (err) {
-			printf("? %s: symbol not found (%s)\n",
+			printf("? %s: symbol not found ('%s)\n",
 					__FUNCTION__, b->name);
 		}
 		return false;
@@ -2551,22 +2551,20 @@ eval_loop(Env *e, Val *s) {
 		printf("? %s: 'it from loop undefined\n",
 				__FUNCTION__);
 		free_env(le, false);
-		return (Ires) {FAIL, s};
+		return {FAIL, s};
 	}
+	free_v(s);
+	for () /*all symvals in le*/ {
+		if (
+	Ires rc = {OK, copy_v(it)};
 	if (le->state == RETURN) {
-		Ires rc = {RET, copy_v(lit)};
-		free_env(le, false);
-		free_v(s);
-		return rc;
-	}
+		rc.code = RET;
+	} 
 	if (le->state == STOP) {
-		Ires rc = {OK, copy_v(lit)};
-		free_env(le, false);
-		free_v(s);
-		return rc;
+		rc.code = OK;
 	}
 	free_env(le, false);
-	return (Ires) {FAIL, s};
+	return rc;
 }
 static Ires 
 solve_seq(Env *e, Val *a, bool lookall, bool lookit) {
