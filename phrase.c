@@ -2546,24 +2546,33 @@ eval_loop(Env *e, Val *s) {
 		}
 	}
 	if (Dbg) { printf("#\t  %s end:\n", __FUNCTION__); print_env(le, "#\t"); }
-	Val *lit = lookup(le, ITNAME, false, false);
-	if (lit == NULL) {
+	Symval *svit = lookup_id(le, ITNAME, false, NULL);
+	if (svit == NULL) {
 		printf("? %s: 'it from loop undefined\n",
 				__FUNCTION__);
 		free_env(le, false);
-		return {FAIL, s};
+		return (Ires) {FAIL, s};
 	}
+	Ires rc = {OK, copy_v(svit->v)};
 	free_v(s);
-	for () /*all symvals in le*/ {
-		if (
-	Ires rc = {OK, copy_v(it)};
+	/* update parent's symval with le's: */
+	for (int i = 0; i < le->n; ++i) {
+		if (le->s[i] == svit) {
+			free_symval(le->s[i]);
+			continue;
+		}
+		if (!upded_sym(le->parent, le->s[i], false)) {
+			free_symval(le->s[i]);
+		}
+	}
 	if (le->state == RETURN) {
 		rc.code = RET;
 	} 
 	if (le->state == STOP) {
 		rc.code = OK;
 	}
-	free_env(le, false);
+	free(le->s);
+	free(le);
 	return rc;
 }
 static Ires 
