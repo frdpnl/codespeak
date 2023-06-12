@@ -27,7 +27,7 @@ Whitespace separates words.
 
 `2 ~= 2.0` 1, more or less equal
 
-`2 /= 2.` 1, different types
+`2 /= 2.` (not equal operator) 1, different types
 
 `(2,) ~= (2.,)` 1 (true)
 
@@ -123,6 +123,8 @@ f (3,) ; print it
 ```
 displays 6
 
+Functions can return new functions:
+
 ```
 def makef (a,)
 	def g (x,)
@@ -184,6 +186,8 @@ displays 6, 6.0 and -6
 
 
 ## Known bugs
+
+Under internal re-design, the self-tests need to be updated.
 
 
 ## Background
