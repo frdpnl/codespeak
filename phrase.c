@@ -2063,11 +2063,8 @@ op_end(Env *e, Val *s, size_t p) {
 			return (Ires) {FAIL, s};
 		}
 		if (c->hdr.t != VFUN) {
-			printf("? %s: `end argument is not a function\n", 
-					__FUNCTION__);
 			free_v(a);
-			// should be BACK
-			return (Ires) {FAIL, s};
+			return (Ires) {BACK, s};
 		}
 		if (strncmp(a->sym.v, c->symf.name, sizeof(a->sym.v)) != 0) {
 			/* rem: not the function being defined, then part of the body */
@@ -2778,6 +2775,7 @@ eval_maybe_def(Env *e, Val *a) {
 		Ires rc = eval_run(e, a, false, false);
 		/* if an end 'fun: */
 		if (rc.code != BACK) {
+			// OK, FAIL
 			return rc;
 		}
 	}
